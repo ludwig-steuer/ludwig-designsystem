@@ -3,6 +3,8 @@ import { useState } from "react";
 
 import { Card, CardHead } from "../../primitives/Table";
 import { ClarificationCard, type ClarificationDetailVM } from "./ClarificationCard";
+import { ClarificationThread } from "./ClarificationThread";
+import { ITEMS as THREAD } from "./ClarificationThread.stories";
 import type { ClarificationVM } from "./Clarification";
 
 const meta: Meta<typeof ClarificationCard> = {
@@ -81,7 +83,7 @@ export const InBatchReview: Story = {
     return (
       <div style={{ maxWidth: 760 }}>
         <ClarificationCard
-          clarification={{ ...BASE, ...AGENT_DETAIL, evidence: EVIDENCE }}
+          clarification={{ ...BASE, ...AGENT_DETAIL, evidence: EVIDENCE, raisedBy: null }}
           mode="answer"
           caseLink={{ label: "Sachverhalt 2026-0042 · Bewirtung Musterfirma", href: "#case=2026-0042" }}
           onSelect={(item) => setPicked(`${item.kind}:${item.id}`)}
@@ -91,6 +93,8 @@ export const InBatchReview: Story = {
           onDefer={async () => {}}
         />
         <p className="v2sub">{picked ? `Drawer öffnet: ${picked}` : "Klick auf eine Zeile öffnet einen Drawer."}</p>
+        {/* The thread of the case under the card (0214): the question on screen last, marked. */}
+        <ClarificationThread items={THREAD} currentId="q4" />
       </div>
     );
   },

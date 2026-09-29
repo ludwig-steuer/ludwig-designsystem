@@ -4780,3 +4780,19 @@ a.v3bbr__val:hover { text-decoration-color: currentColor; }
 /* The key in link colour, mono or not; „genannt" as a quiet second line, not glued to the date. */
 .v2clc__pick .v2mono { color: inherit; }
 .v2clc__cited { display: block; color: var(--color-text-muted); }
+
+/* 0214 · the thread of a case's clarifications */
+.v3clt__list { list-style: none; margin: 0; padding: 0; display: grid; }
+.v3clt__item + .v3clt__item { border-top: 1px solid var(--color-border-subtle); }
+.v3clt__line { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-1) var(--space-2); min-width: 0; font-size: var(--fs-ui-sm); }
+.v3clt__kind { font-weight: 600; }
+.v3clt__title { flex: 1 1 200px; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--color-text); }
+.v3clt__current { font-size: var(--fs-ui-xs); font-weight: 600; color: var(--color-accent-700); }
+/* Flush with the foldable rows: summary padding + chevron (14) + gap (measured 30 px). */
+.v3clt__currentrow { padding: var(--space-2) var(--space-2) var(--space-2) calc(var(--space-2) + 14px + var(--space-2)); }
+.v3clt__item.is-current { background: var(--color-accent-50); }
+.v3clt__detail { display: grid; gap: var(--space-2); padding: var(--space-1) 0 var(--space-2); }
+.v3clt__q { margin: 0; font-weight: 600; }
+.v3clt__stephead { font-size: var(--fs-ui-sm); color: var(--color-text-muted); }
+.v3clt__stephead strong { color: var(--color-text); }
+.v3clt__text { margin: 2px 0 0; }

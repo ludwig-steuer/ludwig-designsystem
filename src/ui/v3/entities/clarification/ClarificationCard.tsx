@@ -81,8 +81,13 @@ const EVENT_LABEL: Record<ClarificationEventKind, string> = {
  */
 export type ClarificationActor = string | Actor;
 
-/** The name to print. Never „—": somebody acted, even if it was a machine. */
-function actorName(by: ClarificationActor | null | undefined, fallback: string): string {
+/**
+ * The name to print. Never „—": somebody acted, even if it was a machine.
+ *
+ * @when    Naming who asked, answered, resolved or deferred a clarification.
+ * @instead A person in a log row → LogList's own actor cell.
+ */
+export function actorName(by: ClarificationActor | null | undefined, fallback: string): string {
   if (!by) return fallback;
   if (typeof by === "string") return by.trim() || fallback;
   return by.label?.trim() || resolveStatus("actor_kind", by.kind).label;
@@ -582,6 +587,8 @@ export function ClarificationCard({
         ) : null}
         <p className="v2clc__meta">
           {isComment ? "Notiz" : `Gefragt ist: ${AUDIENCE_LABEL[c.audience]}`}
+          {/* Who asked — several people work on one case (owner 2026-09-29, 0214). */}
+          {` · ${isComment ? "von" : "gefragt von"} ${actorName(c.raisedBy, "Ludwig")}`}
           {questionWord ? ` · ${questionWord}` : ""}
           {originWord ? ` · ${originWord}` : ""}
           {" · "}
@@ -646,7 +653,9 @@ export function ClarificationCard({
       ) : null}
 
       {history.length > 0 ? (
-        <Block label="Verlauf">
+        // „dieser Frage": the course of the whole case is the thread below the
+        // card (ClarificationThread, 0214) — two blocks must not share a name.
+        <Block label="Verlauf dieser Frage">
           <ol className="v2clc__hist">
             {history.map((e, i) => (
               <li key={`${e.kind}-${e.at}-${i}`}>

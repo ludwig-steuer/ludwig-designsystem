@@ -720,6 +720,7 @@ export {
 
 export {
   ClarificationCard,
+  actorName,
   type ClarificationDetailVM,
   type ClarificationEvent,
   type ClarificationEventKind,
@@ -731,6 +732,7 @@ export {
   type EvidenceEntry,
   type EvidenceKind,
 } from "./entities/clarification/ClarificationCard";
+export { ClarificationThread, type ThreadItem } from "./entities/clarification/ClarificationThread";
 
 export {
   ClarificationEditor,

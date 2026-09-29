@@ -64,3 +64,11 @@ vier Gruppen mit genannten Einträgen, Antwortoptionen, Knopfzeile) ·
 - „genannt" steht als leise zweite Zeile am Schlüssel der Zeile; genannte Einträge stehen oben.
 - Ohne `evidence` fällt die Karte auf die flache `sources`-Liste zurück — sie erscheint dann als „Weitere Quellen" im selben Block.
 - Gemessen (Story `InBatchReview`, 760 px): keine Evidenz-Tabelle scrollt quer; Antwortoptionen je 41 px hoch, gewählte fett mit Akzentrand; Freitext „Oder selbst formulieren" neben den Optionen; Hauptknopf mit `submitLabel`; Auswege als kleine Zeilen „Anderweitig geklärt", „Zurückstellen".
+
+## Nachtrag 2026-09-29 — Verlauf und Akteure (Owner-Freigabe über ll-dev4)
+
+**A · `ClarificationThread`** (neu, `entities/clarification/`): alle Fragen und Notizen eines Sachverhalts, älteste oben (die App ordnet), als eigener Block unter der Karte — Aufklapper „Verlauf" mit Anzahl, standardmäßig zu (`defaultOpen`). Je Eintrag eine Zeile: Art (Frage/Notiz) · wer fragt → wer gefragt ist · Datum · Stand · Titel. Aufgeklappt: die Frage, dann jeder Schritt mit Wort, Person, Datum + Uhrzeit und Text — „Antwort", „Anderweitig geklärt" (mit Grund), „Zurückgestellt bis …" (mit Grund). Die Frage auf dem Schirm (`currentId`) steht zuletzt, markiert „aktuell", ohne Aufklapper; Notizen klappen nicht auf (ihr Titel ist ihr Inhalt). Entscheid: eigener Baustein statt `ClarificationList` im Lesemodus — der Faden ist chronologisch und die Zeile trägt „wer → wen", beides hat die Liste nicht.
+
+**B · Akteure:** die Meta-Zeile der Karte sagt jetzt auch „gefragt von …" (`raisedBy`, sonst „Ludwig"). Der Block der Karte heißt „**Verlauf dieser Frage**" — der Verlauf des Sachverhalts ist der Faden darunter; zwei Blöcke tragen nicht denselben Namen. `actorName` ist exportiert.
+
+Gemessen: alle Zeilen des Fadens bündig (54 px), keine Zeile bricht.
