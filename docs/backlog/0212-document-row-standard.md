@@ -296,3 +296,5 @@ kürzer bleibt als 176 px.
 noch die älteren M3 und M5 (M7 ist mit fd5402b angegangen und hier nicht
 nachgeprüft).
 
+
+**Nachprüfung M7 2026-09-29** (Claude, fremde Sitzung): `source-document-columns.tsx:471` setzt an der Seiten-Zelle eines Teils den Titel „Seiten {Bereich} im Original“; im DOM von `Seiten/Belegzeile/Inbox`, Zeile Aral, trägt die Zelle „5–7“ den Titel „Seiten 5–7 im Original“ — M7 erledigt; offen bleiben M3 und M5.
