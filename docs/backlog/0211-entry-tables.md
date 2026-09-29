@@ -317,3 +317,32 @@ und M9 (volle Standardform benennen oder messen); M5/M6 bei Gelegenheit.
 - **Mehrere Gegenkonten:** jede Nummer ist ein eigener Link ins Konto (erste mit Namen, weitere als Nummer, durch Komma); die Zelle bricht um statt „+n" im Titel zu verstecken. Gemessen: Spiegelsatz „6300, 1800" → zwei Links `#account=6300`, `#account=1800`.
 - **Herkunft einer Ludwig-Zeile:** neue zuschaltbare Spalte `include: ["entryOrigin"]` „Herkunft" (Achse `journal_entry_origin`, (i) am Kopf): Vorschlag von Ludwig · Manuell · Regelwerk · Storno · Mandantenstapel. „Dauersachverhalt" hat kein Registry-Wort → Befund **L-360**.
 - Gemessen `InDrawerWithAll` (960 px, mit Herkunft): scrollt in der Karte (1364), keine Spalte unter ihrem Mindestwert.
+
+## Nachprüfung 2026-09-29 (Stand e0a0016/2188c44)
+
+Abnehmer: Claude (fremde Sitzung). Geprüft wurden der Nachtrag Review F338
+(Stand e0a0016) und M10 (Stand 2188c44), Storybook 6107 bei 1280 × 900 mit
+Playwright.
+
+| Kriterium | Nachweis | Ergebnis |
+|---|---|---|
+| Jedes Gegenkonto ein eigener Link | `InDrawerWithAll`, Zeile mit 6300/1800 | ✓ zwei Links `#account=6300` („6300 Sonstige Aufwendungen") und `#account=1800`, durch Komma getrennt; der Titel trägt die ganze Liste |
+| Spalte „Herkunft" (`entryOrigin`) | `InDrawerWithAll` | ✓ nach „Buchungszustand", 150 px; Wörter der Registry: Vorschlag von Ludwig · Mandantenstapel · Manuell · Storno |
+| 960 px mit allem: scrollt in der Karte, keine Spalte unter dem Mindestwert | `InDrawerWithAll` | ✓ 1364 in 960, keine Spalte gequetscht, Zeilen 52 px |
+| Kompakte Form unverändert | `InExpander` | ✓ 640 = 640, Köpfe wie zuvor, Zeilen 34–37 px |
+| ErrorRow: Was-Satz fett | `JournalEntryList/LoadingAndError`, `SourceDocumentList/LoadingAndError` | ✓ Gewicht 600, `role="alert"` |
+| M10: (i) im Kopf von `AccountEntryList` | Stand e0a0016 | ✗ 0 Knöpfe im Tabellenkopf; `headerAside` wurde verworfen |
+| M10 nachgeprüft | Stand 2188c44, `InDrawerWithAll`; Code `AccountEntries.tsx:501` | ✓ „Herkunft" trägt das (i) („Herkunft: Zustände erklären", 24 × 24 px), Kopfzeile 32 px. Im Code rendert der Kopf `c.headerAside` für **jede** Spalte; `mirrorMatch` hat es (`:298`, `StatusInfoButton axis="mirror_match"`) und bekäme es zugeschaltet genauso |
+
+**Hinweis, nicht blockierend.** Die Spalte „Buchungszustand" (`status`) hat kein
+(i). Sie mischt drei Achsen (`journal_entry`, `journal_entry_datev_stage`,
+`journal_entry_origin`), deshalb gibt es keine eine Legende. Z4 verlangt das (i)
+an jeder Status-Spalte. Dafür braucht es eine eigene Legende oder eine benannte
+Ausnahme; ein neuer Mangel aus 2188c44 ist das nicht.
+
+Der zweite Konto-Link („1800") misst 45 × 15 px; das gehört zu M3 (setweit).
+
+### Urteil
+
+**Abgenommen mit Auflagen**: M10 erledigt; offen bleiben M3 (setweit), M5, M6
+und der Hinweis zu „Buchungszustand".

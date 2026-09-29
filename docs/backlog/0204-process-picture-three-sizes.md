@@ -333,3 +333,23 @@ Owner am Bild (`BoxEnd`, `AllCells`):
 Der Stand steht im Kopf — auf der Seite als Prozess-Box, im Drawer als Status im Drawer-Kopf. Die Zeile „Erledigung" in „Belegdaten" wiederholte ihn (D7) und ist **ganz** entfallen (Owner, zweite Runde; die erste Fassung `completion={false}` aus 3f02af2 ist wieder zurückgenommen). Mit ihr fallen die Props `explainCompletion` und `batchHref` an `SourceDocumentFacts` und `SourceDocumentCard`; zum Stapel führen Kopf-Knopf „Zum Stapel" und die Stapel-Box.
 
 **Nachtrag 2026-09-29 (Owner):** Ist ein Beleg ganz durchgelaufen, ist der Balken grün **und** eine durchgehende Linie statt vier Segmente (Zelle und Box) — am Ende ist nichts mehr zu zählen. Gemessen: Zelle 64 px ohne Lücke, laufende Balken behalten ihre 3-px-Lücken.
+
+## Nachprüfung 2026-09-29 (Stand e0a0016/2188c44)
+
+Abnehmer: Claude (fremde Sitzung). Geprüft wurde der Nachtrag „durchgehende
+Linie", Storybook 6107 `Seiten/Beleg-Prozessbild` bei 1280 × 900 mit
+Playwright.
+
+| Kriterium | Nachweis | Ergebnis |
+|---|---|---|
+| Durchgelaufene Zelle ohne Lücke | `AllCells`, `.pz-mini.is-complete` | ✓ sieben Zellen, je 64 px, Lücke 0 px bei 1 bis 5 Segmenten, eine Farbe `--color-success` (rgb 63, 122, 90) |
+| Laufende Zellen behalten ihre Segmente | `AllCells` | ✓ Lücke 3 px, mehrere Farben (erledigt, aktiv, gehalten, offen) |
+| Durchgelaufene Box als eine Linie | `AllBoxes`, `.pz-box__phases.is-complete` | ✓ vier Boxen, Lücke 0 px, Oberkante durchgehend grün; die Phasenwörter bleiben lesbar (Abstand über `padding-left`) |
+| Laufende Box behält ihre Segmente | `AllBoxes` | ✓ Lücke 4 px |
+
+Farbe steht nie allein: Neben der durchgehenden Linie steht das Wort des
+Stands.
+
+### Urteil
+
+**Abgenommen.**

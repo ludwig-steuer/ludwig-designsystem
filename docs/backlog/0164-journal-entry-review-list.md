@@ -167,3 +167,26 @@ Offen, nicht blockierend: M2 (setweit), M5.
 setweiten Auftrag.
 
 **Nachtrag 2026-09-29 (Review F340, Owner-Regel „nichts verlieren"):** Die Gegenpartei bricht auf bis zu **drei Zeilen** um statt einzeilig zu kürzen — Schritt 3 zeigte bisher bis 40 Zeichen („Deutsche Telekom Geschäftskunden GmbH"). Spuren: Gegenpartei `minmax(120px, 1.4fr)`, Soll/Haben `minmax(68px, …)`, Prüfbedarf 124. Gemessen bei 1280: `Grouped` und `Flat` je 1246 = 1246, kein Name gekürzt (Telekom 63 px, drei Zeilen); Zeilen mit langen Kontonamen in `Flat` bis 109 px.
+
+## Nachprüfung 2026-09-29 (Stand e0a0016/2188c44)
+
+Abnehmer: Claude (fremde Sitzung). Geprüft wurde der Nachtrag Review F340,
+Storybook 6107 bei 1280 × 900 mit Playwright.
+
+| Kriterium | Nachweis | Ergebnis |
+|---|---|---|
+| Kein Querscroll | `Grouped`, `Flat` | ✓ je 1246 = 1246 |
+| „Deutsche Telekom Geschäftskunden GmbH" ungekürzt | `Grouped`, `Flat` | ✓ drei Zeilen, 63 px, scrollHeight = clientHeight; Spalte 145 px (`Grouped`) bzw. 120 px (`Flat`); in beiden Stories kein Name gekürzt |
+| Spuren | Kopf `Flat` | ✓ Gegenpartei 120, Soll/Haben je 69 (Boden 68), Prüfbedarf 124 |
+| Zeilenhöhen | beide | `Grouped` 67–88 px, wie zuvor höchstens 88; `Flat` 66 und **109 px**, vorher höchstens 88 |
+| ErrorRow: Was-Satz fett | setweit (`.v2tbl__error > span:first-child`) | ✓ Gewicht 600, `role="alert"` |
+
+**Hinweis, nicht blockierend.** In `Flat` stehen die Zeilen mit Kontonamen jetzt
+109 px hoch statt 88, weil Soll und Haben in 69 px auf vier bis fünf Zeilen
+umbrechen. Die Spec nennt das. Bei 40 Vorschlägen passen damit etwa sechs statt
+acht Zeilen auf den Schirm. Wo die Kontonamen nicht gebraucht werden, hilft
+`accountNames: false`.
+
+### Urteil
+
+**Abgenommen mit Auflagen**: unverändert M2 (setweit) und M5.
