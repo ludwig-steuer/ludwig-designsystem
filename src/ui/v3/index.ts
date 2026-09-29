@@ -394,6 +394,7 @@ export {
   BATCH_DOCUMENTS_VIEW,
   PARTNER_DOCUMENTS_VIEW,
   UNBOOKED_VIEW,
+  UNBOOKED_GROUPED_VIEW,
   COMPACT_VIEW,
   type SourceDocumentColumn,
   type SourceDocumentColumnOptions,

@@ -186,3 +186,15 @@ Offen, nicht blockierend: M2 (setweit), M3, M5.
 
 **Abgenommen mit Auflagen**: M3 als benannte Ausnahme in die Guideline; M5 im
 nächsten Schritt.
+
+## Nachtrag 2026-09-29 — Welle 2 (Hinweise ll-dev2 G4–G8)
+
+| # | Lücke | Lösung |
+|---|---|---|
+| G4 | Teilbelege in `SourceDocumentCard` ohne Prozessbild und Einordnung | `partProcessPicture`, `partClassificationPicture` an der Karte, an die Teile-Liste durchgereicht |
+| G5 | `#parts` sprang ins Leere | Block „Teilbelege" trägt `id="parts"` |
+| G6 | Betrag fehlte in V5 | `UNBOOKED_VIEW` mit `amount` an der Katalogstelle |
+| G7 | leere Begründung als „—" | „Ohne hinterlegte Begründung.", gedämpft — eine fehlende Begründung ist hier selbst ein Befund |
+| G8 | Seitenbereich des Teils | `pages` zeigt `splitPageRange` („4–5", absolut, von der App gesetzt), sonst die Seitenzahl; neue Ansicht `UNBOOKED_GROUPED_VIEW`. „Seiten" steht an der **Katalogstelle** nach der Einordnung, nicht vorn — eine Ansicht wählt aus, sie ordnet nicht um (E2) |
+
+Breiten danach neu gesetzt: Beleg ≥ 190, Einordnung 200 (das zweizeilige Bild von 0205 braucht die 232 der alten Badge-Kette nicht), Betrag 112, Fortschritt ≥ 236, Begründung ≥ 100. Gemessen bei 1280 px: V1, V2, V3, V5 und V5 gruppiert je 1246 = 1246, kein Stand-Wort gekürzt, keine Einordnung gekürzt; K in 720 px passt.

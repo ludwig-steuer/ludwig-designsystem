@@ -9,6 +9,7 @@ import {
 } from "./SourceDocumentFacts";
 import { Columns } from "../../patterns/Columns";
 import { SourceDocumentList } from "./SourceDocumentList";
+import type { SourceDocumentColumnOptions } from "./source-document-columns";
 import { SourceDocumentPreview, type SourceDocumentOriginal } from "./SourceDocumentPreview";
 import type { SourceDocumentVM } from "./SourceDocument";
 
@@ -57,6 +58,10 @@ export interface SourceDocumentCardProps {
    */
   parts?: readonly SourceDocumentVM[];
   partHref?: (document: SourceDocumentVM) => string;
+  /** The progress of each part (0204) — handed to the parts list (hint ll-dev2 G4). */
+  partProcessPicture?: SourceDocumentColumnOptions["processPicture"];
+  /** The classification of each part (0205) — handed to the parts list (G4). */
+  partClassificationPicture?: SourceDocumentColumnOptions["classificationPicture"];
   /** What is missing and how it gets filled in — passed to the facts. */
   missing?: readonly SourceDocumentGap[];
   /**
@@ -118,6 +123,8 @@ export function SourceDocumentCard({
   group,
   parts,
   partHref,
+  partProcessPicture,
+  partClassificationPicture,
   missing,
   tone = "surface",
   provenance,
@@ -175,9 +182,16 @@ export function SourceDocumentCard({
       />
 
       {parts && parts.length > 0 ? (
-        <div className="v2doccard__parts">
+        // `id="parts"`: the process dialog („Zu den n Teilbelegen") and the
+        // classification's bundle link point here (G5).
+        <div className="v2doccard__parts" id="parts">
           <div className="v2doc__h">Teilbelege</div>
-          <SourceDocumentList documents={parts} {...(partHref ? { href: partHref } : {})} />
+          <SourceDocumentList
+            documents={parts}
+            {...(partHref ? { href: partHref } : {})}
+            {...(partProcessPicture ? { processPicture: partProcessPicture } : {})}
+            {...(partClassificationPicture ? { classificationPicture: partClassificationPicture } : {})}
+          />
         </div>
       ) : null}
 

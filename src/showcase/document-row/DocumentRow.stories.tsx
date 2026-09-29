@@ -9,6 +9,7 @@ import {
   DOCUMENT_LIST_VIEW,
   INBOX_VIEW,
   UNBOOKED_VIEW,
+  UNBOOKED_GROUPED_VIEW,
   sourceDocumentColumns,
   sourceDocumentMinWidth,
   type SourceDocumentColumn,
@@ -181,3 +182,14 @@ export const Compact: Story = {
 
 /** At 600 px (a drawer): V2 scrolls inside its card from its floor; K fits. */
 export const Narrow: Story = { render: () => <View title="Belege 2026" columns={DOCUMENT_LIST_VIEW} width={600} /> };
+
+/** V5 grouped by collection PDF: the part carries its page range in the original (G8); a missing reason is named (G7). */
+export const UnbookedGrouped: Story = {
+  render: () => (
+    <View
+      title="Belege ohne Buchung · scan_0923.pdf"
+      columns={UNBOOKED_GROUPED_VIEW}
+      rows={[ROWS[3]!, { ...ROWS[4]!, doc: { ...ROWS[4]!.doc, doneReason: null, splitPageRange: "8–9" } }]}
+    />
+  ),
+};

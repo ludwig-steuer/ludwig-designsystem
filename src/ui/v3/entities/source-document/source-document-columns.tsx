@@ -112,7 +112,13 @@ export const BATCH_DOCUMENTS_VIEW: SourceDocumentColumn[] = ["document", "classi
 /** V4 · Geschäftspartner → Belege — hold a new case against the old ones. */
 export const PARTNER_DOCUMENTS_VIEW: SourceDocumentColumn[] = ["document", "classification", "amount", "documentDate", "progress", "case", "batch"];
 /** V5 · Abnahme „ohne Buchung" — the reason is the object of the review, so it is a column. */
-export const UNBOOKED_VIEW: SourceDocumentColumn[] = ["document", "classification", "documentDate", "progress", "reason", "case"];
+export const UNBOOKED_VIEW: SourceDocumentColumn[] = ["document", "classification", "amount", "documentDate", "progress", "reason", "case"];
+/**
+ * V5 grouped by collection PDF: the parts with their page range in the
+ * original. „Seiten" stands at its catalogue place, after the classification —
+ * a view selects, it does not reorder (owner E2).
+ */
+export const UNBOOKED_GROUPED_VIEW: SourceDocumentColumn[] = ["document", "classification", "pages", "amount", "documentDate", "progress", "reason", "case"];
 /** K · the compact row, a document named in foreign context — no head, one line each. */
 export const COMPACT_VIEW: SourceDocumentColumn[] = ["document", "classification", "amount", "documentDate", "progress"];
 
@@ -362,7 +368,7 @@ export function sourceDocumentColumns({
     document: {
       key: "document",
       header: "Beleg",
-      width: variant === "compact" ? "minmax(130px, 1.4fr)" : "minmax(200px, 1.4fr)",
+      width: variant === "compact" ? "minmax(130px, 1.4fr)" : "minmax(190px, 1.4fr)",
       sortable: variant !== "compact",
       cell: (d) => {
         const head = documentHead(d);
@@ -393,7 +399,9 @@ export function sourceDocumentColumns({
       key: "progress",
       header: "Fortschritt",
       headerAside: <StatusInfoButton axis="document_status" />,
-      width: variant === "compact" ? "minmax(200px, 1fr)" : "minmax(220px, 1fr)",
+      // Room for the longest state word („Keine Buchung nötig") beside the
+      // strip; with it V5 grouped (amount, pages) stands in 1246 px (G6, G8).
+      width: variant === "compact" ? "minmax(200px, 1fr)" : "minmax(236px, 1fr)",
       cell: (d) => {
         const p = processPicture?.(d);
         // Without a picture the old completion stands until the app derives it
@@ -455,19 +463,31 @@ export function sourceDocumentColumns({
       header: "Seiten",
       width: "72px",
       align: "end",
-      cell: (d) => (d.pageCount == null ? <span className="v2muted">—</span> : <span className="v2num">{d.pageCount}</span>),
+      // A part shows its range in the original („4–5", absolute over nested
+      // splits — the app sets it); a whole file its page count (G8).
+      cell: (d) =>
+        d.splitPageRange ? (
+          <span className="v2num">{d.splitPageRange}</span>
+        ) : d.pageCount == null ? (
+          <span className="v2muted">—</span>
+        ) : (
+          <span className="v2num">{d.pageCount}</span>
+        ),
     },
     reason: {
       key: "reason",
       header: "Begründung",
-      width: "minmax(180px, 1.2fr)",
+      width: "minmax(100px, 1.2fr)",
       cell: (d) =>
         d.doneReason ? (
           <span className="v2trunc" title={d.doneReason}>
             {d.doneReason}
           </span>
         ) : (
-          <span className="v2muted">—</span>
+          // A missing reason is itself a finding here — it is what gets judged (G7).
+          <span className="v2muted v2trunc" title="Ohne hinterlegte Begründung.">
+            Ohne hinterlegte Begründung.
+          </span>
         ),
     },
     counterparty: {
@@ -562,7 +582,7 @@ export function sourceDocumentColumns({
     amount: {
       key: "amount",
       header: "Betrag",
-      width: variant === "compact" ? "104px" : "130px",
+      width: variant === "compact" ? "104px" : "112px",
       align: "end",
       sortable: true,
       // Empty, not an em dash, where the kind of document has no measure: a
@@ -748,7 +768,9 @@ export function sourceDocumentColumns({
       // of its neighbours — V1 asks for one row height (acceptance 0070, M1).
       // Compact: one line, the form word only — 232 px made the row K 860 px
       // wide in a 720 px frame (acceptance 0212, M1).
-      width: variant === "compact" ? "minmax(96px, 0.8fr)" : "232px",
+      // 200 px: the picture of 0205 is two lines (form, effect) — the 232 px of
+      // the old badge chain (0070 M1) went to the progress word (G6/G8).
+      width: variant === "compact" ? "minmax(96px, 0.8fr)" : "200px",
       cell: (d) => {
         const c = classificationPicture?.(d);
         return c ? (
