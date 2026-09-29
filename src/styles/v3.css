@@ -4758,3 +4758,5 @@ a.v3bbr__val:hover { text-decoration-color: currentColor; }
 /* T2: every contra account its own link; the cell wraps instead of hiding them (review F338). */
 .v2ae__contra--all { white-space: normal; }
 .v2ae__contra--all .v2acc { white-space: nowrap; }
+.v3entry__keys { white-space: normal; }
+.v3entry__keys > span { white-space: nowrap; }

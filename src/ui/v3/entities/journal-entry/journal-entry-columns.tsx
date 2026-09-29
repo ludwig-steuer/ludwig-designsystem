@@ -62,6 +62,11 @@ export interface EntryRow {
   amount: number;
   currency: Currency;
   taxKey?: string | null;
+  /**
+   * All tax keys of the entry in line order, where it has more than one
+   * (splits, reverse-charge lines; hint ll-dev4). Without it `taxKey` stands alone.
+   */
+  taxKeys?: readonly string[] | null;
   /** The value of the table's state axis — `journal_entry_datev_stage` or `mirror_match`. */
   state: string;
   /** Axis `journal_entry_origin`; Ludwig only. */
@@ -334,7 +339,22 @@ export function journalEntryColumns(options: JournalEntryColumnOptions = {}): Co
       key: "taxKey",
       header: "USt",
       width: "48px",
-      cell: (e) => <TaxKeyCell taxKey={e.taxKey ?? null} {...(taxKeyHref ? { taxKeyHref } : {})} />,
+      // Every key its own way into the reference work, in line order — the
+      // cell wraps rather than hiding the second one behind „+n".
+      cell: (e) => {
+        const keys = e.taxKeys && e.taxKeys.length > 1 ? e.taxKeys : null;
+        if (!keys) return <TaxKeyCell taxKey={e.taxKey ?? null} {...(taxKeyHref ? { taxKeyHref } : {})} />;
+        return (
+          <span className="v3entry__keys">
+            {keys.map((k, i) => (
+              <span key={`${k}-${i}`}>
+                {i > 0 ? ", " : null}
+                <TaxKeyCell taxKey={k} {...(taxKeyHref ? { taxKeyHref } : {})} />
+              </span>
+            ))}
+          </span>
+        );
+      },
     },
     amount: {
       key: "amount",

@@ -346,3 +346,8 @@ Der zweite Konto-Link („1800") misst 45 × 15 px; das gehört zu M3 (setweit).
 
 **Abgenommen mit Auflagen**: M10 erledigt; offen bleiben M3 (setweit), M5, M6
 und der Hinweis zu „Buchungszustand".
+
+## Nachtrag 2026-09-29 — Legende und mehrere BU
+
+- **„Buchungszustand" (T2) hat eine Legende:** neuer Baustein `StatusLegendButton({ title, parts })` neben `StatusInfoButton` — ein (i), das eine Legende aus mehreren Achsen öffnet, jedes Wort aus der Registry: `journal_entry` (alle), `journal_entry_datev_stage` (nur „Exportiert"), `journal_entry_origin` (nur „Mandantenstapel"). Owner 2026-09-29 („bitte eine machen"). Gemessen: (i) 24 × 24 px, Dialog mit sechs Zuständen.
+- **Mehrere BU-Schlüssel (T1, Hinweis ll-dev4):** `EntryRow.taxKeys?: string[]` in Zeilenreihenfolge; die USt-Zelle zeigt jeden als eigenen Link, durch Komma, und bricht um. Ohne `taxKeys` steht `taxKey` allein. Story `WithRunAndDatevId`, erste Zeile.

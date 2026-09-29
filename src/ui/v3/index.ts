@@ -780,5 +780,5 @@ export {
 } from "./patterns/Confidence";
 export { StatusBadge, type StatusBadgeProps } from "./patterns/StatusBadge";
 export { StatusHeader, type StatusHeaderProps } from "./patterns/StatusHeader";
-export { StatusInfoButton } from "./patterns/StatusInfoButton";
+export { StatusInfoButton, StatusLegendButton, type StatusLegendPart } from "./patterns/StatusInfoButton";
 export { StatusInfoDialog } from "./patterns/StatusInfoDialog";

@@ -5,7 +5,9 @@ import { useState, type ReactNode } from "react";
 import { ActionIcon } from "../Icons";
 import { AXIS_LABEL } from "./entity-icons";
 import { StatusInfoDialog } from "./StatusInfoDialog";
-import type { StatusAxis } from "@/ludwig/ui/status/status-registry";
+import { axisLegend, type StatusAxis } from "@/ludwig/ui/status/status-registry";
+import { Badge } from "../primitives/Badge";
+import { Dialog } from "../primitives/Dialog";
 
 interface StatusInfoButtonProps {
   axis: StatusAxis;
@@ -54,6 +56,62 @@ export function StatusInfoButton({ axis, current, children }: StatusInfoButtonPr
         {children ?? <ActionIcon action="info" size={12} />}
       </button>
       <StatusInfoDialog axis={axis} current={current} open={open} onClose={() => setOpen(false)} />
+    </>
+  );
+}
+
+/**
+ * A column whose values come from **more than one** axis — the booking state
+ * of an account movement shows the entry's state, „übergeben" from the way to
+ * DATEV and „Mandantenstapel" from the origin (0211, acceptance hint). One
+ * legend, the parts in order, every word and meaning from the registry; no
+ * word of its own.
+ */
+export interface StatusLegendPart {
+  axis: StatusAxis;
+  /** Only these values of the axis, in this order; without it all of them. */
+  only?: readonly string[];
+}
+
+/**
+ * @when    The (i) at the head of a column that mixes values of several axes.
+ * @instead A column of one axis → StatusInfoButton (with its diagram).
+ */
+export function StatusLegendButton({ title, parts }: { title: string; parts: readonly StatusLegendPart[] }) {
+  const [open, setOpen] = useState(false);
+  const items = parts.flatMap((p) => axisLegend(p.axis, p.only).map((it) => ({ ...it, axis: p.axis })));
+  return (
+    <>
+      <button
+        type="button"
+        className="v2sinfo"
+        aria-label={`${title}: Zustände erklären`}
+        title={`${title}: Zustände erklären`}
+        onClick={(e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          setOpen(true);
+        }}
+      >
+        <ActionIcon action="info" size={12} />
+      </button>
+      <Dialog open={open} onClose={() => setOpen(false)} title={title} size="md">
+        <div className="v3stlegend">
+          {items.map((it) => (
+            <div key={`${it.axis}:${it.value}`} className="v3stlegend__row">
+              <div>
+                <Badge tone={it.kind}>{it.label}</Badge>
+              </div>
+              <div className="v3stlegend__text">
+                {it.meaning || <span className="v3stlegend__muted">—</span>}
+                <div className="v3stlegend__tech">
+                  Technisch: <code>{`${it.axis} · ${it.value}`}</code>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </Dialog>
     </>
   );
 }

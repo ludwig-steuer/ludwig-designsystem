@@ -10,7 +10,7 @@ import { HeadRow, Row, Table, EmptyRow } from "../../primitives/Table";
 import { Time } from "../../primitives/Time";
 import { EntityIcon } from "../../Icons";
 import { StatusBadge } from "../../patterns/StatusBadge";
-import { StatusInfoButton } from "../../patterns/StatusInfoButton";
+import { StatusInfoButton, StatusLegendButton } from "../../patterns/StatusInfoButton";
 import { columnsMinWidth, type ColumnDef } from "../../patterns/DataTable";
 import { Link } from "../../primitives/Link";
 import { SourceDocumentRefCell } from "../source-document/SourceDocumentRefCell";
@@ -266,6 +266,17 @@ export function accountEntryColumns({
     status: {
       key: "status",
       header: "Buchungszustand",
+      // Three axes in one column — one legend for all of them (acceptance hint 0211).
+      headerAside: (
+        <StatusLegendButton
+          title="Buchungszustand"
+          parts={[
+            { axis: "journal_entry" },
+            { axis: "journal_entry_datev_stage", only: ["exported"] },
+            { axis: "journal_entry_origin", only: ["client_import"] },
+          ]}
+        />
+      ),
       // 148, not 132: the widest chip of the axis needs 144,3 px in the cell,
       // measured with an unbound clone — at 132 it was clipped at every width.
       width: "148px",

@@ -310,3 +310,5 @@ nachgeprüft).
 **Nachbesserung M5 (2026-09-29):** `SourceDocumentList` hat `loading` (zwei Skelettzeilen in denselben Spuren) und `error: { message; retry? }` (`ErrorRow`, `role="alert"`). Story `SourceDocumentList/LoadingAndError`.
 
 **Nachprüfung M5 2026-09-29** (Claude, fremde Sitzung, Stand 88d24a4): `SourceDocumentList.tsx` rendert bei `loading` zwei Skelettzeilen und bei `error` die `ErrorRow`, beide in derselben `Table` mit denselben Spuren und Mindestbreite wie die Zeilen; in `v3/Entitäten/Beleg/SourceDocumentList/LoadingAndError` gemessen: Skelettzeile mit fünf Zellen in den fünf Spuren der Kompaktzeile, Fehler mit `role="alert"`, Was-Satz „Die Belege dieses Sachverhalts ließen sich nicht laden.“ und „Erneut laden“ — M5 erledigt. Hinweis, nicht diesem Baustein angelastet: `ErrorRow` (`Cells.tsx:408`, `.v2tbl__error`) setzt den Was-Satz nicht fett, wie T5 es verlangt; das gilt für jede Tabelle des Sets. 0212 bleibt abgenommen mit Auflage M3 (setweit).
+
+**M3 erledigt (Owner 2026-09-29):** `DATE_AXIS_WORD` steht als benannte Ausnahme mit Owner und Datum in `docs/design-guidelines.md` (T4).

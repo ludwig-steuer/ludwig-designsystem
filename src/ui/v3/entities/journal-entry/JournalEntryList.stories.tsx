@@ -118,7 +118,12 @@ export const InBatch: Story = {
 export const WithRunAndDatevId: Story = {
   render: () => (
     <JournalEntryList
-      entries={BATCH.map((e, i) => ({ ...e, run: (i % 2) + 1, exportRef: `LW-2026-0009-${String(i + 1).padStart(4, "0")}` }))}
+      entries={BATCH.map((e, i) => ({
+        ...e,
+        run: (i % 2) + 1,
+        exportRef: `LW-2026-0009-${String(i + 1).padStart(4, "0")}`,
+        ...(i === 0 ? { taxKeys: ["9", "94"] } : {}),
+      }))}
       head={{ title: "Inhalt des Stapels", sub: "2026-08-001" }}
       include={["run", "exportRef"]}
       without={["batch"]}
