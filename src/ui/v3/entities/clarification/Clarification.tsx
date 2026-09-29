@@ -30,8 +30,11 @@ import type { StateKind } from "../../patterns/Review";
 /** Who is expected to answer — `client_accounting_case_clarification.audience`. */
 export type ClarificationAudience = "accounting" | "client" | "agent";
 
-/** German word per audience; the axis has none, so it lives here (V7, T1). */
-const AUDIENCE_LABEL: Record<ClarificationAudience, string> = {
+/**
+ * German word per audience; the axis has none, so it lives here — **once**
+ * for card, row and thread (V7, T1; acceptance 0214, M2).
+ */
+export const AUDIENCE_LABEL: Record<ClarificationAudience, string> = {
   accounting: "Kanzlei",
   client: "Mandant",
   agent: "Ludwig",

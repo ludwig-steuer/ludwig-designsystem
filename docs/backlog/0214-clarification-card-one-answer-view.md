@@ -148,3 +148,14 @@ rechts mit `AmountCell`, Stand als `StatusBadge`, Markierung durch Rand
 
 **Abgenommen mit Auflagen**: M1, M2, M3, M5; M4 bleibt beim setweiten Auftrag.
 
+
+## Nachbesserung 2026-09-29 (nach der fremden Abnahme)
+
+| Mangel | Behoben |
+|---|---|
+| M1 | Die ganze Evidenz-Zeile ruft `onSelect` (bzw. folgt `href`): der Schlüssel trägt `v2rowlink`, dessen Overlay die Zeile deckt |
+| M2 | Eine Wortliste der Adressaten: `AUDIENCE_LABEL` aus `Clarification.tsx`, von Karte und Faden importiert |
+| M3 | „gefragt von …" nur, wenn `raisedBy` gesetzt ist — sonst sagt das Herkunftswort „von Ludwig" schon |
+| M5 | Story `RadioGroup/Rows`; die gebauten Karten-Stories heißen `InBatchReview`, `AtCaseFreeText`, `DeferredWithUndo` |
+| Hinweis | Eine zurückgestellte Frage mit `onUndefer` bietet nicht zugleich „Zurückstellen" an |
+| M4 | offen, setweit — Backlog 0213 |

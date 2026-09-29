@@ -28,7 +28,7 @@ import { ActionIcon } from "../../Icons";
 import { StatusBadge } from "../../patterns/StatusBadge";
 import { resolveStatus } from "@/ludwig/ui/status/status-registry";
 import { ChoicePrompt, type ChoiceAnswer } from "../../patterns/ChoicePrompt";
-import type { ClarificationVM } from "./Clarification";
+import { AUDIENCE_LABEL, type ClarificationVM } from "./Clarification";
 
 /**
  * The unfolded clarification: what was asked, what it rests on, who asked it
@@ -53,12 +53,6 @@ import type { ClarificationVM } from "./Clarification";
  * props, because `ludwig/app` has no catalogue for either (findings B1, B2).
  */
 
-/** German word per audience — mirrors `Clarification.tsx`, no axis has it. */
-const AUDIENCE_LABEL: Record<ClarificationVM["audience"], string> = {
-  accounting: "Kanzlei",
-  client: "Mandant",
-  agent: "Ludwig",
-};
 
 /** What each history entry is; the four `case.clarification_*` audit actions. */
 export type ClarificationEventKind = "raised" | "answered" | "resolved" | "deferred";
@@ -296,7 +290,21 @@ function citedFirst<T extends { cited?: boolean }>(rows: readonly T[]): T[] {
 type Select = ((item: { kind: EvidenceKind; id: string }) => void) | undefined;
 
 /** The key cell of an evidence row: a button when the caller opens a drawer, a link when it navigates. */
-function Pick({ kind, row, select, children }: { kind: EvidenceKind; row: EvidenceRow; select: Select; children: React.ReactNode }) {
+function Pick({
+  kind,
+  row,
+  select,
+  children,
+  inRow = true,
+}: {
+  kind: EvidenceKind;
+  row: EvidenceRow;
+  select: Select;
+  children: React.ReactNode;
+  /** In a table row the pick covers the row; in the plain list of other sources it must not (its overlay would cover the card). */
+  inRow?: boolean;
+}) {
+  const rowLink = inRow ? " v2rowlink" : "";
   const body = (
     <>
       {children}
@@ -305,13 +313,15 @@ function Pick({ kind, row, select, children }: { kind: EvidenceKind; row: Eviden
   );
   if (select)
     return (
-      <button type="button" className="v3cell-link v2clc__pick" onClick={() => select({ kind, id: row.id })}>
+      // `v2rowlink`: the button's overlay covers the whole row — a click on the
+      // issuer calls it too (acceptance 0214, M1; I11).
+      <button type="button" className={`v3cell-link v2clc__pick${rowLink}`} onClick={() => select({ kind, id: row.id })}>
         {body}
       </button>
     );
   if (row.href)
     return (
-      <Link href={row.href} className="v3cell-link">
+      <Link href={row.href} className={`v3cell-link${rowLink}`}>
         {body}
       </Link>
     );
@@ -422,7 +432,7 @@ function Evidence({ e, select }: { e: ClarificationEvidence; select: Select }) {
             <ul className="v2clc__sources">
               {other.map((o) => (
                 <li key={`${o.kind}:${o.id ?? o.label}`}>
-                  <Pick kind="other" row={{ id: o.id ?? o.label, cited: o.cited, href: o.href }} select={select}>
+                  <Pick kind="other" row={{ id: o.id ?? o.label, cited: o.cited, href: o.href }} select={select} inRow={false}>
                     {o.label}
                   </Pick>
                 </li>
@@ -588,7 +598,9 @@ export function ClarificationCard({
         <p className="v2clc__meta">
           {isComment ? "Notiz" : `Gefragt ist: ${AUDIENCE_LABEL[c.audience]}`}
           {/* Who asked — several people work on one case (owner 2026-09-29, 0214). */}
-          {` · ${isComment ? "von" : "gefragt von"} ${actorName(c.raisedBy, "Ludwig")}`}
+          {/* Only when a person or the system is known — without it the origin
+              word already says „von Ludwig" (acceptance 0214, M3). */}
+          {c.raisedBy ? ` · ${isComment ? "von" : "gefragt von"} ${actorName(c.raisedBy, "Ludwig")}` : ""}
           {questionWord ? ` · ${questionWord}` : ""}
           {originWord ? ` · ${originWord}` : ""}
           {" · "}
@@ -713,7 +725,7 @@ export function ClarificationCard({
           <TextButton onClick={() => setResolving(true)}>Anderweitig geklärt</TextButton>
         </p>
       ) : null}
-      {canExit && onDefer ? (
+      {canExit && onDefer && !(c.state === "deferred" && onUndefer) ? (
         <p className="v2clc__exit">
           <ActionIcon action="time" size={14} />
           Jetzt nicht zu klären?{" "}

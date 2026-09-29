@@ -1,7 +1,7 @@
 import { Disclosure } from "../../primitives/Disclosure";
 import { Time } from "../../primitives/Time";
 import { StatusBadge } from "../../patterns/StatusBadge";
-import type { ClarificationVM } from "./Clarification";
+import { AUDIENCE_LABEL, type ClarificationVM } from "./Clarification";
 import { actorName, type ClarificationDetailVM, type ClarificationEvent } from "./ClarificationCard";
 
 /**
@@ -13,12 +13,6 @@ import { actorName, type ClarificationDetailVM, type ClarificationEvent } from "
  * question on screen stands last, marked, and is not written out twice.
  */
 
-/** The words of `Clarification.tsx` — no axis carries the audience yet. */
-const AUDIENCE_WORD: Record<ClarificationVM["audience"], string> = {
-  accounting: "Kanzlei",
-  client: "Mandant",
-  agent: "Ludwig",
-};
 
 export type ThreadItem = ClarificationVM & Pick<ClarificationDetailVM, "question" | "raisedBy" | "answeredBy" | "history" | "deferredReason">;
 
@@ -29,7 +23,7 @@ function Line({ c, current }: { c: ThreadItem; current: boolean }) {
       <span className="v3clt__kind">{isComment ? "Notiz" : "Frage"}</span>
       <span>
         {actorName(c.raisedBy, "Ludwig")}
-        {isComment ? null : ` → ${AUDIENCE_WORD[c.audience]}`}
+        {isComment ? null : ` → ${AUDIENCE_LABEL[c.audience]}`}
       </span>
       <Time value={c.raisedAt} format="date" size="sm" />
       {isComment ? null : <StatusBadge axis="clarification" status={c.state} info={false} />}

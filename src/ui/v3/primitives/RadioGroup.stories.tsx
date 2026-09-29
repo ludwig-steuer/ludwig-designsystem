@@ -112,3 +112,26 @@ export const InForm: Story = {
     );
   },
 };
+
+/** `rows`: every option a framed row, the whole row the target — the proposed answers of rule S13 (0214). */
+export const Rows: Story = {
+  render: () => {
+    const [v, setV] = useState<string | null>("b");
+    return (
+      <div style={{ maxWidth: 560 }}>
+        <RadioGroup
+          name="answer"
+          label="Antwortoptionen"
+          variant="rows"
+          options={[
+            { value: "a", label: "Bewirtung (4650)" },
+            { value: "b", label: "Reisekosten (4670)" },
+            { value: "c", label: "Aufteilen: Speisen 4650, Übernachtung 4670" },
+          ]}
+          value={v}
+          onChange={setV}
+        />
+      </div>
+    );
+  },
+};

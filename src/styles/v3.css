@@ -4780,6 +4780,10 @@ a.v3bbr__val:hover { text-decoration-color: currentColor; }
 /* The key in link colour, mono or not; „genannt" as a quiet second line, not glued to the date. */
 .v2clc__pick .v2mono { color: inherit; }
 .v2clc__cited { display: block; color: var(--color-text-muted); }
+/* The pick is the row link itself: it must stay static, or its overlay would
+   cover only the button, not the row (the rule for other buttons in a linked
+   row lifts them — 0214, M1). */
+.v2tbl .v2clc__pick.v2rowlink { position: static; }
 
 /* 0214 · the thread of a case's clarifications */
 .v3clt__list { list-style: none; margin: 0; padding: 0; display: grid; }
