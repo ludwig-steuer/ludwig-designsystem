@@ -3,3 +3,6 @@
      Hier bleiben nur die Verbindungs-Hints, die den Abruf beschleunigen. -->
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<!-- The app renders `<html lang="de">`; without it `hyphens: auto` does nothing
+     here, and a story would measure other line breaks than the app shows. -->
+<script>document.documentElement.lang = "de";</script>

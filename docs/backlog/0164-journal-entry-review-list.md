@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Status | **Abnahme — gebaut 2026-09-29**; aus dem Backlog geholt 2026-09-29 (F334 T3, Owner-Auftrag über ll-dev; ersetzt den Default „bis `export-batch` steht"). Gebaut nach Abnahme von 0211, ohne Sortierung nach Aufmerksamkeit (L-295) und ohne `DiffView` |
+| Status | **fertig — abgenommen 2026-09-29 (mit Auflagen M2 setweit, M5); Nachtrag 2026-10-01 (Soll/Haben ruhiger, Zeilen oben) in Abnahme**; gebaut 2026-09-29; aus dem Backlog geholt 2026-09-29 (F334 T3, Owner-Auftrag über ll-dev; ersetzt den Default „bis `export-batch` steht"). Gebaut nach Abnahme von 0211, ohne Sortierung nach Aufmerksamkeit (L-295) und ohne `DiffView` |
 | Stufe | `entities/journal-entry/` |
 | Klassen-Test | „Ergäbe das auch in einer Versicherungs-App Sinn?" → nein: Buchungsvorschlag, Judge-Verdikt, Stapel, Herkunft Mandantenstapel |
 | Quelle | Entitätsprofil `docs/entitaeten/journal-entry.md`, Abschnitte „Listen" (dritte Zeile), „Formen" (Zeile `JournalEntryReviewList`) und „Zuschnitt" |
@@ -38,7 +38,7 @@ Aus dem Entitätsprofil, damit die Spec es nicht neu erheben muss:
 
 | Ausprägung | Spalten |
 |---|---|
-| `full` | Nr. · Datum · Gegenpartei (+ „erstmals") · Soll · Haben (nur Nummern, „n Zeilen") · Betrag · BU · Prüfung durch Ludwig · Satzart (nicht in Gruppen nach Satzart) · Prüfbedarf („entschieden") |
+| `full` | Nr. · Datum · Gegenpartei (+ „erstmals") · Soll · Kontoname · Haben · Kontoname (Nachtrag 2026-10-01: Hauptkonto, „+n weitere"; ohne Namen mit `accountNames: false`) · Betrag · BU · Prüfung durch Ludwig · Satzart (nicht in Gruppen nach Satzart) · Prüfbedarf („entschieden") |
 | `compact` | Datum · Gegenpartei · Konten („4930 an 70021") · Betrag · Prüfung durch Ludwig |
 
 Rahmen: `expand` (Aufklapper der App: Satz, Begründung, Aktionen) · `rowActions`
@@ -190,3 +190,70 @@ acht Zeilen auf den Schirm. Wo die Kontonamen nicht gebraucht werden, hilft
 ### Urteil
 
 **Abgenommen mit Auflagen**: unverändert M2 (setweit) und M5.
+
+## Nachtrag 2026-10-01 — Soll/Haben ruhiger, Zeilen oben (Owner über lldev1)
+
+Anlass: Schritt Buchungsvorschläge, „Buchungsvorschläge nach Satzart" (App
+`Step3Single`, `variant="full"`, gruppiert). Die Soll/Haben-Zellen listeten
+alle Konten mit „ / " und Namen und brachen samt Nummer um — dem Owner zu
+unruhig.
+
+1. **Je Seite nur das Hauptkonto.** `accounts.debit[0]` bzw. `credit[0]` ist
+   das Hauptkonto (höchste Summe der Seite); die **App ordnet**, die Liste
+   rechnet nichts (JSDoc an `ProposalRow.accounts`). Dahinter „+n weitere"
+   (`v2sub`), wo es mehr als eins gibt. Die volle Liste steht im `title` der
+   Nummer und des Namens, der Aufklapper zeigt den Satz ganz.
+2. **Nummer und Name in eigenen Spalten.** Neue Spaltenschlüssel `debitName`
+   und `creditName` (in `ProposalColumn`, hinter `debit` bzw. `credit`). Die
+   Nummer mono, fest **44 px** (fünf Ziffern messen 37,5 px), mit Link über
+   `accountHref`; der Name `minmax(72px, 1fr)`, bricht um — Silbentrennung nur
+   in Wörtern ab zwölf Zeichen (`hyphenate-limit-chars: 12 5 5`, sonst stand
+   „Bü-robedarf" da), höchstens drei Zeilen wie die Gegenpartei, der Rest im
+   `title`. Köpfe: sichtbar „Soll" / „Haben" über der Nummer, über dem Namen
+   nichts fürs Auge und „Kontoname Soll" / „Kontoname Haben" für den
+   Screenreader (`v2vh`) — zweimal „Kontoname" im Kopf hätte die Seiten nicht
+   mehr getrennt.
+3. **„n Zeilen" nur noch, wo die Konten es nicht sagen:** wenn `lineCount`
+   größer ist als die Zahl der Konten beider Seiten (ein Konto auf mehreren
+   Zeilen). Sonst sagt „+n weitere" dasselbe.
+4. **`accountNames: false`**: keine Namensspalten; Soll/Haben wieder
+   `minmax(68px, 1fr)` mit Nummer und „+n weitere" darunter.
+5. **Platz dafür** (gemessener Inhalt in Klammern): Datum 84 → 76 (72),
+   BU 40 → 32 (23), Prüfung durch Ludwig 112 → 96 (90). Gegenpartei bleibt
+   `minmax(120px, 1.4fr)` (F340: „Deutsche Telekom Geschäftskunden GmbH" ganz).
+6. **Setweit:** Tabellenzeilen oben ausgerichtet (`.v2tbl__row { align-items:
+   start }`, Kopf bleibt mittig) — Owner-Standard, in
+   `design-guidelines.md` §Tabelle mit Datum.
+7. Storybook setzt `lang="de"` wie die App (`.storybook/preview-head.html`),
+   sonst trennt `hyphens: auto` dort nicht.
+
+**Gemessen** (Playwright, 1280 × 900, Storybook :6107):
+
+| Story | Messung |
+|---|---|
+| `Grouped` | 1246 = 1246, kein Querscroll. Spuren: Gegenpartei 120, Soll 44, Name 78, Haben 44, Name 78. Kein Gegenparteiname gekürzt, keine Nummer über ihre Spur. Zeilen 64–106 px (vorher 84–88; die höchste trägt zwei Prüfbedarf-Gründe und drei Namenszeilen) |
+| `Flat` (`accountNames={false}`) | 1246 = 1246. Soll/Haben je 85 px: „3100 +2 weitere", „70021 3 Zeilen" (Zeile 11). Zeilen 47–88 px (vorher bis 109) |
+| Zeilen oben | Erste Zeile jeder Zelle 12–14 px unter der Zeilenoberkante; Grundlinien einer einzeiligen Zeile in `CaseList --filled` innerhalb 1 px (Text 13,5 · Badge 11,5 · Mono 12,5 px). `BankTransactionList --filled`: die zweizeilige Sachverhaltszelle zieht die anderen nicht mehr in die Mitte |
+
+**Offene Frage an den Owner (Flat):** Mit der Satzart-Spalte passen die
+Namensspalten in der flachen Ansicht bei 1280 px nicht — 1328 zu 1246 px, die
+Aktionen (Freigeben) rutschen aus dem Bild. *Ohne Antwort gilt:* flach ohne
+Namensspalten (`accountNames={false}`, Namen im `title` und im Aufklapper),
+gruppiert mit. Alternativen: (b) flach ohne Satzart-Spalte, (c) flach mit
+Querscroll.
+
+**Ausbau:** T1 (`journalEntryColumns`, `SideAccounts`) zeigt Soll/Haben noch als
+Liste mit „ / " — gebuchte Sätze haben fast immer ein Konto je Seite; zieht
+nach, wenn ein Screen es verlangt.
+
+Status: **Abnahme** (Nachtrag). Kriterien für die fremde Abnahme:
+
+- [ ] `full` mit Namen: Köpfe „Soll" · (leer, sr „Kontoname Soll") · „Haben" · (leer, sr „Kontoname Haben"); je Seite genau eine Nummer und ein Name (`Grouped`)
+- [ ] „+n weitere" = Zahl der Konten der Seite minus eins, nur bei mehr als einem; `title` nennt alle Konten mit Nummer und Name (`Grouped`, `Flat`)
+- [ ] „n Zeilen" nur, wo `lineCount` > Konten beider Seiten (`Flat` Zeile 11), sonst nicht (`Grouped`)
+- [ ] Nummernspalte 44 px, mono, kein Überlauf; Name bricht um, höchstens drei Zeilen, keine Trennung in Wörtern unter zwölf Zeichen (`Grouped`, gemessen)
+- [ ] `accountNames={false}`: keine Namensspalten, Nummer + „+n weitere" in einer Spalte (`Flat`)
+- [ ] `Grouped` und `Flat` bei 1280 px ohne Querscroll; kein Gegenparteiname gekürzt (gemessen)
+- [ ] Setweit: `.v2tbl__row` oben ausgerichtet, Kopf mittig; einzeilige Zeilen weiter auf einer Grundlinie (zwei fremde Tabellen-Stories gemessen); Regel in `design-guidelines.md` mit Datum
+- [ ] Spec-Tabelle „Ausprägung" oben und Code stimmen überein; `pnpm typecheck`, `pnpm build`, `pnpm check:type` grün
+

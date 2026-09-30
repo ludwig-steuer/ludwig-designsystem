@@ -45,7 +45,11 @@ export interface ProposalRow {
   title: string;
   /** A counterparty never booked before — worth a second look. */
   firstTime?: boolean;
-  /** `null` = the case has no entry yet („kein Satz"). */
+  /**
+   * `null` = the case has no entry yet („kein Satz"). The first account of a
+   * side is its **main account** — the one with the highest sum; the app
+   * orders, the list shows the first and counts the rest (owner 2026-10-01).
+   */
   accounts: { debit: readonly EntryAccount[]; credit: readonly EntryAccount[]; lineCount?: number } | null;
   amount: number | null;
   currency: Currency;
@@ -69,7 +73,9 @@ export type ProposalColumn =
   | "counterparty"
   | "accounts"
   | "debit"
+  | "debitName"
   | "credit"
+  | "creditName"
   | "amount"
   | "taxKey"
   | "document"
@@ -82,7 +88,8 @@ export type ProposalColumn =
  * a laptop with the sidebar open, and the document stands in the fold-out. The
  * column exists for a frame with room — pass it in `include`.
  */
-const FULL: readonly ProposalColumn[] = ["number", "date", "counterparty", "debit", "credit", "amount", "taxKey", "document", "review", "kind", "reasons"];
+const FULL: readonly ProposalColumn[] = ["number", "date", "counterparty", "debit", "debitName", "credit", "creditName", "amount", "taxKey", "document", "review", "kind", "reasons"];
+const NAMES: readonly ProposalColumn[] = ["debitName", "creditName"];
 const COMPACT: readonly ProposalColumn[] = ["date", "counterparty", "accounts", "amount", "document", "review"];
 const OPTIONAL: readonly ProposalColumn[] = ["document"];
 
@@ -93,9 +100,10 @@ export interface ProposalColumnOptions {
   /** Optional columns this frame has room for — today only `document`. */
   include?: readonly ProposalColumn[];
   /**
-   * The account names beside the numbers in Soll and Haben — on by default in
-   * `full`, as step 3 shows them today (hint ll-dev 2026-09-29, owner rule
-   * „drop no feature the data carries"). `false` for a frame that must stay narrow.
+   * The account names in their own columns beside Soll and Haben — on by
+   * default in `full` (hint ll-dev 2026-09-29, owner rule „drop no feature the
+   * data carries"; own columns owner 2026-10-01). `false` for a frame that must
+   * stay narrow: the numbers alone, the names in the title.
    */
   accountNames?: boolean;
   accountHref?: (accountNumber: string) => string;
@@ -103,35 +111,65 @@ export interface ProposalColumnOptions {
   taxKeyHref?: (taxKey: string) => string;
 }
 
-function Side({
+/** Every account of a side, for the title — the cell shows the main one. */
+const sideTitle = (accounts: readonly EntryAccount[]) => accounts.map((a) => `${a.number} ${a.name ?? ""}`.trim()).join(", ");
+
+/** „+2 weitere" — the accounts after the main one; nothing when there are none. */
+function More({ accounts }: { accounts: readonly EntryAccount[] }) {
+  return accounts.length > 1 ? <span className="v2sub">+{accounts.length - 1} weitere</span> : null;
+}
+
+/**
+ * The main account's number (owner 2026-10-01): one account per side, mono in a
+ * narrow column of its own, so the numbers stand under each other and never
+ * wrap with the name. Without the name columns the rest is counted here.
+ */
+function SideNumber({
   accounts,
   accountHref,
-  names,
+  withMore,
 }: {
   accounts: readonly EntryAccount[];
   accountHref?: ((n: string) => string) | undefined;
-  names: boolean;
+  withMore: boolean;
 }) {
-  // Number and name per account, „ / " between them — as step 3 reads today
-  // (`kontoText`, owner acceptance 2026-09-21); the cell wraps instead of
-  // cutting. Without names the numbers alone, the names in the title.
+  const main = accounts[0];
+  if (!main) return <span className="v2muted">—</span>;
+  const number = accountHref ? (
+    <Link className="v3cell-link v2mono" href={accountHref(main.number)}>
+      {main.number}
+    </Link>
+  ) : (
+    <span className="v2mono">{main.number}</span>
+  );
   return (
-    <span className={names ? "v3prop__accs v3prop__accs--wrap" : "v3prop__accs"} title={accounts.map((a) => `${a.number} ${a.name ?? ""}`.trim()).join(", ")}>
-      {accounts.map((a, i) => (
-        <span key={a.number}>
-          {i > 0 ? " / " : null}
-          {accountHref ? (
-            <Link className="v3cell-link v2mono" href={accountHref(a.number)}>
-              {a.number}
-            </Link>
-          ) : (
-            <span className="v2mono">{a.number}</span>
-          )}
-          {names && a.name ? ` ${a.name}` : null}
-        </span>
-      ))}
+    <span className="v3prop__who" title={sideTitle(accounts)}>
+      {number}
+      {withMore ? <More accounts={accounts} /> : null}
     </span>
   );
+}
+
+/** The main account's name — it wraps; the rest is counted below it. */
+function SideName({ accounts, note }: { accounts: readonly EntryAccount[]; note?: ReactNode }) {
+  const main = accounts[0];
+  if (!main) return null;
+  return (
+    <span className="v3prop__who" title={sideTitle(accounts)}>
+      <span className="v3prop__acc">{main.name ?? "—"}</span>
+      <More accounts={accounts} />
+      {note}
+    </span>
+  );
+}
+
+/**
+ * „3 Zeilen" only where the accounts do not already say it — a side can carry
+ * one account on several lines. Where „+n weitere" stands, it would say the
+ * same twice.
+ */
+function hiddenLines(a: NonNullable<ProposalRow["accounts"]>): ReactNode {
+  return a.lineCount && a.lineCount > a.debit.length + a.credit.length ? <span className="v2sub">{a.lineCount} Zeilen</span> : null;
 }
 
 /**
@@ -147,7 +185,8 @@ export function proposalReviewColumns(options: ProposalColumnOptions = {}): Colu
     date: {
       key: "date",
       header: "Datum",
-      width: "84px",
+      // The date at `size="sm"` measures 72 px (owner 2026-10-01: room for Soll and Haben apart).
+      width: "76px",
       cell: (p) => (p.date ? <Time value={p.date} format="date" size="sm" /> : <span className="v2muted">—</span>),
     },
     counterparty: {
@@ -181,25 +220,41 @@ export function proposalReviewColumns(options: ProposalColumnOptions = {}): Colu
         return <JournalEntryCell lines={lines} currency={p.currency} showNames={false} showAmount={false} {...(accountHref ? { accountHref } : {})} />;
       },
     },
+    // Number and name in columns of their own (owner 2026-10-01): the number
+    // mono and fixed — five digits are 37.5 px —, the name beside it wraps.
+    // The name heads say nothing to the eye, the „Soll" before them does.
     debit: {
       key: "debit",
       header: "Soll",
-      width: "minmax(68px, 1fr)",
+      width: accountNames ? "44px" : "minmax(68px, 1fr)",
       cell: (p) =>
         p.accounts ? (
           <span className="v3prop__who">
-            <Side accounts={p.accounts.debit} accountHref={accountHref} names={accountNames} />
-            {p.accounts.lineCount && p.accounts.lineCount > 2 ? <span className="v2sub">{p.accounts.lineCount} Zeilen</span> : null}
+            <SideNumber accounts={p.accounts.debit} accountHref={accountHref} withMore={!accountNames} />
+            {accountNames ? null : hiddenLines(p.accounts)}
           </span>
-        ) : (
+        ) : accountNames ? null : (
           <span className="v2muted">kein Satz</span>
         ),
+    },
+    debitName: {
+      key: "debitName",
+      header: <span className="v2vh">Kontoname Soll</span>,
+      width: "minmax(72px, 1fr)",
+      cell: (p) =>
+        p.accounts ? <SideName accounts={p.accounts.debit} note={hiddenLines(p.accounts)} /> : <span className="v2muted">kein Satz</span>,
     },
     credit: {
       key: "credit",
       header: "Haben",
-      width: "minmax(68px, 1fr)",
-      cell: (p) => (p.accounts ? <Side accounts={p.accounts.credit} accountHref={accountHref} names={accountNames} /> : null),
+      width: accountNames ? "44px" : "minmax(68px, 1fr)",
+      cell: (p) => (p.accounts ? <SideNumber accounts={p.accounts.credit} accountHref={accountHref} withMore={!accountNames} /> : null),
+    },
+    creditName: {
+      key: "creditName",
+      header: <span className="v2vh">Kontoname Haben</span>,
+      width: "minmax(72px, 1fr)",
+      cell: (p) => (p.accounts ? <SideName accounts={p.accounts.credit} /> : null),
     },
     amount: {
       key: "amount",
@@ -211,7 +266,8 @@ export function proposalReviewColumns(options: ProposalColumnOptions = {}): Colu
     taxKey: {
       key: "taxKey",
       header: "BU",
-      width: "40px",
+      // Three digits in mono are 23 px.
+      width: "32px",
       cell: (p) => (p.taxKey ? <TaxKeyCell taxKey={p.taxKey} {...(taxKeyHref ? { taxKeyHref } : {})} /> : null),
     },
     document: {
@@ -230,8 +286,8 @@ export function proposalReviewColumns(options: ProposalColumnOptions = {}): Colu
     review: {
       key: "review",
       header: "Prüfung durch Ludwig",
-      // Dot + longest word („Plausibel") + the verdict's sign — never more.
-      width: "112px",
+      // Dot + longest word („Plausibel") + the verdict's sign — 90 px measured.
+      width: "96px",
       cell: (p) => <AiBookingNotesCell verdict={p.verdict ?? null} confidence={p.confidence ?? null} />,
     },
     kind: {
@@ -261,6 +317,7 @@ export function proposalReviewColumns(options: ProposalColumnOptions = {}): Colu
   };
   return (variant === "compact" ? COMPACT : FULL)
     .filter((k) => !without.includes(k))
+    .filter((k) => accountNames || !NAMES.includes(k))
     .filter((k) => !OPTIONAL.includes(k) || include.includes(k))
     .map((k) => all[k]);
 }

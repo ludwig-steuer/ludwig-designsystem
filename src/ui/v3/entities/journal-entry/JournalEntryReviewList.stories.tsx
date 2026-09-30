@@ -31,9 +31,23 @@ const ROWS: ProposalRow[] = Array.from({ length: 40 }, (_, i) => {
       i === 11
         ? null
         : {
-            debit: [{ number: kind.key === "payment" ? "70021" : "4930", name: "Bürobedarf" }],
-            credit: i % 13 === 0 ? [{ number: "1800", name: "Bank" }, { number: "1360", name: "Geldtransit" }] : [{ number: kind.key === "payment" ? "1800" : "70021", name: "Muster Bürobedarf GmbH" }],
-            lineCount: i % 13 === 0 ? 3 : 2,
+            // The main account first — the app orders by sum (owner 2026-10-01).
+            debit:
+              kind.key === "payment"
+                ? [{ number: "70021", name: "Muster Bürobedarf GmbH" }]
+                : i % 6 === 0
+                  ? [{ number: "3100", name: "Fremdleistungen" }, { number: "1576", name: "Abziehbare Vorsteuer 19 %" }, { number: "1571", name: "Abziehbare Vorsteuer 7 %" }]
+                  : i % 3 === 0
+                    ? [{ number: "4930", name: "Bürobedarf" }, { number: "1576", name: "Abziehbare Vorsteuer 19 %" }]
+                    : [{ number: "4930", name: "Bürobedarf" }],
+            credit:
+              i % 13 === 0
+                ? [{ number: "1800", name: "Bank" }, { number: "1360", name: "Geldtransit" }]
+                : kind.key === "payment"
+                  ? [{ number: "1800", name: "Bank" }]
+                  : [{ number: "70021", name: i % 5 === 0 ? "Verbindlichkeiten aus Lieferungen und Leistungen" : "Muster Bürobedarf GmbH" }],
+            // A side that carries one account on two lines — only here „3 Zeilen" stays.
+            lineCount: i % 13 === 0 ? 3 : i % 6 === 0 ? 4 : i % 3 === 0 ? 3 : i === 10 ? 3 : 2,
           },
     amount: i === 11 ? null : 38.5 + i * 97.35,
     currency: "EUR",
@@ -79,7 +93,12 @@ const actions = (p: ProposalRow) =>
 
 const BULK = [{ label: "Ausgewählte freigeben", action: async () => {} }];
 
-/** Step 3, grouped by entry kind: selection, fold-out, row actions; the caller takes the kind column out inside its groups. */
+/**
+ * Step 3, grouped by entry kind: selection, fold-out, row actions; the caller
+ * takes the kind column out inside its groups. Soll and Haben show the main
+ * account — number in its own column, the name beside it wrapping, „+n weitere"
+ * below (owner 2026-10-01); rows align at the top.
+ */
 export const Grouped: Story = {
   render: () => (
     <JournalEntryReviewList
@@ -99,11 +118,17 @@ export const Grouped: Story = {
   ),
 };
 
-/** Flat, with the kind as a column. */
+/**
+ * Flat, with the kind as a column — and without the name columns
+ * (`accountNames={false}`): with the kind they would not fit 1280 px. The
+ * number counts the rest („+2 weitere"), the title names every account, and
+ * „3 Zeilen" stays only where one account carries several lines (row 11).
+ */
 export const Flat: Story = {
   render: () => (
     <JournalEntryReviewList
       rows={ROWS.slice(0, 12)}
+      accountNames={false}
       head={{ title: "Bitte anschauen", sub: "12 von 40 Sachverhalten" }}
       expand={expand}
       rowActions={actions}

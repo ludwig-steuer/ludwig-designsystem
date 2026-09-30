@@ -67,7 +67,7 @@ Alles Folgende gilt dem produktiven Register, wenn nicht anders gesagt.
 | Raster | 4-px-Grundraster, 8-px-Rhythmus, Abstände nur aus `--space-*`. |
 | Rand | 1 px, nie dicker (Ausnahme aktiver Tab 2 px). `--color-border` Standard, `-strong` Tabellenblock, `-subtle` Zeile, `-control` Eingabeelement (3:1). |
 | Karte | Weiß; 1 px `--color-border` **oder** `--shadow-sm`, nie beides. Radius `--radius-md`, hervorgehoben `--radius-lg`. Kopf mit Trennlinie auf `--color-surface-head` (A3). Padding ≥ `--space-5`, Inhaltskarten `--space-6`. |
-| Tabelle | Trennlinien `--color-border-subtle`, keine Zebra-Streifen, keine Gitter (V4). Maße `v2.css`. |
+| Tabelle | Trennlinien `--color-border-subtle`, keine Zebra-Streifen, keine Gitter (V4). Maße `v2.css`. **Zeilen oben ausgerichtet (Owner 2026-10-01):** bricht eine Zelle um, bleiben die anderen auf ihrer ersten Zeile, statt in die Mitte zu rutschen (`.v2tbl__row { align-items: start }`, gilt für jede `Table`/`DataTable`). Die Kopfzeile bleibt mittig. |
 | Radius | sm Inputs/Tags · md Buttons/Karten · lg große Karten/Dialoge · xl nur Hero · pill nur Status-Badge. Nichts „cuddly". |
 | Schatten | `--shadow-xs…lg`, sparsam: Menü, Popover, Dialog. Karten bevorzugen Rand. |
 | Icon | Lucide, Stroke 1.5 px, `currentColor`, **Leiter je Register** (A8): produktiv 12/14/16 px, lesend 16/20/24 px — das Icon folgt der Schriftstufe, nie umgekehrt. **Nur funktional, nie ohne Wort**. Keine Emoji, keine Unicode-Icons (✓ ✗ ⚠ ●), keine farbigen/gefüllten/animierten Icons (Ausnahme Füllung im Status-Badge). |

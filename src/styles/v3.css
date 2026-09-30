@@ -111,6 +111,9 @@
   padding: var(--v2-row-y, 12px) 18px;
   align-items: center;
 }
+/* Rows align at the top (owner 2026-10-01, set standard): where one cell wraps,
+   the others stay on its first line instead of sliding to the middle. */
+.v2tbl__row { align-items: start; }
 
 .v2tbl__head {
   padding: var(--v2-head-y, 9px) 18px;
@@ -4756,9 +4759,13 @@ a.v3bbr__val:hover { text-decoration-color: currentColor; }
 /* 0164 · proposals to review */
 .v3prop__who { display: grid; min-width: 0; }
 .v3prop__name { display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 3; line-clamp: 3; overflow: hidden; overflow-wrap: anywhere; }
-.v3prop__accs { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-/* With names the cell wraps instead of cutting (step 3, owner acceptance 2026-09-21). */
-.v3prop__accs--wrap { white-space: normal; overflow-wrap: anywhere; }
+/* The main account's name wraps (owner 2026-10-01) — at a syllable, and only
+   in long words: „Verbind-lichkeiten", not „Bü-robedarf". Three lines like the
+   counterparty; the title carries the rest. */
+.v3prop__acc {
+  min-width: 0; hyphens: auto; hyphenate-limit-chars: 12 5 5; overflow-wrap: break-word;
+  display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 3; line-clamp: 3; overflow: hidden;
+}
 .v3prop__reasons { display: grid; min-width: 0; color: var(--color-text-muted); }
 /* T2: the counterparty under the booking text (hint ll-dev 11) — the text cell becomes two lines. */
 .v2ae__text:has(.v2ae__who) { flex-wrap: wrap; row-gap: 0; }
