@@ -105,12 +105,12 @@ const Q_BASE = { severity: "required", type: "question", audience: "accounting" 
 
 // Six questions of the batch, four already answered (request ludwig-orga 2026-09-30).
 const QUESTIONS: ClarificationVM[] = [
-  { ...Q_BASE, id: "q1", title: "Team-Essen oder Kundenbewirtung?", state: "open", raisedAt: "2026-09-26T09:12:00+02:00" },
+  { ...Q_BASE, id: "q1", title: "Team-Essen oder Bewirtung?", state: "open", raisedAt: "2026-09-26T09:12:00+02:00" },
   { ...Q_BASE, id: "q2", title: "Software-Abo: Lizenz oder Wartung?", state: "open", severity: "optional", raisedAt: "2026-09-26T09:14:00+02:00" },
   { ...Q_BASE, id: "q3", title: "Tankbeleg doppelt?", state: "answered", raisedAt: "2026-09-25T16:40:00+02:00", answeredAt: "2026-09-26T08:05:00+02:00" },
   { ...Q_BASE, id: "q4", title: "Parkgebühr: Reise oder Kfz?", state: "answered", raisedAt: "2026-09-25T16:42:00+02:00", answeredAt: "2026-09-26T08:07:00+02:00" },
   { ...Q_BASE, id: "q5", title: "Monitor: GWG oder Büromaterial?", state: "answered", raisedAt: "2026-09-24T11:20:00+02:00", answeredAt: "2026-09-25T09:30:00+02:00" },
-  { ...Q_BASE, id: "q6", title: "Bahnticket: Unternehmer oder Mitarbeiter?", state: "answered", raisedAt: "2026-09-24T11:22:00+02:00", answeredAt: "2026-09-25T09:31:00+02:00" },
+  { ...Q_BASE, id: "q6", title: "Bahnticket: wer ist gereist?", state: "answered", raisedAt: "2026-09-24T11:22:00+02:00", answeredAt: "2026-09-25T09:31:00+02:00" },
 ];
 
 const OPTION_CUSTOMER = "Kundenbewirtung: 70 % abzugsfähig (4650), 30 % nicht abzugsfähig (4654)";
@@ -151,7 +151,7 @@ export const Questions: Story = {
         sentence="Die Fragen von Ludwig beantworten, damit er die betroffenen Sachverhalte fertig buchen kann."
         next="Weiter zu den Buchungsvorschlägen"
       />
-      <div style={{ display: "grid", gridTemplateColumns: "400px minmax(0, 1fr)", gap: "var(--space-4)", alignItems: "start" }}>
+      <div style={{ display: "grid", gridTemplateColumns: "416px minmax(0, 1fr)", gap: "var(--space-4)", alignItems: "start" }}>
         <Card>
           <CardHead title="Fragen an die Kanzlei" meta={<span className="v2muted">6</span>} />
           <div>
@@ -166,7 +166,6 @@ export const Questions: Story = {
               clarification={{ ...QUESTIONS[0]!, ...DETAIL }}
               mode="answer"
               caseLink={{ label: "Sachverhalt 2026-0142 · Trattoria Da Enzo", href: "#case=2026-0142" }}
-              submitLabel="Antwort speichern und zurück an Ludwig"
               onAnswer={async () => {}}
               onResolve={async () => {}}
               onDefer={async () => {}}
