@@ -196,7 +196,8 @@ function ChecklistLine({
         {row.jump ? (
           <>
             <ActionIcon action="forward" size={12} />
-            {row.jump}
+            {/* Its own box, so the ellipsis works inside the flex line (0215, H1). */}
+            <span className="v2chk__jumptext">{row.jump}</span>
           </>
         ) : (
           ""

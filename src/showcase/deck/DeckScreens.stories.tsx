@@ -133,7 +133,7 @@ export const Questions: Story = {
         step={2}
         title="Rückfragen"
         sentence="Die Fragen von Ludwig beantworten, damit er die betroffenen Sachverhalte fertig buchen kann."
-        next="Weiter zu Schritt 3"
+        next="Weiter zu den Buchungsvorschlägen"
       />
       <div style={{ display: "grid", gridTemplateColumns: "400px minmax(0, 1fr)", gap: "var(--space-4)", alignItems: "start" }}>
         <Card>

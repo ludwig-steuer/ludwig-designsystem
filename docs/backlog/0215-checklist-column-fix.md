@@ -53,3 +53,9 @@ und die breitere Spalte kürzt kein Label und erzeugt in keiner der sieben
 Checklist-Stories einen Querscroll, weder bei 1280 noch bei 1440 px. Die
 Deck-Seite ist vorführbar; M1 ist ein Ein-Wort-Fix und blockiert die
 Abnahme nicht.
+
+## Nachbesserung 2026-09-30
+
+- **M1:** Der Primärbutton der Deck-Seite nennt den nächsten Schritt: „Weiter zu den Buchungsvorschlägen".
+- **H1:** Der Sprungtext steht in einer eigenen Box (`.v2chk__jumptext`) mit Ellipse; Pfeil fest, Zelle `max-width: 100%` — ein langer Sprung wird mit „…" gekürzt statt über den Kartenrand zu laufen.
+- **H2** (relative Zeit ohne absolute in `ClarificationRow`) bleibt als Befund am Baustein: die Zeile zeigt das Alter, die genaue Zeit steht im Tooltip (Entscheid T7 der Zeile). Ob das der Regel „relative Zeit nur neben der absoluten" genügt, ist offen.
