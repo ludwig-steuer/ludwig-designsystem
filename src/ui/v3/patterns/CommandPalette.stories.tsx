@@ -1,7 +1,9 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { BookOpen, Building2, FileText, Landmark, Search } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { formatAmount, formatTime } from "../format";
 import { AppShell, TopBar } from "../primitives/AppShell";
+import { Button } from "../primitives/Button";
 import { CommandPalette, type CommandGroup } from "./CommandPalette";
 import { Input, InputGroup } from "../primitives/Form";
 import { Kbd } from "../primitives/Kbd";
@@ -227,5 +229,151 @@ export const Edge: Story = {
       })),
     };
     return <CommandPalette open={open} onOpenChange={setOpen} groups={[many]} />;
+  },
+};
+
+/** What the fake server knows — two documents share a name, as in real life. */
+const CLIENTS = [
+  { id: "client-1", label: "Musterbau GmbH", hint: "Mandant 10042 · Wirtschaftsjahr 2026" },
+  { id: "client-2", label: "Müller & Söhne Sanitär- und Heizungstechnik KG", hint: "Mandant 10077 · Wirtschaftsjahr 2025/26" },
+];
+const DOCUMENTS = [
+  { id: "doc-4471", label: "Rechnung Musterfirma GmbH", number: "RE-2026-4471", amount: -240.4, date: "2026-08-21" },
+  { id: "doc-4502", label: "Rechnung Musterfirma GmbH", number: "RE-2026-4502", amount: -1834.12, date: "2026-09-03" },
+  { id: "doc-0917", label: "Kassenbeleg Tankstelle Aral", number: "0917", amount: -86.5, date: "2026-09-12" },
+];
+
+/** A stand-in for the server: the app reads the prefixes, not the palette. */
+function search(query: string, onDrawer: (what: string) => void): CommandGroup[] {
+  const [, prefix, rest = ""] = /^(?:([mbj]):)?\s*(.*)$/.exec(query) ?? [];
+  const word = rest.toLowerCase();
+  const documents: CommandGroup = {
+    title: "Belege",
+    items: DOCUMENTS.filter((d) => `${d.label} ${d.number}`.toLowerCase().includes(word)).map((d) => ({
+      id: d.id,
+      label: d.label,
+      hint: `${d.number} · ${formatAmount(d.amount, "EUR")} · ${formatTime(d.date, "date")}`,
+      href: `#${d.id}`,
+      secondary: { label: "Im Drawer öffnen", onSelect: () => onDrawer(`${d.label} (${d.number})`) },
+    })),
+  };
+  const clients: CommandGroup = {
+    title: "Mandanten",
+    items: CLIENTS.filter((c) => c.label.toLowerCase().includes(word)).map((c) => ({ ...c, href: `#${c.id}` })),
+  };
+  if (prefix === "b") return [documents];
+  if (prefix === "m") return [clients];
+  if (prefix === "j") {
+    return [
+      {
+        title: "Wirtschaftsjahr",
+        items: ["2026", "2025"].map((y) => ({ id: `year-${y}`, label: `Wirtschaftsjahr ${y}`, href: `#year-${y}` })),
+      },
+    ];
+  }
+  return [clients, documents].filter((g) => g.items.length > 0);
+}
+
+/**
+ * Treffer vom Server (0216): `filter="none"`, die Eingabe hält der Aufrufer.
+ * Leer stehen die Präfixe — Enter setzt „m: " ins Feld und die Palette bleibt
+ * offen (`keepOpen`). „b: 4471" findet den Beleg über seine Nummer, die nicht
+ * im Label steht, und die zwei gleichnamigen Rechnungen sind zwei Einträge.
+ * Enter öffnet die Seite, Shift+Enter (oder der Hinweis rechts) den Drawer,
+ * ⌘↵ einen neuen Tab. Das Ergebnis steht unter der Palette.
+ */
+export const ServerHits: Story = {
+  render: function Render() {
+    const [open, setOpen] = useState(true);
+    const [query, setQuery] = useState("");
+    const [hits, setHits] = useState<CommandGroup[]>([]);
+    const [loading, setLoading] = useState(false);
+    const [last, setLast] = useState<string | null>(null);
+
+    useEffect(() => {
+      const onHash = () => setLast(`Seite: ${window.location.hash}`);
+      window.addEventListener("hashchange", onHash);
+      return () => window.removeEventListener("hashchange", onHash);
+    }, []);
+    useEffect(() => {
+      if (!query.trim()) return;
+      setLoading(true);
+      const timer = setTimeout(() => {
+        setHits(search(query, (what) => setLast(`Drawer: ${what}`)));
+        setLoading(false);
+      }, 300);
+      return () => clearTimeout(timer);
+    }, [query]);
+
+    const prefixes: CommandGroup = {
+      title: "Suchen in",
+      items: [
+        { id: "prefix-m", label: "Mandanten", hint: "m: vor dem Namen", key: "m:", keepOpen: true, onSelect: () => setQuery("m: ") },
+        { id: "prefix-b", label: "Belegen", hint: "b: vor Nummer oder Aussteller", key: "b:", keepOpen: true, onSelect: () => setQuery("b: ") },
+        { id: "prefix-j", label: "Wirtschaftsjahren", hint: "j: vor dem Jahr", key: "j:", keepOpen: true, onSelect: () => setQuery("j: ") },
+      ],
+    };
+    const empty = !query.trim();
+    return (
+      <div className="v2stack" style={{ maxWidth: 520 }}>
+        <Button size="sm" onClick={() => setOpen(true)}>
+          Palette öffnen
+        </Button>
+        <div className="lw-body-sm">{last ?? "Noch nichts geöffnet."}</div>
+        <CommandPalette
+          open={open}
+          onOpenChange={setOpen}
+          filter="none"
+          query={query}
+          onQueryChange={setQuery}
+          loading={!empty && loading}
+          groups={empty ? [prefixes] : hits}
+          placeholder="Name, Nummer oder m: b: j:"
+          emptyText={`Kein Treffer für „${query.trim()}" — kürzer suchen oder ein Präfix wählen.`}
+        />
+      </div>
+    );
+  },
+};
+
+/**
+ * Lädt: die Treffer der vorigen Eingabe bleiben stehen, darunter „Suche läuft
+ * …" — kein „Kein Treffer" zugleich, und nichts rückt nach unten.
+ */
+export const Loading: Story = {
+  render: function Render() {
+    const [open, setOpen] = useState(true);
+    return (
+      <CommandPalette
+        open={open}
+        onOpenChange={setOpen}
+        filter="none"
+        query="b: Musterfirma"
+        onQueryChange={() => {}}
+        loading
+        groups={search("b: Musterfirma", () => {})}
+      />
+    );
+  },
+};
+
+/** Fehler: das Was fett, die Ursache, der nächste Schritt — und der Knopf dazu. */
+export const Error: Story = {
+  render: function Render() {
+    const [open, setOpen] = useState(true);
+    return (
+      <CommandPalette
+        open={open}
+        onOpenChange={setOpen}
+        filter="none"
+        query="b: 4471"
+        onQueryChange={() => {}}
+        groups={[]}
+        error={{
+          message: "Die Suche ist fehlgeschlagen. Der Server antwortet nicht. Suchen Sie erneut.",
+          retry: <Button size="sm">Erneut suchen</Button>,
+        }}
+      />
+    );
   },
 };

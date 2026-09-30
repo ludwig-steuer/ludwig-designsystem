@@ -1610,10 +1610,15 @@ a.v3jump__hit:focus-visible { outline: 2px solid var(--color-focus); outline-off
 .v2cmd__item:hover { background: var(--color-bg-soft); }
 .v2cmd__jump {
   display: flex; align-items: center; gap: var(--space-2);
-  width: 100%; color: inherit; text-decoration: none;
+  flex: 1 1 auto; min-width: 0; color: inherit; text-decoration: none;
 }
 .v2cmd__label { display: flex; flex-direction: column; flex: 1 1 auto; min-width: 0; }
 .v2cmd__hint { font-size: var(--fs-ui-sm); color: var(--color-text-subtle); }
+/* The second way (0216): only on the selected line, but every line keeps its
+   room — `visibility`, not `display`, so no label rewraps while wandering.
+   24 px: the hit area of 2.5.8. */
+.v2cmd__alt { flex: none; min-height: 24px; font-size: var(--fs-ui-sm); visibility: hidden; }
+.v2cmd__item[data-selected="true"] .v2cmd__alt { visibility: visible; }
 
 /* --- Popover family (0038): Popover, Tooltip, HoverCard -----------------
    No z-order needed — the panel lives in the browser's top layer. `inset: auto`

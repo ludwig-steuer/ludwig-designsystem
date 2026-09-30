@@ -28,6 +28,7 @@ import { ActionIcon } from "../../Icons";
 import { StatusBadge } from "../../patterns/StatusBadge";
 import { resolveStatus } from "@/ludwig/ui/status/status-registry";
 import { ChoicePrompt, type ChoiceAnswer } from "../../patterns/ChoicePrompt";
+import { BankTransactionPurpose } from "../bank-transaction/BankTransactionPurpose";
 import { AUDIENCE_LABEL, type ClarificationVM } from "./Clarification";
 
 /**
@@ -135,8 +136,10 @@ export interface EvidencePayment extends EvidenceRow {
   date: string;
   amount: number;
   currency: Currency;
-  /** Counterparty or purpose — what the statement line says. */
-  text: string | null;
+  /** The counterparty's name as the statement line carries it. */
+  counterparty: string | null;
+  /** The raw purpose (0214, owner 2026-10-01): its own column, read through BankTransactionPurpose. */
+  purpose: string | null;
   paymentAccount: string | null;
 }
 export interface EvidenceEntry extends EvidenceRow {
@@ -391,7 +394,7 @@ function Evidence({ e, select }: { e: ClarificationEvidence; select: Select }) {
         ) : null}
         {pays.length ? (
           <Disclosure summary="Zahlungen" count={pays.length}>
-            <EvidenceTable cols="88px 112px minmax(0, 1.4fr) minmax(0, 1fr)" head={["Datum", "Betrag", "Gegenpartei / Zweck", "Zahlungskonto"]}>
+            <EvidenceTable cols="88px 112px minmax(0, 1fr) minmax(0, 1.4fr) minmax(0, 0.8fr)" head={["Datum", "Betrag", "Gegenpartei", "Verwendungszweck", "Zahlungskonto"]}>
               {pays.map((p) => (
                 <Row key={p.id}>
                   <Pick kind="payment" row={p} select={select}>
@@ -400,8 +403,9 @@ function Evidence({ e, select }: { e: ClarificationEvidence; select: Select }) {
                   <span className="v2num">
                     <AmountCell value={p.amount} currency={p.currency} />
                   </span>
-                  <span className="v2trunc" title={p.text ?? undefined}>{p.text ?? "—"}</span>
-                  <span className="v2trunc">{p.paymentAccount ?? "—"}</span>
+                  <span className="v2trunc" title={p.counterparty ?? undefined}>{p.counterparty ?? "—"}</span>
+                  <BankTransactionPurpose purpose={p.purpose} />
+                  <span className="v2trunc" title={p.paymentAccount ?? undefined}>{p.paymentAccount ?? "—"}</span>
                 </Row>
               ))}
             </EvidenceTable>

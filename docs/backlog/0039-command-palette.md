@@ -63,7 +63,8 @@ type CommandItem = {
 Keine Typen aus `src/ludwig/`: das Pattern kennt keine Route und keine
 Entität. Der Aufrufer bildet `NavSection[]` aus `NavList` auf Gruppen ab.
 
-**Kann bewusst nicht:** serverseitig suchen (die Liste kommt vollständig),
+**Kann bewusst nicht:** serverseitig suchen (die Liste kommt vollständig —
+Nachtrag 2026-10-01: seit 0216 mit `filter="none"`, `query`, `loading`, `error`),
 sich zuletzt Gewähltes merken, verschachtelte Seiten („zurück" innerhalb der
 Palette), Einträge selbst ausführen, die eine Bestätigung brauchen (das ist
 `ActionButton` mit `ConfirmSpec`).

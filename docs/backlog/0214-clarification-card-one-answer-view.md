@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Status | Abnahme — gebaut 2026-09-29; fremde Abnahme steht aus |
+| Status | fertig (abgenommen 2026-09-29, Nachprüfung 3) · Nachtrag 2026-10-01 (Zahlungen: Verwendungszweck) in Abnahme |
 | Stufe | erweitert `entities/clarification/ClarificationCard.tsx` · `patterns/ChoicePrompt` (Überschrift der Optionen, Zeilen-Optionen, Frage ausblendbar) · `primitives/RadioGroup` (`variant: "rows"`) |
 | Klassen-Test | Karte: nein (Klärung). RadioGroup-Zeilen, ChoicePrompt-Fußzeile: ja |
 | Quelle | Owner-Feedback 2026-09-29 über ll-dev4: Stapelabnahme Schritt 2 (`KlaerungDetail`) und Sachverhalt (`ClarificationCard`) sehen verschieden aus; die Struktur der Abnahme ist die Basis, die Teile der Karte kommen dazu |
@@ -23,7 +23,8 @@
 6. Inhalt **tabellarisch**, Beträge rechts mit `tnum`:
    Belege: Datum · Aussteller · Beleg-Nr. · Betrag — Konten: Nummer · Name
    (numerisch sortiert, von der App) — Zahlungen: Datum · Betrag ·
-   Gegenpartei/Zweck · Zahlungskonto — Buchungen: Datum · Soll · Haben · Betrag
+   Gegenpartei · Verwendungszweck · Zahlungskonto (Nachtrag 2026-10-01) —
+   Buchungen: Datum · Soll · Haben · Betrag
    · BU · Stand. Ein Klick auf eine Zeile ruft **`onSelect`** und navigiert
    nicht (die Antwort bleibt halb getippt, der Aufrufer öffnet einen Drawer);
    ohne `onSelect` bleibt `href`.
@@ -46,7 +47,7 @@
 | Prop / Feld | Typ |
 |---|---|
 | `caseLink` | `{ label: string; href: string }` |
-| `evidence` | `{ documents?, accounts?, payments?, entries?, other? }` — Zeilen mit `id`, `cited?`, und je Art: Beleg `{ date, issuer, number, amount, currency }`, Konto `{ number, name }`, Zahlung `{ date, amount, currency, text, paymentAccount }`, Buchung `{ date, debit, credit, amount, currency, taxKey?, state? }`, weitere `ClarificationSource` |
+| `evidence` | `{ documents?, accounts?, payments?, entries?, other? }` — Zeilen mit `id`, `cited?`, und je Art: Beleg `{ date, issuer, number, amount, currency }`, Konto `{ number, name }`, Zahlung `{ date, amount, currency, counterparty, purpose, paymentAccount }` (Nachtrag 2026-10-01), Buchung `{ date, debit, credit, amount, currency, taxKey?, state? }`, weitere `ClarificationSource` |
 | `onSelect` | `(item: { kind: "document" \| "account" \| "payment" \| "entry" \| "other"; id: string }) => void` |
 | `submitLabel` | `string` — Standard „Antwort speichern" |
 | `onUndefer` | `() => Promise<void>` |
@@ -238,3 +239,43 @@ Fixture `ITEMS` liegt jetzt in `clarification/thread-fixtures.ts`, die
 Story-„ITEMS" ist aus dem Storybook-Index verschwunden, und
 `ClarificationCard/InBatchReview` zeigt den Verlauf weiter unverändert
 („Verlauf" mit Anzahl 5, aus derselben Fixture importiert).
+
+## Nachtrag 2026-10-01 — Zahlungen: Verwendungszweck als eigene Spalte
+
+Auftrag llcto 2026-10-01 (Owner-Wunsch: der Überweisungsbetreff als eigene
+Spalte — FTC, Gehaltszahlungen mit „Lohn – Aktueller Monat …"). Die App füllte
+`text` bisher mit „Gegenpartei · Zweck" in einem String
+(`case-detail-ds-mapping.ts`, mit `ponytail:` markiert).
+
+- **`EvidencePayment.text` → `counterparty`**, neu **`purpose: string | null`**.
+  Umbenannt statt weitergeführt: ein Feld namens `text`, das nur noch die
+  Gegenpartei trägt, wäre ein zweites Wort für dieselbe Sache. Die App stellt
+  die eine Zeile im Mapping ohnehin um (`counterparty: p.counterpartyName`,
+  `purpose: p.purpose`).
+- **Spalten:** Datum 88 · Betrag 112 · Gegenpartei `minmax(0, 1fr)` ·
+  Verwendungszweck `minmax(0, 1.4fr)` · Zahlungskonto `minmax(0, 0.8fr)` —
+  der Zweck ist der längste Text und bekommt den meisten Platz.
+- **Zelle Verwendungszweck = `BankTransactionPurpose` (inline)**, wie in der
+  Bankliste (`bank-transaction-columns.tsx`): SEPA-Kürzel (`EREF+`, `SVWZ+` …)
+  werden lesbar, die Referenzen stehen hinter dem (i), `null` wird „—".
+  Gleiches sieht gleich aus. Ohne `sepaTags` zerlegt die Zelle den Rohwert
+  selbst (der Weg für Altzeilen) — ein Feld für die Tags kommt, wenn die App
+  sie im Kontext hat.
+- **Zahlungskonto** trägt jetzt `title` wie die übrigen gekürzten Zellen.
+- Story `InBatchReview`: zwei Zahlungen — eine mit SEPA-Kürzeln, eine
+  Gehaltszahlung mit langem Namen und dem Betreff „Lohn – Aktueller Monat …".
+
+Gemessen (Storybook `--in-batch-review`, Karte 744 px, Playwright): Kopf und
+Zeilen stehen auf denselben x-Positionen (42 · 140 · 262 · 418 · 633), keine
+Zelle ragt über ihre Spur, lange Werte enden in der Ellipse, das (i) steht in
+der Zeile, beide Zeilen gleich hoch (Zelle 24 px, Unterschied 1 px ist die
+Trennlinie).
+
+Status: **Abnahme** (Nachtrag). Kriterien für die fremde Abnahme:
+
+- [ ] Kopf „Gegenpartei" und „Verwendungszweck" als zwei Spalten, „Gegenpartei / Zweck" kommt nicht mehr vor (`grep`)
+- [ ] `EvidencePayment` führt `counterparty` und `purpose`, kein `text` (Code, Spec-Zeile Schnittstelle)
+- [ ] Zweck-Zelle ist `BankTransactionPurpose`: „SVWZ+…" erscheint als Freitext, EREF hinter dem (i) (`--in-batch-review`)
+- [ ] Spalten fluchten bei 1280 px Innenbreite, keine Zelle überläuft (`--in-batch-review`, gemessen)
+- [ ] `pnpm typecheck`, `pnpm build`, `pnpm check:type` grün
+

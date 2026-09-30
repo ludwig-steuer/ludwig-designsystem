@@ -63,7 +63,10 @@ const EVIDENCE: ClarificationDetailVM["evidence"] = {
     { id: "4650", number: "4650", name: "Bewirtungskosten" },
     { id: "4670", cited: true, number: "4670", name: "Reisekosten Arbeitnehmer" },
   ],
-  payments: [{ id: "bt-1", date: "2026-08-23", amount: -240.4, currency: "EUR", text: "Musterfirma GmbH RE-2026-4471", paymentAccount: "Sparkasse Musterstadt" }],
+  payments: [
+    { id: "bt-1", date: "2026-08-23", amount: -240.4, currency: "EUR", counterparty: "Musterfirma GmbH", purpose: "EREF+RE-2026-4471 SVWZ+RE-2026-4471 Bewirtung 21.08.2026", paymentAccount: "Sparkasse Musterstadt" },
+    { id: "bt-2", date: "2026-08-29", amount: -2840.12, currency: "EUR", counterparty: "Katharina Oberländer-Wittmann", purpose: "Lohn – Aktueller Monat August 2026 Personalnummer 0042", paymentAccount: "Sparkasse Musterstadt" },
+  ],
   entries: [
     { id: "je-1", date: "2026-08-21", debit: "4670", credit: "70021", amount: 240.4, currency: "EUR", taxKey: "9", state: "proposed" },
     { id: "je-2", date: "2026-07-18", debit: "4650", credit: "70021", amount: 118.2, currency: "EUR", taxKey: "9", state: "posted" },
