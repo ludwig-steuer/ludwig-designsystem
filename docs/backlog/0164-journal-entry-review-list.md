@@ -38,7 +38,7 @@ Aus dem Entitätsprofil, damit die Spec es nicht neu erheben muss:
 
 | Ausprägung | Spalten |
 |---|---|
-| `full` | Nr. · Datum · Gegenpartei (+ „erstmals") · Soll · Kontoname · Haben · Kontoname (Nachtrag 2026-10-01: Hauptkonto, „+n weitere"; ohne Namen mit `accountNames: false`) · Betrag · BU · Prüfung durch Ludwig · Satzart (nicht in Gruppen nach Satzart) · Prüfbedarf („entschieden") |
+| `full` | Datum · Gegenpartei (+ „erstmals") · Soll · Kontoname · Haben · Kontoname (Nachtrag 2026-10-01: Hauptkonto, „+n weitere"; ohne Namen mit `accountNames: false`) · Betrag · BU · Prüfung durch Ludwig · Satzart (nicht in Gruppen nach Satzart) · Prüfbedarf („entschieden"). „Nr." und „Beleg" nur über `include` |
 | `compact` | Datum · Gegenpartei · Konten („4930 an 70021") · Betrag · Prüfung durch Ludwig |
 
 Rahmen: `expand` (Aufklapper der App: Satz, Begründung, Aktionen) · `rowActions`
@@ -221,6 +221,11 @@ unruhig.
 5. **Platz dafür** (gemessener Inhalt in Klammern): Datum 84 → 76 (72),
    BU 40 → 32 (23), Prüfung durch Ludwig 112 → 96 (90). Gegenpartei bleibt
    `minmax(120px, 1.4fr)` (F340: „Deutsche Telekom Geschäftskunden GmbH" ganz).
+   **„Nr." ist kein Standard mehr (Owner 2026-10-01: „bringt nichts, braucht
+   Platz, Datum reicht")** — `number` steht in `OPTIONAL` neben `document` und
+   kommt über `include: ["number"]` zurück. Das Feld `ProposalRow.number`
+   bleibt. Das `aria-label` der Auswahl nennt jetzt Datum · Gegenpartei statt
+   der Nummer, die niemand mehr sieht.
 6. **Setweit:** Tabellenzeilen oben ausgerichtet (`.v2tbl__row { align-items:
    start }`, Kopf bleibt mittig) — Owner-Standard, in
    `design-guidelines.md` §Tabelle mit Datum.
@@ -231,16 +236,16 @@ unruhig.
 
 | Story | Messung |
 |---|---|
-| `Grouped` | 1246 = 1246, kein Querscroll. Spuren: Gegenpartei 120, Soll 44, Name 78, Haben 44, Name 78. Kein Gegenparteiname gekürzt, keine Nummer über ihre Spur. Zeilen 64–106 px (vorher 84–88; die höchste trägt zwei Prüfbedarf-Gründe und drei Namenszeilen) |
-| `Flat` (`accountNames={false}`) | 1246 = 1246. Soll/Haben je 85 px: „3100 +2 weitere", „70021 3 Zeilen" (Zeile 11). Zeilen 47–88 px (vorher bis 109) |
+| `Grouped` | 1246 = 1246, kein Querscroll. Spuren ohne „Nr.": Datum 76, Gegenpartei 136, Soll 44, Name 97, Haben 44, Name 97. Kein Gegenparteiname gekürzt, keine Nummer über ihre Spur. Zeilen 64–106 px (vorher 84–88; die höchste trägt zwei Prüfbedarf-Gründe). `aria-label` der Auswahl „16.09.2026 · Allianz Versicherungs-AG" |
+| `Flat` (`accountNames={false}`) | 1246 = 1246. Gegenpartei 142, Soll/Haben je 101 px: „3100 +2 weitere", „70021 3 Zeilen" (11. Zeile). Zeilen 47–88 px (vorher bis 109) |
 | Zeilen oben | Erste Zeile jeder Zelle 12–14 px unter der Zeilenoberkante; Grundlinien einer einzeiligen Zeile in `CaseList --filled` innerhalb 1 px (Text 13,5 · Badge 11,5 · Mono 12,5 px). `BankTransactionList --filled`: die zweizeilige Sachverhaltszelle zieht die anderen nicht mehr in die Mitte |
 
-**Offene Frage an den Owner (Flat):** Mit der Satzart-Spalte passen die
-Namensspalten in der flachen Ansicht bei 1280 px nicht — 1328 zu 1246 px, die
-Aktionen (Freigeben) rutschen aus dem Bild. *Ohne Antwort gilt:* flach ohne
-Namensspalten (`accountNames={false}`, Namen im `title` und im Aufklapper),
-gruppiert mit. Alternativen: (b) flach ohne Satzart-Spalte, (c) flach mit
-Querscroll.
+**Owner-Entscheid 2026-10-01 (flache Ansicht):** Mit der Satzart-Spalte
+passten die Namensspalten flach bei 1280 px nicht (gemessen 1328 zu 1246 px,
+noch mit „Nr."; die Aktionen rutschten aus dem Bild). Entschieden: **flach ohne
+Namensspalten** — die App übergibt dort `accountNames={false}`, die Namen
+stehen im `title` und im Aufklapper; gruppiert mit Namensspalten. Verworfen:
+flach ohne Satzart, flach mit Querscroll.
 
 **Ausbau:** T1 (`journalEntryColumns`, `SideAccounts`) zeigt Soll/Haben noch als
 Liste mit „ / " — gebuchte Sätze haben fast immer ein Konto je Seite; zieht
@@ -254,6 +259,7 @@ Status: **Abnahme** (Nachtrag). Kriterien für die fremde Abnahme:
 - [ ] Nummernspalte 44 px, mono, kein Überlauf; Name bricht um, höchstens drei Zeilen, keine Trennung in Wörtern unter zwölf Zeichen (`Grouped`, gemessen)
 - [ ] `accountNames={false}`: keine Namensspalten, Nummer + „+n weitere" in einer Spalte (`Flat`)
 - [ ] `Grouped` und `Flat` bei 1280 px ohne Querscroll; kein Gegenparteiname gekürzt (gemessen)
+- [ ] Keine Spalte „Nr." im Standard; `include: ["number"]` bringt sie zurück (Code, `OPTIONAL`); `aria-label` der Auswahl = Datum · Gegenpartei (DOM-Probe `Grouped`)
 - [ ] Setweit: `.v2tbl__row` oben ausgerichtet, Kopf mittig; einzeilige Zeilen weiter auf einer Grundlinie (zwei fremde Tabellen-Stories gemessen); Regel in `design-guidelines.md` mit Datum
 - [ ] Spec-Tabelle „Ausprägung" oben und Code stimmen überein; `pnpm typecheck`, `pnpm build`, `pnpm check:type` grün
 

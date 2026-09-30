@@ -2,6 +2,7 @@ import type { ReactNode } from "react";
 
 import type { Currency } from "@/ludwig/shared/money";
 
+import { formatTime } from "../../format";
 import type { ConfidenceLevel } from "../../patterns/Confidence";
 import {
   DataTable,
@@ -85,19 +86,21 @@ export type ProposalColumn =
 
 /**
  * No document column by default (owner 2026-09-21, step 3): the list has to fit
- * a laptop with the sidebar open, and the document stands in the fold-out. The
- * column exists for a frame with room — pass it in `include`.
+ * a laptop with the sidebar open, and the document stands in the fold-out. No
+ * „Nr." either (owner 2026-10-01: it tells the reader nothing, the date is
+ * enough, and Soll and Haben need the room). Both exist for a frame that wants
+ * them — pass them in `include`.
  */
 const FULL: readonly ProposalColumn[] = ["number", "date", "counterparty", "debit", "debitName", "credit", "creditName", "amount", "taxKey", "document", "review", "kind", "reasons"];
 const NAMES: readonly ProposalColumn[] = ["debitName", "creditName"];
 const COMPACT: readonly ProposalColumn[] = ["date", "counterparty", "accounts", "amount", "document", "review"];
-const OPTIONAL: readonly ProposalColumn[] = ["document"];
+const OPTIONAL: readonly ProposalColumn[] = ["number", "document"];
 
 export interface ProposalColumnOptions {
   variant?: "compact" | "full";
   /** Columns that say nothing in this frame — the kind inside a group by kind. */
   without?: readonly ProposalColumn[];
-  /** Optional columns this frame has room for — today only `document`. */
+  /** Optional columns this frame has room for — `number` and `document`. */
   include?: readonly ProposalColumn[];
   /**
    * The account names in their own columns beside Soll and Haben — on by
@@ -367,7 +370,14 @@ export function JournalEntryReviewList(
     ...(options.variant === "compact" ? { minWidth: 0 } : {}),
     ...(rowActions ? { rowActions } : {}),
     ...(bulkActions && bulkActions.length > 0
-      ? { selection: { actions: bulkActions, label: (p: ProposalRow) => `${p.number} · ${p.counterparty ?? p.title}`, sticky: true } }
+      ? {
+          selection: {
+            actions: bulkActions,
+            // What the row shows — the number is no longer a column by default.
+            label: (p: ProposalRow) => `${formatTime(p.date, "date")} · ${p.counterparty ?? p.title}`,
+            sticky: true,
+          },
+        }
       : {}),
     ...(filtered ? { filtered } : {}),
     ...(empty ? { empty } : {}),
