@@ -370,7 +370,7 @@ export const Error: Story = {
         onQueryChange={() => {}}
         groups={[]}
         error={{
-          message: "Die Suche ist fehlgeschlagen. Der Server antwortet nicht. Suchen Sie erneut.",
+          message: "Die Suche ist fehlgeschlagen. Ludwig ist gerade nicht erreichbar. Suchen Sie erneut.",
           retry: <Button size="sm">Erneut suchen</Button>,
         }}
       />

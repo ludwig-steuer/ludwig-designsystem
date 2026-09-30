@@ -50,10 +50,10 @@ Neu an `CommandPalette` (bestehende Props unverändert, siehe 0039):
 
 Neu an `CommandItem`:
 
-| Feld | Typ | Bedeutung | Nachweis (Story) |
-|---|---|---|---|
-| `secondary` | `{ label: string; onSelect: () => void }` | Zweitweg: Shift+Enter, Shift+Klick oder Klick auf den Hinweis „Shift ↵ {label}" rechts in der markierten Zeile; schließt die Palette | `ServerHits` |
-| `keepOpen` | `boolean` | `onSelect` läuft, die Palette bleibt offen (Präfix einsetzen). Wirkt nur ohne `href` | `ServerHits` |
+| Feld | Typ | Pflicht | Bedeutung | Nachweis (Story) |
+|---|---|---|---|---|
+| `secondary` | `{ label: string; onSelect: () => void }` | nein | Zweitweg: Shift+Enter, Shift+Klick oder Klick auf den Hinweis „Shift ↵ {label}" rechts in der markierten Zeile; schließt die Palette | `ServerHits` |
+| `keepOpen` | `boolean` | nein | `onSelect` läuft, die Palette bleibt offen (Präfix einsetzen). Wirkt nur ohne `href` | `ServerHits` |
 
 Keine Typen aus `src/ludwig/`: das Pattern kennt weiter keine Entität und
 keinen Router. Präfixe deutet der Aufrufer.
@@ -133,7 +133,7 @@ Variabel (aus dieser Spec):
 - [ ] `query`/`onQueryChange`: ein `keepOpen`-Eintrag setzt „m: " ins Feld, die Palette bleibt offen, der Fokus bleibt im Feld (`ServerHits`)
 - [ ] `filter="none"`: kein Eintrag wird ausgeblendet, obwohl sein Label den Suchtext nicht enthält; Reihenfolge wie geliefert; zwei gleichnamige Einträge sind einzeln wählbar (`ServerHits`)
 - [ ] `loading`: Ladezeile sichtbar, kein „Kein Treffer" gleichzeitig (`Loading`)
-- [ ] `error`: Fehlerzeile mit fettem Was und Retry, `role="alert"`, kein Leertext (`Loading`)
+- [ ] `error`: Fehlerzeile mit fettem Was und Retry, `role="alert"`, kein Leertext (`Error`)
 - [ ] Shift+Enter und Shift+Klick lösen `secondary` aus, nicht den Sprung; kein neues Browserfenster (`ServerHits`)
 - [ ] Der Hinweis „Shift ↵ {label}" steht nur in der markierten Zeile, ist klickbar (≥ 24 px hoch, Hover), und die Zeilenhöhe ändert sich beim Wandern nicht (`ServerHits`, gemessen)
 - [ ] ⌘↵ / Strg+Enter auf einem `href`-Eintrag öffnet einen neuen Tab, die aktuelle Seite bleibt (`ServerHits`)
@@ -196,7 +196,7 @@ gezählt und danach geschlossen. Bildschirmfotos unter `.playwright-mcp/`:
 | `query`/`onQueryChange`: ein `keepOpen`-Eintrag setzt „m: " ins Feld, die Palette bleibt offen, der Fokus bleibt im Feld (`ServerHits`) | `--server-hits`: Enter auf „Mandanten" → Feldwert `"m: "`, Cursor an Stelle 3, Palette offen, `document.activeElement` = Eingabefeld; danach zwei Mandanten, erster markiert. Gegenprobe: Meta+Enter auf „Belegen" (Handlung ohne `href`) → `"b: "`, offen — wirkt wie Enter | ✓ |
 | `filter="none"`: kein Eintrag wird ausgeblendet, obwohl sein Label den Suchtext nicht enthält; Reihenfolge wie geliefert; zwei gleichnamige Einträge sind einzeln wählbar (`ServerHits`) | „b: 4471" → „Rechnung Musterfirma GmbH" steht (das Label enthält weder „b:" noch „4471"), Live „1 Treffer". „b: Musterfirma" → `data-value` `doc-4471`, `doc-4502` in Lieferreihenfolge, nach dem Eintreffen die erste markiert (der Befund beim Bauen ist behoben). ↓ Enter → „Seite: #doc-4502"; Shift+Enter auf der ersten → „Drawer: Rechnung Musterfirma GmbH (RE-2026-4471)" | ✓ |
 | `loading`: Ladezeile sichtbar, kein „Kein Treffer" gleichzeitig (`Loading`) | `--loading`: zwei Treffer, „Suche läuft …" unterhalb der letzten Zeile, kein `[cmdk-empty]`, Live „Suche läuft …" (`0216-loading.png`). In `--server-hits` beim Tippen von „xyz": die alten Treffer stehen, „Suche läuft …", kein Leertext; nach 300 ms „Kein Treffer für „xyz" — kürzer suchen oder ein Präfix wählen.", Live „0 Treffer" | ✓ |
-| `error`: Fehlerzeile mit fettem Was und Retry, `role="alert"`, kein Leertext (`Loading`) | Geprüft in `--error` (die Spec nennt hier `Loading` → M2): `.v2tbl__error` mit `role="alert"`, Meldung `font-weight` 600, Knopf „Erneut suchen" (30,2 px hoch), kein `[cmdk-empty]`, Live-Region leer, Fokus im Feld (`0216-error.png`) | ✓ (M2, H1) |
+| `error`: Fehlerzeile mit fettem Was und Retry, `role="alert"`, kein Leertext (`Error`) | Geprüft in `--error` (die Spec nennt hier `Loading` → M2): `.v2tbl__error` mit `role="alert"`, Meldung `font-weight` 600, Knopf „Erneut suchen" (30,2 px hoch), kein `[cmdk-empty]`, Live-Region leer, Fokus im Feld (`0216-error.png`) | ✓ (M2, H1) |
 | Shift+Enter und Shift+Klick lösen `secondary` aus, nicht den Sprung; kein neues Browserfenster (`ServerHits`) | Shift+Enter → „Drawer: … (RE-2026-4471)", Adresse bleibt `#doc-4502`, Palette zu, eine Seite im Kontext. Shift+Klick auf den Link der zweiten Zeile → „Drawer: … (RE-2026-4502)", Adresse unverändert, **kein** neues Fenster (weiter eine Seite). Gegenprobe: Shift+Enter auf einem Mandanten (ohne `secondary`) → wie Enter, `#client-1` | ✓ |
 | Der Hinweis „Shift ↵ {label}" steht nur in der markierten Zeile, ist klickbar (≥ 24 px hoch, Hover), und die Zeilenhöhe ändert sich beim Wandern nicht (`ServerHits`, gemessen) | `.v2cmd__alt` 164,7 × 24 px, x 729,3 in beiden Zeilen; `visibility` `visible` nur in der markierten Zeile, `hidden` in der anderen; ↓ und ↑ tauschen das. Zeilenhöhe vor, während und nach dem Wandern 52,297 px in beiden Zeilen. `elementFromPoint` in der Mitte trifft den Knopf. Hover: `text-decoration` none → underline, Cursor `pointer`. Klick nach Hover → „Drawer: … (RE-2026-4502)", Adresse unverändert, Palette zu | ✓ (M1) |
 | ⌘↵ / Strg+Enter auf einem `href`-Eintrag öffnet einen neuen Tab, die aktuelle Seite bleibt (`ServerHits`) | Meta+Enter auf `doc-4471` → zweite Seite `#doc-4471`, die eigene bleibt `#doc-4502`, Palette offen, Fokus im Feld. Control+Enter auf `doc-4502` → zweite Seite `#doc-4502`, Palette offen. ⌘+Klick auf den Link → eine neue Seite, Palette offen (Fokus dann am Link → H3). Neue Seiten danach geschlossen | ✓ |
@@ -294,3 +294,15 @@ Abgenommen von / am: Claude (Abnahme-Agent), 2026-10-01 · Offene Punkte:
 M1 (Unterstreichung in der Tastenkappe), M2 (Spec: Nachweis-Story beim
 Kriterium `error`, Spalte „Pflicht" an `CommandItem`); vorbestehend M3
 (`aria-activedescendant`, cmdk), M4 (Gruppe „Frame" statt „Rahmen").
+
+## Nacharbeit 2026-10-01 (nach der fremden Abnahme)
+
+| Punkt | Änderung | Stand |
+|---|---|---|
+| M1 Unterstreichung läuft durch die Tastenkappe | `v3.css` `.v2cmd__alt`: beim Hover trägt nur das Label die Linie (`> span`), die Kappe bleibt glatt | behoben |
+| M2 Spec | Kriterium `error` nennt die Story `Error`; Tabelle „Neu an `CommandItem`" mit Spalte „Pflicht" | behoben |
+| H1 Systemwort in der Beispielmeldung | Story `Error`: „Ludwig ist gerade nicht erreichbar" statt „Der Server antwortet nicht" | behoben |
+| M3 `aria-activedescendant` erst nach dem ersten Pfeil | **Benannte Ausnahme** (Owner: designsystem, 2026-10-01): Verhalten von `cmdk` 1.1.1, vorbestehend seit 0039. Die Live-Region sagt die Trefferzahl an, der erste Pfeil liest die Zeile vor. Nicht nach 0119 (dort liegt die vertagte *visuelle* Prüfung); aufheben, wenn `cmdk` es beim Öffnen setzt oder eine Palette-Aufgabe ohnehin an die Auswahl geht | benannt |
+| M4 Storybook-Gruppe „Frame" statt „Rahmen" | vorbestehend für drei Familien — Systementscheid, eigener Auftrag | offen |
+| H3 Fokus nach ⌘+Klick am Link | bleibt: Pfeile und Enter wirken weiter (sie hängen an der Palette, nicht am Feld); nur Tippen ginge ins Leere | offen, Beobachtung |
+

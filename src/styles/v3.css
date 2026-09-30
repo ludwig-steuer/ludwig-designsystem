@@ -1619,6 +1619,10 @@ a.v3jump__hit:focus-visible { outline: 2px solid var(--color-focus); outline-off
    24 px: the hit area of 2.5.8. */
 .v2cmd__alt { flex: none; min-height: 24px; font-size: var(--fs-ui-sm); visibility: hidden; }
 .v2cmd__item[data-selected="true"] .v2cmd__alt { visibility: visible; }
+/* The line under the label only — through the key cap it would read as a link
+   inside the key (acceptance 0216, M1). */
+.v2cmd__alt:hover:not(:disabled) { text-decoration: none; }
+.v2cmd__alt:hover:not(:disabled) > span { text-decoration: underline; }
 
 /* --- Popover family (0038): Popover, Tooltip, HoverCard -----------------
    No z-order needed — the panel lives in the browser's top layer. `inset: auto`
