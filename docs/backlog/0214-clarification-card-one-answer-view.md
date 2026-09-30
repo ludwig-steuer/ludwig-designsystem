@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Status | fertig (abgenommen 2026-09-29, Nachprüfung 3) · Nachtrag 2026-10-01 (Zahlungen: Verwendungszweck) in Abnahme |
+| Status | fertig (abgenommen 2026-09-29, Nachprüfung 3) · Nachtrag 2026-10-01 (Zahlungen: Verwendungszweck) abgenommen 2026-10-01 (fremde Abnahme, ohne Mangel) |
 | Stufe | erweitert `entities/clarification/ClarificationCard.tsx` · `patterns/ChoicePrompt` (Überschrift der Optionen, Zeilen-Optionen, Frage ausblendbar) · `primitives/RadioGroup` (`variant: "rows"`) |
 | Klassen-Test | Karte: nein (Klärung). RadioGroup-Zeilen, ChoicePrompt-Fußzeile: ja |
 | Quelle | Owner-Feedback 2026-09-29 über ll-dev4: Stapelabnahme Schritt 2 (`KlaerungDetail`) und Sachverhalt (`ClarificationCard`) sehen verschieden aus; die Struktur der Abnahme ist die Basis, die Teile der Karte kommen dazu |
@@ -273,9 +273,55 @@ Trennlinie).
 
 Status: **Abnahme** (Nachtrag). Kriterien für die fremde Abnahme:
 
-- [ ] Kopf „Gegenpartei" und „Verwendungszweck" als zwei Spalten, „Gegenpartei / Zweck" kommt nicht mehr vor (`grep`)
-- [ ] `EvidencePayment` führt `counterparty` und `purpose`, kein `text` (Code, Spec-Zeile Schnittstelle)
-- [ ] Zweck-Zelle ist `BankTransactionPurpose`: „SVWZ+…" erscheint als Freitext, EREF hinter dem (i) (`--in-batch-review`)
-- [ ] Spalten fluchten bei 1280 px Innenbreite, keine Zelle überläuft (`--in-batch-review`, gemessen)
-- [ ] `pnpm typecheck`, `pnpm build`, `pnpm check:type` grün
+- [x] Kopf „Gegenpartei" und „Verwendungszweck" als zwei Spalten, „Gegenpartei / Zweck" kommt nicht mehr vor (`grep`)
+- [x] `EvidencePayment` führt `counterparty` und `purpose`, kein `text` (Code, Spec-Zeile Schnittstelle)
+- [x] Zweck-Zelle ist `BankTransactionPurpose`: „SVWZ+…" erscheint als Freitext, EREF hinter dem (i) (`--in-batch-review`)
+- [x] Spalten fluchten bei 1280 px Innenbreite, keine Zelle überläuft (`--in-batch-review`, gemessen)
+- [x] `pnpm typecheck`, `pnpm build`, `pnpm check:type` grün
 
+### Fremde Abnahme Nachtrag 2026-10-01
+
+Abnehmer: Claude (Abnahme-Agent, fremde Sitzung, nicht der Bauende). Stand
+9c1adbb. Gelesen: dieser Nachtrag, `ClarificationCard.tsx` (Typ
+`EvidencePayment`, Tabelle „Zahlungen"), `ClarificationCard.stories.tsx`
+(`EVIDENCE.payments`), `BankTransactionPurpose.tsx`. Gemessen mit Playwright
+an Storybook 6107 in einem eigenen Browser-Kontext (die gemeinsame Seite
+bekam fremde Eingaben, siehe 0216 „Abnahme"), Story
+`v3-entitäten-klärung-clarificationcard--in-batch-review`, Aufklapper
+„Zahlungen" (Anzahl 2) geöffnet, 1280 × 900; Gegenprobe bei 700, 1100, 1400
+und 1920 px. Bildschirmfotos: `.playwright-mcp/0214-payments-1280.png`,
+`.playwright-mcp/0214-payments-popover.png`.
+
+| Kriterium | Nachweis | Ergebnis |
+|---|---|---|
+| Kopf „Gegenpartei" und „Verwendungszweck" als zwei Spalten, „Gegenpartei / Zweck" kommt nicht mehr vor (`grep`) | Kopf: Datum · Betrag · Gegenpartei · Verwendungszweck · Zahlungskonto (fünf `th`). `grep -rn "Gegenpartei / Zweck" src docs` → nur das Kriterium selbst (Zeile 276) | ✓ |
+| `EvidencePayment` führt `counterparty` und `purpose`, kein `text` (Code, Spec-Zeile Schnittstelle) | `ClarificationCard.tsx:135–144`: `counterparty: string \| null`, `purpose: string \| null`, `paymentAccount: string \| null`, kein `text`. Schnittstelle (Zeile 50): `{ date, amount, currency, counterparty, purpose, paymentAccount }`; Aufbau Punkt 6 (Zeilen 26–27) nennt die fünf Spalten. `pnpm typecheck` Exit 0 — keine andere Stelle baut `EvidencePayment` | ✓ |
+| Zweck-Zelle ist `BankTransactionPurpose`: „SVWZ+…" erscheint als Freitext, EREF hinter dem (i) (`--in-batch-review`) | Code `ClarificationCard.tsx:407` `<BankTransactionPurpose purpose={p.purpose} />` (inline, wie `bank-transaction-columns.tsx:244`). Zeile 1 zeigt „RE-2026-4471 Bewirtung 21.08.2026" (Ellipse, `title` mit dem vollen Text), kein „EREF+"/„SVWZ+" im Blick. Das (i) misst 24 × 24 px, `elementFromPoint` in seiner Mitte trifft das (i) selbst, nicht das Zeilen-Overlay; Klick öffnet „EREF RE-2026-4471 · Originalwert", und `onSelect` löst dabei **nicht** aus („Klick auf eine Zeile öffnet einen Drawer." bleibt stehen). Zeile 2 (ohne Kürzel) hat kein (i) | ✓ |
+| Spalten fluchten bei 1280 px Innenbreite, keine Zelle überläuft (`--in-batch-review`, gemessen) | Kopf und beide Zeilen beginnen bei 42 · 140 · 262 · 418,3 · 633 px; jede Zelle endet 10 px vor der nächsten, die letzte bei 750. Tabelle 744 px ohne Querlauf, Seite ohne Querlauf. Ellipse bei „Katharina Oberländer-…", bei beiden Zwecken und bei „Sparkasse Muste…", je mit `title`. Alle Zellen 12,5 px. Zeilen 39 und 38 px: der eine Pixel ist die Trennlinie der ersten Zeile (`border-bottom` 1 px, letzte Zeile 0). Gegenprobe: 700 px → 42 · 140 · 262 · 389,5 · 564, Tabelle 652 px, kein Überlauf; 1100, 1400, 1920 px wie 1280 | ✓ |
+| `pnpm typecheck`, `pnpm build`, `pnpm check:type` grün | `pnpm typecheck` Exit 0; `pnpm check:type` Exit 0 („0 older hand-written values"). `pnpm build` **nicht neu gelaufen** (Weisung: parallele Sitzungen schreiben nach `storybook-static`) — vom Erbauer für 9c1adbb grün gemeldet | ✓ (build laut Erbauer) |
+| Zusatz: die ganze Zeile ruft weiter `onSelect` (M1 der Abnahme vom 2026-09-29) | Klick in die Zweck-Zelle der zweiten Zeile → „Drawer öffnet: payment:bt-2" | ✓ |
+| Zusatz: Konsole | keine Fehler und Warnungen | ✓ |
+
+**Hinweis (vorbestehend, nicht blockierend).** Die Spurbreiten aller vier
+Evidenz-Tabellen stehen als px im TSX (`ClarificationCard.tsx:367`, `:383`,
+`:397`, `:416`, etwa `"88px 112px …"`), gegen „kein px in TSX" (`CLAUDE.md`
+§2 Darstellung). Das war vor dem Nachtrag schon so (`9c1adbb^`: Zeilen 364,
+394, 412) und gehört zu einem setweiten Entscheid über Spurbreiten, nicht zu
+diesem Nachtrag.
+
+Vier Linsen: **Sprache** — Kopf „Gegenpartei", „Verwendungszweck",
+„Zahlungskonto"; „—" für leer; SEPA-Kürzel nicht im Blick ✓.
+**Bedienung** — ganze Zeile klickbar, das (i) mit 24 × 24 px über dem
+Overlay und mit eigenem Weg, kein versehentliches `onSelect` ✓. **Logik** —
+ein Feld je Sache (`counterparty` statt eines `text` mit zwei Inhalten), die
+Zelle aus der Bankliste wiederverwendet (Gleiches sieht gleich aus), das Feld
+für die Tags vertagt und benannt ✓. **Darstellung** — der Kopf fluchtet mit
+den Zeilen, Betrag rechts, der Zweck hat den meisten Platz (`1.4fr`),
+Ellipse statt Umbruch, beide Zeilen gleich hoch ✓.
+
+### Urteil
+
+**Abgenommen.** Alle fünf Kriterien des Nachtrags sind erfüllt; kein Mangel
+am Nachtrag.
+
+Abgenommen von / am: Claude (Abnahme-Agent), 2026-10-01.
