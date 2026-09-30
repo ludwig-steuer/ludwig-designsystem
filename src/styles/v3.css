@@ -2892,6 +2892,8 @@ a.ki__src:hover { text-decoration: underline; color: var(--color-accent-700); }
 .v2cl { display: flex; flex-direction: column; font-size: var(--fs-ui); line-height: var(--lh-ui); }
 .v2cl__item { border-top: 1px solid var(--color-border-subtle); }
 .v2cl__item:first-child { border-top: none; }
+/* The question shown beside the list: selected — background is reserved for exactly that (§2). */
+.v2cl__item.is-active { background: var(--color-accent-50); box-shadow: inset 3px 0 0 var(--color-accent-700); }
 
 /* The row carries three bands: case (optional), head, meta. */
 .v2cl__row {

@@ -132,6 +132,7 @@ export function ClarificationRow({
   showCase,
   detail,
   defaultOpen,
+  active = false,
 }: {
   clarification: ClarificationVM;
   /** Puts case number and title in front — rank 6 is context, not identity. */
@@ -139,7 +140,10 @@ export function ClarificationRow({
   /** What appears when the row folds open; without it the row does not fold. */
   detail?: ReactNode;
   defaultOpen?: boolean;
+  /** The question shown beside the list — selected, so its row is marked (0214). */
+  active?: boolean;
 }) {
+  const item = active ? "v2cl__item is-active" : "v2cl__item";
   const head = (
     <div className="v2cl__row">
       {showCase && (c.caseNumber || c.caseTitle) ? (
@@ -208,12 +212,17 @@ export function ClarificationRow({
     </div>
   );
 
-  if (!detail) return <div className="v2cl__item">{head}</div>;
+  if (!detail)
+    return (
+      <div className={item} {...(active ? { "aria-current": "true" as const } : {})}>
+        {head}
+      </div>
+    );
 
   // `Disclosure` is native `<details>` — the row folds open without a client
   // island, so the list can stay a server component.
   return (
-    <div className="v2cl__item">
+    <div className={item} {...(active ? { "aria-current": "true" as const } : {})}>
       <Disclosure summary={head} defaultOpen={defaultOpen} tone="quiet">
         {detail}
       </Disclosure>

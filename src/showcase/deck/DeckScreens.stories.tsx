@@ -103,32 +103,48 @@ function StepHead({ step, title, sentence, next }: { step: number; title: string
 
 const Q_BASE = { severity: "required", type: "question", audience: "accounting" } as const;
 
+// Six questions of the batch, four already answered (request ludwig-orga 2026-09-30).
 const QUESTIONS: ClarificationVM[] = [
-  { ...Q_BASE, id: "q1", title: "Bewirtung oder Reise?", state: "open", raisedAt: "2026-09-26T09:12:00+02:00" },
-  { ...Q_BASE, id: "q2", title: "Privat oder betrieblich?", state: "open", raisedAt: "2026-09-26T09:14:00+02:00" },
+  { ...Q_BASE, id: "q1", title: "Team-Essen oder Kundenbewirtung?", state: "open", raisedAt: "2026-09-26T09:12:00+02:00" },
+  { ...Q_BASE, id: "q2", title: "Software-Abo: Lizenz oder Wartung?", state: "open", severity: "optional", raisedAt: "2026-09-26T09:14:00+02:00" },
   { ...Q_BASE, id: "q3", title: "Tankbeleg doppelt?", state: "answered", raisedAt: "2026-09-25T16:40:00+02:00", answeredAt: "2026-09-26T08:05:00+02:00" },
+  { ...Q_BASE, id: "q4", title: "Parkgebühr: Reise oder Kfz?", state: "answered", raisedAt: "2026-09-25T16:42:00+02:00", answeredAt: "2026-09-26T08:07:00+02:00" },
+  { ...Q_BASE, id: "q5", title: "Monitor: GWG oder Büromaterial?", state: "answered", raisedAt: "2026-09-24T11:20:00+02:00", answeredAt: "2026-09-25T09:30:00+02:00" },
+  { ...Q_BASE, id: "q6", title: "Bahnticket: Unternehmer oder Mitarbeiter?", state: "answered", raisedAt: "2026-09-24T11:22:00+02:00", answeredAt: "2026-09-25T09:31:00+02:00" },
 ];
 
+const OPTION_CUSTOMER = "Kundenbewirtung: 70 % abzugsfähig (4650), 30 % nicht abzugsfähig (4654)";
+
 const DETAIL: ClarificationDetailVM = {
-  question: "Soll der Beleg als Bewirtung (4650) oder als Reisekosten (4670) gebucht werden?",
-  context: "Der Beleg nennt Speisen für vier Personen und eine Übernachtung — Bewirtung und Reisekosten werden steuerlich verschieden behandelt.",
+  question: "Wie ist das Essen veranlasst?",
+  context:
+    "Der Restaurantbeleg nennt vier Personen, ein Bewirtungsbeleg mit Anlass und Teilnehmern liegt nicht vor. " +
+    "Mitarbeiterbewirtung und Kundenbewirtung werden steuerlich verschieden behandelt.",
   text: "",
-  recommendation: "Reisekosten (4670)",
+  // Names option 1 verbatim, so it is the preselection (rule S13).
+  recommendation: OPTION_CUSTOMER,
   facts: [
-    { label: "Betrag", value: "240,40 € (Speisen 68,40 €, Übernachtung 172,00 €)" },
-    { label: "Teilnehmer laut Beleg", value: "4" },
+    { label: "Betrag", value: "186,40 € (Speisen 152,90 €, Getränke 33,50 €)" },
+    { label: "Personen laut Beleg", value: "4" },
+    { label: "Datum", value: "18.09.2026, 19:40" },
+    { label: "Bewirtungsbeleg", value: "liegt nicht vor" },
   ],
   questionType: "agent_clarification",
   sourceModule: "booking-module",
   answerKind: "single_choice",
-  answerOptions: ["Bewirtung (4650)", "Reisekosten (4670)", "Aufteilen: Speisen 4650, Übernachtung 4670"],
+  answerOptions: [
+    OPTION_CUSTOMER,
+    "Team-Event / Mitarbeiterbewirtung: 100 % Freiwillige soziale Aufwendungen (4140)",
+    "Arbeitsessen ohne Anlass, nicht abzugsfähig (4654)",
+    "Privat veranlasst, keine Betriebsausgabe (1800)",
+  ],
   allowFreeText: true,
 };
 
 /** Stapelabnahme, Schritt 2: three different questions, one unfolded and answered in one click. */
 export const Questions: Story = {
   render: () => (
-    <Frame current="2" rail={rail(2, { 2: "2 von 3 offen", 3: "41 von 118 offen" }, { 2: "open", 3: "open" })}>
+    <Frame current="2" rail={rail(2, { 2: "2 von 6 offen", 3: "41 von 118 offen" }, { 2: "open", 3: "open" })}>
       <StepHead
         step={2}
         title="Rückfragen"
@@ -137,10 +153,10 @@ export const Questions: Story = {
       />
       <div style={{ display: "grid", gridTemplateColumns: "400px minmax(0, 1fr)", gap: "var(--space-4)", alignItems: "start" }}>
         <Card>
-          <CardHead title="Fragen an die Kanzlei" meta={<span className="v2muted">3</span>} />
+          <CardHead title="Fragen an die Kanzlei" meta={<span className="v2muted">6</span>} />
           <div>
             {QUESTIONS.map((q) => (
-              <ClarificationRow key={q.id} clarification={q} />
+              <ClarificationRow key={q.id} clarification={q} active={q.id === "q1"} />
             ))}
           </div>
         </Card>
@@ -149,7 +165,7 @@ export const Questions: Story = {
             <ClarificationCard
               clarification={{ ...QUESTIONS[0]!, ...DETAIL }}
               mode="answer"
-              caseLink={{ label: "Sachverhalt 2026-0142 · Restaurant am Markt", href: "#case=2026-0142" }}
+              caseLink={{ label: "Sachverhalt 2026-0142 · Trattoria Da Enzo", href: "#case=2026-0142" }}
               submitLabel="Antwort speichern und zurück an Ludwig"
               onAnswer={async () => {}}
               onResolve={async () => {}}
