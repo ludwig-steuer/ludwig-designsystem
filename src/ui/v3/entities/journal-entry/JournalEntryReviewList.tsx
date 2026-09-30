@@ -296,7 +296,8 @@ export function proposalReviewColumns(options: ProposalColumnOptions = {}): Colu
     kind: {
       key: "kind",
       header: "Satzart",
-      width: "84px",
+      // The longest word of the registry, „Dauerbuchung", measures 99.7 px as a badge.
+      width: "100px",
       cell: (p) => (p.kindLabel ? <Badge tone="neutral">{p.kindLabel}</Badge> : <span className="v2muted">—</span>),
     },
     reasons: {

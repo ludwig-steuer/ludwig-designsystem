@@ -38,7 +38,7 @@ Aus dem Entitätsprofil, damit die Spec es nicht neu erheben muss:
 
 | Ausprägung | Spalten |
 |---|---|
-| `full` | Datum · Gegenpartei (+ „erstmals") · Soll · Kontoname · Haben · Kontoname (Nachtrag 2026-10-01: Hauptkonto, „+n weitere"; ohne Namen mit `accountNames: false`) · Betrag · BU · Prüfung durch Ludwig · Satzart (nicht in Gruppen nach Satzart) · Prüfbedarf („entschieden"). „Nr." und „Beleg" nur über `include` |
+| `full` | Datum · Gegenpartei (+ „erstmals") · Soll · (Name des Soll-Kontos, Kopf nur für den Screenreader: „Kontoname Soll") · Haben · (Name des Haben-Kontos, „Kontoname Haben") (Nachtrag 2026-10-01: Hauptkonto, „+n weitere"; ohne Namen mit `accountNames: false`) · Betrag · BU · Prüfung durch Ludwig · Satzart (nicht in Gruppen nach Satzart) · Prüfbedarf („entschieden"). „Nr." und „Beleg" nur über `include` |
 | `compact` | Datum · Gegenpartei · Konten („4930 an 70021") · Betrag · Prüfung durch Ludwig |
 
 Rahmen: `expand` (Aufklapper der App: Satz, Begründung, Aktionen) · `rowActions`
@@ -236,7 +236,7 @@ unruhig.
 
 | Story | Messung |
 |---|---|
-| `Grouped` | 1246 = 1246, kein Querscroll. Spuren ohne „Nr.": Datum 76, Gegenpartei 136, Soll 44, Name 97, Haben 44, Name 97. Kein Gegenparteiname gekürzt, keine Nummer über ihre Spur. Zeilen 64–106 px (vorher 84–88; die höchste trägt zwei Prüfbedarf-Gründe). `aria-label` der Auswahl „16.09.2026 · Allianz Versicherungs-AG" |
+| `Grouped` | 1246 = 1246, kein Querscroll. Spuren ohne „Nr.": Datum 76, Gegenpartei 136, Soll 44, Name 97, Haben 44, Name 97. Kein Gegenparteiname gekürzt, keine Nummer über ihre Spur. Zeilen 64–106 px (vorher 67–88 laut Nachprüfung 2026-09-29; die höchste, 105,6 px, ist Fall 11 — dreizeiliger Kontoname plus „3 Zeilen"). `aria-label` der Auswahl „16.09.2026 · Allianz Versicherungs-AG" |
 | `Flat` (`accountNames={false}`) | 1246 = 1246. Gegenpartei 142, Soll/Haben je 101 px: „3100 +2 weitere", „70021 3 Zeilen" (11. Zeile). Zeilen 47–88 px (vorher bis 109) |
 | Zeilen oben | Erste Zeile jeder Zelle 12–14 px unter der Zeilenoberkante; Grundlinien einer einzeiligen Zeile in `CaseList --filled` innerhalb 1 px (Text 13,5 · Badge 11,5 · Mono 12,5 px). `BankTransactionList --filled`: die zweizeilige Sachverhaltszelle zieht die anderen nicht mehr in die Mitte |
 
@@ -261,6 +261,7 @@ Status: **in Arbeit** (Nachtrag; fremde Abnahme 2026-10-01 unten). Kriterien fü
 - [x] `Grouped` und `Flat` bei 1280 px ohne Querscroll; kein Gegenparteiname gekürzt (gemessen)
 - [x] Keine Spalte „Nr." im Standard; `include: ["number"]` bringt sie zurück (Code, `OPTIONAL`); `aria-label` der Auswahl = Datum · Gegenpartei (DOM-Probe `Grouped`)
 - [x] Setweit: `.v2tbl__row` oben ausgerichtet, Kopf mittig; einzeilige Zeilen weiter auf einer Grundlinie (zwei fremde Tabellen-Stories gemessen); Regel in `design-guidelines.md` mit Datum
+- [ ] offen (App): die App ordnet `accounts.debit`/`credit` nach Summe absteigend (Hauptkonto zuerst) und übergibt in der flachen Ansicht `accountNames={false}` — `docs/befunde-app.md` §E
 - [ ] Spec-Tabelle „Ausprägung" oben und Code stimmen überein; `pnpm typecheck`, `pnpm build`, `pnpm check:type` grün — ✗ M8 (fremde Abnahme 2026-10-01)
 
 ### Fremde Abnahme Nachtrag 2026-10-01
@@ -388,4 +389,15 @@ Code (`docs/backlog/README.md`, „Wer nachzieht"). Nacharbeit: M8 und M7 in der
 Spec (zur Nachprüfung genügt Lesen); M6 mit einer Spurbreite, danach `Flat`
 bei 1280 px nachmessen; M9 als Übergabe an die App. Daneben bleiben M2
 (setweit) und der Rest von M5 offen.
+
+## Nacharbeit 2026-10-01 (nach der fremden Abnahme)
+
+| Punkt | Änderung | Stand |
+|---|---|---|
+| M8 Ausprägung vs. Code | Tabelle „Ausprägung" nennt die Namensspalten jetzt wie gebaut: sichtbar ohne Kopf, für den Screenreader „Kontoname Soll" / „Kontoname Haben" | behoben |
+| M7 Messwerte | höchste Zeile richtig benannt (Fall 11, 105,6 px, Kontoname plus „3 Zeilen"); „vorher" nach der Nachprüfung vom 2026-09-29 (67–88 px) | behoben |
+| M6 Badge „Dauerbuchung" ragt aus der Satzart-Spur | Spur 84 → 100 px (Badge 99,7 px); die flexiblen Spalten geben die 16 px ab, `Flat` bleibt 1246 = 1246 | behoben |
+| M9 App-Pflichten nicht übergeben | Kriterium „offen (App)" oben; Zeile in `docs/befunde-app.md` §E | behoben |
+| Hinweis M5-Rest | Story: der Sammelkontoname „Verbindlichkeiten aus Lieferungen und Leistungen" steht auf **1600** statt auf der Kreditorennummer 70021 | behoben |
+| M2 Trefferfläche Nummern-Link 19,4 px | setweit, Backlog 0213 (Owner 2026-09-29: nicht jetzt) | offen |
 

@@ -45,7 +45,9 @@ const ROWS: ProposalRow[] = Array.from({ length: 40 }, (_, i) => {
                 ? [{ number: "1800", name: "Bank" }, { number: "1360", name: "Geldtransit" }]
                 : kind.key === "payment"
                   ? [{ number: "1800", name: "Bank" }]
-                  : [{ number: "70021", name: i % 5 === 0 ? "Verbindlichkeiten aus Lieferungen und Leistungen" : "Muster Bürobedarf GmbH" }],
+                  : i % 5 === 0
+                    ? [{ number: "1600", name: "Verbindlichkeiten aus Lieferungen und Leistungen" }]
+                    : [{ number: "70021", name: "Muster Bürobedarf GmbH" }],
             // A side that carries one account on two lines — only here „3 Zeilen" stays.
             lineCount: i % 13 === 0 ? 3 : i % 6 === 0 ? 4 : i % 3 === 0 ? 3 : i === 10 ? 3 : 2,
           },
