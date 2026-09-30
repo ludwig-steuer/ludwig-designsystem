@@ -178,6 +178,27 @@ export const Questions: Story = {
   ),
 };
 
+/** The open question alone at slide width (request lead-presentation 2026-09-30). */
+export const QuestionDetail: Story = {
+  render: () => (
+    <div style={{ padding: "var(--space-6)", maxWidth: "1200px" }}>
+      <Card>
+        <div style={{ padding: "var(--space-4)" }}>
+          <ClarificationCard
+            clarification={{ ...QUESTIONS[0]!, ...DETAIL }}
+            mode="answer"
+            caseLink={{ label: "Sachverhalt 2026-0142 · Trattoria Da Enzo", href: "#case=2026-0142" }}
+            onAnswer={async () => {}}
+            onResolve={async () => {}}
+            onDefer={async () => {}}
+            onSelect={() => {}}
+          />
+        </div>
+      </Card>
+    </div>
+  ),
+};
+
 /* ── 2 · Prüfprotokoll ──────────────────────────────────────────────────── */
 
 const CHECKS: ChecklistRow[] = [
