@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Status | **fertig — abgenommen 2026-09-29 (mit Auflagen M2 setweit, M5); Nachtrag 2026-10-01 (Soll/Haben ruhiger, Zeilen oben) in Abnahme**; gebaut 2026-09-29; aus dem Backlog geholt 2026-09-29 (F334 T3, Owner-Auftrag über ll-dev; ersetzt den Default „bis `export-batch` steht"). Gebaut nach Abnahme von 0211, ohne Sortierung nach Aufmerksamkeit (L-295) und ohne `DiffView` |
+| Status | **fertig — abgenommen 2026-09-29 (mit Auflagen M2 setweit, M5); Nachtrag 2026-10-01 (Soll/Haben ruhiger, Zeilen oben) in Arbeit — fremde Abnahme 2026-10-01 nicht abgenommen, allein wegen Spec-Text (M8 macht Kriterium 9 rot, dazu M7); Code erfüllt die Kriterien 1–8 und gilt bis zur Nacharbeit; nicht blockierend M6 (vorbestehend), M9**; gebaut 2026-09-29; aus dem Backlog geholt 2026-09-29 (F334 T3, Owner-Auftrag über ll-dev; ersetzt den Default „bis `export-batch` steht"). Gebaut nach Abnahme von 0211, ohne Sortierung nach Aufmerksamkeit (L-295) und ohne `DiffView` |
 | Stufe | `entities/journal-entry/` |
 | Klassen-Test | „Ergäbe das auch in einer Versicherungs-App Sinn?" → nein: Buchungsvorschlag, Judge-Verdikt, Stapel, Herkunft Mandantenstapel |
 | Quelle | Entitätsprofil `docs/entitaeten/journal-entry.md`, Abschnitte „Listen" (dritte Zeile), „Formen" (Zeile `JournalEntryReviewList`) und „Zuschnitt" |
@@ -251,15 +251,141 @@ flach ohne Satzart, flach mit Querscroll.
 Liste mit „ / " — gebuchte Sätze haben fast immer ein Konto je Seite; zieht
 nach, wenn ein Screen es verlangt.
 
-Status: **Abnahme** (Nachtrag). Kriterien für die fremde Abnahme:
+Status: **in Arbeit** (Nachtrag; fremde Abnahme 2026-10-01 unten). Kriterien für die fremde Abnahme:
 
-- [ ] `full` mit Namen: Köpfe „Soll" · (leer, sr „Kontoname Soll") · „Haben" · (leer, sr „Kontoname Haben"); je Seite genau eine Nummer und ein Name (`Grouped`)
-- [ ] „+n weitere" = Zahl der Konten der Seite minus eins, nur bei mehr als einem; `title` nennt alle Konten mit Nummer und Name (`Grouped`, `Flat`)
-- [ ] „n Zeilen" nur, wo `lineCount` > Konten beider Seiten (`Flat` Zeile 11), sonst nicht (`Grouped`)
-- [ ] Nummernspalte 44 px, mono, kein Überlauf; Name bricht um, höchstens drei Zeilen, keine Trennung in Wörtern unter zwölf Zeichen (`Grouped`, gemessen)
-- [ ] `accountNames={false}`: keine Namensspalten, Nummer + „+n weitere" in einer Spalte (`Flat`)
-- [ ] `Grouped` und `Flat` bei 1280 px ohne Querscroll; kein Gegenparteiname gekürzt (gemessen)
-- [ ] Keine Spalte „Nr." im Standard; `include: ["number"]` bringt sie zurück (Code, `OPTIONAL`); `aria-label` der Auswahl = Datum · Gegenpartei (DOM-Probe `Grouped`)
-- [ ] Setweit: `.v2tbl__row` oben ausgerichtet, Kopf mittig; einzeilige Zeilen weiter auf einer Grundlinie (zwei fremde Tabellen-Stories gemessen); Regel in `design-guidelines.md` mit Datum
-- [ ] Spec-Tabelle „Ausprägung" oben und Code stimmen überein; `pnpm typecheck`, `pnpm build`, `pnpm check:type` grün
+- [x] `full` mit Namen: Köpfe „Soll" · (leer, sr „Kontoname Soll") · „Haben" · (leer, sr „Kontoname Haben"); je Seite genau eine Nummer und ein Name (`Grouped`)
+- [x] „+n weitere" = Zahl der Konten der Seite minus eins, nur bei mehr als einem; `title` nennt alle Konten mit Nummer und Name (`Grouped`, `Flat`)
+- [x] „n Zeilen" nur, wo `lineCount` > Konten beider Seiten (`Flat` Zeile 11), sonst nicht (`Grouped`)
+- [x] Nummernspalte 44 px, mono, kein Überlauf; Name bricht um, höchstens drei Zeilen, keine Trennung in Wörtern unter zwölf Zeichen (`Grouped`, gemessen)
+- [x] `accountNames={false}`: keine Namensspalten, Nummer + „+n weitere" in einer Spalte (`Flat`)
+- [x] `Grouped` und `Flat` bei 1280 px ohne Querscroll; kein Gegenparteiname gekürzt (gemessen)
+- [x] Keine Spalte „Nr." im Standard; `include: ["number"]` bringt sie zurück (Code, `OPTIONAL`); `aria-label` der Auswahl = Datum · Gegenpartei (DOM-Probe `Grouped`)
+- [x] Setweit: `.v2tbl__row` oben ausgerichtet, Kopf mittig; einzeilige Zeilen weiter auf einer Grundlinie (zwei fremde Tabellen-Stories gemessen); Regel in `design-guidelines.md` mit Datum
+- [ ] Spec-Tabelle „Ausprägung" oben und Code stimmen überein; `pnpm typecheck`, `pnpm build`, `pnpm check:type` grün — ✗ M8 (fremde Abnahme 2026-10-01)
+
+### Fremde Abnahme Nachtrag 2026-10-01
+
+Abnehmer: Claude (fremde Sitzung, nicht der Bauende). Stand `24cbfef` (Bau
+`8f029d0` + `24cbfef`). Grundlage: Spec und Code; Storybook 6107 bei
+1280 × 900 in einem eigenen Playwright-Kontext gemessen. `pnpm typecheck` ·
+`check:type` · `check:when` · `check:language` Exit 0. `pnpm build` nicht
+nachgelaufen (parallele Sitzungen); der Erbauer meldet ihn für `24cbfef` grün.
+`Grouped`, `Flat`, `Compact`, `States` ohne Konsolenmeldung. Story-IDs mit dem
+Präfix `v3-entitäten-buchungssatz-journalentryreviewlist--`.
+
+| Kriterium | Nachweis | Ergebnis |
+|---|---|---|
+| 1 Köpfe; je Seite eine Nummer und ein Name | `--grouped`: Köpfe Datum · Gegenpartei · Soll · (leer) · Haben · (leer) · Betrag · BU · Prüfung durch Ludwig · Prüfbedarf · Aktionen; Namensköpfe `v2vh` 1 × 1 px (`clip-path: inset(50%)`), Text „Kontoname Soll" / „Kontoname Haben". In 39 Zeilen je Seite genau ein `.v2mono` und ein `.v3prop__acc`; Fall 12 („kein Satz") keins | ✓ |
+| 2 „+n weitere"; `title` | `--grouped`: 3100 mit drei Konten „+2 weitere", 4930 mit 1576 „+1 weitere", 1800 mit 1360 „+1 weitere" (Fälle 1, 14, 27, 40), ein Konto ohne Zusatz — stimmt mit den Story-Daten. `--flat`: „3100 +2 weitere" (Zeilen 1, 7), „4930 +1 weitere" (4, 10), „1800 +1 weitere" (1). `title` an Nummer und Name, z. B. „3100 Fremdleistungen, 1576 Abziehbare Vorsteuer 19 %, 1571 Abziehbare Vorsteuer 7 %" | ✓ |
+| 3 „n Zeilen" | `--flat`: nur Zeile 11, „70021 · 3 Zeilen" (`lineCount` 3 > 1 + 1). `--grouped`: genau einmal, derselbe Fall 11 in der Gruppe Zahlung — regelgerecht; die Klammer „sonst nicht (`Grouped`)" liest sich, als zeige `Grouped` keins. In den übrigen 39 Zeilen ist `lineCount` ≤ Zahl der Konten, kein Zusatz | ✓ |
+| 4 Nummer 44 px mono; Name ≤ drei Zeilen; Trennung erst ab zwölf Zeichen | `--grouped`: Spur 44 px, JetBrains Mono, breiteste Nummer „70021" 37,5 px, in 78 Nummernzellen kein Überlauf. Namen höchstens drei Zeilen; gekappt nur „Verbindlichkeiten aus Lieferungen und Leistungen" (5 Zeilen, ganz im `title`). Getrennt nur „Fremdleis-tungen" (15 Zeichen) und „Verbindlich-keiten" (17), „Bürobedarf" (10) nie. `hyphens: auto`, `hyphenate-limit-chars: 12 5 5`, `lang="de"` am Dokument | ✓ |
+| 5 `accountNames={false}` | `--flat`: Köpfe Datum · Gegenpartei · Soll · Haben · Betrag · BU · Prüfung durch Ludwig · Satzart · Prüfbedarf · Aktionen; kein `.v3prop__acc`; Soll/Haben je 101,2 px (`minmax(68px, 1fr)`), Nummer und „+n weitere" darunter | ✓ |
+| 6 1280 px ohne Querscroll; kein Name gekürzt | `.v2tbl__scroll`: `--grouped` 1246 = 1246, `--flat` 1246 = 1246, `--states` viermal 1246 = 1246. `.v3prop__name` in allen 52 Zeilen scrollHeight = clientHeight. Spuren `--grouped`: Datum 76, Gegenpartei 135,9, Soll 44, Name 97,1, Haben 44, Name 97,1; `--flat`: Gegenpartei 141,6, Soll/Haben 101,2. In `Flat` ragt aber die Satzart aus ihrer Spur → M6 | ✓ |
+| 7 „Nr." nur über `include`; `aria-label` | Code: `OPTIONAL = ["number", "document"]` (`JournalEntryReviewList.tsx:97`), Filter `:324`. `--grouped`: `aria-label` „16.09.2026 · Allianz Versicherungs-AG"; ohne Gegenpartei „08.09.2026 · Eingangsrechnung ohne erkannten Gegenpart"; ohne Datum steht „—" (`format.ts:280`) | ✓ |
+| 8 Setweit oben, Kopf mittig, eine Grundlinie, Regel mit Datum | Tabelle „Setweite Gegenprobe" unten: sechs fremde Stories, keine Zeile höher, einzeilige Zeilen höchstens 1,2 px auseinander; Köpfe `align-items: center`. `design-guidelines.md`, Zeile „Tabelle": „Zeilen oben ausgerichtet (Owner 2026-10-01)" | ✓ |
+| 9 Ausprägung = Code; typecheck, build, check:type | typecheck und check:type Exit 0, build laut Erbauer grün. Die Tabelle „Ausprägung" nennt „Kontoname" zweimal → M8 | ✗ |
+
+**Setweite Gegenprobe.** Die Grundlinie ist aus dem Glyphenkasten des ersten
+Zeichens jeder Zelle und der Fontmetrik gerechnet (Inter 0,969/0,242 em,
+JetBrains Mono 1,02/0,30 em). Ein Null-Marker taugt dafür nicht: in einem
+`inline-flex`-Badge landet er in dessen Mitte und täuscht 4 px Versatz vor. Die
+Klammerwerte stammen aus demselben Kontext mit übersteuertem
+`.v2tbl__row { align-items: center }`, also dem Stand vor dem Nachtrag.
+
+| Story | Zeilen | höher geworden | einzeilig: Spreizung der Grundlinien, jetzt (vorher) | mehrzeilig: erste Zeilen, jetzt (vorher) | Bedienelemente, Mitte unter Zeilenoberkante |
+|---|---|---|---|---|---|
+| `v3-entitäten-sachverhalt-caselist--filled` | 5 | 0 | 0,2 px (1,0) | — | Icon im Badge 23 px |
+| `v3-entitäten-kontoauszugsposition-banktransactionlist--filled` | 5 | 0 | 1,2 px (0,6) | 1,2 px (10,8) | Knopf (24 px hoch) 21,7 px |
+| `v3-entitäten-buchungssatz-journalentrylist--in-batch` | 6 | 0 | 1,1 px (1,9) | 0,2 px (8,7) | Icons 21,7–22 px |
+| `v3-patterns-arbeitsfläche-datatable--row-actions` | 8 | 0 | 0,8 px (1,0) | — | „Zurückstellen" 22,1 px |
+| `v3-patterns-arbeitsfläche-datatable--expand` | 6 | 0 | 0,1 px (1,0) | — | Checkbox 13–27 px, Aufklapper 22,5 px |
+| `v3-primitives-tabelle-table--filled` | 4 | 0 | 1,1 px (0,7) | — | — |
+| `--grouped` / `--flat` (T3 selbst) | 40 / 12 | 0 | — / 2,2 px (1,3) | 2,2 px (30,6) / 2,2 px (21,7) | Checkbox 13–27, Aufklapper 22,5, (i) 22,8, „Öffnen" 22,1 px |
+
+Die erste Textzeile beginnt überall 12 px unter der Zeilenoberkante (Polster),
+Glyphen bei 14–16 px, Grundlinie bei 26–28 px; alle Bedienelemente liegen in
+diesem Band. In T3 kommen die 2,2 px aus Nummer (mono, 26,1) gegen Prüfung
+durch Ludwig (28,3) — kein Mangel.
+
+#### Mängel
+
+**M6 — nicht blockierend, vorbestehend (seit `0efe1df`).** In `Flat` hat die
+Satzart eine 84-px-Spur (`JournalEntryReviewList.tsx:299`), das Badge
+„Dauerbuchung" misst 99,7 px: es ragt 15,7 px aus der Spur und liegt 5,7 px
+über dem Text der Nachbarspalte („entschieden", „erstmals gebucht", „Ludwig ist
+unsicher"; Zeilen 3, 6, 9, 12; Screenshot `.playwright-mcp/abn164-flat-dauerbuchung.png`). Das „ohne
+Querscroll" von `Flat` steht damit auf einer Spur, die ihren Inhalt nicht
+trägt. Abhilfe: Satzart 100 px — die `fr`-Spuren geben 16 px ab (Gegenpartei
+141,6 → 135,1, Soll/Haben 101,2 → 96,5 px, beide über ihrem Boden 120/68),
+gerechnet weiter 1246 = 1246; danach `Flat` bei 1280 px nachmessen. Die
+beiden Nachprüfungen vom 2026-09-29 haben den Überlauf nicht gemessen.
+
+**M7 — Spec, nicht blockierend.** Messwert-Tabelle des Nachtrags, Zeile
+`Grouped` (oben in diesem Abschnitt): „die höchste trägt zwei
+Prüfbedarf-Gründe" stimmt nicht. Die höchste Zeile (105,6 px) ist Fall 11
+(Aral Tankstelle, 11.09.2026) mit **einem** Grund („Konto weicht vom Vorjahr
+ab", Zelle 20,9 px). Ihre Höhe kommt vom Kontonamen Soll: „Muster / Bürobedarf /
+GmbH" in drei Zeilen plus „3 Zeilen", Zelle 80,6 px. Zeilen mit zwei Gründen
+stehen bei höchstens 87,8 px. Dazu widerspricht „vorher 84–88" der
+Nachprüfung vom 2026-09-29 in derselben Spec (`Grouped` 67–88 px).
+
+**M8 — Spec, macht Kriterium 9 rot.** Die Tabelle „Ausprägung" (Abschnitt
+„Gebaut 2026-09-29", Zeile `full`) nennt „Soll · Kontoname · Haben ·
+Kontoname". Der Code heißt die Namensköpfe „Kontoname Soll" / „Kontoname
+Haben", sichtbar leer (`JournalEntryReviewList.tsx:245`, `:258`). Punkt 2 des
+Nachtrags begründet genau das: „zweimal „Kontoname" im Kopf hätte die Seiten
+nicht mehr getrennt". Die Tabelle schreibt also, was der Code vermeidet.
+Abhilfe z. B. „Soll · Kontoname Soll · Haben · Kontoname Haben (Namensköpfe nur
+für den Screenreader)".
+
+**M9 — nicht blockierend.** Der Nachtrag legt der App zwei Pflichten auf:
+`accounts.debit[0]` / `credit[0]` ist das Hauptkonto, weil „die App ordnet"
+(Punkt 1, JSDoc `JournalEntryReviewList.tsx:49–53`), und die flache Ansicht
+übergibt `accountNames={false}` (Owner-Entscheid oben). Beides ist nirgends
+übergeben — weder als Kriterium „offen (App)" noch in `docs/befunde-app.md`;
+0164 hat dort auch in §E („Ablösungen", `Schritt3.tsx`) keine Zeile. Ordnet
+die App nicht, steht als Hauptkonto etwa 1576 Vorsteuer statt 3100. Die Liste
+kann das nicht bemerken, weil sie nichts rechnet.
+
+#### Hinweise (keine Mängel)
+
+- `Grouped`: 36 von 40 Zeilen stehen bei 86,8–87,8 px, weil der Kreditorname
+  „Muster Bürobedarf GmbH" in der 97-px-Namensspur dreizeilig bricht (vorher
+  laut Nachprüfung 2026-09-29: 67–88 px). Ruhiger ja, dichter nein: bei 900 px
+  Höhe passen rund acht Zeilen. Entscheid des Owners, hier nur gemessen.
+- M5 ist durch `8f029d0` bis auf einen Rest erledigt: Nummern und Namen
+  passen, außer 70021 „Verbindlichkeiten aus Lieferungen und Leistungen" in
+  jeder fünften Zeile (`JournalEntryReviewList.stories.tsx:48`) — ein
+  Sammelkontoname auf einer Kreditorennummer, als Langnamen-Probe gewollt,
+  fachlich schief.
+- Der Nummern-Link spannt in `Flat` die ganze Spur (101,2 × 19,4 px, weil
+  `.v3prop__who` ein Grid ist), in `Grouped` 44 × 19,4 px. Die Höhe liegt unter
+  24 px; das bleibt bei M2 (setweit).
+- „+1 weitere" ist elliptisch — Wortlaut des Owners („+n weitere").
+- `include: ["number"]` hat keine Story; Nachweis wie im Kriterium über den
+  Code.
+
+**Vier Linsen.** **Sprache** — „+n weitere", „n Zeilen", „kein Satz",
+Screenreader-Köpfe „Kontoname Soll/Haben"; das `aria-label` „Datum ·
+Gegenpartei" sagt, was die Zeile zeigt; keine Versalien, kein Systemwort ✓.
+**Bedienung** — Soll und Haben bleiben auch für den Screenreader getrennt; die
+volle Kontoliste steht im `title` und per Tastatur im Aufklapper; Checkbox,
+Aufklapper und Aktionen sitzen auf der ersten Zeile, keine Zeile wurde höher
+✓; Trefferfläche des Nummern-Links → M2. **Logik** — die Liste rechnet nichts:
+Hauptkonto = erstes Element, „+n" = Länge − 1, „n Zeilen" nur bei `lineCount` >
+Konten ✓; fünf Zustände unverändert, der Kopf mit Namensspalten steht auch
+leer, beim Laden und im Fehler (`States` 1246 = 1246) ✓; App-Vertrag nicht
+übergeben → M9. **Darstellung** — Nummern mono untereinander in fester Spur,
+Namen links, keine neue Farbe; „+n weitere" #717171 auf Weiß = 4,88:1 bei
+11,5 px ✓; setweit oben ausgerichtet ohne Höhenänderung ✓; Satzart-Badge
+überdeckt die Nachbarspalte → M6.
+
+#### Urteil
+
+**Nicht abgenommen (Nachtrag)** — allein wegen Kriterium 9 (M8, Spec-Text).
+Code und Verhalten erfüllen die Kriterien 1–8; bis zur Nacharbeit gilt der
+Code (`docs/backlog/README.md`, „Wer nachzieht"). Nacharbeit: M8 und M7 in der
+Spec (zur Nachprüfung genügt Lesen); M6 mit einer Spurbreite, danach `Flat`
+bei 1280 px nachmessen; M9 als Übergabe an die App. Daneben bleiben M2
+(setweit) und der Rest von M5 offen.
 
