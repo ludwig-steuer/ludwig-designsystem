@@ -28,8 +28,8 @@ import { TaxKeyCell } from "./TaxKey";
  * T3 · proposals to review — one case with its proposal per row (0164, brief
  * F334). The third of the booking tables next to T1 (entries of a stock) and
  * T2 (movements of an account): here the reader decides, so the row carries
- * the judge's verdict and the reasons it is in this tab, the fold-out the
- * proposal and its rationale, and the selection the bulk release.
+ * the strongest review reason (0218), the fold-out the proposal, its checks
+ * and its rationale, and the selection the bulk release.
  *
  * **Computes nothing** (E2): order, groups, reasons and actions come from the
  * app. Not built yet (0164 Ausbau): sorting by attention (L-295) and the diff
@@ -132,7 +132,7 @@ export interface ProposalColumnOptions {
   variant?: "compact" | "full";
   /** Columns that say nothing in this frame — the kind inside a group by kind. */
   without?: readonly ProposalColumn[];
-  /** Optional columns this frame has room for — `number` and `document`. */
+  /** Optional columns this frame has room for — `number`, `document` and `verdict` („Prüfung durch Ludwig"). */
   include?: readonly ProposalColumn[];
   /**
    * The account names in their own columns beside Soll and Haben — on by
@@ -208,8 +208,8 @@ function hiddenLines(a: NonNullable<ProposalRow["accounts"]>): ReactNode {
 }
 
 /**
- * @when    The proposals of a batch or a period are reviewed — verdict,
- *          reasons, bulk release; as columns for a `DataTable` of one's own.
+ * @when    The proposals of a batch or a period are reviewed — review reason,
+ *          precedent, bulk release; as columns for a `DataTable` of one's own.
  * @instead The ready list with fold-out and selection → JournalEntryReviewList.
  *          The entries of a stock without a decision → journalEntryColumns.
  */
@@ -321,6 +321,8 @@ export function proposalReviewColumns(options: ProposalColumnOptions = {}): Colu
       key: "precedent",
       header: "So gebucht",
       width: "72px",
+      // A count („12×") stands right, like every number (V3); „erstmals" with it.
+      align: "end",
       cell: (p) => {
         const n = p.priorSameBookings;
         if (n === 0 || (n == null && p.firstTime)) return "erstmals";
@@ -367,7 +369,7 @@ type Shape =
   | { groups: readonly TableGroup<ProposalRow>[]; rows?: never };
 
 /**
- * @when    Reviewing the proposals of a batch: verdict and reasons per row,
+ * @when    Reviewing the proposals of a batch: the review reason per row,
  *          the proposal in the fold-out, release one or many.
  * @instead The entries of a stock, nothing to decide → JournalEntryList. One
  *          proposal read whole → the case page.
@@ -423,7 +425,7 @@ export function JournalEntryReviewList(
   };
   // The fold-out carries the checks above the caller's own content (0217) —
   // the same block in every list, so the app does not put them in a second
-  // time. `CheckItems` directly: the row already says how many passed. Not in
+  // time. `CheckItems` directly, without a head line of its own. Not in
   // `compact`: it has no column for them, so it shows none (acceptance M1).
   const rows = props.groups ? props.groups.flatMap((g) => g.rows) : props.rows!;
   const withChecks = options.variant !== "compact" && rows.some((r) => r.checks);

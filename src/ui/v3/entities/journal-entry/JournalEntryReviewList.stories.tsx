@@ -83,9 +83,10 @@ function reasonsFor(i: number, kind: string, taxKey: string | null, checks: Chec
   const verdict = kind === "recurring" ? null : VERDICTS[i % 5]!;
   const red = checks.find((c) => c.state === "red");
   const yellow = checks.find((c) => c.state === "yellow");
-  if (red) out.push({ points: 100, r: { code: `check_red:${red.code}`, label: CHECK_WORD[red.code] ?? red.code, kind: "warning", detail: red.reason } });
+  // A red check may come as `danger` from the registry — the cell shows it as warning (A7).
+  if (red) out.push({ points: 100, r: { code: `check_red:${red.code}`, label: CHECK_WORD[red.code] ?? red.code, kind: "danger", detail: red.reason } });
   if (verdict === "flag") out.push({ points: 100, r: { code: "judge_flag", label: "Beanstandet", kind: "warning", detail: "Judge: Konto 4930 passt nicht zur Leistung — eher 4980 (Betriebsbedarf)." } });
-  if (confidenceFor(i) === "red") out.push({ points: 100, r: { code: "confidence_red", label: "Ludwig unsicher", kind: "warning", detail: "Ludwig: 38 %" } });
+  if (kind !== "recurring" && confidenceFor(i) === "red") out.push({ points: 100, r: { code: "confidence_red", label: "Ludwig unsicher", kind: "warning", detail: "Ludwig: 38 %" } });
   if (taxKey === "94") out.push({ points: 60, r: { code: "reverse_charge", label: "§13b", kind: "info", detail: "BU 94 · Sachverhalt 7: sonstige EU-Leistung" } });
   if (taxKey === "91") out.push({ points: 60, r: { code: "special_tax_key", label: "Sonderschlüssel", kind: "info", detail: "BU 91 · Innergemeinschaftlicher Erwerb 7 %" } });
   if (verdict === "adjust") out.push({ points: 60, r: { code: "judge_adjust", label: "Korrigiert", kind: "info", detail: "Judge: Steuerschlüssel von 8 auf 9 korrigiert." } });
@@ -225,7 +226,7 @@ export const Flat: Story = {
   ),
 };
 
-/** Compact, for a drawer or the tab „Zum Schließen": accounts as „A an B", no kind, no reasons. */
+/** Compact, for a drawer or the tab „Zum Schließen": accounts as „A an B", no kind, the review reason last. */
 export const Compact: Story = {
   render: () => (
     <div style={{ width: 680 }}>

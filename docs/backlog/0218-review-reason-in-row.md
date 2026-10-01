@@ -60,8 +60,9 @@ alle Gründe und die Rechnung. Routine bleibt leer. Daneben „So gebucht"
 | „x von y bestanden" in der Zeile | raus; die Prüfpunkte stehen im Aufklapper (`CheckItems`) | `Grouped` |
 
 `full`: Datum · Gegenpartei · Soll · Name · Haben · Name · Betrag · BU · So gebucht ·
-Prüfgrund (· Satzart flach). `compact`: Datum · Gegenpartei · Konten · Betrag ·
-Prüfgrund. Optional: Nr. · Beleg · Prüfung durch Ludwig.
+(Satzart, nur flach) · Prüfgrund. `compact`: Datum · Gegenpartei · Konten · Betrag ·
+Prüfgrund. Optional: Nr. · Beleg · Prüfung durch Ludwig. „So gebucht" rechtsbündig
+(eine Zahl, V3).
 
 **Kann bewusst nicht:** den Prüfbedarf rechnen, Gründe ordnen oder Wörter
 wählen (die App, F232/F357), den Reiter zeigen.
@@ -71,7 +72,7 @@ wählen (die App, F232/F357), den Reiter zeigen.
 - **Wort:** `Badge` im Ton der Registry. **A7 in der Liste:** Warnung ist die
   höchste Farbe — ein `danger` aus der Registry wird hier `warning`; Rot bleibt dem,
   was die Freigabe sperrt (roter Prüfpunkt im Fall). Zu langes Wort wird gekürzt,
-  nie umgebrochen; `title` und (i) tragen es ganz.
+  nie umgebrochen; ganz steht es im (i) (der `title` am Wort ist die Einzelheit).
 - **Hover:** `title` am Wort = Einzelheit dieses Falls („Beleg weist 7 % aus,
   gebucht wurde BU 9 (19 %).", „Ludwig: 38 %", „BU 94 · Sachverhalt 7: …"); `title`
   an „+n" = die weiteren Wörter.
@@ -200,3 +201,22 @@ gebucht" linksbündig (H1).
 
 Abgenommen von / am: nicht abgenommen — Claude (Abnahme-Agent), 2026-10-01 ·
 Offene Punkte: M1–M7 (M1 blockierend)
+
+## Nacharbeit 2026-10-01 (nach der fremden Abnahme)
+
+| Punkt | Änderung | Stand |
+|---|---|---|
+| M1 Hover kommt in aufklappbaren Zeilen nicht an | `.v3rrc__word`, `.v3rrc__more` über die Zeilenfläche gehoben (`position: relative; z-index: 2`, wie Links in der Zeile). Gemessen `grouped`: `elementFromPoint` trifft in sechs Zeilen das Wort, auch „+n" | behoben |
+| M2 Barrel ohne `ReviewReasonCell` | seit a3ed1dd im Barrel (`ReviewReasonCell`, `ReviewReasonView`) | behoben |
+| M3 Spaltenreihenfolge | Spec nach dem Code: „So gebucht · (Satzart, nur flach) · Prüfgrund" | behoben |
+| M4 Satz zum gekürzten Wort | „ganz steht es im (i); der `title` ist die Einzelheit" | behoben |
+| M5 Fixture | `confidence_red` nur bei Vorschlägen mit Judge (nicht bei Dauerbuchung); `check_red` kommt als `danger` herein und zeigt sich als Warnung — die A7-Abbildung ist in `grouped` zu sehen | behoben |
+| M6 `grep` nicht leer | Beispielwörter aus dem JSDoc von `ReviewReasonView.label` genommen | behoben |
+| M7 veraltete Sätze | Kopfkommentar, `include`-JSDoc (nennt `verdict`), beide `@when`, Kommentar am Aufklapper, `Compact`-Story | behoben |
+| H1 „So gebucht" linksbündig | `align: "end"`, Kopf folgt | behoben |
+| H2 Teile im (i) heißen anders als die Gründe | Befund an die App (`befunde-app.md` §E): die Labels der Teile in `review-score.ts` an die Wörter der Achse `review_reason` angleichen | an die App |
+| H3 Popover 7 px unter dem Fensterrand bei vier Gründen | bleibt: der Rand gehört `Popover` (Ausrichtung nach unten), nicht diesem Feld | offen |
+| H4 keine Story für `include: ["verdict"]` | bleibt (Option, kein Standard) | offen |
+| H5 50 Punkte ohne Prüfgrund möglich (25 + 25) | Befund an die App: dann leert die Zelle — entweder ein Grund „Mehrere kleine Gründe" oder die Grundlast in die Achse | an die App |
+| H6 (i) des alten Spaltenkopfs (`review_tab`) weg | bleibt: der Kopf „Prüfgrund" erklärt sich über das (i) je Zeile | — |
+

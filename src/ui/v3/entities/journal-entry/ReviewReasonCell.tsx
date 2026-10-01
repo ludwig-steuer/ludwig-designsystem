@@ -17,7 +17,7 @@ import { Popover } from "../../primitives/Popover";
 export interface ReviewReasonView {
   /** The registry code — `check_red:P-UST`, `judge_flag`, `reverse_charge` … */
   code: string;
-  /** The short word — „Steuerschlüssel", „Beanstandet", „§13b". */
+  /** The short word of the registry — for a check, the check's short word. */
   label: string;
   kind: StatusKind;
   /** This case's particular — the finding, the judge's comment, „Ludwig: 62 %", „BU 94 · Sachverhalt 7". */
