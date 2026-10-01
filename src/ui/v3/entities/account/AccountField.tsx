@@ -106,6 +106,10 @@ export function AccountField({
   );
   const box = useRef<HTMLDivElement>(null);
   const pop = useRef<HTMLDivElement>(null);
+  const input = useRef<HTMLInputElement>(null);
+  // Set when the focus comes back to the field after a choice: then it must
+  // not open the list again.
+  const quiet = useRef(false);
   // Two account fields on one page must not point at the same list — the
   // id used to be a fixed literal (same defect as in 0021 and 0028).
   const listId = useId();
@@ -211,6 +215,12 @@ export function AccountField({
     onChange(c.number, c);
     setQuery(c.number);
     setOpen(false);
+    // Chosen by keyboard, the focus stood on the option, which now disappears:
+    // back to the field, where typing goes on (acceptance 0013 M1).
+    if (document.activeElement !== input.current) {
+      quiet.current = true;
+      input.current?.focus();
+    }
   }
 
   return (
@@ -227,6 +237,7 @@ export function AccountField({
       <div className="v2kf__box">
         <input
           id={id}
+          ref={input}
           className={`v2in v2kf__in${resting ? " v2kf__in--rest" : ""}${
             onOpenLedger ? " v2kf__in--ledger" : ""
           }${invalid ? " v2in--invalid" : ""}`}
@@ -240,7 +251,8 @@ export function AccountField({
           placeholder={placeholder}
           onFocus={(e) => {
             setFocused(true);
-            setOpen(true);
+            if (quiet.current) quiet.current = false;
+            else setOpen(true);
             // The number stands there selected; typing replaces it.
             e.target.select();
           }}
@@ -282,7 +294,16 @@ export function AccountField({
         ) : null}
       </div>
       {open ? (
-        <div className="v2kf__pop" id={listId} role="listbox" ref={pop} popover="manual">
+        <div
+          className="v2kf__pop"
+          id={listId}
+          role="listbox"
+          ref={pop}
+          popover="manual"
+          // A press anywhere in the list — option, group head, scrollbar — keeps
+          // the focus in the field (B4, acceptance 0013 H1).
+          onMouseDown={(e) => e.preventDefault()}
+        >
           {groups.length === 0 ? (
             <div className="v2kf__empty">
               Kein Konto zu „{query}" — weder unter den Vorschlägen noch im Kontenrahmen.
@@ -300,9 +321,6 @@ export function AccountField({
                     role="option"
                     aria-selected={c.number === value}
                     className={`v2kf__opt${c.number === value ? " is-active" : ""}`}
-                    // The field keeps the focus: no blur before the click, and
-                    // after the choice the focus is where typing goes on (B4).
-                    onMouseDown={(e) => e.preventDefault()}
                     onClick={() => choose(c)}
                   >
                     <span className="v2kf__num">{c.number}</span>

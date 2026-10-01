@@ -466,3 +466,13 @@ Nachprüfung des Tastaturwegs (Tab auf Eintrag, Enter → Fokus im Feld, Liste z
 und eine Stichprobe von B1. B3 und B5 bleiben offen.
 
 Nachgeprüft von / am: Claude (fremder Nachprüfer), 2026-10-01
+
+### Nacharbeit 2 2026-10-01 (nach der Nachprüfung, Stand d1bb70a)
+
+| Punkt | Was getan |
+|---|---|
+| **M1** | Nach der Wahl per Tastatur (Tab auf den Eintrag, Enter) stand der Fokus auf dem Eintrag, der verschwindet — er fiel auf `body`. `choose()` gibt ihn jetzt ans Feld zurück, wenn er nicht schon dort ist; ein Merker hält `onFocus` davon ab, die Liste wieder zu öffnen. Der Satz „das Feld behält den Fokus, auch nach der Wahl" gilt damit für Klick **und** Enter |
+| **H1** | `preventDefault` beim Mausdruck sitzt an der ganzen Liste statt an jedem Eintrag: Gruppenkopf und Bildlaufleiste lassen den Fokus im Feld, die Liste bleibt offen |
+| H2 | zweimal „Alle Konten" mit demselben Konto in `RecurringRuleEditor --filled` — eigener Punkt, offen |
+
+Nachzuprüfen: Tab auf Eintrag, Enter → Wert gesetzt, Liste zu, Fokus sichtbar im Feld, Tippen geht ins Feld; Klick auf Gruppenkopf → Liste bleibt offen; B1 stichprobenartig.
