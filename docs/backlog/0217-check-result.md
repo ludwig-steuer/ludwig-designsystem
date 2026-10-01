@@ -265,3 +265,29 @@ gemessen, die Gegenprobe ist unverändert grün. Abnahmekriterien abgehakt.
 
 Abgenommen von / am: Claude (Nachprüf-Agent), 2026-10-01 · Offene Punkte: H1
 (Owner-Hinweis), H4 (Kommentar)
+
+## Nachtrag 2026-10-01 — y zählt nur prüfbare Punkte (F355 §5 Punkt 3, Owner über llcto)
+
+Brief `ludwig/app` `docs/backlog/F355-booking-review-unified-design-brief.md`
+(6999e08f), §3: „x von y bestanden", wobei **y nur die prüfbaren Punkte zählt** —
+„18 von 18", nicht „18 von 24" unter einem grünen Haken. Die nicht prüfbaren
+stehen weiter als eigener zusammengefasster Block.
+
+- `CheckItems`: Gruppenzeile der bestandenen Punkte `x von (alle − nicht
+  prüfbar)`; Block „n Prüfpunkte nicht prüfbar" unverändert.
+- `CheckResult`: dieselbe Rechnung (`checkable`), damit Zeile und Gruppe
+  dieselbe Zahl sagen. Fakten genauso: „nicht erhoben" zählt nicht mit.
+- `checkSummary()` unverändert (zählt jede Gruppe für sich).
+- Wirkt überall, wo `CheckItems` steht — auch Plausibilitäts- und
+  Vorsteuer-Reiter der App (gewollt, Owner).
+
+Gemessen: `CheckItemsMixed` „3 von 5 Prüfpunkten bestanden" (vorher „3 von 7"),
+„2 Prüfpunkte nicht prüfbar"; `CheckResultTones` „6 von 7 bestanden" (vorher
+„6 von 8"), „7 von 7" (vorher „7 von 8"), Fakten „3 von 4 geklärt" … `title`
+unverändert („1 offen · 1 nicht prüfbar · 6 bestanden").
+
+Kriterien für die fremde Abnahme:
+
+- [ ] `CheckItems`: y = Punkte ohne `open`; nicht prüfbare als eigener Block (`CheckItemsMixed`, `CheckItemsAllOpen`, `CheckItemsAllGreen`)
+- [ ] `CheckResult`: dieselbe Zahl wie die Gruppe in `CheckItems` für dieselben Punkte (`CheckResultTones`, T3-Aufklapper `Grouped`)
+- [ ] `checkSummary()` unverändert (Code, `title`)

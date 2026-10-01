@@ -414,7 +414,9 @@ export function CheckItems({ items, kind = "rule" }: { items: CheckItem[]; kind?
         <CheckGroup
           state="done"
           kind={kind}
-          summary={`${passed.length} von ${items.length} ${noun} ${words.green}`}
+          // y counts only what could run (F355): „18 von 18", not „18 von 24"
+          // under a green sign — the not checkable stand in their own group.
+          summary={`${passed.length} von ${items.length - notRun.length} ${noun} ${words.green}`}
           items={passed}
         />
       ) : null}
@@ -465,6 +467,8 @@ export function CheckResult({ items, kind = "rule" }: { items: readonly CheckIte
   const words = SUMMARY_WORD[kind];
   const state = worst(items);
   const passed = items.filter((i) => i.state === "green").length;
+  // y counts only what could run (F355) — the same sum as the group in CheckItems.
+  const checkable = items.filter((i) => i.state !== "open").length;
   const text =
     state === null
       ? kind === "fact"
@@ -472,7 +476,7 @@ export function CheckResult({ items, kind = "rule" }: { items: readonly CheckIte
         : "Keine Prüfpunkte"
       : state === "open"
         ? words.open
-        : `${passed} von ${items.length} ${words.green}`;
+        : `${passed} von ${checkable} ${words.green}`;
   return (
     <span className={`v2pp__result-line v2pp__result-line--${state ?? "none"}`} title={checkSummary(items, kind)}>
       {state ? <StateIcon state={PP_ICON[state]} /> : null}
