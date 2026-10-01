@@ -261,9 +261,10 @@ const SUMMARY_WORD: Record<CheckKind, Record<CheckItem["state"], string>> = {
  * The counts of a set of checks in one line — the XS size (0206): „1 verletzt
  * · 2 offen · 9 bestanden". Worst first, empty groups left out.
  *
- * @when    The result of a set of checks in one line — the title of a report's
- *          verdict (`StatusCallout`) or an overview.
- * @instead The checks themselves → CheckItems.
+ * @when    All counts of a set of checks as plain text — the title of a
+ *          report's verdict (`StatusCallout`), a tooltip, an overview.
+ * @instead The checks themselves → CheckItems. One line with sign and tone in
+ *          a list row → CheckResult.
  */
 export function checkSummary(items: readonly CheckItem[], kind: CheckKind = "rule"): string {
   const order: CheckItem["state"][] = ["red", "yellow", "open", "green"];
@@ -393,7 +394,8 @@ function CheckGroup({
  *
  * @when    Individual checks with reasons — rules (pass/fail) or facts (a word
  *          each); passed/settled and unrunnable ones each in a single line.
- * @instead Error that blocks saving → Messages. The count alone → checkSummary.
+ * @instead Error that blocks saving → Messages. The count alone → checkSummary;
+ *          as a line with sign and tone in a list row → CheckResult.
  */
 export function CheckItems({ items, kind = "rule" }: { items: CheckItem[]; kind?: CheckKind }) {
   const words = SUMMARY_WORD[kind];

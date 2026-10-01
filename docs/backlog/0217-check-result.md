@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Status | in Arbeit — gebaut 2026-10-01; fremde Abnahme 2026-10-01 nicht bestanden, M1–M6 offen |
+| Status | Abnahme — Nacharbeit 2026-10-01 nach der fremden Abnahme (M1–M6) |
 | Stufe | `patterns/` — Gruppe Prüfen (Familie `Review.tsx`, neben `CheckItems` und `checkSummary`) |
 | Klassen-Test | „Ergäbe das auch in einer Versicherungs-App Sinn?" → ja: jedes Prüfergebnis eines Antrags mit Regeln |
 | Quelle | Anfrage llcto 2026-10-01, Owner-Wunsch: Prüfpunkte auch in der Vorschlagsliste (Schritt 3, T3, Ansichten „Übersicht" und „Liste"), als eigener Baustein, damit sie überall gleich erscheinen |
@@ -36,8 +36,9 @@ vollen Prüfpunkte wie in `CheckItems`.
   Aufklappen trägt der Ort, an dem sie steht — in T3 der Zeilen-Aufklapper,
   darin `CheckItems`. Eine eigene Klapp-Form ist geplant, aber nicht gebaut
   (Befund beim Bauen, Ausbau).
-- **Setzt auf:** `StateIcon`, `CheckItems`, `checkSummary`. Server-Component wie
-  der Rest der Familie.
+- **Setzt auf:** `StateIcon` und `checkSummary` (für den `title`).
+  Server-Component wie der Rest der Familie. `CheckItems` setzt erst T3 ein, im
+  Zeilen-Aufklapper.
 
 ## Schnittstelle
 
@@ -50,7 +51,8 @@ vollen Prüfpunkte wie in `CheckItems`.
 
 | Feld / Verhalten | Bedeutung | Nachweis |
 |---|---|---|
-| `ProposalRow.checks?: readonly CheckItem[]` | Die Prüfpunkte des Satzes, wie in der Fall-Ansicht. `undefined`: keine Daten, nichts erscheint | `Grouped` |
+| `ProposalRow.checks?: readonly CheckItem[]` | Die Prüfpunkte des Satzes, wie in der Fall-Ansicht. `undefined`: keine Daten — in der Zelle erscheint nichts; hat die Liste einen Aufklapper, sagt er dort „Keine Prüfpunkte für diesen Fall." (der Leertext von `CheckItems`), statt leer aufzugehen | `Grouped`, `ChecksWithoutExpand` |
+| `variant="compact"` | zeigt keine Prüfpunkte — weder Zeile noch Aufklapper (keine Spalte „Prüfbedarf") | `Compact` |
 | Spalte „Prüfbedarf" | Erste Zeile `CheckResult`, darunter wie bisher die Gründe bzw. „entschieden". Spur 124 → **156 px** („12 von 12 bestanden" mit Zeichen misst 153 px, auf einer Zeile) | `Grouped`, `Flat` |
 | Zeilen-Aufklapper | Oben `CheckItems` mit den Prüfpunkten des Satzes, darunter der Aufklapper des Aufrufers (`expand`). Ohne `expand` gibt es den Aufklapper nur der Prüfpunkte wegen. Der Aufrufer legt die Prüfpunkte nicht noch einmal hinein | `Grouped` |
 
@@ -67,13 +69,16 @@ quittieren (das tun `gate`/`jump` in `CheckItems`), in `compact` erscheinen
 - **Ton = schlechtester Punkt:** `red` vor `yellow` vor `green`. „Nicht prüfbar"
   (`open`) zählt nicht als Befund. Das Zeichen ist `StateIcon` (error · warning
   · done); bei Rot und Gelb trägt auch der Text die Farbe (`--color-danger`
-  6,07:1, `--color-warning` 5,52:1 auf Weiß). Bei Grün bleibt der Text in der
+  6,06:1, `--color-warning` 5,52:1 auf Weiß). Bei Grün bleibt der Text in der
   Grundfarbe: Grün ist der Normalfall, das Signal ist die Abweichung, und 36
   grüne Zeilen hintereinander wären keine Ruhe (Farbe nur als Signal).
 - **Nichts prüfbar** (nur `open`): kein „0 von 12 bestanden", das wie ein Befund
   läse, sondern „nicht prüfbar", Zeichen `open`, Text gedämpft — wie die dritte
   Gruppe in `CheckItems` (0148).
 - **Leer** (`[]`): „Keine Prüfpunkte", gedämpft.
+- **Fakten** (`kind="fact"`): dieselben Regeln mit den Wörtern der Familie —
+  „x von y geklärt"; Rot „widersprüchlich", Gelb „zu klären" (nur im `title`
+  gezählt), nichts erhoben → „nicht erhoben", leer → „Keine Fakten".
 - **Text kurz** („9 von 12 bestanden" — „Prüfpunkte" sagt die Umgebung), auf
   einer Zeile; `title` = `checkSummary()` („1 verletzt · 2 offen · 9 bestanden").
   Keine Interaktion, kein Hover — aufgeklappt wird die Zeile der Liste.
@@ -89,9 +94,12 @@ je Regel und Fakt) = 1; der Einsatz in T3 beweist Zeile und Aufklapper.
 | `CheckResultTones` | alle Töne nebeneinander, `kind` rule und fact, `title` mit allen Zahlen |
 | T3 `Grouped` | Zeile in „Prüfbedarf" ohne Aufklappen sichtbar; im Zeilen-Aufklapper die vollen Prüfpunkte über dem Satz |
 | T3 `Flat` | dieselbe Zeile in der flachen Ansicht |
+| T3 `ChecksWithoutExpand` | ohne Aufklapper des Aufrufers: die Liste klappt nur der Prüfpunkte wegen auf; die Zeile ohne `checks` sagt „Keine Prüfpunkte für diesen Fall." |
+| T3 `Compact` | keine Prüfpunkte, kein Aufklapper |
 
 Nicht anwendbar: lädt und Fehler — die Prüfpunkte kommen mit der Zeile; lädt die
-Liste, zeigt T3 ihren Ladezustand.
+Liste, zeigt T3 ihren Ladezustand. Leer nach Filter — der Baustein filtert
+nicht; was die Liste filtert, sagt ihr eigener Leertext.
 
 ## Ausbau
 
@@ -204,3 +212,22 @@ nur als Kritikalität, Grün nur am Zeichen, Zeile 20,9 px in `--fs-ui`, `nowrap
 
 Abgenommen von / am: nicht abgenommen — Claude (Abnahme-Agent), 2026-10-01 ·
 Offene Punkte: M1–M6 (M1 blockierend)
+
+## Nacharbeit 2026-10-01 (nach der fremden Abnahme)
+
+| Punkt | Änderung | Stand |
+|---|---|---|
+| M1 `compact` bekam Aufklapper mit Prüfpunkten | Aufklapper der Prüfpunkte nur, wenn `variant !== "compact"`; `Compact` gemessen: 0 Aufklapper, 0 Prüfzeilen bei 6 Zeilen | behoben |
+| M2 leerer Aufklapper bei Zeile ohne `checks` | sie zeigt `CheckItems` mit `[]` → „Keine Prüfpunkte für diesen Fall."; neue Story `ChecksWithoutExpand` (vier Zeilen, darunter Fall 12 ohne Satz) | behoben |
+| M3 Nachbarn ohne Rückverweis | `checkSummary`: `@when` „All counts … as plain text", `@instead` nennt `CheckResult`; `CheckItems`: `@instead` nennt `CheckResult` | behoben |
+| M4 Fakten nur in Gelb | `CheckResultTones` zeigt Fakten in allen fünf Fällen (widersprüchlich · zu klären · geklärt · nicht erhoben · keine) | behoben |
+| M5 Fakt-Wörter, „leer nach Filter" | Abschnitt „Verhalten" nennt die Fakt-Wörter; „leer nach Filter" unter „Nicht anwendbar" begründet | behoben |
+| M6 „Setzt auf", Kontrast | „Setzt auf" ohne `CheckItems`; `--color-danger` 6,06:1 in Spec und CSS-Kommentar | behoben |
+| H3 Klasse `.v3prop__who` in „Prüfbedarf" | eigene Klasse `.v3prop__stack` für mehrzeilige Zellen (Soll/Haben, Prüfbedarf); `.v3prop__who` bleibt der Gegenpartei | behoben |
+| H1 aufgeklappt „6 von 8 bestanden" (Zeile) und „6 von 8 Prüfpunkten bestanden" (Gruppe in `CheckItems`) zugleich | bleibt: die Zeile ist der Stand ohne Aufklappen, die Gruppenzeile beschriftet den zugeklappten Block der bestandenen Punkte — zwei Orte mit zwei Aufgaben. Will der Owner sie trennen, ist der Weg ein kürzerer Gruppensatz in `CheckItems`, nicht eine zweite Zeile | offen, Owner |
+| H2 `title` nur mit der Maus | bleibt: die Zahlen stehen vollständig im Aufklapper | — |
+
+Gemessen nach der Nacharbeit (1280 × 900): `Grouped` 1246 = 1246, Zeilen 67–106 px;
+`Compact` ohne Aufklapper; `ChecksWithoutExpand` vier Aufklapper, der dritte „Keine
+Prüfpunkte für diesen Fall.".
+

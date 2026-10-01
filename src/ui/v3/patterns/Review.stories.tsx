@@ -299,7 +299,10 @@ const rule = (state: CheckItem["state"], n: number): CheckItem[] =>
 /**
  * `CheckResult` (0217) in every tone, side by side — the line of a list row.
  * Red and yellow colour the words, green only the sign; nothing checkable says
- * so instead of „0 von 12"; the title carries every count.
+ * so instead of „0 von 12"; the title carries every count. First the rules
+ * (red · yellow · green · not checkable · none), then the facts in the same
+ * order of tones („widersprüchlich", „zu klären", „geklärt", „nicht erhoben",
+ * „Keine Fakten").
  */
 export const CheckResultTones: Story = {
   render: () => (
@@ -309,7 +312,11 @@ export const CheckResultTones: Story = {
       <CheckResult items={[...rule("green", 7), ...rule("open", 1)]} />
       <CheckResult items={NOT_CHECKABLE} />
       <CheckResult items={[]} />
+      <CheckResult items={[...rule("red", 1), ...rule("green", 3)]} kind="fact" />
       <CheckResult items={FACTS} kind="fact" />
+      <CheckResult items={rule("green", 4)} kind="fact" />
+      <CheckResult items={rule("open", 3)} kind="fact" />
+      <CheckResult items={[]} kind="fact" />
     </div>
   ),
 };

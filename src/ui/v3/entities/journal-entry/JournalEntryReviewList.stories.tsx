@@ -177,6 +177,15 @@ export const Compact: Story = {
   ),
 };
 
+/**
+ * Checks without a fold-out of the caller (0217): the list unfolds for the
+ * checks alone. The row without checks (no entry yet) says so when opened —
+ * it does not open onto nothing.
+ */
+export const ChecksWithoutExpand: Story = {
+  render: () => <JournalEntryReviewList rows={ROWS.slice(9, 13)} head={{ title: "Prüfpunkte je Satz", sub: "4 Sachverhalte" }} {...HREFS} />,
+};
+
 /** Empty is a success, empty after a filter is not; loading and error keep the head. */
 export const States: Story = {
   render: () => (

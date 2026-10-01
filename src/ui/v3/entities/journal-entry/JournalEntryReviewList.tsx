@@ -153,7 +153,7 @@ function SideNumber({
     <span className="v2mono">{main.number}</span>
   );
   return (
-    <span className="v3prop__who" title={sideTitle(accounts)}>
+    <span className="v3prop__stack" title={sideTitle(accounts)}>
       {number}
       {withMore ? <More accounts={accounts} /> : null}
     </span>
@@ -165,7 +165,7 @@ function SideName({ accounts, note }: { accounts: readonly EntryAccount[]; note?
   const main = accounts[0];
   if (!main) return null;
   return (
-    <span className="v3prop__who" title={sideTitle(accounts)}>
+    <span className="v3prop__stack" title={sideTitle(accounts)}>
       <span className="v3prop__acc">{main.name ?? "—"}</span>
       <More accounts={accounts} />
       {note}
@@ -239,7 +239,7 @@ export function proposalReviewColumns(options: ProposalColumnOptions = {}): Colu
       width: accountNames ? "44px" : "minmax(68px, 1fr)",
       cell: (p) =>
         p.accounts ? (
-          <span className="v3prop__who">
+          <span className="v3prop__stack">
             <SideNumber accounts={p.accounts.debit} accountHref={accountHref} withMore={!accountNames} />
             {accountNames ? null : hiddenLines(p.accounts)}
           </span>
@@ -315,7 +315,7 @@ export function proposalReviewColumns(options: ProposalColumnOptions = {}): Colu
       // The checks first — „x von y bestanden" without opening (0217) —, then
       // one line per reason; what does not fit is cut, the title carries it.
       cell: (p) => (
-        <span className="v3prop__who">
+        <span className="v3prop__stack">
           {p.checks ? <CheckResult items={p.checks} /> : null}
           {p.decided ? (
             <span>entschieden</span>
@@ -400,20 +400,25 @@ export function JournalEntryReviewList(
   };
   // The fold-out carries the checks above the caller's own content (0217) —
   // the same block in every list, so the app does not put them in a second
-  // time. `CheckItems` directly: the row already says „x von y".
+  // time. `CheckItems` directly: the row already says how many passed. Not in
+  // `compact`: it has no column for them, so it shows none (acceptance M1).
   const rows = props.groups ? props.groups.flatMap((g) => g.rows) : props.rows!;
-  const fold = expand || rows.some((r) => r.checks)
-    ? (row: ProposalRow) => (
-        <>
-          {row.checks ? (
-            <div className="v3prop__checks">
-              <CheckItems items={[...row.checks]} />
-            </div>
-          ) : null}
-          {expand?.(row)}
-        </>
-      )
-    : undefined;
+  const withChecks = options.variant !== "compact" && rows.some((r) => r.checks);
+  const fold =
+    expand || withChecks
+      ? (row: ProposalRow) => (
+          <>
+            {withChecks ? (
+              <div className="v3prop__checks">
+                {/* Every row unfolds once one can (DataTable): a row without
+                    checks says so, it does not open onto nothing (M2). */}
+                <CheckItems items={row.checks ? [...row.checks] : []} />
+              </div>
+            ) : null}
+            {expand?.(row)}
+          </>
+        )
+      : undefined;
   const table = fold
     ? props.groups
       ? <DataTable<ProposalRow> {...shared} expand={fold} groups={props.groups} />

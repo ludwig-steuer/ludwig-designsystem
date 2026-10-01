@@ -4247,7 +4247,7 @@ button.v2oil__side:focus-visible { outline: 2px solid var(--color-focus); outlin
    `Disclosure`'s head. */
 .v2pp__sum { display: inline-flex; align-items: center; gap: var(--space-2); min-width: 0; }
 /* 0217 · the result of a set of checks in one line. Red and yellow colour the
-   words (danger 6.07:1, warning 5.52:1 on white); green only the sign. */
+   words (danger 6.06:1, warning 5.52:1 on white); green only the sign. */
 .v2pp__result-line { display: inline-flex; align-items: center; gap: var(--space-2); min-width: 0; white-space: nowrap; }
 .v2pp__result-line > svg { flex: none; }
 .v2pp__result-line--red { color: var(--color-danger); }
@@ -4766,6 +4766,8 @@ a.v3bbr__val:hover { text-decoration-color: currentColor; }
 .v3docrow__entry:hover { text-decoration: underline; }
 /* 0164 · proposals to review */
 .v3prop__who { display: grid; min-width: 0; }
+/* A cell of several lines — main account, its rest; the check line, the reasons. */
+.v3prop__stack { display: grid; min-width: 0; }
 .v3prop__name { display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 3; line-clamp: 3; overflow: hidden; overflow-wrap: anywhere; }
 /* The main account's name wraps (owner 2026-10-01) — at a syllable, and only
    in long words: „Verbind-lichkeiten", not „Bü-robedarf". Three lines like the
