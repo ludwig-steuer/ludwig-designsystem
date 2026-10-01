@@ -105,7 +105,7 @@ export interface SourceDocumentVM {
   documentDate?: string | null;
   /**
    * NOT NULL. Eingang beim Mandanten — Perioden-Achse der Belegliste. Default
-   * ist der Upload-Tag; der DATEV-Metadaten-Import überschreibt ihn.
+   * ist der Upload-Tag; Intake und Agent (`update_source_doc`) setzen ihn.
    */
   receivedDate: string;
   /**
