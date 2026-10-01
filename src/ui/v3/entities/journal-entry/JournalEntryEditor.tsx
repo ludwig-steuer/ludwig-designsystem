@@ -4,7 +4,7 @@ import { Trash2, Undo2 } from "lucide-react";
 import { useCallback, useEffect, useMemo, useState } from "react";
 
 import { deriveTax } from "./tax-assist";
-import { REVERSE_CHARGE_TAX_ACCOUNTS, journalBalanceText, journalLines } from "./journal-entry";
+import { ISO_DATE, REVERSE_CHARGE_TAX_ACCOUNTS, journalBalanceText, journalLines } from "./journal-entry";
 // Direct import, not the barrel: `@/ui/status` also exports `FlowModal` and
 // pulls `@/modules/invoices` with the DB driver into the bundle (P22).
 import { ActionIcon } from "../../Icons";
@@ -25,8 +25,6 @@ import { JournalEntryCard } from "./JournalEntryCompact";
 import { TaxKeyCell } from "./TaxKey";
 import { AiBookingNotes } from "./AiBookingNotes";
 
-/** A date in ISO form — the one the date input takes. */
-const ISO_DATE = /^\d{4}-\d{2}-\d{2}/;
 
 // One currency, one formatter (T7, 0043). The editor computes in gross and
 // always needs a number, so `toNumber` falls back to 0 where `parseAmount`

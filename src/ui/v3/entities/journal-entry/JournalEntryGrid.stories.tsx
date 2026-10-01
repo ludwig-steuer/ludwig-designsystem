@@ -16,7 +16,7 @@ export default meta;
 type Story = StoryObj<typeof JournalEntryGrid>;
 
 const ROW = (over: Partial<JournalRow> & { id: string }): JournalRow => ({
-  datum: "26.08.2026",
+  datum: "2026-08-26",
   amount: "1.000,00",
   side: "S",
   bu: "9",

@@ -10,6 +10,7 @@ import { TaxKeyCell } from "./TaxKey";
 import { formatAmount } from "../../format";
 import { Time } from "../../primitives/Time";
 import {
+  ISO_DATE,
   documentSideTotal,
   journalBalanceText,
   journalGridTracks,
@@ -22,8 +23,6 @@ import {
   type Side,
 } from "./journal-entry";
 
-/** A date in ISO form — the one the date input takes. */
-const ISO_DATE = /^\d{4}-\d{2}-\d{2}/;
 
 const euro = (n: number) => formatAmount(n, "EUR");
 

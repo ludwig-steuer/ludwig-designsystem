@@ -861,3 +861,12 @@ erfüllt und abgehakt. Kriterium 3 bleibt offen wegen M3. H1 und H2 bleiben
 eigene Aufträge, die Frage aus H3 (Fall-Ansicht in `simple`) liegt beim Owner.
 Nachprüfung danach: nur M3 — `--s-2-split-full` Kopf und Zeile bei scrollLeft 0
 und 104, `case-editable`.
+
+### Nacharbeit 2 Spurbreiten 2026-10-01 (nach der Nachprüfung)
+
+| Punkt | Änderung | Stand |
+|---|---|---|
+| M3 angeheftete Zelle nur so hoch wie ihr Inhalt | `align-self: stretch; display: flex; align-items: center` an der angehefteten Zelle — gemessen `S2_SplitFull`: Kopfzelle 19 px (vorher 0), Zeilenzelle 31 px = Zeile 31 px; bei scrollLeft 104 deckt sie „KOST" ab, über der Löschspalte steht kein Kopf | behoben |
+| H4 zwei Schriftbilder je nach Aufrufer | Erzeuger auf ISO: `JournalEntryGrid.stories.tsx` („2026-08-26"), `showcase/account/scenario.tsx` (`postingDate` ISO) — beide jetzt über `Time` mit `tnum` | behoben |
+| H5 `ISO_DATE` doppelt | einmal in `journal-entry.ts`, Editor und Grid importieren es | behoben |
+| H6 Linien enden beim Querscrollen an der Rahmenbreite | vorbestehend (0044) | offen |

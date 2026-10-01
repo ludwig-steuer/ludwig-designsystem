@@ -633,7 +633,8 @@ function EntryDrawer({ scenario, entry, hash }: { scenario: AccountScenario; ent
   const grid: JournalRow[] = [
     {
       id: entry.id,
-      datum: `${d.slice(8, 10)}.${d.slice(5, 7)}.${d.slice(0, 4)}`,
+      // ISO, as `JournalRow.datum` says — the grid shows it as TT.MM.JJJJ.
+      datum: d.slice(0, 10),
       amount: formatAmount(amount, null),
       side: entry.debit !== null ? "S" : "H",
       bu: "",

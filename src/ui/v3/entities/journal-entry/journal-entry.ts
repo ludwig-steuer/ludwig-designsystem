@@ -24,6 +24,9 @@ export type JournalMode = "simple" | "full";
 export type JournalStatus = "proposed" | "accepted" | "posted" | "reversed";
 
 /** One line of an entry, as it is read. The editor's row adds what it edits. */
+/** A date in ISO form (`2026-08-21`) — the one the editor's date input takes. */
+export const ISO_DATE = /^\d{4}-\d{2}-\d{2}/;
+
 export interface JournalRow {
   id: string;
   /** ISO (`2026-08-21`) — the editor's date input needs it; read, it shows as 21.08.2026. A German date is shown as given. */

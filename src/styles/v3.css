@@ -1823,6 +1823,10 @@ a.ki__src:hover { text-decoration: underline; color: var(--color-accent-700); }
 .bse__tbl--edit .bse__cells > :last-child {
   position: sticky; right: 0;
   background: var(--color-surface); box-shadow: -6px 0 0 var(--color-surface);
+  /* As tall as the row, not as its content: otherwise the head over it is 0 px
+     („KOST" stood bare over the delete column) and a field's frame ran round
+     the bin (acceptance M3). */
+  align-self: stretch; display: flex; align-items: center;
 }
 .bse__head,
 .bse__cells {
