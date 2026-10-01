@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Status | in Arbeit — Nachprüfung 2026-10-01 (Stand 65c25e2): nicht abgenommen (N1–N3, Fixture und Texte; Bau und Layout grün); zuvor: Nacharbeit nach der fremden Abnahme (M1–M7) |
+| Status | **fertig — abgenommen 2026-10-01** (H1 Owner-Bestätigung, H2 Editor-Befund offen); Nachprüfung 2, Stand e6b6e53 |
 | Stufe | `entities/journal-entry/` |
 | Klassen-Test | „Ergäbe das auch in einer Versicherungs-App Sinn?" → nein: Buchungssatz, Satzart, Judge, Prüfpunkte eines Vorschlags |
 | Quelle | Anfrage llcto 2026-10-01, Owner-Wunsch; Brief `ludwig/app` `docs/backlog/F355-booking-review-unified-design-brief.md` §3, §3a, §4, §5 Punkte 4–5 (6999e08f, cc28c51f) |
@@ -129,24 +129,24 @@ dazu „im Einsatz":
 
 Fest (gilt immer):
 
-- [ ] `pnpm typecheck` und `pnpm build` grün
-- [ ] Datei nach der Familie benannt, Story daneben, Titel in der richtigen Gruppe
-- [ ] Code englisch; `@when`/`@instead` an jedem Export
-- [ ] Kein Hex, kein px, keine lokale Label-Map; Status nur über Registry
-- [ ] Alle Stories oben vorhanden; ausgeschlossene Zustände begründet
-- [ ] Prüfliste `design-guidelines.md` §9 durchgegangen
-- [ ] Im Browser angesehen (Storybook), nicht nur gebaut
+- [x] `pnpm typecheck` und `pnpm build` grün
+- [x] Datei nach der Familie benannt, Story daneben, Titel in der richtigen Gruppe
+- [x] Code englisch; `@when`/`@instead` an jedem Export
+- [x] Kein Hex, kein px, keine lokale Label-Map; Status nur über Registry
+- [x] Alle Stories oben vorhanden; ausgeschlossene Zustände begründet
+- [x] Prüfliste `design-guidelines.md` §9 durchgegangen
+- [x] Im Browser angesehen (Storybook), nicht nur gebaut
 
 Variabel (aus dieser Spec):
 
-- [ ] Reihenfolge je Satz: Kopf → Satz → Begründung → Prüfpunkte → Judge → Handlungen; Belege/Zahlung rechts (`CaseEditable`)
-- [ ] Satz auf weißer Fläche, auch im grauen Aufklapper (`ListCompact`, gemessen: Hintergrund)
-- [ ] Leere Blöcke rendern nicht, auch keine Überschrift (`RoutineCase`: keine „Begründung", kein „Judge")
-- [ ] Judge nur bei Urteil ≠ confirm oder Satz vorhanden (`RoutineCase` vs. `ListCompact`)
-- [ ] `show` schaltet jeden Block ab (`ListCompact` ohne Belege; Code)
-- [ ] `lines`: compact = `JournalEntryCard` mit **allen** Zeilen inkl. Steuer/§ 13b/Gegenkonto; full = Slot (`ListFull`, `ExpenseWithPayment`)
-- [ ] Mehrere Sätze untereinander, je „Satz i von n" mit eigenen Prüfpunkten (`ExpenseWithPayment`)
-- [ ] Bei 1280 px kein Querscroll, Belege-Spalte rechts ohne Überlauf (`CaseEditable`, gemessen)
+- [x] Reihenfolge je Satz: Kopf → Satz → Begründung → Prüfpunkte → Judge → Handlungen; Belege/Zahlung rechts (`CaseEditable`)
+- [x] Satz auf weißer Fläche, auch im grauen Aufklapper (`ListCompact`, gemessen: Hintergrund)
+- [x] Leere Blöcke rendern nicht, auch keine Überschrift (`RoutineCase`: keine „Begründung", kein „Judge")
+- [x] Judge nur bei Urteil ≠ confirm oder Satz vorhanden (`RoutineCase` vs. `ListCompact`)
+- [x] `show` schaltet jeden Block ab (`ListCompact` ohne Belege; Code)
+- [x] `lines`: compact = `JournalEntryCard` mit **allen** Zeilen inkl. Steuer/§ 13b/Gegenkonto; full = Slot (`ListFull`, `ExpenseWithPayment`)
+- [x] Mehrere Sätze untereinander, je „Satz i von n" mit eigenen Prüfpunkten (`ExpenseWithPayment`)
+- [x] Bei 1280 px kein Querscroll, Belege-Spalte rechts ohne Überlauf (`CaseEditable`, gemessen)
 
 ## Abnahme
 
@@ -333,3 +333,28 @@ Nachgeprüft von / am: Claude (fremder Nachprüfer), 2026-10-01
 | Hinweis „(P58)" im sichtbaren `title` | gestrichen (Technik hinter Klartext, T4) | behoben |
 | H2 Editor-Spalte „Text" 0 px auch bei 728 px | vorbestehend, eigener Auftrag am Editor; betrifft die Fall-Ansicht der App bei 1280 px | offen, an llcto gemeldet |
 
+
+## Nachprüfung 2 2026-10-01 (Stand e6b6e53)
+
+Fremder Nachprüfer. Playwright im eigenen Kontext 1280 × 900, Story-IDs ohne Präfix
+`v3-entitäten-buchungssatz-bookingreview--`, Prüfpunkte per `summary` aufgeklappt.
+`BookingReview.tsx` seit 65c25e2 unverändert. Im Arbeitsbaum lag eine fremde,
+nicht committete Änderung an `JournalEntryEditor.tsx` (Spalten, H2) — sie berührt
+N1–N3 nicht; der Querscroll ist mit ihr gemessen.
+
+| Punkt | Nachweis | Ergebnis |
+|---|---|---|
+| N1 Belegfeld im Satz = Befund | `case-editable`: Eingabe „Belegfeld 1" = „RE-4417"; `in-use` und `list-full`: Grid-Zeile trägt „RE-4417". P-BELEG rot „Belegfeld 1 „RE-4417" weicht von der Nummer auf dem Beleg „RE-4471" ab"; Beleg („RE-4471 · 21.08.2026", Kopf „Beleg RE-4471 · 1.475,60 €") und Quelle „Rechnung RE-4471" tragen die Belegnummer. Fixture `stories.tsx:113–114` | ✓ |
+| N2 Spec | „Einordnung" Z. 22–25: `AiBookingNotesBody` (Begründung mit Quellen), `ProvenanceRows` (Satz des Judge als „Einschätzung"), `StatusBadge` mit Achse `confidence`. „Ausbau": nur noch Regelkontext. „Verhalten" Z. 101–103: Editor im Slot ohne `aiReview`; derselbe Satz in `befunde-app.md:378` (§E, 0219). Schnittstelle: Abschnitt seit 65c25e2 unverändert, `BookingReview.tsx` ebenso — Abgleich der Nachprüfung (M7) gilt weiter | ✓ |
+| N3 Beschreibung `InUse` | `stories.tsx:276–281`: „der volle Satz steht als `JournalEntryGrid` in seiner weißen Fläche", Editor-Befund benannt — die Story setzt `JournalEntryGrid` | ✓ |
+| Hinweis P-UST | aufgeklappt: „Steuerschlüssel und Satz auf dem Beleg passen zusammen." — 19 % nur noch in Judge-Satz, Beleg, Quelle und Kontonamen | ✓ |
+| Hinweis P-AUSGLEICH | `expense-with-payment`: nur an „Satz 2 von 2 · Zahlung" (P-BETRAG, P-AUSGLEICH); § 13b-Satz und `routine-case` P-BETRAG, P-KONTO, „ausgeglichen" 0× | ✓ |
+| Hinweis „(P58)" | alle sechs Stories: „P58" im Text 0×, in `title` 0× („Rechnung und Zahlung in einem Fall.", „Sachkonto und Geldkonto im selben Satz.") | ✓ |
+| Gegenprobe | `list-compact`, `list-full`, `case-editable`, `routine-case`, `expense-with-payment`, `in-use`: 0 Konsolenfehler, `scrollWidth` 1280 = 1280 | ✓ |
+| `typecheck`, `check:language` | beide Exit 0 („0 German comment lines"). `build` nicht gelaufen (Auftrag), Erbauer meldet ihn für e6b6e53 grün | ✓ |
+
+**Urteil:** abgenommen. N1–N3 und die drei Hinweise sind behoben; Abnahmekriterien
+abgehakt. Offen bleiben H1 (Owner-Bestätigung `caseKind`) und H2 (Editor-Spalte
+„Text" bei 728 px, eigener Auftrag am Editor).
+
+Nachgeprüft von / am: Claude (fremder Nachprüfer), 2026-10-01
