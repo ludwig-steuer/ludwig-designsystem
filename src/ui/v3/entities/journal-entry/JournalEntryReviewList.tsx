@@ -70,7 +70,8 @@ export interface ProposalRow {
   /**
    * The checks of the entry, as the case view shows them (0217). The pass
    * count stands in the reasons column, the items in the fold-out. Without
-   * them nothing appears.
+   * them the cell stays empty; once another row of the list has checks, this
+   * row's fold-out says there are none instead of opening onto nothing.
    */
   checks?: readonly CheckItem[];
 }
