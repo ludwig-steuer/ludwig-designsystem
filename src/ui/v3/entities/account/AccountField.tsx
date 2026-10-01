@@ -243,6 +243,9 @@ export function AccountField({
       // Escape on the frame, not only on the field: also from an option (0013 H4).
       onKeyDown={(e) => {
         if (e.key === "Escape" && open) {
+          // The list is the innermost layer: Escape closes it, not the drawer
+          // around it, which listens on `window` (0013 H7).
+          e.stopPropagation();
           setOpen(false);
           backToField();
         }

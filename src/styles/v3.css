@@ -2128,9 +2128,12 @@ a.ki__src:hover { text-decoration: underline; color: var(--color-accent-700); }
 }
 .v2ibtn--surface:hover:not(:disabled, [aria-disabled="true"]) { background: var(--color-bg-soft); }
 .v2ibtn:focus-visible { outline: 2px solid var(--color-focus); outline-offset: 2px; }
-/* `aria-disabled` looks the same: it keeps the focus where `disabled` would drop it (0013 H5). */
-.v2ibtn:disabled,
-.v2ibtn[aria-disabled="true"] { opacity: 0.5; cursor: not-allowed; }
+.v2ibtn:disabled { opacity: 0.5; cursor: not-allowed; }
+/* `aria-disabled` keeps the focus where `disabled` would drop it (0013 H5). Only
+   the sign fades — the focus ring keeps its full contrast. `button` only: the
+   pager's dead arrow is a span with its own look (0047). */
+button.v2ibtn[aria-disabled="true"] { cursor: not-allowed; }
+button.v2ibtn[aria-disabled="true"] > * { opacity: 0.5; }
 
 /* --- Disclosure (0005) — the foldout ----------------------------------- */
 .v2disc { border-top: 1px solid var(--color-border-subtle); }

@@ -629,3 +629,11 @@ Knopf ≥ 3:1, toter Pfeil in `RecordPager --first-record` 0,35 / `default` ohne
 Hover, `IconButton --sizes`/`--interactive` unverändert.
 
 Nachgeprüft von / am: Claude (fremder Nachprüfer), 2026-10-01
+
+### Nacharbeit 4 2026-10-01 (nach der Nachprüfung 3, Stand 68086f2)
+
+| Punkt | Was getan | Selbst gemessen |
+|---|---|---|
+| **M1** | Am `aria-disabled`-Knopf blasst nur das Zeichen ab (`button.v2ibtn[aria-disabled="true"] > * { opacity: 0.5 }`), der Knopf selbst nicht — der Fokusring behält `--color-focus` | `--with-ledger`, Feld leeren, Tab: Knopf Deckkraft 1, Ring `rgb(59, 143, 196)` 2 px (3,55:1), Zeichen 0,5, Cursor `not-allowed` |
+| **M2** | Die Regel gilt nur für `button.v2ibtn`: der tote Pfeil des `RecordPager` (ein `span` mit `aria-disabled`) behält sein Bild aus 0047; der Hover-Ausschluss für `[aria-disabled="true"]` bleibt (er nimmt dem toten Pfeil den Hover, den er vorher fälschlich hatte) | `RecordPager --first-record`: `.v2pager__off` Deckkraft 0,35, Cursor `default` |
+| H7 | Escape bei offener Liste hält das Ereignis an (`stopPropagation`): die Liste ist die innerste Ebene, ein `Drawer` drumherum (hört am `window`) bleibt offen | im Code; Escape am Kontenblatt-Knopf schließt die Liste und gibt den Fokus ans Feld |
