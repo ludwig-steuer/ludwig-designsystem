@@ -273,7 +273,7 @@ export const Inbox: Story = {
 };
 
 /**
- * Beleg einreichen: die Größe steht **nur** hier — 25 MB ist die Grenze — und
+ * Beleg einreichen: die Größe steht **nur** hier — 15 MB ist die Grenze — und
  * die zweite Spalte ist die **Einordnung** (0205), deren erste Zeile die
  * Belegform nennt. Die Grundgesamtheit ist „eingeordnet **und**
  * qualifizierende Belegform"; die Form ist also das Kriterium, das hier

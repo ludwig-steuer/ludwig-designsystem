@@ -100,7 +100,9 @@ Aus `ludwig/app`, Stand 2026-09-06:
 - Alle Server-Einstiege stehen bereit (`listInboxForClient`,
   `prepareDocumentUpload`/`finalizeDocumentUpload`, `listInboxEntries`,
   `manage-actions`, `submit-actions`, `case-creation-actions`).
-- Grenzen des Uploads: 25 MB je Datei, 100 MB je Anfrage, 10 Dateien je
+- Grenzen des Uploads: 15 MB je Datei (seit 2026-10-01, App 21277c99,
+  F365: eine Konstante `MAX_UPLOAD_MB`, Dateien gehen direkt in den
+  Speicher, eine Grenze je Anfrage gibt es nicht mehr), 10 Dateien je
   Anfrage. Die Liste lief bisher mit 2 s Polling.
 - Die Achse `beleg_inbox` trägt die vier Zustände
   (`pending_classification` · `classified` · `classification_failed` ·

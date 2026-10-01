@@ -164,7 +164,7 @@ export const INBOX_COLUMNS: SourceDocumentColumn[] = [
 ];
 
 /**
- * Submitting: the size stands **only** here — 25 MB is where it fails.
+ * Submitting: the size stands **only** here — 15 MB is where it fails.
  *
  * The second column is the classification picture (0205): its first line is
  * the **form**, which is the criterion of this list's population —
