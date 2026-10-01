@@ -547,3 +547,85 @@ Nachgeprüft von / am: Claude (fremder Nachprüfer), 2026-10-01
 | **H6** | Nach der Wahl steht die Nummer markiert, wie beim Fokus — Tippen ersetzt sie. `select()` nach dem Render (`requestAnimationFrame`), vorher hielt das Feld noch den alten Text | Klick und Enter auf Eintrag → Auswahl 0–4 von „6815"; Tippen „6800" ersetzt |
 
 Offen (vorbestehend, eigener Punkt): Nach Escape öffnet ein Klick in das schon fokussierte Feld die Liste nicht wieder, Pfeil runter auch nicht — nur Tippen. H2 (zweimal „Alle Konten"), B3, B5.
+
+### Nachprüfung 3 Kontenliste 2026-10-01 (Stand 68086f2)
+
+Fremder Nachprüfer, nichts gebaut. Bedient in eigenen Playwright-Kontexten
+(1280 × 900, `de-DE`) gegen Storybook 6107, mit echten Tasten
+(`keyboard.press`/`type`) und echten Mausklicks auf die Mitte des Ziels; jeder
+Schritt ein eigener Aufruf, gemessen 100–700 ms danach. Fokus über
+`document.activeElement` und `:focus-visible`, Verdeckung über
+`elementFromPoint` (Mitte und vier Ecken), offene Listen über
+`.v2kf__pop:popover-open`, Markierung über `selectionStart`/`selectionEnd`,
+Ringfarbe über Bildschirmfoto-Pixel. Alte CSS-Regeln zum Vergleich im Browser
+per CSSOM zurückgesetzt (die drei geänderten `.v2ibtn`-Regeln auf den Stand
+`b773348`). Arbeitsbaum sauber, `AccountField.tsx` und `v3.css` = `68086f2`.
+
+| Punkt | Messung | Urteil |
+|---|---|---|
+| H4 Escape auf einem Eintrag | `--with-candidates`: Klick ins Feld (6815), Tab → Eintrag „6815" (`:focus-visible`), Escape → 0 Listen offen, `aria-expanded="false"`, `activeElement` = Feld, `:focus-visible`, 5/5 sichtbar; nach 700 ms weiter zu. Geleert, dreimal Tab auf „6800", Escape → ebenso; „Inter" getippt → steht im Feld, die Liste öffnet erst jetzt. Editor `JournalEntryEditor --s-2-split-full` (148-px-Feld), geleert, zweimal Tab auf „6820", Escape → zu, Fokus im Feld, 5/5, nach 600 ms zu. Escape mit dem Fokus auf dem Kontenblatt-Knopf (`--with-ledger` beide Felder, `--number-and-name` drittes Feld) → zu, Fokus im Feld | ✓ |
+| H4 Escape im Feld wie vorher | „68" getippt → offen; Escape → zu, Fokus und Text bleiben, nach 500 ms zu; zweites Escape bei geschlossener Liste → nichts. Alle neun Felder der sechs Stories: Fokus öffnet, Escape schließt | ✓ |
+| H5 Knopf behält den Fokus | `--with-ledger`, Feld „Konto" (6815) angeklickt, geleert, Tab → `BUTTON` „Kontenblatt", `aria-disabled="true"`, `disabled` false, `:focus-visible`, Ring `2px solid rgb(59, 143, 196)` Offset 2 px, Deckkraft 0,5, Cursor `not-allowed`, 24 × 24, 5/5 sichtbar; die Liste bleibt offen (Fokus noch im Rahmen). Maus darauf: Hintergrund `rgba(0, 0, 0, 0)`. Enter, Leertaste, Klick → kein Drawer, Fokus bleibt. Feld „Gegenkonto" (von Anfang an leer): Tab → derselbe Zustand, Enter öffnet nichts, Tab weiter → Liste zu | ✓ |
+| H5 Fokusring am gesperrten Knopf | Pixel des Rings: `#9DC7E1` auf Weiß — `opacity: 0.5` am Knopf blasst auch `outline` ab. **1,80:1** (rechts über dem Feldrand `#80ADCD` auf `#F4F6F8`: 2,21:1). Gegenprobe derselbe Knopf mit Wert: `#3B8FC4`, 3,55:1 | ✗ M1 |
+| H5 mit Wert wie vorher | Wahl „6820" per Enter, Tab → „Kontenblatt zu 6820", kein `aria-disabled`, Deckkraft 1, Cursor `pointer`; Enter → Drawer „Kontenblatt 6820", Escape → Fokus zurück auf den Knopf. Ruhend (6815): Maus darauf `rgb(244, 246, 248)`, Klick → „Kontenblatt 6815" | ✓ |
+| H5 andere `IconButton` mit echtem `disabled` | `IconButton --sizes` („Gesperrt, solange der Stapel läuft") und `--interactive` („Vorherige Seite" auf Seite 1): Deckkraft 0,5, Cursor `not-allowed`, Hover ohne Hintergrund — mit den alten Regeln gleich. Aktive „Nächste Seite": Hover `rgb(244, 246, 248)` wie vorher | ✓ |
+| Nebenwirkung `RecordPager` | `RecordPager --first-record`: der tote Pfeil ist `<span class="v2ibtn v2ibtn--md v2pager__off" aria-disabled>` (`RecordPager.tsx:139`), also trifft ihn die neue Regel. Neu Deckkraft **0,5**, Cursor **`not-allowed`**; mit den alten Regeln 0,35 und `default`. `.v2ibtn[aria-disabled="true"]` (Spezifität 0,2,0, `v3.css:2133`) schlägt `.v2pager__off` (0,1,0, `v3.css:2719`, „visibly paler, no pointer"). Dazu Hover: alt `rgb(244, 246, 248)` und Textfarbe auf dem toten Pfeil, neu keiner — das ist richtig | ✗ M2 |
+| H6 Nummer nach der Wahl markiert | `--with-candidates`: Klick auf „6820" → „6820", Auswahl 0–4, Fokus im Feld; „6800" getippt → „6800" (ersetzt). Enter im Feld → erster Treffer „6800", 0–4; „68" → „68". Tab, Tab auf „6820", Enter → 0–4, nach 500 ms weiter 0–4; „6845" → „6845". Tab + Leertaste auf Eintrag → 0–4; Backspace → leer, Liste offen. `--with-ledger`: Klick auf „6800" → 0–4, „6820" ersetzt. Editor: Tab + Enter → „6815" 0–4, „6820" ersetzt, Enter → 0–4. Alle sechs Stories: „68" + Enter → 0–4 markiert | ✓ |
+| M1 Tab + Enter → Fokus im Feld | Editor, geleert: Tab → „6815", Enter → Wert 6815, 0 Listen, `activeElement` = Feld, `:focus-visible`, 5/5; nach 600 ms zu; später Tab hinaus → „Belegfeld 1", ruhend „6820 Porto" | ✓ |
+| H1 Klick auf Gruppenkopf | Editor, geleert: Klick auf „Vorschlag von Ludwig", dann „Zuletzt bei dieser Gegenpartei" → Liste offen, Fokus im Feld, Wert unverändert | ✓ |
+| B1 Tab durch die Einträge, Tab hinaus | Editor, anschließend: Tab „6815" offen → Tab „6820" offen → Tab „Belegfeld 1": zu, 5/5 sichtbar | ✓ |
+| Fokusverlust meldet den Wert | Editor: „6820" frei getippt, Escape, Tab → „Belegfeld 1", ruhend „6820 Porto". Alle sechs Stories: Klick außerhalb → zu, Wert bleibt (z. B. „6805" in `--full-text-only`) | ✓ |
+| Keine Konsolenfehler | alle sechs `AccountField --*` (neun Felder, je Fokus, Escape, „68", Tab, Escape, „68" + Enter, Klick außerhalb), alle Editor-Läufe, `IconButton`, `RecordPager`: 0 Fehler, 0 Warnungen | ✓ |
+| `pnpm typecheck`, `check:language`, `check:when` | alle drei Exit 0 („0 German comment lines left", „in Ordnung"); `pnpm build` auftragsgemäß nicht gestartet | ✓ |
+
+**Mängel**
+
+- **M1 — der Fokusring am gesperrten Kontenblatt-Knopf hat 1,80:1.** H5 macht
+  den Knopf fokussierbar, die Regel `.v2ibtn[aria-disabled="true"] { opacity:
+  0.5 }` (`v3.css:2132–2133`) blasst aber den ganzen Knopf ab, Ring
+  eingeschlossen: aus `--color-focus` (3,55:1) wird gemessen `#9DC7E1`. V10 und
+  `CLAUDE.md` §2 verlangen für den Fokus ≥ 3:1 ohne Ausnahme; dass WCAG 1.4.11
+  inaktive Bedienelemente ausnimmt, hilft hier nicht, die Hausregel ist
+  strenger, und gerade wer per Tab auf dem gesperrten Knopf steht, muss sehen,
+  wo er ist. (Mit echtem `disabled` tritt das nicht auf — dort gibt es keinen
+  Fokus.) Abhilfe: beim fokussierbaren gesperrten Knopf nur das Zeichen
+  abblassen, nicht den Knopf, etwa
+  `button.v2ibtn[aria-disabled="true"] { cursor: not-allowed; }` und
+  `button.v2ibtn[aria-disabled="true"] > * { opacity: 0.5; }`;
+  `.v2ibtn:disabled` bleibt wie es ist.
+- **M2 — stille Änderung am `RecordPager`.** Die neue Regel trifft auch den
+  toten Pfeil des `RecordPager` (Span mit `.v2ibtn` und `aria-disabled`): 0,35 →
+  0,5, `default` → `not-allowed`, gegen die eigene Regel von 0047. Die
+  Nacharbeit nennt das nicht; nach `CLAUDE.md` §3 ist eine Farbänderung an
+  einem anderen Baustein ein Systementscheid, keine Nebenwirkung. Abhilfe: die
+  Regel auf `button.v2ibtn[aria-disabled="true"]` beschränken (wie bei M1 —
+  dieselbe Zeile behebt beide); den Hover-Ausschluss
+  `:not(:disabled, [aria-disabled="true"])` behalten, er nimmt dem toten Pfeil
+  den Hover, den er vorher fälschlich hatte. Wer die beiden Gesperrt-Bilder
+  lieber angleicht, schreibt es in 0047 und an `.v2pager__off`, mit Datum.
+
+**Hinweise ohne Mangel**
+
+- **H7 — Escape im Feld innerhalb eines Drawers schließt auch den Drawer**
+  (gelesen, nicht in einer Story gemessen): `Drawer` hört auf `keydown` am
+  `window` (`Drawer.tsx:140–151`), der neue Escape-Handler am Rahmen
+  (`AccountField.tsx:244`) hält das Ereignis nicht an. Vorbestehend (der alte
+  Handler am Feld tat es auch nicht), mit H4 gilt es nun auch auf einem
+  Eintrag. Wer `AccountField` in einen Drawer setzt (`RecurringRuleEditor`,
+  `PaymentAccountEditor` prüfen), sollte bei offener Liste
+  `e.stopPropagation()` ergänzen — „Esc schließt die innerste Ebene".
+- Offen wie notiert: Klick ins schon fokussierte Feld nach Escape öffnet die
+  Liste nicht wieder; H2, B3, B5.
+
+**Urteil: nicht abgenommen — zwei Mängel (M1 Fokusring am gesperrten Knopf
+1,80:1, M2 Nebenwirkung auf `RecordPager`), beide in denselben zwei Zeilen
+`v3.css:2132–2133`.** Die Mechanik hält: H4 (Escape auf Eintrag und Knopf →
+Fokus sichtbar im Feld, Liste bleibt zu), H5 (Fokus bleibt auf dem Knopf, kein
+Hover, Enter/Leertaste/Klick tun nichts, mit Wert wie vorher) und H6 (Nummer
+nach Klick, Enter im Feld, Tab + Enter/Leertaste markiert, Tippen ersetzt) sind
+behoben; M1, H1, B1 und der Fokusverlust halten, 0 Konsolenfehler. Nach der
+Abhilfe genügt eine Nachprüfung der CSS: Ringpixel am gesperrten fokussierten
+Knopf ≥ 3:1, toter Pfeil in `RecordPager --first-record` 0,35 / `default` ohne
+Hover, `IconButton --sizes`/`--interactive` unverändert.
+
+Nachgeprüft von / am: Claude (fremder Nachprüfer), 2026-10-01
