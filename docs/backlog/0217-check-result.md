@@ -288,6 +288,65 @@ unverändert („1 offen · 1 nicht prüfbar · 6 bestanden").
 
 Kriterien für die fremde Abnahme:
 
-- [ ] `CheckItems`: y = Punkte ohne `open`; nicht prüfbare als eigener Block (`CheckItemsMixed`, `CheckItemsAllOpen`, `CheckItemsAllGreen`)
-- [ ] `CheckResult`: dieselbe Zahl wie die Gruppe in `CheckItems` für dieselben Punkte (`CheckResultTones`, T3-Aufklapper `Grouped`)
-- [ ] `checkSummary()` unverändert (Code, `title`)
+- [x] `CheckItems`: y = Punkte ohne `open`; nicht prüfbare als eigener Block (`CheckItemsMixed`, `CheckItemsAllOpen`, `CheckItemsAllGreen`)
+- [x] `CheckResult`: dieselbe Zahl wie die Gruppe in `CheckItems` für dieselben Punkte (`CheckResultTones`, T3-Aufklapper `Grouped`)
+- [x] `checkSummary()` unverändert (Code, `title`)
+
+### Fremde Abnahme Nachtrag (y prüfbar) 2026-10-01
+
+Stand 423ac4e (`git show 423ac4e`: nur `Review.tsx` Z. 417–419 und 470–479 und
+diese Datei). Gemessen bei 1280 × 900 in eigenem Browser-Kontext. Die
+Review-Stories auf Storybook 6107 (`Review.tsx` ist im Arbeitsbaum unverändert).
+T3 `Grouped` auf einem eigenen Storybook aus einem sauberen Worktree von
+423ac4e (Port 6199, danach entfernt), weil der Arbeitsbaum fremde, nicht
+committete Arbeit an `JournalEntryReviewList` trägt (siehe H1).
+
+| Kriterium | Nachweis | |
+|---|---|---|
+| `CheckItems`: y ohne `open`, nicht prüfbare als eigener Block | Code Z. 419: `items.length - notRun.length`. `check-items-mixed` (3 grün, 1 rot, 1 gelb, 2 nicht prüfbar): Zeilen P07, P12, dann „3 von 5 Prüfpunkten bestanden", dann eigener Block „2 Prüfpunkte nicht prüfbar". `check-items-all-open`: nur „12 Prüfpunkte nicht prüfbar", keine Gruppe „0 von 0". `check-items-all-green`: „12 von 12 Prüfpunkten bestanden". `check-items-facts` (2 zu klären, 2 geklärt, nichts nicht erhoben): „2 von 4 Fakten geklärt" | ✓ |
+| `CheckResult`: dieselbe Zahl wie die Gruppe für dieselben Punkte | Code Z. 471/479: `checkable` = Punkte ohne `open`, dieselbe Rechnung wie Z. 419. `check-result-tones`, alle zehn Zeilen nachgerechnet: „9 von 12" (rot), „6 von 7" (gelb, 1 nicht prüfbar), „7 von 7" (grün, 1 nicht prüfbar), „nicht prüfbar", „Keine Prüfpunkte", Fakten „3 von 4 geklärt", „2 von 4 geklärt", „4 von 4 geklärt", „nicht erhoben", „Keine Fakten". Ton-Klassen unverändert. T3 `grouped`: alle 17 der 39 Zeilen mit „nicht prüfbar" im `title` aufgeklappt, Zeile (Spalte „Prüfbedarf") gegen Gruppenzeile im Aufklapper verglichen, 0 Abweichungen: 6× „7 von 7 bestanden" ↔ „7 von 7 Prüfpunkten bestanden" + „1 Prüfpunkt nicht prüfbar"; 6× „6 von 7 bestanden" (1 verletzt oder 1 offen) ↔ „6 von 7 Prüfpunkten bestanden" + „1 Prüfpunkt nicht prüfbar"; 5× „nicht prüfbar" ↔ nur „8 Prüfpunkte nicht prüfbar". Die übrigen 22 Zeilen haben keinen nicht prüfbaren Punkt, dort gilt y = alle wie vorher | ✓ |
+| `checkSummary()` unverändert | Der Diff berührt Z. 269–276 nicht. `title` in den Stories: „1 offen · 1 nicht prüfbar · 6 bestanden", „1 nicht prüfbar · 7 bestanden", „12 nicht prüfbar", „1 widersprüchlich · 3 geklärt"; im T3: „1 verletzt · 1 nicht prüfbar · 6 bestanden", „8 nicht prüfbar" | ✓ |
+| `pnpm typecheck`, `pnpm check:language` | Im sauberen Worktree von 423ac4e: beide grün (tsc ohne Fehler; „0 German comment lines"). `pnpm build` nicht gelaufen (Erbauer meldet ihn grün) | ✓ |
+
+**Wo sonst „x von y" gezählt wird** (`grep 'von ${'` und `von {` in `src/ui/v3`):
+Über Prüfpunkte zählen nur die zwei Stellen in `Review.tsx` (Z. 419
+`CheckItems`, Z. 479 `CheckResult`). Beide zählen jetzt dieselbe Menge. Alle
+übrigen Treffer zählen etwas anderes, mit eigener Grundmenge: Schritte
+(`StepRail`, `Progress`, die Zähler „8 von 8" in `Checklist`, die der Aufrufer liefert), Filter
+(`FilterBar` „Gefiltert: x von y", `ActiveFilters`, Story-Köpfe von
+`MultiSelectFilter` und `PeriodField`), Blättern (`Pagination`,
+`RecordPager`), Buchungsstand (`SourceDocumentMilestones`,
+`BankTransactionList` „x von y gebucht"), Teilbelege (`SourceDocumentFacts`),
+Bewegungen (`AccountEntries`), Regeltreffer (`RecurringRuleList`,
+`RecurringRuleOverview`, `RecurringRuleEditor` „x von y geprüften Zahlungen")
+und `DiffView` „x von y geändert". `checkSummary()` sagt kein „von", es zählt
+jede Gruppe für sich. `InputTaxTab` (Showcase) nutzt `checkSummary` als Titel
+und `CheckItems` für die Punkte, erbt die neue Zählung also. Keine weitere
+Stelle, die über Prüfpunkte zählt. Nichts widerspricht sich.
+
+**Mängel**
+
+- M1 (leicht, Spec ≠ Code, CLAUDE.md §4 Punkt 5): Abschnitt „Verhalten",
+  erster Punkt (Z. 66 f.), sagt noch „x = bestandene (`green`), **y = alle
+  Prüfpunkte**". Seit 423ac4e gilt y = alle ohne `open`. Der Nachtrag sagt das
+  richtig, der Satz oben widerspricht ihm aber. Fix: „y = prüfbare Punkte (alle
+  ohne `open`, F355)". Das betrifft keines der drei Kriterien.
+
+**Hinweise**
+
+- H1: Im Arbeitsbaum liegt fremde, nicht committete Arbeit an
+  `JournalEntryReviewList.tsx`/`.stories.tsx` und `v3.css`, dazu die neue
+  Datei `ReviewReasonCell.tsx`. Mit ihr scheitert `pnpm typecheck` an
+  `JournalEntryReviewList.tsx(24,51)`: TS2307 `./ReviewScoreCell`. Das ist
+  nicht 423ac4e. Wer diese Arbeit committet, muss die Datei mitliefern oder
+  den Import richten. Storybook 6107 zeigt T3 bis dahin im Zwischenstand.
+- H2: Das offene H1 der ersten Abnahme (Zeile und Gruppenzeile sagen
+  aufgeklappt dieselbe Zahl) bleibt Owner-Sache. Seit dem Nachtrag ist die
+  Gleichheit auch für Zeilen mit nicht prüfbaren Punkten gemessen.
+
+**Urteil:** Abgenommen. Die drei Kriterien halten, Zeile und Gruppe sagen in
+allen 17 betroffenen T3-Zeilen dieselbe Zahl, und `checkSummary()` ist
+unberührt. Offen bleibt M1: ein Satz der Spec, beim nächsten Anfassen nachziehen.
+
+Abgenommen von / am: Claude (fremder Abnehmer), 2026-10-01 · Offene Punkte: M1
+(Spec-Satz), H1 (fremde WIP, Typecheck im Arbeitsbaum)
