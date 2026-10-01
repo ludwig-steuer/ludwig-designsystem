@@ -307,3 +307,11 @@ Der Fuß hat jetzt den Fortschritt links und `footer` rechts, also Zurück und
 Weiter beieinander (Owner 2026-10-01). Ein Fuß entsteht, sobald `footer`
 oder `progress` gesetzt ist. Die `.wz*`-Regeln in `components.css` fallen,
 sobald die App umgestellt ist (lldev1).
+
+**Abnahme des Nachtrags** (fremd, 2026-10-01, Stand `aae9d49`, schlanke
+Abnahme (Schnittstelle) plus Messung, Tabelle in 0220): Schnittstelle wie
+oben, gemessen bei 1280 px. Titel `h2` 16/600, Titel → Einleitung 4 px, Kopf →
+Inhalt 20 px, Einleitung 68ch, ohne `title` kein Kopf, Fortschritt links mit
+`aria-live`. Alles ✓. Offen bleibt 0220 M5: In `InUse` steht die Karte
+„Vorschau" als `h2` unter dem Schritttitel `h2` (`Wizard.stories.tsx:165`) und
+braucht `headingLevel={3}`.
