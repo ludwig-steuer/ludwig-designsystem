@@ -144,8 +144,8 @@ export interface SourceDocumentVM {
    */
   classConfidence?: number | null;
   /**
-   * Dateigröße in Bytes. Sie zählt an genau einer Stelle: bei 25 MB
-   * scheitert die Übergabe.
+   * Dateigröße in Bytes. Sie zählt an genau einer Stelle: über
+   * `MAX_UPLOAD_MB` (15 MB, `files/domain/upload-limits.ts`) scheitert die Übergabe.
    */
   byteSize?: number | null;
 
