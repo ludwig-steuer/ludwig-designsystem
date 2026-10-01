@@ -704,9 +704,80 @@ dem Scrollen; die Seite scrollt nicht (1280 = 1280).
 
 Kriterien für die fremde Abnahme:
 
-- [ ] Text-Spalte ≥ 160 px in `full` und `simple` bei 900 px Rahmen; kein überlagerter Kopf (`S2_SplitFull`, `S1_EditWithWarning`)
-- [ ] Datum ganz lesbar („21.08.2026"), Feld ohne inneren Überlauf
-- [ ] Querscroll nur in `.bse__tbl`, nicht auf der Seite; Handlungszelle beim Scrollen sichtbar (Löschen erreichbar ohne Scrollen)
-- [ ] Lese-Tabelle (`JournalEntryGrid`) unverändert, KOST nicht angeheftet
-- [ ] in `BookingReview --in-use` (728 px, Editor im Slot) Text lesbar, Handlungszelle sichtbar — gemessen: Tabelle 1008 in 694 px, Text 160 px, letzte Zelle bei 727 = rechter Rand
-- [ ] Datum im Lesezustand „21.08.2026" in Editor (`--in-use`) und Grid (`BookingReview --list-full`)
+- [x] Text-Spalte ≥ 160 px in `full` und `simple` bei 900 px Rahmen; kein überlagerter Kopf (`S2_SplitFull`, `S1_EditWithWarning`)
+- [x] Datum ganz lesbar („21.08.2026"), Feld ohne inneren Überlauf
+- [ ] Querscroll nur in `.bse__tbl`, nicht auf der Seite; Handlungszelle beim Scrollen sichtbar (Löschen erreichbar ohne Scrollen) — offen: M2 (fremde Abnahme)
+- [ ] Lese-Tabelle (`JournalEntryGrid`) unverändert, KOST nicht angeheftet — offen: M1 (fremde Abnahme)
+- [x] in `BookingReview --in-use` (728 px, Editor im Slot) Text lesbar, Handlungszelle sichtbar — gemessen: Tabelle 1008 in 694 px, Text 160 px, letzte Zelle bei 727 = rechter Rand
+- [ ] Datum im Lesezustand „21.08.2026" in Editor (`--in-use`) und Grid (`BookingReview --list-full`) — offen: M1 (fremde Abnahme)
+
+### Fremde Abnahme Nachtrag Spurbreiten 2026-10-01
+
+Fremder Abnehmer (nichts gebaut), Stand `82bfa0c`. Storybook :6107, eigener
+Playwright-Kontext 1280 × 900, Locale de-DE.
+
+| # | Kriterium | Nachweis | |
+|---|---|---|---|
+| 1 | Text ≥ 160 px in `full` und `simple` bei 900 px, kein überlagerter Kopf | `--s-2-split-full`: Tabelle 862 px, Inhalt 1046 px; „Text" 797–957 = 160 px, keine Spalte unter 4 px, kein Kopf abgeschnitten. Nach „Einfach ◂": 862 in 862, Text 226 px. `--s-1-edit-with-warning` (simple): Text 226 px. Einzige Überdeckung ist die leere angeheftete Kopfzelle (865–897) über dem Rest von „Text" — gewollt, das Wort steht frei | ✓ |
+| 2 | Datum ganz lesbar, Feld ohne inneren Überlauf | Datumsfeld 112 px, Bild: „21.08.2026" mit Kalender ganz; scrollWidth 110 = clientWidth 110 in jeder Zeile, beide Modi | ✓ |
+| 3 | Querscroll nur in `.bse__tbl`; Handlungszelle sichtbar, Löschen ohne Scrollen | Seite 1280 = 1280 in allen 13 Editor-Stories; `.bse__tbl` overflow-x auto; letzte Zelle `sticky`, 865–897 bei scrollLeft 0 und 184; „Zeile entfernen" 865–878 ohne Scrollen sichtbar. **Aber** der Fokus auf „Buchungstext" landet unter der angehefteten Zelle (M2) | ✗ |
+| 4 | Lese-Tabelle unverändert außer dem Datum, KOST nicht angeheftet | KOST `position: static` in `bookingreview--list-full`, `journalentrygrid--full`, `--edges`; Spuren unverändert. **Aber** das Datum ist in jeder `journalentrygrid--*`-Story mit Zeilen „—" und auf der Konto-Seite vertauscht (M1) | ✗ |
+| 5 | `bookingreview--in-use` (728 px, Editor lesend im Slot) | Tabelle 33–727, 1008 in 694 px; Text 160 px; letzte Zelle rechts bei 727 vor und nach dem Scrollen; Seite 1280 = 1280 | ✓ |
+| 6 | Datum lesend „21.08.2026" in Editor und Grid; kein ISO sichtbar | `--in-use` und `--list-full`: `<time>` „21.08.2026"; lesende Editoren in S24, S25, S20 „21.08.2026"; kein `JJJJ-MM-TT` im Seitentext der 13 Editor-, 10 Grid- und 2 BookingReview-Stories. Die Grid-Stories zeigen statt des Datums „—" (M1) | ✗ |
+| G | Gegenprobe | 25 Stories ohne Konsolenfehler; `pnpm typecheck` 0, `check:language` ok, `check:when` in Ordnung; `build` nicht gelaufen (Auftrag) | ✓ |
+
+**M1 — Das Grid liest jedes `datum` als ISO, nicht jeder Aufrufer liefert ISO.**
+Fundort `JournalEntryGrid.tsx:259` (`<Time value={row.datum}>`); `JournalRow.datum`
+(`journal-entry.ts:29`) hat keinen Vertrag. Gemessen:
+- `JournalEntryGrid.stories.tsx:19` setzt `datum: "26.08.2026"` → in allen
+  Grid-Stories mit Zeilen steht „—" (vorher „26.08.2026").
+- `src/showcase/account/scenario.tsx:636` baut TT.MM.JJJJ aus `postingDate`;
+  `new Date("09.07.2026")` liest US-Ordnung. `seiten-konto-konten--long-name`,
+  `#entry=k12-2`: das Grid im Drawer zeigt **„07.09.2026"** (title „Montag,
+  7. September 2026"), die Liste daneben 09.07.2026. Ab Tag 13 „—". Ein still
+  falsches Datum ist schlimmer als ein rohes.
+
+Weg: Vertrag festschreiben (`datum` ist ISO `JJJJ-MM-TT`, JSDoc am Feld) und beide
+Erzeuger auf ISO stellen (Fixture `"2026-08-26"`, `scenario.tsx` `datum: d`).
+
+**M2 — Fokus unter der angehefteten Zelle.** `--s-2-split-full`, Tab aus
+„Belegfeld 2" auf „Buchungstext": der Browser scrollt 60 px, das Feld steht bei
+737–897, die angeheftete Zelle (865–897 plus 6 px Schatten) deckt die rechten
+38 px samt Fokusring. Wer am Ende weitertippt (`End`, „ Druckerpapier A4 und
+Ordner"), sieht die letzten Zeichen nicht — sie liegen unter dem Papierkorb.
+KOST 1 kommt frei (scrollLeft 184). Verstößt gegen „Fokusring sichtbar und nicht
+verdeckt" (`CLAUDE.md` §2 Bedienung). Fundort `v3.css`, `.bse__tbl--edit`. Probe
+ohne Commit: `.bse__tbl--edit { scroll-padding-inline-end: 44px }` → Feld 693–853,
+verdeckt 0 px.
+
+Hinweise, nicht Teil dieses Nachtrags:
+
+- **H1 (vorbestehend seit `7390c50`, schwer):** `.bse__tbl { overflow-x: auto }`
+  macht die Tabelle auch senkrecht zum Scroll-Container, die Kontenliste des
+  `AccountField` wird darin abgeschnitten. `--s-1-edit-with-warning`, Klick in
+  „Konto": Liste 202–407, Tabelle endet bei 268 und scrollt senkrecht (282 in
+  143); sichtbar bleibt nur „Vorschlag von Ludwig". Seit diesem Nachtrag hängt
+  der Editor bewusst an diesem Container. Eigener Nachtrag empfohlen (Liste
+  außerhalb des Containers rendern).
+- **H2 (vorbestehend):** „Zeile entfernen" misst 13 × 13 px; die
+  Abstandsausnahme hält knapp (KOST endet bei 859, Kreis 859,5–883,5).
+- **H3:** In der Fall-Ansicht (`--in-use`, 694 px) beginnt „Text" bei ~795 px und
+  liegt beim Öffnen ganz außerhalb; die angeheftete letzte Zelle ist lesend leer
+  und deckt trotzdem 38 px. Folgt aus „scrollen statt Spalte verlieren"; Frage an
+  den Owner, ob die Fall-Ansicht lesend in `simple` startet oder die Zelle nur mit
+  Inhalt angeheftet wird.
+
+Vier Linsen:
+- **Sprache:** Datum lesend über `Time` in TT.MM.JJJJ (T7) — aber nur bei
+  ISO-Eingabe, sonst „—" oder vertauscht (M1); keine neuen Wörter.
+- **Bedienung:** Löschen ohne Scrollen erreichbar, Seite ohne Querscroll; der Fokus
+  auf „Buchungstext" ist teils verdeckt (M2), die Kontenliste abgeschnitten (H1).
+- **Logik:** Der Editor folgt jetzt derselben Regel wie `journalGridTracks` (160 px,
+  scrollen); das Anheften ist sauber auf `.bse__tbl--edit` begrenzt, KOST im Grid
+  bleibt static.
+- **Darstellung:** Keine Spalte fällt mehr auf 0 px, kein Kopf läuft ineinander;
+  Schatten in `--color-surface`, kein Hex, kein neues Token.
+
+**Urteil: nicht abgenommen.** Kriterien 1, 2 und 5 erfüllt; 3 scheitert an M2, 4
+und 6 an M1. Nachprüfung danach: Kriterien 3, 4, 6 und die Konto-Seite
+`long-name` mit `#entry=k12-2`.
