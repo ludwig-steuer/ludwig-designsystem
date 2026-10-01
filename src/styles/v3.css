@@ -1813,6 +1813,15 @@ a.ki__src:hover { text-decoration: underline; color: var(--color-accent-700); }
    into "KOST" (0044, M2). The minimum lives in `journalGridTracks`, the
    scrolling here. */
 .bse__tbl { --bse-cols: 1fr; overflow-x: auto; }
+/* In the editor the last cell is the row's action (remove, ledger) — in the
+   reading grid it is KOST, so only here: it stays at the right edge
+   while the entry scrolls — otherwise removing a line meant scrolling first.
+   The shadow covers the gap, so scrolled text does not show beside it. */
+.bse__tbl--edit .bse__head > :last-child,
+.bse__tbl--edit .bse__cells > :last-child {
+  position: sticky; right: 0;
+  background: var(--color-surface); box-shadow: -6px 0 0 var(--color-surface);
+}
 .bse__head,
 .bse__cells {
   display: grid;

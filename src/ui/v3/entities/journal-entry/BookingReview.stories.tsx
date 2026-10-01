@@ -277,8 +277,10 @@ export const ExpenseWithPayment: Story = {
 /**
  * Im Einsatz, so breit wie in der App bei 1280 px mit Seitenleiste und
  * Schritt-Leiste (~728 px): die Belege stehen unter dem Satz, vor der Handlung;
- * der volle Satz steht als `JournalEntryGrid` in seiner weißen Fläche. (Der
- * Editor im Modus `full` ist in dieser Breite zu eng — eigener Befund am Editor.)
+ * der volle Satz steht als `JournalEntryEditor` (lesend, mit „Bearbeiten") in
+ * seiner weißen Fläche — wie in der Fall-Ansicht. Die DATEV-Spalten passen in
+ * dieser Breite nicht ganz: der Satz scrollt in sich quer, Text behält 160 px,
+ * die Handlung am Zeilenende bleibt stehen (0015, Nachtrag Spurbreiten).
  */
 export const InUse: Story = {
   render: () => (
@@ -305,14 +307,17 @@ export const InUse: Story = {
               </Button>
             ),
             full: (
-              <JournalEntryGrid
-                rows={[GRID_ROW({ id: "1" })]}
-                status="proposed"
+              <JournalEntryEditor
                 mode="full"
+                rows={[GRID_ROW({ id: "1" })]}
                 contraAccount={{ account: "70044", name: "Bürobedarf Meier GmbH" }}
                 documentNumber="RE-4471"
                 documentAmount={1475.6}
+                documentSide="S"
+                status="proposed"
                 accountFramework="skr03"
+                editable={false}
+                onEdit={() => {}}
               />
             ),
           },

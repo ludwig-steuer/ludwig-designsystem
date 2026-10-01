@@ -8,6 +8,7 @@ import { StatusBadge } from "../../patterns/StatusBadge";
 import { JournalEntryCard } from "./JournalEntryCompact";
 import { TaxKeyCell } from "./TaxKey";
 import { formatAmount } from "../../format";
+import { Time } from "../../primitives/Time";
 import {
   documentSideTotal,
   journalBalanceText,
@@ -253,7 +254,10 @@ function Row({
   return (
     <div className="bse__row">
       <div className="bse__cells" role="row">
-        <span>{row.datum}</span>
+        <span>
+          {/* `datum` is ISO (the editor's date input needs it); read, it is TT.MM.JJJJ (T7). */}
+          <Time value={row.datum} format="date" size="sm" />
+        </span>
         {full ? <span className="v2muted">{row.currency ?? "EUR"}</span> : null}
         <span className="v2num">{euro(rowAmount(row.amount))}</span>
         <span>{row.side}</span>

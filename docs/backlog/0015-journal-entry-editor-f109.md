@@ -670,3 +670,43 @@ Kein Mangel. Zwei Anmerkungen ohne Abnahmefolge:
 - `Journal` destrukturiert noch `contraAccount: contraAccount, documentSide:
   documentSide` (Z. 819 f.), Rest einer Umbenennung, nicht aus diesem Commit —
   gehört zu M16 / **0113**.
+
+## Nachtrag 2026-10-01 — Spurbreiten im Modus `full` (llcto, Owner-Demo Fall-Ansicht)
+
+Befund beim Bau von 0219 (vorbestehend): Der Editor legte die Spalte „Text" mit
+`minmax(0,1fr)` an. Unter ~1000 px Breite fiel sie auf **0 px**, ihr Kopf lief in
+„KOST" — gemessen in `S2_SplitFull` bei 900 px („Text" 773–773) und in der
+Fall-Ansicht der App bei 1280 px (~728 px Platz). Die Lese-Tabelle hatte dasselbe
+in 0044 M2 behoben (`journalGridTracks`: Text `minmax(160px, 1fr)`, der Satz
+scrollt quer), der Editor nicht. Dazu schnitt das Datumsfeld (Eingabe mit
+Kalender) bei 88 px „21.08.2026" auf „21.08.20".
+
+Behoben:
+
+- Spuren im Editor (`JournalEntryEditor.tsx`, `cols`): Datum **112 px**, Text
+  **`minmax(160px,1fr)`** in beiden Modi; Reihenfolge der Spalten unverändert.
+  Unter der Mindestbreite scrollt der Satz in `.bse__tbl` quer, statt eine Spalte zu
+  verlieren — wie die Lese-Tabelle.
+- Die letzte Zelle der Editorzeile (Löschen bzw. Kontenblatt) bleibt beim
+  Querscrollen am rechten Rand (`.bse__tbl--edit`, `position: sticky`); in der
+  Lese-Tabelle ist die letzte Zelle KOST, dort gilt die Regel nicht.
+
+- **Datum im Lesezustand** (Editor ohne Bearbeiten und `JournalEntryGrid`): stand
+  roh als „2026-08-21" da (T7 verlangt TT.MM.JJJJ) — jetzt über `Time`
+  („21.08.2026"); `datum` bleibt ISO, weil das Datumsfeld es braucht.
+- `BookingReview --in-use` setzt jetzt den Editor (lesend) in den Slot, wie die
+  Fall-Ansicht — die Breite, in der der Fehler auffiel.
+
+Gemessen (`S2_SplitFull`, 1280 × 900, Rahmen 900 px): Tabelle 1046 px Inhalt in 862 px
+→ quer scrollbar (184 px); Text 160 px; Datumsfeld 112 px, „21.08.2026" ganz
+(scrollWidth 110 = clientWidth 110); Handlungszelle rechts bei 897 px vor und nach
+dem Scrollen; die Seite scrollt nicht (1280 = 1280).
+
+Kriterien für die fremde Abnahme:
+
+- [ ] Text-Spalte ≥ 160 px in `full` und `simple` bei 900 px Rahmen; kein überlagerter Kopf (`S2_SplitFull`, `S1_EditWithWarning`)
+- [ ] Datum ganz lesbar („21.08.2026"), Feld ohne inneren Überlauf
+- [ ] Querscroll nur in `.bse__tbl`, nicht auf der Seite; Handlungszelle beim Scrollen sichtbar (Löschen erreichbar ohne Scrollen)
+- [ ] Lese-Tabelle (`JournalEntryGrid`) unverändert, KOST nicht angeheftet
+- [ ] in `BookingReview --in-use` (728 px, Editor im Slot) Text lesbar, Handlungszelle sichtbar — gemessen: Tabelle 1008 in 694 px, Text 160 px, letzte Zelle bei 727 = rechter Rand
+- [ ] Datum im Lesezustand „21.08.2026" in Editor (`--in-use`) und Grid (`BookingReview --list-full`)

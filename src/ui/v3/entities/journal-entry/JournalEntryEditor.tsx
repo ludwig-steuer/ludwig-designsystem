@@ -15,6 +15,7 @@ import { formatAmount } from "../../format";
 import { parseAmount } from "../../primitives/AmountInput";
 import { Button } from "../../primitives/Button";
 import { Dialog } from "../../primitives/Dialog";
+import { Time } from "../../primitives/Time";
 import { AccountField, type AccountCandidate, type AccountGroup } from "../account/AccountField";
 import type { KnownDocumentNumber } from "@/ludwig/modules/accounting-cases/domain/document-number";
 
@@ -279,9 +280,13 @@ export function JournalEntryEditor(props: JournalEntryEditorProps) {
   }, [editable, onCancel, quickActions, save]);
 
   const full = mode === "full";
+  // The text keeps 160 px and the entry scrolls instead (as `journalGridTracks`
+  // since 0044 M2): with `minmax(0,1fr)` the text fell to 0 px below ~1000 px
+  // and its head ran into „KOST" — in the case view at 1280 px. The date is an
+  // input with a picker: 88 px cut „21.08.2026" to „21.08.20".
   const cols = full
-    ? "88px 56px 104px 40px 62px 148px 96px 96px minmax(0,1fr) 80px 32px"
-    : "88px 104px 40px 62px 148px 96px minmax(0,1fr) 32px";
+    ? "112px 56px 104px 40px 62px 148px 96px 96px minmax(160px,1fr) 80px 32px"
+    : "112px 104px 40px 62px 148px 96px minmax(160px,1fr) 32px";
 
   return (
     <div className="bse">
@@ -314,7 +319,7 @@ export function JournalEntryEditor(props: JournalEntryEditorProps) {
         </div>
       ) : null}
 
-      <div className="bse__tbl" style={{ "--bse-cols": cols } as React.CSSProperties}>
+      <div className="bse__tbl bse__tbl--edit" style={{ "--bse-cols": cols } as React.CSSProperties}>
         <div className="bse__head">
           <span>Datum</span>
           {full ? <span>Whg.</span> : null}
@@ -734,7 +739,10 @@ function EditorRow({
           </>
         ) : (
           <>
-            <span>{row.datum}</span>
+            <span>
+              {/* `datum` is ISO (the date input needs it); read, it is TT.MM.JJJJ (T7). */}
+              <Time value={row.datum} format="date" size="sm" />
+            </span>
             {full ? <span>{row.currency ?? "EUR"}</span> : null}
             <span className="v2num">{row.amount}</span>
             <span>{row.side}</span>
