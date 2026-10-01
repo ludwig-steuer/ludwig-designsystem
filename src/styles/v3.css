@@ -2120,15 +2120,17 @@ a.ki__src:hover { text-decoration: underline; color: var(--color-accent-700); }
 .v2ibtn--sm { width: 24px; height: 24px; }
 .v2ibtn--md { width: 28px; height: 28px; }
 .v2ibtn--lg { width: 32px; height: 32px; }
-.v2ibtn:hover:not(:disabled) { background: var(--color-bg-soft); color: var(--color-text); }
+.v2ibtn:hover:not(:disabled, [aria-disabled="true"]) { background: var(--color-bg-soft); color: var(--color-text); }
 .v2ibtn--surface {
   background: var(--color-surface);
   border: 1px solid var(--color-border);
   color: var(--color-text);
 }
-.v2ibtn--surface:hover:not(:disabled) { background: var(--color-bg-soft); }
+.v2ibtn--surface:hover:not(:disabled, [aria-disabled="true"]) { background: var(--color-bg-soft); }
 .v2ibtn:focus-visible { outline: 2px solid var(--color-focus); outline-offset: 2px; }
-.v2ibtn:disabled { opacity: 0.5; cursor: not-allowed; }
+/* `aria-disabled` looks the same: it keeps the focus where `disabled` would drop it (0013 H5). */
+.v2ibtn:disabled,
+.v2ibtn[aria-disabled="true"] { opacity: 0.5; cursor: not-allowed; }
 
 /* --- Disclosure (0005) — the foldout ----------------------------------- */
 .v2disc { border-top: 1px solid var(--color-border-subtle); }

@@ -215,8 +215,15 @@ export function AccountField({
     onChange(c.number, c);
     setQuery(c.number);
     setOpen(false);
-    // Chosen by keyboard, the focus stood on the option, which now disappears:
-    // back to the field, where typing goes on (acceptance 0013 M1).
+    backToField();
+    // The number stands there selected, as on focus — typing replaces it
+    // (0013 H6). After the render: before it the field still holds the old text.
+    requestAnimationFrame(() => input.current?.select());
+  }
+
+  // On a choice or Escape from an option the focus stood on the option, which
+  // now disappears: back to the field, without opening the list again (M1, H4).
+  function backToField() {
     if (document.activeElement !== input.current) {
       quiet.current = true;
       input.current?.focus();
@@ -232,6 +239,13 @@ export function AccountField({
       // focus (WCAG 2.4.11, acceptance 0013 B1). React's onBlur is focusout.
       onBlur={(e) => {
         if (!e.currentTarget.contains(e.relatedTarget as Node | null)) setOpen(false);
+      }}
+      // Escape on the frame, not only on the field: also from an option (0013 H4).
+      onKeyDown={(e) => {
+        if (e.key === "Escape" && open) {
+          setOpen(false);
+          backToField();
+        }
       }}
     >
       <div className="v2kf__box">
@@ -265,7 +279,6 @@ export function AccountField({
             onChange(query.trim());
           }}
           onKeyDown={(e) => {
-            if (e.key === "Escape") setOpen(false);
             if (e.key === "Enter" && open && groups[0]?.items[0]) {
               e.preventDefault();
               choose(groups[0].items[0]);
@@ -284,11 +297,15 @@ export function AccountField({
               size="sm"
               label={value ? `Kontenblatt zu ${value}` : "Kontenblatt"}
               icon={<ActionIcon action="ledger" size={14} />}
-              disabled={!value}
+              // `aria-disabled`, not `disabled`: emptying the field while the
+              // focus is here would take the focus to `body` (0013 H5).
+              aria-disabled={!value || undefined}
               // Without this the focus leaves the field — the list would stay
               // open, but the value would be reported as if it had been left.
               onMouseDown={(e) => e.preventDefault()}
-              onClick={() => onOpenLedger(value)}
+              onClick={() => {
+                if (value) onOpenLedger(value);
+              }}
             />
           </span>
         ) : null}

@@ -537,3 +537,13 @@ außerhalb und Fokusverlust melden den Wert wie vorher, 0 Konsolenfehler. H4 und
 H5 sollten als eigener Punkt ans Set (Bedienung, Tastaturweg).
 
 Nachgeprüft von / am: Claude (fremder Nachprüfer), 2026-10-01
+
+### Nacharbeit 3 2026-10-01 (Hinweise der Nachprüfung 2, vorbestehend)
+
+| Punkt | Was getan | Selbst gemessen (with-candidates, with-ledger, 1280 × 900) |
+|---|---|---|
+| **H4** | Escape wird am Rahmen `.v2kf` behandelt, nicht nur am Feld: auch von einem Eintrag aus schließt die Liste, der Fokus geht über denselben Weg wie nach der Wahl ans Feld (`backToField`, Merker `quiet`) | Tab auf Eintrag, Escape → Fokus im Feld, Liste zu |
+| **H5** | Der Kontenblatt-Knopf ist bei leerem Feld `aria-disabled`, nicht `disabled`: er behält den Fokus, wenn das Feld geleert und per Tab verlassen wird; `onClick` prüft den Wert. `.v2ibtn[aria-disabled="true"]` sieht aus wie `:disabled` und bekommt kein Hover | Feld leeren, Tab → Fokus auf „Kontenblatt", `:focus-visible`, Deckkraft 0,5; Enter öffnet nichts |
+| **H6** | Nach der Wahl steht die Nummer markiert, wie beim Fokus — Tippen ersetzt sie. `select()` nach dem Render (`requestAnimationFrame`), vorher hielt das Feld noch den alten Text | Klick und Enter auf Eintrag → Auswahl 0–4 von „6815"; Tippen „6800" ersetzt |
+
+Offen (vorbestehend, eigener Punkt): Nach Escape öffnet ein Klick in das schon fokussierte Feld die Liste nicht wieder, Pfeil runter auch nicht — nur Tippen. H2 (zweimal „Alle Konten"), B3, B5.
