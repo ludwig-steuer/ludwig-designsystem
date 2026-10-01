@@ -410,3 +410,59 @@ Abgenommen von / am: Claude (fremder Abnehmer), 2026-10-01
 | B4 Fokus nach der Wahl auf `body` | Einträge mit `onMouseDown` ohne Fokuswechsel: das Feld behält den Fokus, auch nach der Wahl (gemessen: Wahl „6600", Fokus im Feld, Liste zu) | behoben |
 | B3 weder unten noch oben Platz | außerhalb des Desktop-Ziels | offen |
 | B5 Leertext bei nie befülltem Feld ohne Kandidaten | eigener Punkt (drei Leertexte, T6) | offen |
+
+### Nachprüfung Kontenliste 2026-10-01 (Stand d1bb70a)
+
+Fremder Nachprüfer, nichts gebaut. Bedient in eigenen Playwright-Kontexten
+(1280 × 900, `de-DE`) gegen Storybook 6107, mit Klicks, Mausrad und Tasten;
+Fokus über `document.activeElement`, Verdeckung über `elementFromPoint` (Mitte
+und vier Ecken des fokussierten Elements), offene Listen über
+`.v2kf__pop:popover-open`. `AccountField.tsx` im Arbeitsbaum = `d1bb70a`.
+
+| Punkt | Nachweis | Ergebnis |
+|---|---|---|
+| B1 Tab aus Feld und Liste schließt | `--s-2-split-full`, erstes Kontofeld geleert: Liste offen (beide Gruppen, 6815 und 6820) → Tab „6815" offen → Tab „6820" offen → Tab „Belegfeld 1": **zu**, Fokus 5 von 5 Punkten sichtbar. Shift+Tab aus dem Feld → „Steuerschlüssel", zu. Shift+Tab von einem Eintrag zurück ins Feld → bleibt offen. Ganze Seite 40 × Tab vom Anfang: jedes fokussierte Element 5/5 sichtbar, höchstens **eine** Liste offen; Klick ins erste, dann ins zweite Kontofeld → eine offen | ✓ |
+| B2 doppelter Schlüssel | `RecurringRuleEditor --new`, `--filled`, `--modes`, `--invalid`, `--error`, `--interactive`, `--in-use`, `--edges` (`--pending` gesperrt): jedes Kontofeld fokussiert und „68" getippt; der Fall tritt auf (zwei Gruppen „Alle Konten"), **0** Konsolenmeldungen „same key", 0 sonstige Fehler | ✓ |
+| B4 Klick auf einen Eintrag | Editor: Klick auf „6820" → Wert 6820, Liste zu, `activeElement` = Kontofeld; Tab → „Belegfeld 1", ruhend „6820 Porto". `AccountField --with-candidates`, `--with-ledger`, `--number-and-name`: Klick auf den ersten Eintrag → Wert gesetzt, zu, Fokus im Feld | ✓ |
+| B4 Enter auf einen Eintrag (Tastaturweg, Teil des Befunds B4) | Editor, Feld geleert, Tab auf „6815", Enter → Wert 6815, Liste zu, **`activeElement` = `body`**; dasselbe in `AccountField --with-candidates` (Leertaste danach landet nirgends). Kein Fokusring mehr sichtbar | ✗ |
+| Kriterium 1 im Editor ganz sichtbar | Liste 320 × 190 bei 148-px-Feld, 4 px darunter, beide Gruppenköpfe und beide Einträge per `elementFromPoint` getroffen; `.bse__tbl` 210 = 210 | ✓ |
+| Kriterium 3 läuft beim Querscrollen mit | Mausrad quer über der Tabelle: `scrollLeft` 120, Feld 439 → 319, Liste 439 → 319, Abstand 4 px | ✓ |
+| Kriterium 4 Tastatur und Wahl | Escape → zu; „Porto" getippt → offen, 6820 und 6600; Enter → 6820, zu, Fokus im Feld; „6820" frei getippt, Tab → ruhend „6820 Porto" (Fokusverlust meldet den Wert); „6600" getippt, Klick außerhalb → zu, Wert 6600 gemeldet | ✓ |
+| Kriterium 5 eigene Stories | alle sechs `AccountField --*`: Fokus öffnet, Wahl bzw. Leertext, Shift+Tab schließt, 0 Konsolenfehler; `--with-ledger`: Kontenblatt-Knopf 24 × 24 bei offener Liste → „Kontenblatt 6815" | ✓ |
+| `pnpm typecheck`, `check:language`, `check:when` | alle drei Exit 0 („0 German comment lines left", „in Ordnung"); `pnpm build` auftragsgemäß nicht gestartet | ✓ |
+
+**Mangel**
+
+- **M1 — B4 nur für die Maus behoben.** Der Befund lautete „Klick **oder Enter**
+  auf einen Eintrag"; die Nacharbeit verhindert nur den Fokuswechsel beim
+  Mausdruck (`onMouseDown` mit `preventDefault`, `AccountField.tsx:305`). Wer
+  per Tab auf einen Eintrag geht und Enter drückt, hat den Fokus auf dem Knopf;
+  `choose()` (`:209`) schließt die Liste, der Knopf verschwindet, der Fokus fällt
+  auf `body`. Folge: kein sichtbarer Fokus mehr (2.4.7), Tippen geht ins Leere.
+  Die Zeile „das Feld behält den Fokus, auch nach der Wahl" in der Nacharbeit
+  stimmt damit nur für den Klick. Abhilfe: nach der Wahl den Fokus ans Feld
+  zurückgeben — ohne dass `onFocus` die Liste wieder öffnet.
+
+**Hinweise ohne Mangel**
+
+- **H1 — Klick auf einen Gruppenkopf schließt die Liste.** Der Kopf ist nicht
+  fokussierbar, der Fokus fällt auf `body`, `relatedTarget` ist `null`, das neue
+  `onBlur` schließt. Folgerichtig zu B1 und unschädlich; wer es ruhig will, setzt
+  das `preventDefault` beim Mausdruck an die ganze Liste statt an jeden Eintrag.
+- **H2 — zwei Gruppen „Alle Konten" mit demselben Konto.** `RecurringRuleEditor
+  --filled`, erstes Kontofeld: „Alle Konten: 10001 | Alle Konten: 10001". Der
+  Index im Schlüssel beseitigt die React-Warnung, die Doppelung bleibt sichtbar
+  (die Treffer der Suche gehören in die Gruppe des Aufrufers oder werden gegen
+  sie abgeglichen). Eigener Punkt, nicht Teil von B2.
+- **H3 — `--with-ledger`: die Liste schließt jetzt, wenn das Kontenblatt
+  aufgeht** (der Fokus wandert in den Drawer). Die Abnahme vom Stand `82090ad`
+  sah „Liste bleibt"; das neue Verhalten ist das richtige.
+- Den Klick auf die Bildlaufleiste einer langen Liste (sieben Einträge, 378 zu
+  318 px) konnte der Prüfbrowser nicht messen: er blendet Bildlaufleisten aus.
+
+**Urteil: nicht abgenommen — ein Mangel (M1, Tastaturweg von B4).** B1 und B2
+sind behoben, die fünf Kriterien des Nachtrags halten. Nach M1 genügt eine
+Nachprüfung des Tastaturwegs (Tab auf Eintrag, Enter → Fokus im Feld, Liste zu)
+und eine Stichprobe von B1. B3 und B5 bleiben offen.
+
+Nachgeprüft von / am: Claude (fremder Nachprüfer), 2026-10-01
