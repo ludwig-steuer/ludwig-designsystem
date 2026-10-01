@@ -37,9 +37,9 @@ const REVERSE_CHARGE_BANK_LINES: JournalLine[] = [
 ];
 
 const CHECKS_WITH_FINDING: CheckItem[] = [
-  { code: "P-UST", question: "Passt der Steuerschlüssel zum ausgewiesenen Steuersatz?", reason: "Beleg weist 7 % aus, gebucht wurde BU 9 (19 %).", state: "red" },
+  { code: "P-BELEG", question: "Stimmt die Belegnummer mit dem Beleg überein?", reason: "Belegfeld 1 „RE-4417“ weicht von der Nummer auf dem Beleg „RE-4471“ ab.", state: "red" },
+  { code: "P-UST", question: "Passt der Steuerschlüssel zum ausgewiesenen Steuersatz?", reason: "Beleg weist 19 % aus, gebucht mit BU 9.", state: "green" },
   { code: "P-BETRAG", question: "Stimmt der gebuchte Betrag mit dem Beleg überein?", reason: "Betrag und Beleg stimmen auf den Cent.", state: "green" },
-  { code: "P-BELEG", question: "Stimmt die Belegnummer mit dem Beleg überein?", reason: "Belegfeld 1 entspricht der Nummer auf dem Beleg.", state: "green" },
   { code: "P-KONTO", question: "Passt das Sachkonto zur Leistung?", reason: "Wie die letzten drei Buchungen dieser Gegenpartei.", state: "green" },
   { code: "P-13B", question: "Ist die Umkehr der Steuerschuld richtig behandelt?", reason: "Ob § 13b greift, ist am Beleg nicht vermerkt.", state: "open" },
 ];
@@ -48,10 +48,30 @@ const CHECKS_PASSED: CheckItem[] = [
   { code: "P-AUSGLEICH", question: "Gleicht die Zahlung den offenen Posten aus?", reason: "RE-4471 ist mit dieser Zahlung ausgeglichen.", state: "green" },
 ];
 
-const RATIONALE =
-  "Bürobedarf Meier GmbH liefert seit 2024 Büromaterial; die letzten drei Rechnungen stehen auf 4930 Bürobedarf mit BU 9. Die Rechnung weist 19 % aus.";
+const RATIONALE = "Bürobedarf Meier GmbH liefert seit 2024 Büromaterial; die letzten drei Rechnungen stehen auf 4930 Bürobedarf.";
+const JUDGE = "Steuerschlüssel von 8 auf 9 korrigiert: die Rechnung weist 19 % aus.";
+const SOURCES = [
+  { key: "doc", art: "document" as const, label: "Rechnung RE-4471", quote: "Nettobetrag 1.240,00 € · USt 19 % 235,60 €" },
+  { key: "hist", art: "history" as const, label: "Vorbuchungen Bürobedarf Meier GmbH", quote: "3 × 4930 Bürobedarf, zuletzt 18.07.2026" },
+];
 
-/** Liste, kompakt — wie im Aufklapper von T3: Satz, Begründung, Prüfpunkte mit Befund, Judge. Ohne Belege. */
+const DOCUMENT = (
+  <FieldList
+    title="Beleg & USt"
+    rows={[
+      ["Aussteller", "Bürobedarf Meier GmbH"],
+      ["Nummer / Datum", "RE-4471 · 21.08.2026"],
+      ["Leistungszeitraum", "August 2026"],
+      ["Netto / USt / Brutto", "1.240,00 € · 235,60 € · 1.475,60 €"],
+      ["Empfänger", "der Mandant"],
+    ]}
+  />
+);
+
+/**
+ * Liste, kompakt — wie im Aufklapper von T3: Satz, Begründung, Prüfpunkte mit
+ * Befund, Judge. Der Satz hat Belege, `show={{ evidence: false }}` schaltet sie ab.
+ */
 export const ListCompact: Story = {
   render: () => (
     <div style={{ maxWidth: 1180, background: "var(--color-bg-soft)", padding: "var(--space-5)" }}>
@@ -66,10 +86,12 @@ export const ListCompact: Story = {
             kindLabel: "Aufwand",
             kindDescription: "Ein Sachkonto für Aufwand, ein Personenkonto — eine Eingangsrechnung.",
             status: "proposed",
+            confidence: "yellow",
             rationale: RATIONALE,
             verdict: "adjust",
-            judgeReasoning: "Steuerschlüssel von 8 auf 9 korrigiert: die Rechnung weist 19 % aus.",
+            judgeReasoning: JUDGE,
             checks: CHECKS_WITH_FINDING,
+            evidence: DOCUMENT,
           },
         ]}
       />
@@ -123,18 +145,6 @@ export const ListFull: Story = {
   ),
 };
 
-const DOCUMENT = (
-  <FieldList
-    title="Beleg & USt"
-    rows={[
-      ["Aussteller", "Bürobedarf Meier GmbH"],
-      ["Nummer / Datum", "RE-4471 · 21.08.2026"],
-      ["Leistungszeitraum", "August 2026"],
-      ["Netto / USt / Brutto", "1.240,00 € · 235,60 € · 1.475,60 €"],
-      ["Empfänger", "der Mandant"],
-    ]}
-  />
-);
 
 /**
  * Fall-Ansicht, voll und bearbeitbar: der Editor steht im Slot und bearbeitet
@@ -154,9 +164,11 @@ export const CaseEditable: Story = {
               currency: "EUR",
               kindLabel: "Aufwand",
               status: "proposed",
+              confidence: "yellow",
               rationale: RATIONALE,
+              sources: SOURCES,
               verdict: "adjust",
-              judgeReasoning: "Steuerschlüssel von 8 auf 9 korrigiert: die Rechnung weist 19 % aus.",
+              judgeReasoning: JUDGE,
               checks: CHECKS_WITH_FINDING,
               evidence: DOCUMENT,
               actions: (
@@ -201,6 +213,7 @@ export const RoutineCase: Story = {
             currency: "EUR",
             kindLabel: "Aufwand",
             status: "proposed",
+            confidence: "green",
             rationale: null,
             verdict: "confirm",
             judgeReasoning: null,
@@ -214,20 +227,25 @@ export const RoutineCase: Story = {
 
 /**
  * „Aufwand mit Zahlung" (P58) in beiden Formen (§3a): oben ein Fall mit zwei
- * Sätzen — Rechnung und Zahlung —, jeder vollständig mit eigenen Prüfpunkten;
+ * Sätzen — Rechnung („Aufwand") und Zahlung („Zahlung"), die Satzart des Falls
+ * einmal darüber (`caseKind`) —, jeder vollständig mit eigenen Prüfpunkten;
  * darunter ein Einzelsatz, der Aufwand direkt an die Bank bucht, mit allen vier
  * Zeilen einschließlich des § 13b-Steuerpaars.
  */
 export const ExpenseWithPayment: Story = {
   render: () => {
     const twoEntries: BookingReviewEntry[] = [
-      { id: "je-inv", lines: INVOICE_LINES, currency: "EUR", kindLabel: "Aufwand mit Zahlung", kindDescription: "Rechnung und Zahlung in einem Fall (P58).", status: "proposed", checks: CHECKS_WITH_FINDING },
-      { id: "je-pay", lines: PAYMENT_LINES, currency: "EUR", kindLabel: "Aufwand mit Zahlung", kindDescription: "Rechnung und Zahlung in einem Fall (P58).", status: "proposed", checks: CHECKS_PASSED },
+      { id: "je-inv", lines: INVOICE_LINES, currency: "EUR", kindLabel: "Aufwand", status: "proposed", checks: CHECKS_WITH_FINDING },
+      { id: "je-pay", lines: PAYMENT_LINES, currency: "EUR", kindLabel: "Zahlung", status: "proposed", checks: CHECKS_PASSED },
     ];
     return (
       <div style={{ display: "grid", gap: "var(--space-6)", maxWidth: 1180 }}>
         <div style={{ background: "var(--color-bg-soft)", padding: "var(--space-5)" }}>
-          <BookingReview {...HREFS} entries={twoEntries} />
+          <BookingReview
+            {...HREFS}
+            caseKind={{ label: "Aufwand mit Zahlung", description: "Rechnung und Zahlung in einem Fall (P58)." }}
+            entries={twoEntries}
+          />
         </div>
         <div style={{ background: "var(--color-bg-soft)", padding: "var(--space-5)" }}>
           <BookingReview
@@ -250,3 +268,51 @@ export const ExpenseWithPayment: Story = {
     );
   },
 };
+
+/**
+ * Im Einsatz, so breit wie in der App bei 1280 px mit Seitenleiste und
+ * Schritt-Leiste (~728 px): die Belege stehen unter dem Satz, vor der Handlung;
+ * der volle Editor scrollt in seiner weißen Fläche, die Seite nicht.
+ */
+export const InUse: Story = {
+  render: () => (
+    <div style={{ width: 728 }}>
+      <BookingReview
+        lines="full"
+        entries={[
+          {
+            id: "je-1",
+            lines: INVOICE_LINES,
+            currency: "EUR",
+            kindLabel: "Aufwand",
+            status: "proposed",
+            confidence: "yellow",
+            rationale: RATIONALE,
+            sources: SOURCES,
+            verdict: "adjust",
+            judgeReasoning: JUDGE,
+            checks: CHECKS_WITH_FINDING,
+            evidence: DOCUMENT,
+            actions: (
+              <Button variant="tertiary" size="sm">
+                Diesen Satz ablehnen
+              </Button>
+            ),
+            full: (
+              <JournalEntryGrid
+                rows={[GRID_ROW({ id: "1" })]}
+                status="proposed"
+                mode="full"
+                contraAccount={{ account: "70044", name: "Bürobedarf Meier GmbH" }}
+                documentNumber="RE-4471"
+                documentAmount={1475.6}
+                accountFramework="skr03"
+              />
+            ),
+          },
+        ]}
+      />
+    </div>
+  ),
+};
+

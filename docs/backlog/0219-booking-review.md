@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Status | in Arbeit — fremde Abnahme 2026-10-01: nicht abgenommen (M1, M2 blockierend) |
+| Status | Abnahme — Nacharbeit 2026-10-01 nach der fremden Abnahme (M1–M7); zuvor: in Arbeit — fremde Abnahme 2026-10-01: nicht abgenommen (M1, M2 blockierend) |
 | Stufe | `entities/journal-entry/` |
 | Klassen-Test | „Ergäbe das auch in einer Versicherungs-App Sinn?" → nein: Buchungssatz, Satzart, Judge, Prüfpunkte eines Vorschlags |
 | Quelle | Anfrage llcto 2026-10-01, Owner-Wunsch; Brief `ludwig/app` `docs/backlog/F355-booking-review-unified-design-brief.md` §3, §3a, §4, §5 Punkte 4–5 (6999e08f, cc28c51f) |
@@ -41,31 +41,36 @@ Prüfpunkte sagen, was der Judge sagt. Was leer ist, steht nicht da.
 | Prop | Typ | Pflicht | Bedeutung | Nachweis (Story) |
 |---|---|---|---|---|
 | `entries` | `readonly BookingReviewEntry[]` | ja | Die Sätze des Falls, untereinander, jeder vollständig (§3a) | alle |
-| `lines` | `"compact" \| "full"` | nein | Standard `compact`: `JournalEntryCard` aus `entry.lines`. `full`: `entry.full` (Grid oder Editor des Aufrufers); fehlt er, die kompakte Form | `ListCompact`, `ListFull`, `CaseEditable` |
-| `show` | `Partial<Record<"kind" \| "rationale" \| "checks" \| "judge" \| "evidence", boolean>>` | nein | Blöcke einzeln abschalten; Standard: alle an. Ein angeschalteter, aber leerer Block rendert trotzdem nicht | `ListCompact` (`evidence: false`) |
+| `caseKind` | `{ label: string; description?: string \| null } \| null` | nein | Satzart des **Falls**, wo sie von den Sätzen abweicht („Aufwand mit Zahlung" über „Aufwand" + „Zahlung", P58) — einmal über den Sätzen; abschaltbar mit `kind` | `ExpenseWithPayment` |
+| `lines` | `"compact" \| "full"` | nein | Standard `compact`: `JournalEntryCard` aus `entry.lines`. `full`: `entry.full` (Grid oder Editor des Aufrufers); fehlt er, die kompakte Form | `ListCompact`, `ListFull`, `CaseEditable`, `InUse` |
+| `show` | `Partial<Record<BookingReviewBlock, boolean>>` | nein | Blöcke einzeln abschalten; Standard: alle an. Ein angeschalteter, aber leerer Block rendert trotzdem nicht | `ListCompact` (Satz mit Belegen, `evidence: false`) |
 | `accountHref` | `(accountNumber: string) => string` | nein | an `JournalEntryCard` | `ListCompact` |
 | `taxKeyHref` | `(taxKey: string) => string` | nein | an `JournalEntryCard` | `ListCompact` |
 
-`BookingReviewEntry`:
+`BookingReviewBlock = "kind" | "confidence" | "rationale" | "checks" | "judge" | "evidence"`.
 
-| Feld | Typ | Bedeutung |
-|---|---|---|
-| `id` | `string` | Schlüssel |
-| `lines` | `readonly JournalLine[]` | **alle** Zeilen des Satzes, Steuer, § 13b und Gegenkonto eingeschlossen — nie gefiltert (§3a) |
-| `currency` | `Currency` | für `JournalEntryCard` |
-| `full` | `ReactNode` | der volle Satz (`JournalEntryGrid` lesend oder `JournalEntryEditor` bearbeitend) für `lines="full"` |
-| `kindLabel` | `string \| null` | Satzart als Wort der App-Registry („Aufwand", „Zahlung", „Aufwand mit Zahlung" …, P58) — neutrales Badge |
-| `kindDescription` | `string \| null` | `title` des Badges |
-| `status` | `string \| null` | Achse `journal_entry` |
-| `rationale` | `string \| null` | Begründung des Agenten — bei Routine leer (F356) |
-| `verdict` | `JudgeVerdict \| null` | Urteil des Judge |
-| `judgeReasoning` | `string \| null` | Satz des Judge |
-| `checks` | `readonly CheckItem[]` | Prüfpunkte dieses Satzes |
-| `evidence` | `ReactNode` | Beleg & USt bzw. Zahlung, rechts neben dem Satz |
-| `actions` | `ReactNode` | Handlungen an diesem Satz („Diesen Satz ablehnen") unter seinen Blöcken |
+`BookingReviewEntry` (alle Felder außer `id`, `lines`, `currency` optional):
 
-Typen: `JournalLine` (JournalEntryCompact), `JudgeVerdict` (AiBookingNotes),
-`CheckItem` (Review), `Currency` aus `src/ludwig/shared/money`.
+| Feld | Typ | Pflicht | Bedeutung |
+|---|---|---|---|
+| `id` | `string` | ja | Schlüssel |
+| `lines` | `readonly JournalLine[]` | ja | **alle** Zeilen des Satzes, Steuer, § 13b und Gegenkonto eingeschlossen — nie gefiltert (§3a) |
+| `currency` | `Currency` | ja | für `JournalEntryCard` |
+| `full` | `ReactNode` | nein | der volle Satz (`JournalEntryGrid` lesend oder `JournalEntryEditor` bearbeitend) für `lines="full"` |
+| `kindLabel` | `string \| null` | nein | Satzart dieses Satzes als Wort der App-Registry („Aufwand", „Zahlung" …) — neutrales Badge |
+| `kindDescription` | `string \| null` | nein | `title` des Badges |
+| `status` | `string \| null` | nein | Achse `journal_entry` |
+| `confidence` | `ConfidenceLevel \| null` | nein | Ludwigs Einschätzung, Achse `confidence` — im Kopf „Ludwig [Plausibel]" (die Fall-Ansicht zeigte sie, M2) |
+| `rationale` | `string \| null` | nein | Begründung des Agenten — bei Routine leer (F356) |
+| `sources` | `readonly AiSource[]` | nein | Quellen der Begründung (die Fall-Ansicht zeigte sie, M2) |
+| `verdict` | `JudgeVerdict \| null` | nein | Urteil des Judge |
+| `judgeReasoning` | `string \| null` | nein | Satz des Judge |
+| `checks` | `readonly CheckItem[]` | nein | Prüfpunkte dieses Satzes |
+| `evidence` | `ReactNode` | nein | Beleg & USt bzw. Zahlung, rechts neben dem Satz |
+| `actions` | `ReactNode` | nein | Handlungen an diesem Satz („Diesen Satz ablehnen") — immer zuletzt |
+
+Typen: `JournalLine` (JournalEntryCompact), `JudgeVerdict`, `AiSource` (AiBookingNotes),
+`ConfidenceLevel` (Confidence), `CheckItem` (Review), `Currency` aus `src/ludwig/shared/money`.
 
 **Kann bewusst nicht:** den Satz bearbeiten (der Editor im Slot tut es),
 Belegfelder darstellen (Slot), Aktionen des ganzen Falls („Freigeben") tragen —
@@ -74,37 +79,41 @@ die stehen beim Aufrufer unter dem Baustein, weil Freigeben den **Fall** freigib
 ## Verhalten
 
 - **Reihenfolge je Satz** (Brief §3): Kopf → Buchungssatz → Begründung →
-  Prüfpunkte → Judge → Handlungen. Rechts daneben, wenn vorhanden: Belege/Zahlung.
-- **Kopf:** „Satz i von n" nur bei mehr als einem Satz; Satzart-Badge; Status —
-  in `full` nicht, dort zeigt ihn die Form im Slot (Grid, Editor) selbst. Fehlt
-  alles, kein Kopf.
+  Prüfpunkte → Judge → Handlungen. Belege/Zahlung rechts daneben; unter 64 rem
+  Breite darunter, **vor** den Handlungen (Grid-Bereiche, M1).
+- **Kopf:** „Satz i von n" nur bei mehr als einem Satz; Satzart-Badge; „Ludwig
+  [Konfidenz]"; Status — in `full` mit `entry.full` nicht, dort zeigt ihn die Form
+  im Slot selbst; `full` ohne `entry.full` zeigt ihn im Kopf. Fehlt alles, kein
+  Kopf. Die Satzart des Falls (`caseKind`) steht einmal über allen Sätzen.
 - **Buchungssatz auf weißem Grund** — eigene weiße Fläche mit 1-px-Rand, auch im
-  grauen Aufklapper einer Liste.
-- **Begründung:** nur mit `rationale`, über `AiBookingNotesBody` — die Zeile trägt
-  ihr Label „Begründung" selbst, eine Überschrift darüber entfällt. **Judge:** nur
-  wenn relevant — Urteil ≠ `confirm` oder ein Satz des Judge vorhanden; Kopfzeile
-  „Judge" mit dem Urteil als `StatusBadge` (`judge`), darunter der Satz über
-  `AiBookingNotesBody`. **Prüfpunkte:** nur mit mindestens einem
-  Punkt; `CheckItems` (y zählt nur prüfbare, nicht prüfbar als eigener Block).
+  grauen Aufklapper einer Liste; ein breiter Editor scrollt in dieser Fläche.
+- **Begründung:** mit `rationale` oder `sources`, über `AiBookingNotesBody` — die
+  Zeile trägt ihr Label „Begründung" selbst, Quellen darunter. **Prüfpunkte:** nur
+  mit mindestens einem Punkt; Überschrift „Prüfpunkte", `CheckItems`. **Judge:**
+  nur wenn relevant — Urteil ≠ `confirm` oder ein Satz vorhanden; Zeile „Judge
+  [Urteil]" (`StatusBadge`, Achse `judge`), darunter „Einschätzung" mit dem Satz
+  (`ProvenanceRows`) — „Judge" steht einmal (M5).
 - **Leer heißt unsichtbar:** ein Block ohne Inhalt rendert nicht, auch keine
   Überschrift.
-- **Mehrere Sätze** (Zwei-Satz-Fall „Aufwand mit Zahlung", §3a): alle
-  untereinander, jeder mit eigenen Prüfpunkten, durch eine Linie getrennt.
+- **Mehrere Sätze** (Zwei-Satz-Fall, §3a): alle untereinander, jeder mit eigener
+  Satzart und eigenen Prüfpunkten, durch eine Linie getrennt.
 - Server-Component (kein Zustand); Tastatur und Fokus bringen die Bausteine mit.
 - **Zustände:** gefüllt; leer (`entries` leer) → nichts (der Aufrufer zeigt „kein
   Vorschlag"); lädt/Fehler → beim Aufrufer (die Daten kommen mit dem Fall).
 
 ## Stories
 
-Titel `v3/Entitäten/Buchungssatz/BookingReview`. Nach Brief §5 je Ausprägung:
+Titel `v3/Entitäten/Buchungssatz/BookingReview`. Nach Brief §5 je Ausprägung,
+dazu „im Einsatz":
 
 | Story | Beweist |
 |---|---|
-| `ListCompact` | `lines="compact"`, wie im T3-Aufklapper: Satz kompakt auf weiß, Begründung, Prüfpunkte mit Befund, Judge mit Urteil „angepasst"; `evidence` aus |
+| `ListCompact` | `lines="compact"`, wie im T3-Aufklapper: Satz kompakt auf weiß, Konfidenz, Begründung, Prüfpunkte mit Befund, Judge „angepasst"; der Satz hat Belege, `show.evidence: false` blendet sie aus |
 | `ListFull` | `lines="full"` mit `JournalEntryGrid` lesend im Slot |
-| `CaseEditable` | Fall-Ansicht: `lines="full"`, `JournalEntryEditor` bearbeitbar im Slot, Beleg & USt rechts, Handlung „Diesen Satz ablehnen" |
+| `CaseEditable` | Fall-Ansicht bei 1246 px: `lines="full"`, `JournalEntryEditor` bearbeitbar im Slot, Quellen, Beleg & USt rechts, Handlung darunter links |
 | `RoutineCase` | Routine: keine Begründung, Judge `confirm` ohne Satz → nur Kopf, Satz, Prüfpunkte |
-| `ExpenseWithPayment` | zwei Sätze eines Falls (Rechnung + Zahlung), Satzart „Aufwand mit Zahlung"; dazu ein Einzelsatz Aufwand direkt an Bank mit § 13b-Zeilen — alle Zeilen sichtbar (§3a) |
+| `ExpenseWithPayment` | zwei Sätze eines Falls („Aufwand", „Zahlung") unter `caseKind` „Aufwand mit Zahlung"; dazu ein Einzelsatz Aufwand direkt an Bank mit § 13b-Zeilen — alle Zeilen sichtbar (§3a) |
+| `InUse` | in App-Breite (728 px, Seitenleiste + Schritt-Leiste bei 1280 px): Belege unter dem Satz, vor der Handlung; der volle Satz in seiner Fläche |
 
 ## Ausbau
 
@@ -242,4 +251,18 @@ Prüfpunkte → Judge → Handlungen; `RoutineCase` ohne „Begründung" und „
 Satzfläche `rgb(255, 255, 255)` auf `rgb(244, 246, 248)`; `ListFull` Kopf nur mit
 Satzart, Status im Grid; `ExpenseWithPayment` „Satz 1 von 2"/„Satz 2 von 2" mit je
 eigenen Prüfpunkten, der Einzelsatz mit allen vier Zeilen (6837 · 1407 · 3837 · 1802).
+
+## Nacharbeit 2026-10-01 (nach der fremden Abnahme)
+
+| Punkt | Änderung | Stand |
+|---|---|---|
+| M1 Belege hinter den Handlungen unter 64 rem | Handlungen sind ein eigener Grid-Bereich: breit „main aside / actions aside", schmal „main / aside / actions". Gemessen `InUse` (728 px): Satz-Spalte 16–705, Belege 721–960, Handlung 976–1006; `CaseEditable` (1246 px): Belege rechts 910–1262, Handlung links unter dem Satz | behoben |
+| M2 Konfidenz und Quellen fehlten | `entry.confidence` (Kopf „Ludwig [Plausibel]", Achse `confidence`, Schalter `confidence`), `entry.sources` (über `AiBookingNotesBody` unter der Begründung) | behoben |
+| M3 keine Story im Einsatz | `InUse` in App-Breite 728 px | behoben |
+| M4 `show.evidence` unbewiesen | `ListCompact` gibt dem Satz Belege und schaltet sie ab | behoben |
+| M5 „Judge" doppelt | Zeile „Judge [Urteil]", darunter „Einschätzung" (`ProvenanceRows`), nicht mehr „Einschätzung des Judge" | behoben |
+| M6 Fixture widersprüchlich | Befund ist jetzt die Belegnummer („RE-4417" ↔ „RE-4471"); 19 % steht nur noch im Satz des Judge und im Beleg, die Begründung wiederholt ihn nicht | behoben |
+| M7 Schnittstelle unvollständig | Tabellen mit Spalte „Pflicht", `BookingReviewBlock`, `caseKind`, Status-Satz für `full` ohne `entry.full` | behoben |
+| H1 Satzart im Zwei-Satz-Fall | Default (llcto trägt ihn, liegt beim Owner): jeder Satz seine Satzart, die des Falls einmal über `caseKind` | gebaut, Owner bestätigt noch |
+| H2 Editor-Spalte „Text" 0 px | vorbestehend (`JournalEntryEditor --s-2-split-full`), eigener Auftrag | offen |
 
