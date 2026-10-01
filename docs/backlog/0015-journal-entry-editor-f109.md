@@ -635,3 +635,38 @@ zeigt jetzt zusätzlich den FTC-Fall mit Gegenkonto — „Σ S 1,79 € = Σ H 
 10,31 € = Σ H 10,31 €", `S2_SplitFull` „Σ S 1.475,60 € = Σ H 1.475,60 €",
 unverändert. `journalLines()` mit dem Satz nachgerechnet (esbuild + node):
 `6837 S 1.50 | 1407 S 0.29 | 3837 H 0.29 | 70145 H 1.50`.
+
+### Fremde Abnahme Nachtrag 2026-10-01
+
+Fremder Abnehmer, Stand 041636e. Gemessen im eigenen Playwright-Kontext
+(1440 × 1000, danach geschlossen) gegen Storybook `localhost:6107`; Journalzeilen
+aus `.bse__journal__body .v2je__row` gelesen, Soll/Haben je Spalte und im Browser
+nachsummiert.
+
+| Punkt | Nachweis | ✓/✗ |
+|---|---|---|
+| 1 `Journal` nur über `journalLines()` / `journalBalanceText()` | `JournalEntryEditor.tsx` Z. 837 `journalLines(rows, contraAccount, documentSide, accountFramework)`, Z. 845 `{journalBalanceText(lines)}`; keine Schleife, kein `debit`/`credit` mehr in `Journal`. `rows={active}` (Z. 447) ist schon ohne `removed`, also gleiche Menge wie vorher. Nichts verwaist: `deriveTax` (Z. 635), `toNumber`, `euro`, `REVERSE_CHARGE_TAX_ACCOUNTS` (Z. 166) haben weiter Aufrufer; `tsc` mit `noUnusedLocals`/`noUnusedParameters` grün | ✓ |
+| 2a `ReverseCharge13b`, erster Kopf | „Σ S 10,31 € = Σ H 10,31 €"; Zeilen 4806 S 8,66 · 1577 S 1,65 · 1787 H 1,65 · 1618 H 8,66, nachsummiert S 10,31 = H 10,31 | ✓ |
+| 2b `ReverseCharge13b`, zweiter Kopf (FTC Gephyra) | „Σ S 1,79 € = Σ H 1,79 €"; aufgeklappt 6837 S 1,50 · 1407 S 0,29 · 3837 H 0,29 · **70145 H 1,50 €**, nachsummiert S 1,79 = H 1,79 | ✓ |
+| 3a `S1_EditWithWarning` | „Σ S 1.475,60 € = Σ H 1.475,60 €"; 6815 S 1.240,00 · 1406 S 235,60 · 70044 H 1.475,60 — Zeilen stimmen mit „=" | ✓ |
+| 3b `S2_SplitFull` | „Σ S 1.475,60 € = Σ H 1.475,60 €"; 6815 S 840,34 · 1406 S 159,66 · 6845 S 399,66 · 1406 S 75,94 · 70044 H 1.475,60; „Rest 0,00 € ✓" | ✓ |
+| 3c `S5_RemainderDoesNotBalance` | „Σ S 1.400,00 € = Σ H 1.400,00 €"; 6815 S 1.176,47 · 1406 S 223,53 · 70044 H 1.400,00; Rest weiter gemeldet: „Rest 75,60 €" und Knopf „Rest 75,60 € einsetzen" | ✓ |
+| 3d `ContraAccountEditable` | „Σ S 1.475,60 € = Σ H 1.475,60 €"; 6815 S 1.240,00 · 1406 S 235,60 · 70044 H 1.475,60 | ✓ |
+| 3e `S3_AutomaticAccount` | „Σ S 1.475,60 € = Σ H 1.475,60 €"; 4400 1.240,00 · 1406 235,60 · 70044 1.475,60 (Seiten nur aus dem ersten Lauf, Summe passt) | ✓ |
+| 3f keine Laufzeitfehler | `pageerror` in allen gemessenen Stories leer | ✓ |
+| 4 `pnpm typecheck`, `pnpm check:language` | beide Exit 0; „check:language — ok. 0 German comment lines left in 0 files." `pnpm build` nicht gelaufen (parallele Sitzungen), Erbauer meldet grün | ✓ |
+
+**Urteil: abgenommen.** Der Fix hält, was der Nachtrag behauptet: Das Journal
+des Editors hat keine eigene Rechnung mehr, das § 13b-Steuerkonto fließt nicht
+ins Gegenkonto, und in allen sieben gemessenen Köpfen stimmt das Zeichen mit
+den Zeilen überein.
+
+Kein Mangel. Zwei Anmerkungen ohne Abnahmefolge:
+
+- Keine der gemessenen Stories zeigt „≠" — mit Gegenkonto gleicht das Journal
+  per Bauart immer aus, ein Ungleichgewicht zeigt der Rest. Der „≠"-Zweig
+  ist derselbe Code in `journalBalanceText()` wie vorher; im Browser ist er
+  hier nicht geprüft.
+- `Journal` destrukturiert noch `contraAccount: contraAccount, documentSide:
+  documentSide` (Z. 819 f.), Rest einer Umbenennung, nicht aus diesem Commit —
+  gehört zu M16 / **0113**.
