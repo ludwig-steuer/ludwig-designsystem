@@ -55,7 +55,8 @@ export const CLEARING_ACCOUNT_TYPE_LABEL: Record<ClearingAccountType, string> = 
   employee_expense: "Spesen / Mitarbeiterauslagen",
   shareholder: "Gesellschafter",
   payroll: "Lohnverrechnung",
-  payroll_liability: "Lohnverbindlichkeiten",
+  // Owner 2026-10-01: trägt auch Forderungen (1520 Krankenkasse aus AAG), daher nicht „Lohnverbindlichkeiten".
+  payroll_liability: "Lohn-Zahlungskreis (offene Posten)",
   payment_gateway: "Zahlungsdienstleister",
   suspense: "Klärung / durchlaufende Posten",
   money_transit: "Geldtransit",

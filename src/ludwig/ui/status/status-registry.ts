@@ -1423,10 +1423,10 @@ const CLEARING_ACCOUNT_TYPE: Record<string, StatusDescriptor> = {
       "Lohnjournal gegen Netto/SV/LSt. Muss dauerhaft auf null stehen — ein Saldo heißt, der Lohnlauf ist unvollständig gebucht. Kein Zahlungskonto.",
   },
   payroll_liability: {
-    label: "Lohnverbindlichkeiten",
+    label: "Lohn-Zahlungskreis (offene Posten)",
     kind: "neutral",
     description:
-      "Offene Netto-Löhne, Lohnsteuer, SV bis zur Zahlung. Trägt zwischen Lohnlauf und Zahltag zu Recht einen Saldo — keine Verprobung. Kein Zahlungskonto.",
+      "Offene Posten rund um den Lohn bis zur Zahlung: Netto-Löhne, Lohnsteuer, SV — und Erstattungsforderungen an die Krankenkasse (AAG, U1/U2). Trägt zwischen Entstehung und Zahlung zu Recht einen Saldo — keine Verprobung. Kein Zahlungskonto.",
   },
   shareholder: {
     label: "Gesellschafter",
