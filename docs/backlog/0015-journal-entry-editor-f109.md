@@ -706,7 +706,7 @@ Kriterien für die fremde Abnahme:
 
 - [x] Text-Spalte ≥ 160 px in `full` und `simple` bei 900 px Rahmen; kein überlagerter Kopf (`S2_SplitFull`, `S1_EditWithWarning`)
 - [x] Datum ganz lesbar („21.08.2026"), Feld ohne inneren Überlauf
-- [ ] Querscroll nur in `.bse__tbl`, nicht auf der Seite; Handlungszelle beim Scrollen sichtbar (Löschen erreichbar ohne Scrollen) — M2 behoben; offen: M3 (Nachprüfung, angeheftete Zelle deckt nur die Höhe ihres Inhalts)
+- [x] Querscroll nur in `.bse__tbl`, nicht auf der Seite; Handlungszelle beim Scrollen sichtbar (Löschen erreichbar ohne Scrollen) — M2 behoben; M3 behoben, Nachprüfung 2 (32a2506)
 - [x] Lese-Tabelle (`JournalEntryGrid`) unverändert, KOST nicht angeheftet — Nachprüfung 5d00af6
 - [x] in `BookingReview --in-use` (728 px, Editor im Slot) Text lesbar, Handlungszelle sichtbar — gemessen: Tabelle 1008 in 694 px, Text 160 px, letzte Zelle bei 727 = rechter Rand
 - [x] Datum im Lesezustand „21.08.2026" in Editor (`--in-use`) und Grid (`BookingReview --list-full`) — Nachprüfung 5d00af6
@@ -870,3 +870,53 @@ und 104, `case-editable`.
 | H4 zwei Schriftbilder je nach Aufrufer | Erzeuger auf ISO: `JournalEntryGrid.stories.tsx` („2026-08-26"), `showcase/account/scenario.tsx` (`postingDate` ISO) — beide jetzt über `Time` mit `tnum` | behoben |
 | H5 `ISO_DATE` doppelt | einmal in `journal-entry.ts`, Editor und Grid importieren es | behoben |
 | H6 Linien enden beim Querscrollen an der Rahmenbreite | vorbestehend (0044) | offen |
+
+### Nachprüfung 2 Spurbreiten 2026-10-01 (Stand 32a2506)
+
+Fremder Nachprüfer (nichts gebaut, weder erste Abnahme noch erste Nachprüfung).
+Storybook :6107, eigener Playwright-Kontext 1280 × 900, Locale de-DE,
+Europe/Berlin.
+
+| Punkt | Nachweis | |
+|---|---|---|
+| M3 Höhe | `--s-2-split-full`: angeheftete Kopfzelle 865–897 × 124,8–144,2 (19,4 px, vorher 0), Zeilenzelle 167,2–198,6 = Zeile 167,2–198,6 (31,4 px), Feld 168,2–197,6 liegt innerhalb. In allen elf bearbeitenden Editor-Stories (32 Kopf- und Zeilenzellen) ist die angeheftete Zelle mindestens so hoch wie die höchste Nachbarzelle | ✓ |
+| M3 scrollLeft 0 | Rahmen von „Buchungstext" (797–957): `elementFromPoint(881, Oberkante + 0,5)` und `(881, Unterkante − 0,5)` treffen in beiden Zeilen die angeheftete Zelle; im Bild endet das Feld bei 859, um den Papierkorb läuft kein Rahmen | ✓ |
+| M3 scrollLeft 104 | Tab aus „Belegfeld 2" → scrollLeft 104, Fokus „Buchungstext" 693–853 (M2 hält, angeheftet ab 865). Kopf „KOST" liegt bei 859–939; `elementFromPoint` an x 866/876/886/896 in Kopf-Oberkante und -Mitte trifft die angeheftete Kopfzelle; im Bild steht über der Löschspalte kein Kopf. Der Rahmen von KOST 1 (859–939) ist oben und unten verdeckt | ✓ |
+| M3 `case-editable` | angeheftet 841–873: Kopf 19,4 px, Zeile 31,4 px = Zeile, **ohne** Inhalt (kein Löschen, vorher 0 px); Rahmen von „Buchungstext" (795–955) oben und unten verdeckt; bei scrollLeft 206 Kopf weiter verdeckt | ✓ |
+| H4 Grid | alle neun `journalentrygrid--*` mit Zeilen: `<time datetime="2026-08-26…">` „26.08.2026", `tabular-nums`, 12,5 px; kein deutsch geliefertes Datum ohne `Time`, kein `JJJJ-MM-TT` im Text | ✓ |
+| H4 Konto-Seite | `seiten-konto-konten--long-name`, Zeile „09.07.2026" → `#entry=k12-2`, „Große Ansicht" geöffnet: `<time datetime="2026-07-09…">` „09.07.2026", `tabular-nums`, 12,5 px = Liste = Drawer-Kopf, nicht vertauscht; ohne Konsolenfehler, Seite 1280 | ✓ |
+| H5 | `ISO_DATE` einmal definiert (`journal-entry.ts:28`), Editor und Grid importieren es. `RawRecord.tsx:38` hat ein eigenes `ISO_DATE` (`(T|$)`, seit a23c004, andere Familie) — nicht Gegenstand von H5 | ✓ |
+| Gegenprobe | 13 Editor-, 10 Grid-, 6 BookingReview-Stories ohne Konsolenfehler, Seite überall 1280 = 1280 | ✓ |
+| Kriterium 1 | `--s-2-split-full` Text 160 px, kein Überlapp mit KOST; `--s-1-edit-with-warning` (simple) Text 226 px | ✓ |
+| Kriterium 2 | Datumsfeld 112 px, „2026-08-21" als 21.08.2026, scrollWidth 110 = clientWidth 110 (`--s-2-split-full`, `case-editable`) | ✓ |
+| Kriterium 3 | Tabelle 1046 in 862 px quer scrollbar, Seite ohne Querscroll; Löschen angeheftet 865–897 vor und nach dem Scrollen und jetzt auf voller Zeilenhöhe (M3) | ✓ |
+| Kriterium 4 | `journalentrygrid--full`, `--edges`, `bookingreview--list-full`: KOST `static` | ✓ |
+| Kriterium 5 | `bookingreview--in-use`: Tabelle 1008 in 694 px, Text 160 px; lesend nichts angeheftet (H3) | ✓ |
+| Kriterium 6 | lesend „21.08.2026" in `--in-use`, `--list-full`, S24, S25, S20 | ✓ |
+| G | `pnpm typecheck` 0, `check:language` ok, `check:when` in Ordnung; `build` nicht gelaufen (Auftrag, Erbauer meldet ihn grün) | ✓ |
+
+Hinweis, nicht blockierend:
+
+- **H7:** Beim Verschieben von `ISO_DATE` ist das JSDoc von `JournalRow` („One
+  line of an entry, as it is read…", `journal-entry.ts:26`) über das von
+  `ISO_DATE` gerutscht — `JournalRow` steht seither ohne Kommentar, über
+  `ISO_DATE` stehen zwei. Dazu zwei Leerzeilen, wo die Konstante wegfiel
+  (`JournalEntryEditor.tsx:27–28`, `JournalEntryGrid.tsx:25–26`). Abhilfe: `ISO_DATE` über
+  den Kommentar von `JournalRow` setzen.
+
+Vier Linsen:
+- **Sprache:** Datum lesend überall TT.MM.JJJJ über `Time`, kein ISO im Text,
+  keine neuen Wörter.
+- **Bedienung:** Tab auf „Buchungstext" hält den Fokus frei (M2), Löschen ohne
+  Scrollen erreichbar, Seite ohne Querscroll.
+- **Logik:** Das Datum folgt jetzt dem Vertrag `JournalRow.datum` (ISO) statt
+  dem Aufrufer; angeheftet nur beim Bearbeiten.
+- **Darstellung:** Die angeheftete Zelle deckt Kopf und Zeile ganz — kein
+  freier Kopf „KOST" über der Löschspalte, kein Feldrahmen um den Papierkorb;
+  ein Schriftbild für die Datumsspalte.
+
+**Urteil: Nachtrag Spurbreiten abgenommen.** M3, H4 und H5 behoben, Kriterium 3
+abgehakt; alle sechs Kriterien erfüllt. Offen bleiben als eigene bzw.
+vorbestehende Punkte H1 (Kontenliste, eigener Auftrag), H2 (Trefferfläche
+Löschen, 0213), H6 (Linien beim Querscrollen, seit 0044) und H7 (JSDoc, klein);
+die Frage aus H3 (Fall-Ansicht in `simple`) liegt beim Owner.
