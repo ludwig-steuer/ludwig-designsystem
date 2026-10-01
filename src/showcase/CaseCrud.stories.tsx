@@ -359,6 +359,12 @@ function CasePage() {
           </Field>
           <Field label="Art" htmlFor="art" {...(kindLocked ? { hint: kindLocked } : {})}>
             <Select id="art" defaultValue={editing?.kind ?? "single"} disabled={Boolean(kindLocked)}>
+              {/* The open kind stands as today's value, not as a choice — never silently „Einzelsachverhalt“. */}
+              {editing?.kind === "recurring_charge" ? (
+                <option value="recurring_charge" disabled>
+                  {CASE_KIND_LABEL.recurring_charge}
+                </option>
+              ) : null}
               {(kindLocked && editing ? [editing.kind] : AssignableCaseKindSchema.options).map((k) => (
                 <option key={k} value={k}>
                   {CASE_KIND_LABEL[k]}

@@ -782,7 +782,7 @@ export const Technical: Story = {
               record={{
                 id: "c-0334",
                 case_number: "2026-0334",
-                kind: "incoming_invoice",
+                kind: "single",
                 lifecycle_status: "open",
                 disposition: "agent",
                 counterparty_partner_id: "bp-4711",

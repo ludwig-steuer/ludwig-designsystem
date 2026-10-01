@@ -41,7 +41,7 @@ Frage, was Escape tut.
 | `label` | `string` | ja | Was bearbeitet wird — sichtbar, auch im Anzeigezustand | `Filled` |
 | `value` | `string` | ja | Der gespeicherte Wert | `Filled` |
 | `onSave` | `(next: string) => Promise<void> \| void` | ja | Speichern; wirft der Aufruf, bleibt das Feld offen und zeigt den Fehler | `Interactive` |
-| `renderInput` | `(props: { value, onChange, autoFocus }) => ReactNode` | nein | Das Eingabeelement; Default ist `Input` | `WithTextarea` |
+| `renderInput` | `(props: InlineEditInputProps) => ReactNode` — `{ value, onChange, autoFocus, onKeyDown, id, disabled }` | nein | Das Eingabeelement; Default ist `Input` | `WithTextarea` |
 | `renderValue` | `(value: string) => ReactNode` | nein | Die Anzeige; Default ist der Text, „—" wenn leer | `Filled` |
 | `pending` | `boolean` | nein | Von außen gesteuertes Speichern (Server Action des Aufrufers) | `Pending` |
 | `error` | `string` | nein | Fehler von außen; sonst kommt er aus `onSave` | `Error` |

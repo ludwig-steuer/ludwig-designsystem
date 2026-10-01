@@ -15,6 +15,7 @@ import {
   type CaseKind,
 } from "@/ludwig/modules/accounting-cases/domain/case";
 import type { KnownDocumentNumber } from "@/ludwig/modules/accounting-cases/domain/document-number";
+import { CASE_TAB_LABEL } from "@/ludwig/modules/accounting-cases/domain/tabs";
 import { resolveStatus } from "@/ludwig/ui/status/status-registry";
 
 import { InlineEdit } from "../../primitives/InlineEdit";
@@ -72,7 +73,11 @@ export function CaseKindEdit({
       error={error}
       hint={
         locked ??
-        (undecided ? "Einzel- oder laufenden Sachverhalt wählen oder im Reiter „Regeln“ eine Regel anlegen." : undefined)
+        // The request only where it can be answered — a closed case has no
+        // „Bearbeiten“. The tab's word comes from its source.
+        (undecided && !disabled
+          ? `Einzel- oder laufenden Sachverhalt wählen oder im Reiter „${CASE_TAB_LABEL.rules}“ eine Regel anlegen.`
+          : undefined)
       }
       // The labels come from `CASE_KIND_LABEL` — the one source. And the kind
       // is **not** a status: no colour, no transitions, no registry axis.

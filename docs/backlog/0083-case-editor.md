@@ -96,6 +96,7 @@ Status-Registry.
 | `onSave` | `(next: CaseKind) => Promise<void> \| void` | wirft oder lehnt ab → das Feld bleibt offen und zeigt den Fehler | `Roundtrip`, `Failed` |
 | `pending` | `boolean` (optional) | Speichern läuft von außen | `Pending` |
 | `disabled` | `boolean` (optional) | geschlossener Sachverhalt | `Filled` |
+| `error` | `string` (optional) | ein Fehler von außen — sonst kommt er aus `onSave` | `Failed` |
 
 **`CaseDocumentNumberModeEdit`**
 
@@ -128,8 +129,10 @@ Status-Registry.
 - **`client` als Zuständigkeit setzen.** Den Mandanten ins Spiel zu bringen
   ist eine Handlung mit Außenwirkung (er bekommt eine Frage), keine
   Wertänderung. Sie gehört zur Klärung.
-- **Die Art einschränken.** Welche Arten fachlich möglich sind, weiß der Kern;
-  die Komponente zeigt alle sieben und lässt `onSave` ablehnen.
+- **Die Art frei setzen.** Wählbar ist nur, was der Kern von Hand erlaubt
+  (`AssignableCaseKindSchema`: Einzel- und laufender Sachverhalt); Regelsachverhalt,
+  Sammelfall und Mandantenstapel ändern sich über ihren eigenen Weg und stehen
+  gesperrt mit Grund (F360, 2026-10-01 — vorher: alle sieben, `onSave` lehnte ab).
 
 ## Verhalten
 
@@ -158,7 +161,7 @@ ihre Überschreitung.
 | Story | Beweist |
 |---|---|
 | `Filled` | Die drei Editoren nebeneinander, wie sie im View stehen; einer davon `disabled` (geschlossener Sachverhalt) |
-| `Kinds` | Alle sieben Arten aus `CASE_KIND_LABEL`, deutsche Labels, keine lokale Map |
+| `Kinds` | Alle sechs Arten aus `CASE_KIND_LABEL`, deutsche Labels, keine lokale Map; zwei wählbar, drei gesperrt mit Grund, „Art offen“ mit Bitte um Wahl (F360) |
 | `Modes` | Alle vier Modi, die erlaubten Übergänge je Ausgangswert, `allowNone` einmal an und einmal aus |
 | `Dispositions` | `agent` und `accounting` wählbar, `client` nicht angeboten, `null` als Ausgangswert lesbar |
 | `Downgrade` | **Der Rand**: `multiple → single` öffnet den Dialog mit Grund **und** Nummernwahl; ohne beides bleibt „Bestätigen" gesperrt |
@@ -582,9 +585,9 @@ kopiert.
 
 | Punkt | Was getan |
 |---|---|
-| Auswahl | `CaseKindEdit` bietet nur `AssignableCaseKindSchema.options` an — Einzel- und laufender Sachverhalt. Kern und Editor sagen dasselbe (`assertCaseKindTransition`) |
+| Auswahl | `CaseKindEdit` bietet nur `AssignableCaseKindSchema.options` an — Einzel- und laufender Sachverhalt. Kern und Editor sagen dasselbe (App: `assertCaseKindTransition`, nicht im Spiegel) |
 | Gesperrte Arten | `rule`, `pool`, `client_batch`: Label ohne „Bearbeiten“, darunter `CASE_KIND_LOCKED_REASON[kind]` als Hinweiszeile. **Abweichung vom Auftrag (Tooltip):** ein Tooltip auf einem Label, das keinen Fokus nimmt, erreicht weder die Tastatur noch den Vier-Wochen-Test; der Satz steht deshalb sichtbar, über die neue Prop `hint` von `InlineEdit` (0020) |
-| Art offen | `recurring_charge`: Hinweis „Einzel- oder laufenden Sachverhalt wählen oder im Reiter „Regeln“ eine Regel anlegen.“ — ohne das vorangestellte „Art offen —“ des Auftrags, weil das Label es schon sagt; „laufenden“ im Akkusativ. In der Auswahl steht die offene Art als heutiger Wert, gesperrt, nicht als Ziel |
+| Art offen | `recurring_charge`: Hinweis „Einzel- oder laufenden Sachverhalt wählen oder im Reiter „Wiederkehr“ eine Regel anlegen.“ (Reiterwort aus `CASE_TAB_LABEL.rules`; nur ohne `disabled`) — ohne das vorangestellte „Art offen —“ des Auftrags, weil das Label es schon sagt; „laufenden“ im Akkusativ. In der Auswahl steht die offene Art als heutiger Wert, gesperrt, nicht als Ziel |
 | Belegnummern-Modus | `allowNone`-Kommentar und Story `Modes`: `none` nur beim Einzelsachverhalt ohne verknüpften Beleg (`case.ts:117`) |
 | Showcase | Reiter „Regeln“ in `CasePage` über `isRecurringKind`; `CaseCrud`-Formular bietet nur die zwei wählbaren Arten, eine gesperrte steht gesperrt mit Grund |
 | Fixtures | Rechnungen, Umbuchung, Korrektur, Auslagen → `single`; Auslagen mit Verrechnungskonto, Vertrag, Zahlungsdienst-Auszahlungen → `running`; Dauersachverhalt mit Regel → `rule`; ohne Regel → `running`; Mandantenstapel → `client_batch`. Ereignisarten (`internal_transfer`, `document_received`) und Belegarten (`contract`, `expense_report`) sind andere Achsen und bleiben |
@@ -710,3 +713,19 @@ sind drei Textstellen: ein Satz, der in einen Reiter schickt, den es so nicht
 gibt (M1), ein Rohdatensatz mit alter Art (M2), und eine Spec, die an zwei
 Stellen noch die sieben Arten beschreibt (M3). Alle drei sind kleine
 Korrekturen ohne Systementscheid.
+
+### Nacharbeit F360 2026-10-01 (nach der Abnahme, Stand 61d24cb)
+
+| Punkt | Was getan |
+|---|---|
+| **M1** | Der Hinweis nennt den Reiter mit seinem Wort aus der Quelle: `CASE_TAB_LABEL.rules` → „… im Reiter „Wiederkehr“ eine Regel anlegen.“ Nachtrag-Zeile „Art offen“ mitgezogen |
+| **M2** | `CaseTabs.stories.tsx` Rohdatensatz: `kind: "single"`. Mein erster grep war mit `head -30` abgeschnitten — der volle grep findet außerhalb von `src/ludwig` nur noch andere Achsen (Belegart, Buchungsgruppe, Ereignisart) und die Übergangsart in `CaseEditor` |
+| **M3** | „Kann bewusst nicht“ umgekehrt („Die Art frei setzen“), Stories-Zeile `Kinds` auf sechs Arten mit Sperre und „Art offen“, `error` in der Prop-Tabelle von `CaseKindEdit` |
+| H4 | Die Bitte um Wahl steht nur ohne `disabled` — ein geschlossener Sachverhalt hat kein „Bearbeiten“ |
+| H5 | `CaseCrud`: ein „Art offen“-Fall steht im Select als heutiger Wert (gesperrt), nicht still als „Einzelsachverhalt“ |
+| H6 | 0020: Typ von `renderInput` auf `InlineEditInputProps` nachgezogen |
+| H7 | Verweis auf `assertCaseKindTransition` als App-Funktion gekennzeichnet |
+| H2, H3, H8 | offen: `aria-describedby` für den Hinweis betrifft `Field` und `InlineEdit` gleich (eigener Punkt); 4,51:1 auf `bg-soft` hält; H8 nach Absicht abgenommen |
+
+Nachzuprüfen: Kriterien 3 und 5 (`CaseEditor --kinds`, Showcase-Reiter, `CaseTabs` Technik), H4 und H5 im Code.
+
