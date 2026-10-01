@@ -4779,6 +4779,26 @@ a.v3bbr__val:hover { text-decoration-color: currentColor; }
 .v3prop__reasons { display: grid; min-width: 0; color: var(--color-text-muted); }
 /* 0217: the checks above the caller's fold-out content. */
 .v3prop__checks { margin-bottom: var(--space-3); }
+/* 0218 · the review reason: the strongest as a badge, „+n", the (i) with all
+   reasons and the sum. The badge is cut, never wrapped: the title carries it. */
+.v3rrc { display: inline-flex; align-items: center; gap: var(--space-1); min-width: 0; max-width: 100%; }
+.v3rrc__word { display: inline-flex; min-width: 0; }
+.v3rrc__word > .bdg { min-width: 0; overflow: hidden; text-overflow: ellipsis; display: inline-block; }
+.v3rrc__more { flex: none; font-size: var(--fs-ui-sm); color: var(--color-text-muted); }
+.v3rrc__panel { display: grid; gap: var(--space-3); min-width: 18rem; max-width: 26rem; }
+.v3rrc__reasons { list-style: none; margin: 0; padding: 0; display: grid; gap: var(--space-2); }
+.v3rrc__reasons > li { display: grid; gap: var(--space-1); justify-items: start; }
+.v3rrc__detail { font-size: var(--fs-ui-sm); color: var(--color-text); }
+.v3rrc__parts { border-collapse: collapse; width: 100%; font-size: var(--fs-ui-sm); }
+.v3rrc__parts caption { text-align: left; font-weight: 600; padding-bottom: var(--space-1); }
+/* The panel lives inside the list's table in the DOM: `.v2tbl th, td` would
+   make these cells blocks — so they say what they are. */
+.v3rrc__parts th, .v3rrc__parts td { display: table-cell; }
+.v3rrc__parts th { text-align: left; font-weight: 400; padding: var(--space-1) var(--space-3) var(--space-1) 0; }
+.v3rrc__parts td { padding: var(--space-1) 0; white-space: nowrap; }
+.v3rrc__parts tbody tr + tr > * { border-top: 1px solid var(--color-border-subtle); }
+.v3rrc__parts tfoot > tr:first-child > * { border-top: 1px solid var(--color-border); font-weight: 600; }
+.v3rrc__note { margin: 0; font-size: var(--fs-ui-sm); color: var(--color-text-muted); }
 /* T2: the counterparty under the booking text (hint ll-dev 11) — the text cell becomes two lines. */
 .v2ae__text:has(.v2ae__who) { flex-wrap: wrap; row-gap: 0; }
 .v2ae__who { flex-basis: 100%; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }

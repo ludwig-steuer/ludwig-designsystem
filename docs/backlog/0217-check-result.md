@@ -64,8 +64,8 @@ quittieren (das tun `gate`/`jump` in `CheckItems`), in `compact` erscheinen
 
 ## Verhalten
 
-- **Zählen:** x = bestandene (`green`), y = alle Prüfpunkte — dieselbe Rechnung
-  wie die Gruppenzeile in `CheckItems` („9 von 12 Prüfpunkten bestanden").
+- **Zählen:** x = bestandene (`green`), y = prüfbare Punkte (alle ohne `open`, F355,
+  Nachtrag unten) — dieselbe Rechnung wie die Gruppenzeile in `CheckItems`.
 - **Ton = schlechtester Punkt:** `red` vor `yellow` vor `green`. „Nicht prüfbar"
   (`open`) zählt nicht als Befund. Das Zeichen ist `StateIcon` (error · warning
   · done); bei Rot und Gelb trägt auch der Text die Farbe (`--color-danger`
@@ -350,3 +350,12 @@ unberührt. Offen bleibt M1: ein Satz der Spec, beim nächsten Anfassen nachzieh
 
 Abgenommen von / am: Claude (fremder Abnehmer), 2026-10-01 · Offene Punkte: M1
 (Spec-Satz), H1 (fremde WIP, Typecheck im Arbeitsbaum)
+
+## Hinweis 2026-10-01 — T3-Zeile ohne „x von y" (0218)
+
+Seit 0218 (F355, Owner) zeigt die T3-Zeile den **Prüfgrund** statt „x von y
+bestanden"; die Prüfpunkte stehen weiter im Zeilen-Aufklapper (`CheckItems`).
+`CheckResult` bleibt als Baustein im Set (Familie `Review.tsx`) — für eine Liste,
+die die Zahl in der Zeile braucht, und für den Kopf des Prüfpunkte-Blocks der
+Buchungsprüfung (0219).
+

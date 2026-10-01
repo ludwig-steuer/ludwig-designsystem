@@ -1,8 +1,9 @@
 import type { ReactNode } from "react";
 
+import type { ReviewReason } from "@/ludwig/modules/accounting-cases/domain/review-score";
 import type { Currency } from "@/ludwig/shared/money";
 
-import { formatTime } from "../../format";
+import { formatCount, formatTime } from "../../format";
 import type { ConfidenceLevel } from "../../patterns/Confidence";
 import {
   DataTable,
@@ -11,8 +12,7 @@ import {
   type ColumnDef,
   type TableGroup,
 } from "../../patterns/DataTable";
-import { CheckItems, CheckResult, type CheckItem } from "../../patterns/Review";
-import { StatusHeader } from "../../patterns/StatusHeader";
+import { CheckItems, type CheckItem } from "../../patterns/Review";
 import { Badge } from "../../primitives/Badge";
 import { Link } from "../../primitives/Link";
 import { AmountCell } from "../../primitives/Cells";
@@ -21,6 +21,7 @@ import { SourceDocumentRefCell } from "../source-document/SourceDocumentRefCell"
 import { AiBookingNotesCell, type JudgeVerdict } from "./AiBookingNotes";
 import { JournalEntryCell, type JournalLine } from "./JournalEntryCompact";
 import type { EntryAccount } from "./journal-entry-columns";
+import { ReviewReasonCell, type ReviewReasonView } from "./ReviewReasonCell";
 import { TaxKeyCell } from "./TaxKey";
 
 /**
@@ -45,8 +46,21 @@ export interface ProposalRow {
   /** The counterparty; the case title stands in where there is none. */
   counterparty: string | null;
   title: string;
-  /** A counterparty never booked before — worth a second look. */
+  /**
+   * A counterparty never booked before. Superseded by `priorSameBookings`
+   * (0218) — read only when that is missing.
+   */
   firstTime?: boolean;
+  /** How often exactly this booking was made before — „So gebucht": 0 „erstmals", n „n×" (0218). */
+  priorSameBookings?: number | null;
+  /**
+   * The review reasons, strongest first, resolved by the app from the registry
+   * axis `review_reason` (F355 / 0218): the column „Prüfgrund" shows the first
+   * and counts the rest. Empty or missing: routine, the cell stays empty.
+   */
+  reviewReasons?: readonly ReviewReasonView[];
+  /** The parts of the review score with their points (F232) — the (i) of „Prüfgrund". */
+  reviewScore?: { score: number; reasons: readonly ReviewReason[]; hard?: boolean } | null;
   /**
    * `null` = the case has no entry yet („kein Satz"). The first account of a
    * side is its **main account** — the one with the highest sum; the app
@@ -63,15 +77,19 @@ export interface ProposalRow {
   confidence?: ConfidenceLevel | null;
   /** The word of the entry kind — from the app's registry; only in the flat view. */
   kindLabel?: string | null;
-  /** Why the case is in this tab (axis `review_tab`), the first two reasons. */
-  reasons: readonly string[];
-  /** Released or rejected already — the reasons give way to „entschieden". */
+  /**
+   * Why the case is in this tab, as words. No longer shown (0218): the parts
+   * of `reviewScore` and the review reasons say it.
+   * @deprecated Remove once the app stops sending it.
+   */
+  reasons?: readonly string[];
+  /** Released or rejected already — the review reason gives way to „entschieden". */
   decided?: boolean;
   /**
-   * The checks of the entry, as the case view shows them (0217). The pass
-   * count stands in the reasons column, the items in the fold-out. Without
-   * them the cell stays empty; once another row of the list has checks, this
-   * row's fold-out says there are none instead of opening onto nothing.
+   * The checks of the entry, as the case view shows them (0217). They stand in
+   * the fold-out — no longer in the row (0218: one value there, the review
+   * reason). Once one row of the list has checks, a row without them says so
+   * in its fold-out instead of opening onto nothing.
    */
   checks?: readonly CheckItem[];
 }
@@ -88,9 +106,10 @@ export type ProposalColumn =
   | "amount"
   | "taxKey"
   | "document"
-  | "review"
+  | "precedent"
+  | "verdict"
   | "kind"
-  | "reasons";
+  | "reviewReason";
 
 /**
  * No document column by default (owner 2026-09-21, step 3): the list has to fit
@@ -99,10 +118,15 @@ export type ProposalColumn =
  * enough, and Soll and Haben need the room). Both exist for a frame that wants
  * them — pass them in `include`.
  */
-const FULL: readonly ProposalColumn[] = ["number", "date", "counterparty", "debit", "debitName", "credit", "creditName", "amount", "taxKey", "document", "review", "kind", "reasons"];
+const FULL: readonly ProposalColumn[] = ["number", "date", "counterparty", "debit", "debitName", "credit", "creditName", "amount", "taxKey", "document", "precedent", "verdict", "kind", "reviewReason"];
 const NAMES: readonly ProposalColumn[] = ["debitName", "creditName"];
-const COMPACT: readonly ProposalColumn[] = ["date", "counterparty", "accounts", "amount", "document", "review"];
-const OPTIONAL: readonly ProposalColumn[] = ["number", "document"];
+const COMPACT: readonly ProposalColumn[] = ["date", "counterparty", "accounts", "amount", "document", "verdict", "reviewReason"];
+/**
+ * Optional, through `include`: „Nr." and „Beleg" (see above) and — since 0218 —
+ * „Prüfung durch Ludwig": the row shows one value, the review reason; the
+ * judge's verdict and the confidence are among its parts.
+ */
+const OPTIONAL: readonly ProposalColumn[] = ["number", "document", "verdict"];
 
 export interface ProposalColumnOptions {
   variant?: "compact" | "full";
@@ -214,7 +238,6 @@ export function proposalReviewColumns(options: ProposalColumnOptions = {}): Colu
           <span className="v3prop__name" title={p.counterparty ?? p.title}>
             {p.counterparty ?? p.title}
           </span>
-          {p.firstTime ? <span className="v2sub">erstmals</span> : null}
         </span>
       ),
     },
@@ -294,8 +317,18 @@ export function proposalReviewColumns(options: ProposalColumnOptions = {}): Colu
         />
       ),
     },
-    review: {
-      key: "review",
+    precedent: {
+      key: "precedent",
+      header: "So gebucht",
+      width: "72px",
+      cell: (p) => {
+        const n = p.priorSameBookings;
+        if (n === 0 || (n == null && p.firstTime)) return "erstmals";
+        return n ? `${formatCount(n)}×` : null;
+      },
+    },
+    verdict: {
+      key: "verdict",
       header: "Prüfung durch Ludwig",
       // Dot + longest word („Plausibel") + the verdict's sign — 90 px measured.
       width: "96px",
@@ -308,29 +341,18 @@ export function proposalReviewColumns(options: ProposalColumnOptions = {}): Colu
       width: "100px",
       cell: (p) => (p.kindLabel ? <Badge tone="neutral">{p.kindLabel}</Badge> : <span className="v2muted">—</span>),
     },
-    reasons: {
-      key: "reasons",
-      header: <StatusHeader axis="review_tab" label="Prüfbedarf" />,
-      // „12 von 12 bestanden" with its sign measures 153 px, on one line (0217).
-      width: "156px",
-      // The checks first — „x von y bestanden" without opening (0217) —, then
-      // one line per reason; what does not fit is cut, the title carries it.
-      cell: (p) => (
-        <span className="v3prop__stack">
-          {p.checks ? <CheckResult items={p.checks} /> : null}
-          {p.decided ? (
-            <span>entschieden</span>
-          ) : (
-            <span className="v3prop__reasons">
-              {p.reasons.slice(0, 2).map((r) => (
-                <span key={r} className="v2trunc" title={r}>
-                  {r}
-                </span>
-              ))}
-            </span>
-          )}
-        </span>
-      ),
+    reviewReason: {
+      key: "reviewReason",
+      header: "Prüfgrund",
+      // The longest words („Ludwig nicht ganz sicher", „Gegenpartei abweichend")
+      // with „+n" and the (i); a longer word is cut, the title and the (i) carry it.
+      width: "200px",
+      cell: (p) =>
+        p.decided ? (
+          <span>entschieden</span>
+        ) : p.reviewReasons?.length && p.reviewScore ? (
+          <ReviewReasonCell reasons={p.reviewReasons} score={p.reviewScore} />
+        ) : null,
     },
   };
   return (variant === "compact" ? COMPACT : FULL)

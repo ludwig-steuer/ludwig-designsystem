@@ -1,5 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 
+import { reviewScore } from "@/ludwig/modules/accounting-cases/domain/review-score";
 import type { CheckItem } from "../../patterns/Review";
 import { JournalEntryCard } from "./JournalEntryCompact";
 import { JournalEntryReviewList, type ProposalRow } from "./JournalEntryReviewList";
@@ -43,16 +44,71 @@ function checksFor(i: number): CheckItem[] {
   });
 }
 
+const VERDICTS = ["confirm", "confirm", "confirm_with_note", "adjust", "flag"] as const;
+const PRIOR = [12, 3, 1, 5, 0, 7];
+
+const confidenceFor = (i: number): "red" | "orange" | "yellow" | "green" =>
+  i % 11 === 10 ? "red" : i % 7 === 6 ? "orange" : i % 3 === 1 ? "yellow" : "green";
+
+/**
+ * The review score as the app computes it — the fixture calls the mirror's own
+ * `reviewScore()` (F232), so parts and sums follow the real rules.
+ */
+function scoreFor(i: number, kind: string, taxKey: string | null, checks: CheckItem[]): ProposalRow["reviewScore"] {
+  const s = reviewScore({
+    journalEntryId: `je-${i}`,
+    origin: kind === "recurring" ? "recurring_rule" : "ai_proposed",
+    entryKind: kind === "payment" ? "payment" : "expense",
+    verdict: kind === "recurring" ? null : VERDICTS[i % 5]!,
+    judgeCriteria: [],
+    confidence: confidenceFor(i),
+    taxKeys: taxKey ? [taxKey] : [],
+    reverseCharge: false,
+    checks: checks.map(({ code, state }) => ({ code, state })),
+    priorSameBookings: i % 9 === 4 ? 0 : PRIOR[i % 6]!,
+  });
+  return { score: s.score, reasons: s.reasons, hard: s.hard };
+}
+
+/** Short words of the checks, as the brief lists them (F355 §1). */
+const CHECK_WORD: Record<string, string> = { "P-UST": "Steuerschlüssel", "P-VORMONAT": "Anders als Vormonat", "P-13B": "§13b prüfen" };
+
+/**
+ * The review reasons as the app will resolve them from the registry axis
+ * `review_reason` (F355 §1): strongest first, the particular of this case as
+ * `detail`. Fixture data — the cell itself knows no word.
+ */
+function reasonsFor(i: number, kind: string, taxKey: string | null, checks: CheckItem[]): ProposalRow["reviewReasons"] {
+  const out: { points: number; r: NonNullable<ProposalRow["reviewReasons"]>[number] }[] = [];
+  const verdict = kind === "recurring" ? null : VERDICTS[i % 5]!;
+  const red = checks.find((c) => c.state === "red");
+  const yellow = checks.find((c) => c.state === "yellow");
+  if (red) out.push({ points: 100, r: { code: `check_red:${red.code}`, label: CHECK_WORD[red.code] ?? red.code, kind: "warning", detail: red.reason } });
+  if (verdict === "flag") out.push({ points: 100, r: { code: "judge_flag", label: "Beanstandet", kind: "warning", detail: "Judge: Konto 4930 passt nicht zur Leistung — eher 4980 (Betriebsbedarf)." } });
+  if (confidenceFor(i) === "red") out.push({ points: 100, r: { code: "confidence_red", label: "Ludwig unsicher", kind: "warning", detail: "Ludwig: 38 %" } });
+  if (taxKey === "94") out.push({ points: 60, r: { code: "reverse_charge", label: "§13b", kind: "info", detail: "BU 94 · Sachverhalt 7: sonstige EU-Leistung" } });
+  if (taxKey === "91") out.push({ points: 60, r: { code: "special_tax_key", label: "Sonderschlüssel", kind: "info", detail: "BU 91 · Innergemeinschaftlicher Erwerb 7 %" } });
+  if (verdict === "adjust") out.push({ points: 60, r: { code: "judge_adjust", label: "Korrigiert", kind: "info", detail: "Judge: Steuerschlüssel von 8 auf 9 korrigiert." } });
+  if (!red && yellow) out.push({ points: 50, r: { code: `check_yellow:${yellow.code}`, label: CHECK_WORD[yellow.code] ?? yellow.code, kind: "info", detail: yellow.reason } });
+  const c = confidenceFor(i);
+  if (kind !== "recurring" && (c === "orange" || c === "yellow")) out.push({ points: c === "orange" ? 30 : 25, r: { code: "confidence_low", label: "Ludwig nicht ganz sicher", kind: "info", detail: c === "orange" ? "Ludwig: 62 %" : "Ludwig: 78 %" } });
+  if (verdict === "confirm_with_note") out.push({ points: 15, r: { code: "judge_note", label: "Hinweis vom Judge", kind: "info", detail: "Judge: Leistungszeitraum steht nur im Freitext." } });
+  return out.sort((a, b) => b.points - a.points).map((x) => x.r);
+}
+
 // Batch 09-2026-Ludwig: forty open proposals.
 const ROWS: ProposalRow[] = Array.from({ length: 40 }, (_, i) => {
   const kind = KINDS[i % 3]!;
+  // § 13b and a special key on a few invoices — the „Sonderfall" column.
+  const taxKey = kind.key === "payment" ? null : i % 10 === 7 ? "94" : i % 10 === 3 ? "91" : "9";
+  const checks = i === 11 ? null : checksFor(i);
   return {
     id: `case-${i + 1}`,
     number: String(i + 1),
     date: `2026-09-${String((i % 28) + 1).padStart(2, "0")}`,
     counterparty: i === 7 ? null : PARTNERS[i % PARTNERS.length]!,
     title: "Eingangsrechnung ohne erkannten Gegenpart",
-    firstTime: i % 9 === 4,
+    priorSameBookings: i % 9 === 4 ? 0 : PRIOR[i % 6]!,
     accounts:
       i === 11
         ? null
@@ -79,16 +135,17 @@ const ROWS: ProposalRow[] = Array.from({ length: 40 }, (_, i) => {
           },
     amount: i === 11 ? null : 38.5 + i * 97.35,
     currency: "EUR",
-    taxKey: kind.key === "payment" ? null : "9",
+    taxKey,
     documentNumber: i % 5 === 3 ? null : `RE-2026-${String(800 + i)}`,
     documentId: i % 4 === 1 ? null : `doc-${i}`,
-    verdict: (["confirm", "confirm_with_note", "adjust", "flag"] as const)[i % 4],
-    confidence: (["green", "yellow", "orange", "red"] as const)[(i * 3) % 4],
+    verdict: VERDICTS[i % 5]!,
+    confidence: confidenceFor(i),
     kindLabel: kind.label,
-    reasons: i % 4 === 3 ? ["Ludwig ist unsicher", "Betrag über 1.000,00 €"] : i % 4 === 2 ? ["Konto weicht vom Vorjahr ab"] : ["erstmals gebucht"],
-    decided: i < 5,
-    // One case without checks — the app sends none; the cell stays as before.
-    ...(i === 11 ? {} : { checks: checksFor(i) }),
+    decided: i < 3,
+    // One case without an entry: no checks, no score — the app sends none.
+    ...(checks
+      ? { checks, reviewScore: scoreFor(i, kind.key, taxKey, checks), reviewReasons: reasonsFor(i, kind.key, taxKey, checks) }
+      : {}),
   };
 });
 
