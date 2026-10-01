@@ -653,7 +653,8 @@ Zur Abnahme vorgelegt, **nicht** selbst eingetragen (F111 Nicht-Scope):
   das Root-Layout (Tokens → App-Chrome → Komponenten → Domänen-Styles →
   Tailwind). Ohne sie sähe hier nichts aus wie in der App.
 - **`.storybook/preview-head.html`** zieht Inter, Source Serif 4 und JetBrains
-  Mono (in der App via `next/font/google`).
+  Mono (in der App seit F370 via `next/font/local` aus
+  `apps/web/src/app/fonts/`, ohne Netzabruf beim Build).
 - **`.storybook/server-actions-stub.ts`** zieht die Server-Action-Grenze, die
   Next im Client-Bundle zieht — siehe B1. Ohne sie startet über die Hälfte der
   Stories nicht.

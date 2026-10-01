@@ -1,4 +1,5 @@
-/* The fonts. In the app next/font/google loads them and sets `--font-*-loaded`;
+/* The fonts. In the app next/font/local loads them from its own files
+   (apps/web/src/app/fonts/) and sets `--font-*-loaded`;
    here the chain must do it itself. (@import must precede all other rules.) */
 @import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Source+Serif+4:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap");
 
