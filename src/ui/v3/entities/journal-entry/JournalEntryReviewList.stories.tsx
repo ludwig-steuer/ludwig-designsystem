@@ -100,7 +100,7 @@ function reasonsFor(i: number, kind: string, taxKey: string | null, checks: Chec
 // Batch 09-2026-Ludwig: forty open proposals.
 const ROWS: ProposalRow[] = Array.from({ length: 40 }, (_, i) => {
   const kind = KINDS[i % 3]!;
-  // § 13b and a special key on a few invoices — the „Sonderfall" column.
+  // § 13b and a special key on a few invoices — review reasons of their own.
   const taxKey = kind.key === "payment" ? null : i % 10 === 7 ? "94" : i % 10 === 3 ? "91" : "9";
   const checks = i === 11 ? null : checksFor(i);
   return {

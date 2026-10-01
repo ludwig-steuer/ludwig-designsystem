@@ -4806,8 +4806,9 @@ a.v3bbr__val:hover { text-decoration-color: currentColor; }
 .v3rrc { display: inline-flex; align-items: center; gap: var(--space-1); min-width: 0; max-width: 100%; }
 .v3rrc__word { display: inline-flex; min-width: 0; }
 /* Above the row's fold-out button (`.v2rowbtn::after`, z-index 1), like links:
-   otherwise the particular on hover never arrives in an expandable list (0218 M1). */
-.v3rrc__word, .v3rrc__more { position: relative; z-index: 2; }
+   otherwise the particular on hover never arrives in an expandable list (0218 M1).
+   The plain cursor: a click here does not unfold the row, so no hand (H8). */
+.v3rrc__word, .v3rrc__more { position: relative; z-index: 2; cursor: default; }
 .v3rrc__word > .bdg { min-width: 0; overflow: hidden; text-overflow: ellipsis; display: inline-block; }
 .v3rrc__more { flex: none; font-size: var(--fs-ui-sm); color: var(--color-text-muted); }
 .v3rrc__panel { display: grid; gap: var(--space-3); min-width: 18rem; max-width: 26rem; }
