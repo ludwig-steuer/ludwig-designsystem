@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Status | Abnahme — Nacharbeit 2026-10-01 nach der fremden Abnahme (M1–M7); zuvor: in Arbeit — fremde Abnahme 2026-10-01: nicht abgenommen (M1, M2 blockierend) |
+| Status | in Arbeit — Nachprüfung 2026-10-01 (Stand 65c25e2): nicht abgenommen (N1–N3, Fixture und Texte; Bau und Layout grün); zuvor: Nacharbeit nach der fremden Abnahme (M1–M7) |
 | Stufe | `entities/journal-entry/` |
 | Klassen-Test | „Ergäbe das auch in einer Versicherungs-App Sinn?" → nein: Buchungssatz, Satzart, Judge, Prüfpunkte eines Vorschlags |
 | Quelle | Anfrage llcto 2026-10-01, Owner-Wunsch; Brief `ludwig/app` `docs/backlog/F355-booking-review-unified-design-brief.md` §3, §3a, §4, §5 Punkte 4–5 (6999e08f, cc28c51f) |
@@ -266,3 +266,54 @@ eigenen Prüfpunkten, der Einzelsatz mit allen vier Zeilen (6837 · 1407 · 3837
 | H1 Satzart im Zwei-Satz-Fall | Default (llcto trägt ihn, liegt beim Owner): jeder Satz seine Satzart, die des Falls einmal über `caseKind` | gebaut, Owner bestätigt noch |
 | H2 Editor-Spalte „Text" 0 px | vorbestehend (`JournalEntryEditor --s-2-split-full`), eigener Auftrag | offen |
 
+## Nachprüfung 2026-10-01 (Stand 65c25e2)
+
+Fremder Nachprüfer, Arbeitsbaum sauber. Playwright im eigenen Kontext 1280 × 900,
+Story-IDs ohne Präfix `v3-entitäten-buchungssatz-bookingreview--`; Container von
+`case-editable` per JS auf 1246 / 1040 / 1025 / 1024 / 1008 / 904 / 728 px gesetzt.
+0 Konsolenfehler.
+
+| Punkt | Nachweis | Ergebnis |
+|---|---|---|
+| M1 Reihenfolge gestapelt / breit | `in-use` (728): Satz-Spalte 16–705, Belege 721–960, Handlung 976–1006 (eine Spalte `728px`). `case-editable` (1246): Spalten `874px 352px`, Satz-Spalte 16–890 bis 1015, Belege rechts 910–1262 ab 16, Handlung links 16–890 bei 1031–1062. Grenze: 1025 → `653px 352px` nebeneinander, 1024 / 1008 / 904 / 728 → gestapelt Satz → Belege → Handlung (Wurzel 16 px, 64 rem = 1024) | ✓ |
+| M2 Konfidenz und Quellen | `case-editable` und `in-use`: Kopf „Aufwand · Ludwig Plausibel"; unter „Begründung" die Zeile „Quellen" (Rechnung RE-4471, Vorbuchungen). Code: `on("confidence")` `BookingReview.tsx:97`, Quellen `:103`, `:148`. Der in M2 verlangte Satz „Editor im Slot ohne `aiReview`" fehlt — N2 | ✓ Code · ✗ Spec N2 |
+| M3 Story `InUse` | vorhanden, 728 px, beweist M1 gestapelt. Beschreibung sagt „der volle Editor scrollt in seiner weißen Fläche" — gerendert ist `JournalEntryGrid`, die Fläche scrollt nicht (726 = 726) — N3 | ✓ Story · ✗ Text N3 |
+| M4 `show.evidence` | `list-compact`: Eintrag trägt `evidence: DOCUMENT` (`stories.tsx:94`), `.v3bkr__aside` fehlt im DOM | ✓ |
+| M5 „Judge" einmal | `list-compact`, `case-editable`, `in-use`: „Judge" 1×, „Einschätzung" 1× („Judge Angepasst · Einschätzung …") | ✓ |
+| M6 Fixture widerspruchsfrei | 19 % sichtbar nur im Judge-Satz, im Beleg, in Quelle und Kontoname; Begründung ohne 19 %. **Aber:** P-BELEG rot „Belegfeld 1 „RE-4417" weicht … „RE-4471" ab", während der Satz im Slot Belegfeld 1 = „RE-4471" trägt (`case-editable`: Eingabe `aria-label` „Belegfeld 1", Wert „RE-4471"; `in-use`: Grid-Zeile „… 4930 Bürobedarf RE-4471 …") — N1 | ✗ N1 |
+| M7 Schnittstelle | Prop-Tabelle = `BookingReview.tsx:71–84` (Namen, Typen, Pflicht, Vorgaben `compact`/`{}`, `caseKind` abschaltbar über `kind` `:88`); `BookingReviewBlock` = `:50`; `BookingReviewEntry` 15 Felder, Typen und Optionalität = `:23–48`; Typen-Herkunft stimmt; Status-Satz für `full` ohne `entry.full` = `:100`. Barrel `index.ts:618–620`. Daneben veraltet: N2 | ✓ Tabellen · ✗ N2 |
+| H1 `caseKind` | `expense-with-payment`: „Aufwand mit Zahlung" einmal über „Satz 1 von 2 · Aufwand · Vorschlag" und „Satz 2 von 2 · Zahlung · Vorschlag"; das zweite Vorkommen ist die Satzart des Einzelsatzes im zweiten Fall | ✓ (Owner bestätigt) |
+| Kein Querscroll bei 1280 | alle sechs Stories `scrollWidth` 1280 = 1280; `case-editable` auch bei Container 728–1246 | ✓ |
+| Leere Blöcke unsichtbar | `routine-case`: Kopf → Satz → „Prüfpunkte"; „Begründung", „Judge", „Einschätzung" 0× | ✓ |
+| Keine doppelten Wörter/Sätze | außer N1 nur Buchungstexte und Namen der Fixture doppelt; „Aufwand mit Zahlung" je Fall einmal | ✓ |
+| `typecheck`, `check:type`, `check:when`, `check:language` | alle Exit 0. `build` nicht gelaufen (Auftrag), Erbauer meldet ihn grün | ✓ |
+
+**Mängel**
+
+| Nr. | Fundort | Befund · Weg |
+|---|---|---|
+| N1 | `BookingReview.stories.tsx:40` gegen `:109` (`GRID_ROW.externalDocumentNumber`) | Die Nacharbeit zu M6 macht die Belegnummer zum Befund, der gezeigte Satz trägt aber die richtige Nummer: in `case-editable` und `in-use` steht Belegfeld 1 „RE-4471" neben dem roten Prüfpunkt „Belegfeld 1 „RE-4417"". Weg: `externalDocumentNumber: "RE-4417"` im Slot-Satz (Beleg bleibt RE-4471) |
+| N2 | Spec Z. 122 („Ausbau"), Z. 23–25 („Einordnung"); `befunde-app.md:378` | „Ausbau" führt „Quellen der Begründung" noch als künftig — `entry.sources` ist gebaut. „Einordnung" nennt `AiBookingNotesBody` für den Satz des Judge (jetzt `ProvenanceRows`) und `StatusBadge` ohne Achse `confidence`. Der in M2 verlangte Satz fehlt in Spec und Befund: der Editor im Slot bekommt kein `aiReview` — heute gibt `Step3Single` es ihm, sonst stehen Konfidenz, Urteil, Begründung, Judge-Satz und Quellen zweimal. Weg: Zeile streichen, Einordnung nachziehen, Satz in „Verhalten" und in `befunde-app.md` |
+| N3 | `BookingReview.stories.tsx:272–276` | Beschreibung von `InUse`: „der volle Editor scrollt in seiner weißen Fläche" — die Story setzt `JournalEntryGrid`, und nichts scrollt (726 = 726). Weg: Text auf das Grid fassen (oder den Editor einsetzen, wie die Fall-Ansicht es tut — dann trifft H2 die Story, s. Hinweis) |
+
+**Hinweise** (blockieren nicht)
+
+- H2 erweitert: der Editor im Slot hat auch bei 728 px (die Fall-Ansicht bei 1280 px
+  in der App) Spalte „Text" 771–771 (0 px), ebenso nebeneinander bei 1025–1246; bei
+  904 px 8 px, erst bei 1008–1024 (gestapelt) 112–128 px. `InUse` zeigt das nicht, weil es das
+  Grid setzt. Der Editor-Auftrag soll 728 px als Messpunkt aufnehmen.
+- Nach Aufklappen von „3 von 4 Prüfpunkten bestanden" steht P-UST „Beleg weist 19 % aus,
+  gebucht mit BU 9." unter dem Judge-Satz „… die Rechnung weist 19 % aus" — nicht
+  wortgleich, aber dieselbe Aussage; die Nacharbeit nennt 19 % „nur im Satz des Judge
+  und im Beleg".
+- Fixture: `CHECKS_PASSED` trägt P-AUSGLEICH „RE-4471 ist mit dieser Zahlung
+  ausgeglichen" auch am Rechnungssatz (`routine-case`) und am § 13b-Satz (FTC) —
+  hinter dem Aufklappen, vorbestehend. `kindDescription` mit „(P58)" im `title` ist
+  eine interne Nummer im Klartext (Fixture, vorbestehend).
+
+**Urteil:** nicht abgenommen. Bau, Layout, Container-Grenze, Konfidenz/Quellen,
+Judge-Zeile, `caseKind` und Schnittstellen-Tabellen sind grün; offen sind N1–N3
+(Fixture und Texte, ohne Änderung am Baustein). H1 Owner-Bestätigung und H2
+Editor-Befund bleiben offen.
+
+Nachgeprüft von / am: Claude (fremder Nachprüfer), 2026-10-01
