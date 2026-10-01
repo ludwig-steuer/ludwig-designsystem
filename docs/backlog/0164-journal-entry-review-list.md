@@ -261,7 +261,7 @@ Status: **fertig — Nachtrag 2026-10-01 abgenommen** (fremde Abnahme und Nachpr
 - [x] `Grouped` und `Flat` bei 1280 px ohne Querscroll; kein Gegenparteiname gekürzt (gemessen)
 - [x] Keine Spalte „Nr." im Standard; `include: ["number"]` bringt sie zurück (Code, `OPTIONAL`); `aria-label` der Auswahl = Datum · Gegenpartei (DOM-Probe `Grouped`)
 - [x] Setweit: `.v2tbl__row` oben ausgerichtet, Kopf mittig; einzeilige Zeilen weiter auf einer Grundlinie (zwei fremde Tabellen-Stories gemessen); Regel in `design-guidelines.md` mit Datum
-- [ ] offen (App): die App ordnet `accounts.debit`/`credit` nach Summe absteigend (Hauptkonto zuerst) und übergibt in der flachen Ansicht `accountNames={false}` — `docs/befunde-app.md` §E
+- [x] (App erledigt: `8f78cd12` Sortierung mit Test, `f42549a4` `accountNames={false}` flach) die App ordnet `accounts.debit`/`credit` nach Summe absteigend (Hauptkonto zuerst) und übergibt in der flachen Ansicht `accountNames={false}` — `docs/befunde-app.md` §E
 - [x] Spec-Tabelle „Ausprägung" oben und Code stimmen überein; `pnpm typecheck`, `pnpm build`, `pnpm check:type` grün — M8 behoben, Nachprüfung 2026-10-01 (`2db675c`)
 
 ### Fremde Abnahme Nachtrag 2026-10-01
