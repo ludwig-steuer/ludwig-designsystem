@@ -311,3 +311,38 @@ URL sind die Umlaute kodiert (`entitäten` → `entit%C3%A4ten`).
   ohnehin öffnet.
 
 Abgenommen von / am: Claude (Abnahme-Agent), 2026-09-05
+
+## Nachtrag 2026-10-01 — die Kontenliste in der obersten Ebene (llcto, Owner-Demo)
+
+Befund bei der Abnahme der Editor-Spurbreiten (0015, H1), **vorbestehend seit 0044
+(7390c50)**: Im `JournalEntryEditor` scrollt die Tabelle (`.bse__tbl`) quer und
+damit auch senkrecht. Die Liste des `AccountField` stand absolut unter dem Feld
+und wurde abgeschnitten — sichtbar blieb nur „Vorschlag von Ludwig", die Tabelle
+scrollte senkrecht. Wer in der Fall-Ansicht ein Konto ändert, sah das.
+
+Behoben:
+
+- Die Liste ist ein `popover="manual"` in der obersten Ebene (wie die
+  Popover-Familie 0038): `position: fixed`, links und unten am Feld, **mindestens
+  so breit wie das Feld, wenigstens 20 rem** (in einer Journal-Zelle ist das Feld
+  148 px — Nummer, Name und Grund passen dort nicht), nie über den Fensterrand;
+  ohne Platz darunter klappt sie nach oben. Beim Scrollen eines beliebigen
+  Vorfahren (und beim Größenändern) läuft sie mit.
+- Schließen unverändert: Klick außerhalb des Felds (die Liste bleibt im DOM unter
+  dem Feld, `contains` trifft sie), Escape, Wahl.
+
+Gemessen (1280 × 900): `JournalEntryEditor --s-2-split-full`, Fokus ins erste
+Kontofeld → Liste offen in der obersten Ebene, 320 × 168 px ab 4 px unter dem Feld,
+beide Gruppen und alle Einträge sichtbar, kein Name gekürzt; die Tabelle bleibt
+210 px hoch (kein senkrechtes Scrollen); nach scrollLeft 100 steht die Liste wieder
+bündig am Feld (339 = 339); Klick auf „6600" setzt den Wert und schließt;
+Escape schließt. `AccountField --with-candidates` (380 px Feld): Liste 380 px breit,
+4 px unter dem Feld; keine Konsolenfehler.
+
+Kriterien für die fremde Abnahme:
+
+- [ ] Im Editor (`--s-2-split-full`, `BookingReview --case-editable`) ist die Kontenliste ganz sichtbar, nicht abgeschnitten, und die Tabelle scrollt nicht senkrecht
+- [ ] Liste mindestens feldbreit, ≥ 20 rem, nie über den Fensterrand; klappt nach oben, wenn unten kein Platz ist (Fenster flach machen)
+- [ ] läuft beim Querscrollen der Tabelle und beim Scrollen der Seite mit
+- [ ] Tastatur und Wahl wie vorher: Enter wählt den ersten Treffer, Escape schließt, Klick auf einen Eintrag setzt ihn, Klick außerhalb schließt, Tippen öffnet
+- [ ] eigene Stories `AccountField --*` unverändert bedienbar

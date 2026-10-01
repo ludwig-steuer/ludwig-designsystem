@@ -1,7 +1,7 @@
 "use client";
 
 import { ActionIcon } from "../../Icons";
-import { useEffect, useId, useMemo, useRef, useState } from "react";
+import { useEffect, useId, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { IconButton } from "../../primitives/IconButton";
 
 /**
@@ -105,6 +105,7 @@ export function AccountField({
     value && valueName ? { number: value, name: valueName } : null,
   );
   const box = useRef<HTMLDivElement>(null);
+  const pop = useRef<HTMLDivElement>(null);
   // Two account fields on one page must not point at the same list — the
   // id used to be a fixed literal (same defect as in 0021 and 0028).
   const listId = useId();
@@ -155,6 +156,38 @@ export function AccountField({
     }
     return out;
   }, [candidates, query, hits]);
+
+  // The list lives in the top layer (0013 Nachtrag): inside a box that scrolls
+  // — the journal entry's table scrolls sideways, and with it up and down — an
+  // absolute list was cut to its first line. It hangs under the field, at least
+  // as wide as the field, flips above where there is no room below, follows the
+  // field while anything scrolls. Closing stays where it was: a click outside
+  // the field (the list is still inside it in the DOM), Escape, a choice.
+  useLayoutEffect(() => {
+    const p = pop.current;
+    const anchor = box.current;
+    if (!open || !p || !anchor) return;
+    if (!p.matches(":popover-open")) p.showPopover();
+    const place = () => {
+      const a = anchor.getBoundingClientRect();
+      // At least 20 rem: in a journal cell the field is 148 px, and number,
+      // name and reason of an account do not fit that. Never past the window.
+      const w = Math.max(a.width, 20 * parseFloat(getComputedStyle(document.documentElement).fontSize));
+      const h = p.offsetHeight;
+      const below = a.bottom + 4;
+      const flip = below + h > window.innerHeight - 8 && a.top - 4 - h > 8;
+      p.style.width = `${w}px`;
+      p.style.left = `${Math.max(8, Math.min(a.left, window.innerWidth - w - 8))}px`;
+      p.style.top = `${flip ? a.top - 4 - h : below}px`;
+    };
+    place();
+    window.addEventListener("scroll", place, true);
+    window.addEventListener("resize", place);
+    return () => {
+      window.removeEventListener("scroll", place, true);
+      window.removeEventListener("resize", place);
+    };
+  });
 
   // The name comes from the choice or from the candidates that were handed
   // in. If it is nowhere to be had, the number stands alone — nothing is
@@ -240,7 +273,7 @@ export function AccountField({
         ) : null}
       </div>
       {open ? (
-        <div className="v2kf__pop" id={listId} role="listbox">
+        <div className="v2kf__pop" id={listId} role="listbox" ref={pop} popover="manual">
           {groups.length === 0 ? (
             <div className="v2kf__empty">
               Kein Konto zu „{query}" — weder unter den Vorschlägen noch im Kontenrahmen.
