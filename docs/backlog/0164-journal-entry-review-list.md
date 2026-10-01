@@ -237,7 +237,7 @@ unruhig.
 | Story | Messung |
 |---|---|
 | `Grouped` | 1246 = 1246, kein Querscroll. Spuren ohne „Nr.": Datum 76, Gegenpartei 136, Soll 44, Name 97, Haben 44, Name 97. Kein Gegenparteiname gekürzt, keine Nummer über ihre Spur. Zeilen 64–106 px (vorher 67–88 laut Nachprüfung 2026-09-29; die höchste, 105,6 px, ist Fall 11 — dreizeiliger Kontoname plus „3 Zeilen"). `aria-label` der Auswahl „16.09.2026 · Allianz Versicherungs-AG" |
-| `Flat` (`accountNames={false}`) | 1246 = 1246. Gegenpartei 142, Soll/Haben je 101 px: „3100 +2 weitere", „70021 3 Zeilen" (11. Zeile). Zeilen 47–88 px (vorher bis 109) |
+| `Flat` (`accountNames={false}`) | 1246 = 1246. Gegenpartei 135, Soll/Haben je 96,5 px (nach M6, Satzart 100 px): „3100 +2 weitere", „70021 3 Zeilen" (11. Zeile). Zeilen 47–88 px (vorher bis 109) |
 | Zeilen oben | Erste Zeile jeder Zelle 12–14 px unter der Zeilenoberkante; Grundlinien einer einzeiligen Zeile in `CaseList --filled` innerhalb 1 px (Text 13,5 · Badge 11,5 · Mono 12,5 px). `BankTransactionList --filled`: die zweizeilige Sachverhaltszelle zieht die anderen nicht mehr in die Mitte |
 
 **Owner-Entscheid 2026-10-01 (flache Ansicht):** Mit der Satzart-Spalte
