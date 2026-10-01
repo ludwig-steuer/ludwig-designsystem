@@ -244,7 +244,7 @@ const DOCUMENTS = [
 ];
 
 /** A stand-in for the server: the app reads the prefixes, not the palette. */
-function search(query: string, onDrawer: (what: string) => void): CommandGroup[] {
+function search(query: string, onPreview: (what: string) => void): CommandGroup[] {
   const [, prefix, rest = ""] = /^(?:([mbj]):)?\s*(.*)$/.exec(query) ?? [];
   const word = rest.toLowerCase();
   const documents: CommandGroup = {
@@ -254,7 +254,7 @@ function search(query: string, onDrawer: (what: string) => void): CommandGroup[]
       label: d.label,
       hint: `${d.number} · ${formatAmount(d.amount, "EUR")} · ${formatTime(d.date, "date")}`,
       href: `#${d.id}`,
-      secondary: { label: "Im Drawer öffnen", onSelect: () => onDrawer(`${d.label} (${d.number})`) },
+      secondary: { label: "Vorschau", onSelect: () => onPreview(`${d.label} (${d.number})`) },
     })),
   };
   const clients: CommandGroup = {
@@ -279,7 +279,7 @@ function search(query: string, onDrawer: (what: string) => void): CommandGroup[]
  * Leer stehen die Präfixe — Enter setzt „m: " ins Feld und die Palette bleibt
  * offen (`keepOpen`). „b: 4471" findet den Beleg über seine Nummer, die nicht
  * im Label steht, und die zwei gleichnamigen Rechnungen sind zwei Einträge.
- * Enter öffnet die Seite, Shift+Enter (oder der Hinweis rechts) den Drawer,
+ * Enter öffnet die Seite, Shift+Enter (oder der Hinweis rechts) die Vorschau,
  * ⌘↵ einen neuen Tab. Das Ergebnis steht unter der Palette.
  */
 export const ServerHits: Story = {
@@ -299,7 +299,7 @@ export const ServerHits: Story = {
       if (!query.trim()) return;
       setLoading(true);
       const timer = setTimeout(() => {
-        setHits(search(query, (what) => setLast(`Drawer: ${what}`)));
+        setHits(search(query, (what) => setLast(`Vorschau: ${what}`)));
         setLoading(false);
       }, 300);
       return () => clearTimeout(timer);
