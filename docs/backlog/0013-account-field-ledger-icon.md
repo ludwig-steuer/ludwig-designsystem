@@ -476,3 +476,64 @@ Nachgeprüft von / am: Claude (fremder Nachprüfer), 2026-10-01
 | H2 | zweimal „Alle Konten" mit demselben Konto in `RecurringRuleEditor --filled` — eigener Punkt, offen |
 
 Nachzuprüfen: Tab auf Eintrag, Enter → Wert gesetzt, Liste zu, Fokus sichtbar im Feld, Tippen geht ins Feld; Klick auf Gruppenkopf → Liste bleibt offen; B1 stichprobenartig.
+
+### Nachprüfung 2 Kontenliste 2026-10-01 (Stand 2704864)
+
+Fremder Nachprüfer, nichts gebaut. Bedient in eigenen Playwright-Kontexten
+(1280 × 900, `de-DE`) gegen Storybook 6107, mit echten Tasten
+(`keyboard.press`) und echten Mausklicks auf die Mitte des Ziels; jeder Schritt
+in einem eigenen Aufruf, gemessen 50–750 ms danach. Fokus über
+`document.activeElement` und `:focus-visible`, Ring über `getComputedStyle`,
+Verdeckung über `elementFromPoint` (Mitte und vier Ecken), offene Listen über
+`.v2kf__pop:popover-open`, gemeldeter Wert über die ruhende Anzeige
+(`.v2kf__shown` zeigt Nummer und Name erst, wenn `value` gesetzt ist).
+`AccountField.tsx` im Arbeitsbaum (HEAD `61d24cb`) = `2704864`; der Unterschied
+zu `6af4375` ist genau die Nacharbeit 2 (Feld-Ref mit Merker `quiet` in
+`choose()` und `onFocus`, `onMouseDown` mit `preventDefault` von den Einträgen
+an die Liste verlegt).
+
+| Kriterium | Messung | Urteil |
+|---|---|---|
+| M1 im Editor (`JournalEntryEditor --s-2-split-full`) | Erstes Kontofeld (148 px, Wert 6815) angeklickt, geleert: Liste mit „Vorschlag von Ludwig · 6815" und „Zuletzt bei dieser Gegenpartei · 6820". Tab → „6815" (Ring 2 px solid `rgb(59, 143, 196)`, `:focus-visible`). Enter → Feld „6815", 0 Listen offen, `aria-expanded="false"`, **`activeElement` = Kontofeld**, `:focus-visible`, Ring Rand `rgb(26, 58, 92)` + 3 px `rgba(59, 143, 196, 0.14)` (derselbe wie beim gewöhnlichen Fokus), 5 von 5 Punkten sichtbar. Nach 650 ms weiter zu — die Rückgabe öffnet nicht. „68" getippt → steht im Feld („681568", siehe H6), Liste öffnet erst jetzt. Zweiter Weg: Tab, Tab auf „6820", Enter → 6820, Fokus im Feld; Tab → „Belegfeld 1" (nicht der Seitenanfang), ruhend „6820 Porto". Leertaste auf einem Eintrag wirkt wie Enter (6815, Fokus im Feld) | ✓ |
+| M1 in `AccountField --with-candidates` (380 px) | Geleert: vier Gruppen. Tab, Tab auf „6820", Enter → 6820, zu, `activeElement` = Feld, `:focus-visible`, Ring wie oben; nach 750 ms weiter zu; „Inter" getippt → steht im Feld, Liste offen. Dreimal Tab auf „6800", Enter → 6800, Fokus im Feld, 5 von 5 sichtbar. Gegenprobe in den übrigen Stories mit Einträgen: `--full-text-only` („68", Tab, Enter → 6805), `--number-and-name` (→ 6815), `--with-ledger` (über den Kontenblatt-Knopf hinweg auf „6815", Enter → 6815): jedes Mal Fokus im Feld, Liste zu | ✓ |
+| H1 Klick auf Gruppenkopf | Editor: beide Gruppenköpfe angeklickt → Liste offen, Fokus im Feld, Wert unverändert. `--with-candidates`: alle vier Gruppenköpfe nacheinander → offen, Fokus im Feld; Mausrad in der Liste (`scrollTop` 0 → 58,5, Liste 376 zu 318 px) → offen, Fokus im Feld; Klick auf den klebenden Kopf nach dem Scrollen → offen | ✓ |
+| H1 Klick auf Eintrag wie vorher | Editor: Klick auf „6820" → 6820, zu, Fokus im Feld; Tab → „Belegfeld 1", ruhend „6820 Porto". `--with-candidates`: Klick auf „6800" und auf den letzten Eintrag „6845" (nach dem Scrollen) → gesetzt, zu, Fokus im Feld | ✓ |
+| B1 Stichprobe | Editor, Feld geleert: Tab „6815" offen → Tab „6820" offen → Tab „Belegfeld 1": **zu**, Fokus 5 von 5 sichtbar. Shift+Tab → Kontofeld (öffnet durch den Fokus, wie vorgesehen) → Shift+Tab → „Steuerschlüssel": zu. `--number-and-name`: Tab aus dem zweiten Feld ins dritte → genau eine Liste offen (die des dritten) | ✓ |
+| Escape, Klick außerhalb, Fokusverlust melden den Wert | Editor: „6820" getippt, Escape → zu, Fokus bleibt; Tab → „Belegfeld 1", ruhend „6820 Porto". `--with-candidates`: „6800" getippt, Klick außerhalb → zu, ruhend „6800 Sonstige Betriebsausgaben"; „6845" getippt, Tab auf den Eintrag, Tab hinaus → zu, ruhend „6845 EDV-Zubehör". Alle sechs `AccountField`-Stories, jedes Feld (neun): Fokus öffnet, Escape schließt, „68" öffnet (Treffer bzw. Leertext), Klick außerhalb schließt und meldet (z. B. ruhend „6805 Telefon") | ✓ |
+| Keine Konsolenfehler | `--with-candidates`, `--full-text-only`, `--no-match`, `--invalid`, `--with-ledger`, `--number-and-name` und alle Editor-Läufe: 0 Fehler, 0 Warnungen | ✓ |
+| Prüfliste Bedienung (`CLAUDE.md` §2) | Nach jeder Wahl sichtbarer Fokus im Feld (2.4.7), nicht verdeckt (5/5, 2.4.11); keine Tastaturfalle: Tab und Shift+Tab verlassen Feld und Liste. In Stories mit einem einzigen Feld verlässt Tab das Dokument, der nächste Tab kehrt ins Feld zurück — Verhalten des Prüfbrowsers, nicht des Felds (`window blur`/`focus` mitgeschrieben) | ✓ |
+| `pnpm typecheck`, `check:language`, `check:when` | alle drei Exit 0 („0 German comment lines left", „in Ordnung"); `pnpm build` auftragsgemäß nicht gestartet | ✓ |
+
+**Hinweise ohne Mangel** (vorbestehend, nicht durch `2704864`)
+
+- **H4 — Escape auf einem Eintrag tut nichts.** Steht der Fokus per Tab auf
+  einem Eintrag, bleibt die Liste bei Escape offen und der Fokus auf dem
+  Eintrag; Escape hört nur am Feld (`AccountField.tsx:268`). „Esc schließt"
+  (`CLAUDE.md` §2) gilt damit nur im Feld. Abhilfe: Escape am Rahmen `.v2kf`
+  (oder an der Liste) behandeln — schließen und den Fokus über denselben
+  Merker `quiet` ans Feld zurückgeben.
+- **H5 — `--with-ledger`: Fokus fällt auf `body`, wenn das geleerte Feld per
+  Tab verlassen wird.** Tab geht auf „Kontenblatt zu 6815"; das `onBlur` des
+  Felds meldet den leeren Wert, der Knopf wird `disabled={!value}` (`:287`) und
+  verliert den Fokus ohne `focusout` — die Liste bleibt offen, kein Fokus
+  sichtbar (2.4.7); der nächste Tab landet auf dem ersten Eintrag. Betrifft
+  jeden Aufrufer mit `onOpenLedger` (`JournalEntryGrid`). Ohne Leeren bleibt
+  der Fokus auf dem Knopf. Seit `6fa8a53`. Abhilfe: `aria-disabled` statt
+  `disabled` (Knopf bleibt fokussierbar, Klick wird ignoriert).
+- **H6 — nach der Wahl steht der Cursor hinter der Nummer, nicht markiert.**
+  Das `select()` in `onFocus` (`:257`) läuft bei der Rückgabe auf dem alten
+  Text, bevor die Nummer gesetzt ist; Tippen hängt an („6815" + „68" →
+  „681568"). Nach Klick-Wahl und nach Enter im Feld ist es ebenso — also
+  einheitlich, und „Tippen geht ins Feld" hält. Wer auch nach der Wahl
+  „Tippen ersetzt" will, markiert nach dem Setzen des Werts.
+- H2 (zweimal „Alle Konten"), B3 und B5 bleiben offen wie notiert.
+
+**Urteil: abgenommen.** M1 ist behoben — Enter und Leertaste auf einem per Tab
+erreichten Eintrag setzen den Wert, schließen die Liste und geben den Fokus
+sichtbar ans Feld zurück, ohne die Liste wieder zu öffnen; Tippen geht ins Feld,
+Tab setzt am Feld fort. H1 ist behoben — Gruppenkopf, Mausrad und klebender
+Kopf lassen Liste und Fokus stehen. B1 hält in der Stichprobe, Escape, Klick
+außerhalb und Fokusverlust melden den Wert wie vorher, 0 Konsolenfehler. H4 und
+H5 sollten als eigener Punkt ans Set (Bedienung, Tastaturweg).
+
+Nachgeprüft von / am: Claude (fremder Nachprüfer), 2026-10-01
