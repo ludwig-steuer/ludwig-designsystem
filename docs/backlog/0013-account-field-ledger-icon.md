@@ -637,3 +637,56 @@ Nachgeprüft von / am: Claude (fremder Nachprüfer), 2026-10-01
 | **M1** | Am `aria-disabled`-Knopf blasst nur das Zeichen ab (`button.v2ibtn[aria-disabled="true"] > * { opacity: 0.5 }`), der Knopf selbst nicht — der Fokusring behält `--color-focus` | `--with-ledger`, Feld leeren, Tab: Knopf Deckkraft 1, Ring `rgb(59, 143, 196)` 2 px (3,55:1), Zeichen 0,5, Cursor `not-allowed` |
 | **M2** | Die Regel gilt nur für `button.v2ibtn`: der tote Pfeil des `RecordPager` (ein `span` mit `aria-disabled`) behält sein Bild aus 0047; der Hover-Ausschluss für `[aria-disabled="true"]` bleibt (er nimmt dem toten Pfeil den Hover, den er vorher fälschlich hatte) | `RecordPager --first-record`: `.v2pager__off` Deckkraft 0,35, Cursor `default` |
 | H7 | Escape bei offener Liste hält das Ereignis an (`stopPropagation`): die Liste ist die innerste Ebene, ein `Drawer` drumherum (hört am `window`) bleibt offen | im Code; Escape am Kontenblatt-Knopf schließt die Liste und gibt den Fokus ans Feld |
+
+### Nachprüfung 4 Kontenliste 2026-10-01 (Stand 8884b9b)
+
+Fremder Nachprüfer, nichts gebaut. Geprüft wird nur die Nacharbeit 4. Bedient
+in einem eigenen Playwright-Kontext (1280 × 900, `de-DE`) gegen Storybook 6107,
+mit echten Tasten (`keyboard.press`/`type`) und echten Mausklicks auf die Mitte
+des Ziels, gemessen 250–900 ms danach. Fokus über `document.activeElement` und
+`:focus-visible`, offene Listen über `.v2kf__pop:popover-open`, Markierung über
+`selectionStart`/`selectionEnd`, Ringfarbe über Bildschirmfoto-Pixel (ein
+Ausschnitt um den Knopf, Pixel per Canvas gelesen), Konsole über
+`console.error`/`console.warn`/`error`/`unhandledrejection`, eingehängt per
+Init-Skript. Im Browser per CSSOM bestätigt, dass Storybook den Stand
+`8884b9b` lädt (`.v2ibtn:disabled`, `button.v2ibtn[aria-disabled="true"]` und
+`… > *`, `.v2pager__off` 0,35). Arbeitsbaum sauber, HEAD = `8884b9b`.
+
+| Punkt | Messung | Urteil |
+|---|---|---|
+| M1 Fokusring am gesperrten Knopf | `--with-ledger`, Feld „Konto" (6815) angeklickt (Auswahl 0–4), Backspace → leer, Liste offen; Tab → `BUTTON` „Kontenblatt", `aria-disabled="true"`, `disabled` false, `:focus-visible`, Deckkraft am Knopf **1**, Ring `2px solid rgb(59, 143, 196)` Offset 2 px. Ringpixel `#3B8FC4`/`#3B8EC3`/`#3A8DC2` — innen auf Weiß **3,55:1**, rechts außen auf `#F4F6F8` **3,28:1** (vorher `#9DC7E1`, 1,80:1). Pixelgleich mit dem Ring desselben Knopfs mit Wert („Kontenblatt zu 6820": `#3B8FC4` links, rechts, oben). Feld „Gegenkonto" (von Anfang an leer), Tab → derselbe Zustand, dieselben Ringpixel | ✓ |
+| M1 Zeichen, Cursor, Hover | `svg` Deckkraft 0,5 (hellste Pixel `#ADADAD`–`#C3C3C3` statt Textgrau), Knopf `color` `rgb(92, 92, 92)` unverändert, Cursor `not-allowed`. Maus darauf (`:hover` wahr): Hintergrund `rgba(0, 0, 0, 0)` | ✓ |
+| M1 öffnet nichts | Fokus auf dem gesperrten Knopf: Enter, Leertaste, Klick → kein Drawer, Fokus bleibt auf dem Knopf, Liste offen. „Gegenkonto": Enter → nichts | ✓ |
+| M1 mit Wert wie vorher | Ruhend (6815): kein `aria-disabled`, Deckkraft 1, `svg` 1, Cursor `pointer`, Maus darauf `rgb(244, 246, 248)`; Klick → Drawer „Kontenblatt 6815". „6820" getippt + Enter (Auswahl 0–4), Tab → „Kontenblatt zu 6820", Enter → Drawer „Kontenblatt 6820", Escape → Fokus zurück auf den Knopf, `:focus-visible` | ✓ |
+| M2 `RecordPager` toter Pfeil | `--first-record`: `SPAN.v2ibtn.v2ibtn--md.v2pager__off` „Vorheriger Datensatz", `aria-disabled="true"`, Deckkraft **0,35**, Cursor **`default`**, Farbe `rgb(113, 113, 113)`; Maus darauf (`:hover` wahr): Hintergrund `rgba(0, 0, 0, 0)`, Farbe, Cursor und Deckkraft gleich. `--last-record`: „Nächster Datensatz" ebenso. Aktive Pfeile (`A`) Deckkraft 1, `pointer`, `rgb(45, 45, 45)`; `--filled` ohne toten Pfeil | ✓ |
+| M2 `IconButton` mit echtem `disabled` | `--sizes` („Gesperrt, solange der Stapel läuft") und `--interactive` („Vorherige Seite"): `disabled`, Deckkraft **0,5 am Knopf** (`svg` 1), Cursor `not-allowed`, Hover ohne Hintergrund. Aktive Nachbarn („Schließen, klein", „Nächste Seite") Hover `rgb(244, 246, 248)`. `--filled`, `--tones`, `--as-link`, `--in-use`: kein gesperrter Knopf, Hover wie vorher. Die neue Regel trifft sonst nichts: `aria-disabled` an einem `button.v2ibtn` gibt es nur in `AccountField.tsx:305` (`StepRail`, `Pagination`, `NavList`, `RecordPager` sind Spans/andere Klassen) | ✓ |
+| H7 Escape bei offener Liste (Code) | `AccountField.tsx:244–252`: `e.stopPropagation()` nur im Zweig `e.key === "Escape" && open`; bei geschlossener Liste bleibt das Ereignis unberührt. `Drawer` hört am `window` (`Drawer.tsx:151`), `Dialog` am `document` (`Dialog.tsx:130`), beide in der Bubble-Phase — der Halt an Reacts Wurzel (bzw. am Portal-Container) erreicht beide | ✓ |
+| H7 im Browser | Eine Story mit `AccountField` **in** einem `Drawer` gibt es nicht (geprüft: `AccountField`-, `Drawer`-, `RecurringRuleEditor`-, `PaymentAccountEditor`-, `ClarificationEditor`-Stories, `CaseTabs`-Showcase; in `--with-ledger` ist der Drawer das Kontenblatt neben dem Feld). Stattdessen Lauscher wie der des Drawers (`keydown` am `window` und am `document`, Bubble-Phase) in die Seite gehängt und gezählt: `--with-ledger`, Fokus auf dem gesperrten Knopf, Liste offen, Escape → Liste zu, Fokus im Feld, **0** Ereignisse an `window`/`document`; zweites Escape bei geschlossener Liste → **1**. `--with-candidates`: Escape auf einem Eintrag → 0; Escape im Feld bei offener Liste → 0; Escape bei geschlossener Liste → 1 | ✓ |
+| Regression Tab + Enter auf Eintrag | `--with-candidates`, geleert, Tab „6815", Tab „6820", Enter → Wert 6820, 0 Listen, `activeElement` = Feld, `:focus-visible`, Auswahl 0–4, nach 900 ms unverändert; „6800" getippt → ersetzt | ✓ |
+| Regression Escape auf Eintrag | „68" getippt, Tab auf „6815", Escape → 0 Listen, `aria-expanded="false"`, Fokus im Feld, `:focus-visible`, Text „68" bleibt; nach 1 s weiter zu; Tippen öffnet die Liste wieder | ✓ |
+| Keine Konsolenfehler | alle sechs `AccountField --*` (neun Felder: Klick, Escape, „68", Tab, Escape, „68" + Enter, Klick außerhalb), dazu die Läufe oben, `RecordPager` (3 Stories), `IconButton` (6 Stories): 0 Fehler, 0 Warnungen. „68" + Enter mit Treffern → erster Treffer, Auswahl 0–4 (`--with-candidates` 6815, `--full-text-only` 6805, `--with-ledger` 6815, `--number-and-name` 6815); ohne Treffer bleibt die Liste mit dem Leertext offen | ✓ |
+| `pnpm typecheck`, `check:language`, `check:when` | alle drei Exit 0 („0 German comment lines left in 0 files", „in Ordnung"); `pnpm build` auftragsgemäß nicht gestartet | ✓ |
+
+**Hinweise ohne Mangel**
+
+- Oben und unten liegt der Ring über dem Feldrand (`#DCE1E6`, 2,8:1 dagegen);
+  innen steht Weiß (3,55:1), außen rechts `#F4F6F8` (3,28:1). Das ist dieselbe
+  Lage wie beim Knopf mit Wert und war nie anders — kein Befund der Nacharbeit.
+- Nach einem **Mausklick** auf den Knopf mit Wert gibt Escape im Kontenblatt
+  den Fokus an `body` zurück, weil `onMouseDown` den Fokus am Knopf verhindert
+  und vorher `body` fokussiert war. Mit der Tastatur geht er zurück auf den
+  Knopf. Vorbestehend, nicht Teil dieser Nacharbeit.
+- Offen wie notiert: Klick ins schon fokussierte Feld nach Escape öffnet die
+  Liste nicht wieder; H2, B3, B5.
+
+**Urteil: abgenommen.** M1 behoben (Ring am gesperrten fokussierten Knopf
+pixelgleich mit dem aktiven, 3,55:1 auf Weiß, nur das Zeichen 0,5, Cursor
+`not-allowed`, kein Hover, Enter/Leertaste/Klick öffnen nichts, mit Wert öffnet
+das Kontenblatt), M2 behoben (toter Pfeil in `RecordPager --first-record` und
+`--last-record` wieder 0,35 / `default` ohne Hover; `IconButton --sizes` und
+`--interactive` unverändert 0,5 am Knopf, `not-allowed`), H7 im Code erledigt
+und im Browser über die Lauscher-Zählung belegt (keine Story mit dem Feld im
+Drawer). Regression Tab + Enter und Escape auf Eintrag hält, 0 Konsolenfehler,
+die drei Prüfungen grün.
+
+Nachgeprüft von / am: Claude (fremder Nachprüfer), 2026-10-01
