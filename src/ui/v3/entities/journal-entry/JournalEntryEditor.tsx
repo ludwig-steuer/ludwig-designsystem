@@ -4,7 +4,7 @@ import { Trash2, Undo2 } from "lucide-react";
 import { useCallback, useEffect, useMemo, useState } from "react";
 
 import { deriveTax } from "./tax-assist";
-import { REVERSE_CHARGE_TAX_ACCOUNTS } from "./journal-entry";
+import { REVERSE_CHARGE_TAX_ACCOUNTS, journalBalanceText, journalLines } from "./journal-entry";
 // Direct import, not the barrel: `@/ui/status` also exports `FlowModal` and
 // pulls `@/modules/invoices` with the DB driver into the bundle (P22).
 import { ActionIcon } from "../../Icons";
@@ -830,52 +830,11 @@ function Journal({
   open: boolean;
   onToggle: () => void;
 }) {
-  // The posting text comes along: the journal is the **DATEV batch order**
-  // (account · account name · posting text · debit · credit), and without it
-  // the column `JournalEntryCard` has for it would stay empty.
-  const lines: { account: string; name: string; text: string; side: Side; amount: number }[] = [];
-  for (const r of rows) {
-    const gross = toNumber(r.amount);
-    const tax = deriveTax(
-      { accountNumber: r.account, taxKey: r.bu || null, amount: gross },
-      accountFramework,
-    );
-    if (!tax) {
-      lines.push({ account: r.account, name: r.accountName, text: r.text, side: r.side, amount: gross });
-      continue;
-    }
-    lines.push({ account: r.account, name: r.accountName, text: r.text, side: r.side, amount: tax.net });
-    lines.push({
-      account: tax.account.accountNumber,
-      name: tax.account.accountName,
-      // The tax line carries the text of its own line: it is the same entry,
-      // only split — in the batch the same text would stand there.
-      text: r.text,
-      side: r.side,
-      amount: tax.tax,
-    });
-  }
-  // The contra account is its own row above the journal but belongs in the
-  // total — otherwise "Σ D ≠ Σ C" reports an error that does not exist.
-  if (contraAccount?.account) {
-    const total = rows
-      .filter((r) => r.side === documentSide)
-      .reduce((sum, r) => sum + toNumber(r.amount), 0);
-    if (total !== 0) {
-      lines.push({
-        account: contraAccount.account,
-        name: contraAccount.name,
-        // The contra account has no text of its own — it takes the one of the
-        // first line, the way the batch would.
-        text: rows[0]?.text ?? "",
-        side: documentSide === "S" ? "H" : "S",
-        amount: total,
-      });
-    }
-  }
-
-  const debit = lines.filter((z) => z.side === "S").reduce((s, z) => s + z.amount, 0);
-  const credit = lines.filter((z) => z.side === "H").reduce((s, z) => s + z.amount, 0);
+  // The lines and the balance come from `journalLines` — the one derivation
+  // grid, card and editor share. A copy of it lived here and summed the
+  // § 13b tax rows into the contra account, so a balanced entry read
+  // „Σ S 1,79 € ≠ Σ H 2,08 €" (lldev1 2026-10-01, P50).
+  const lines = journalLines(rows, contraAccount, documentSide, accountFramework);
 
   return (
     <div className="bse__journal">
@@ -883,7 +842,7 @@ function Journal({
         <span className={`v2chev${open ? " is-open" : ""}`} />
         Journal (wird gespeichert)
         <span className="v2muted" style={{ marginLeft: "auto" }}>
-          Σ S {euro(debit)} {Math.abs(debit - credit) < 0.005 ? "=" : "≠"} Σ H {euro(credit)}
+          {journalBalanceText(lines)}
         </span>
       </button>
       {open ? (

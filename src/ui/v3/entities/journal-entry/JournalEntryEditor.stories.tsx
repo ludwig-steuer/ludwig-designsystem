@@ -148,27 +148,54 @@ const REVERSE_CHARGE_ROWS: EditorRow[] = [
   REVERSE_CHARGE_ROW({ id: "rc4", amount: "8,66", bu: "", side: "H", account: "1618", accountName: "Kreditkarte" }),
 ];
 
+const FTC = { externalDocumentNumber: "OCAKSCTE-0037", text: "FTC Gephyra" };
+
 /**
  * § 13b — der Kern legt das Steuerpaar selbst an (VSt 1577 Soll, USt 1787
  * Haben). Der Beleg ist netto: die VSt-Zeile auf der Belegseite zählt **nicht**
  * in den Rest, sonst stünde „Rest −1,65 €" rot an einem richtigen Satz (P50).
  * Alle vier Zeilen bleiben sichtbar; nur die Summe im Kopf lässt sie weg.
+ *
+ * Darunter derselbe Fall **mit Gegenkonto** — FTC Gephyra, Beleg
+ * OCAKSCTE-0037, SKR04, Kreditor 70145: das Gegenkonto trägt nur den
+ * Belegbetrag, 1,50 — nicht 1,79. Der Kopf des Journals sagt „Σ S 1,79 € = Σ H
+ * 1,79 €". Bis 2026-10-01 stand dort „≠ Σ H 2,08 €": der Editor rechnete mit
+ * einer eigenen, veralteten Kopie von `journalLines`.
  */
 export const ReverseCharge13b: Story = {
   render: () => (
-    <Frame>
-      <JournalEntryEditor
-        {...BASE}
-        contraAccount={null}
-        documentNumber="INV-2026-0400"
-        documentAmount={8.66}
-        accountFramework="skr03"
-        rows={REVERSE_CHARGE_ROWS}
-        editable
-        onCancel={() => {}}
-        onSave={() => {}}
-      />
-    </Frame>
+    <div style={{ display: "grid", gap: 24 }}>
+      <Frame>
+        <JournalEntryEditor
+          {...BASE}
+          contraAccount={null}
+          documentNumber="INV-2026-0400"
+          documentAmount={8.66}
+          accountFramework="skr03"
+          rows={REVERSE_CHARGE_ROWS}
+          editable
+          onCancel={() => {}}
+          onSave={() => {}}
+        />
+      </Frame>
+      <Frame>
+        <JournalEntryEditor
+          {...BASE}
+          contraAccount={{ ...AGAINST, account: "70145", name: "FTC Gephyra" }}
+          documentNumber="OCAKSCTE-0037"
+          documentAmount={1.5}
+          accountFramework="skr04"
+          rows={[
+            REVERSE_CHARGE_ROW({ ...FTC, id: "ftc1", amount: "1,50", bu: "94", account: "6837", accountName: "Aufwendungen für die zeitlich befristete Überlassung von Rechten" }),
+            REVERSE_CHARGE_ROW({ ...FTC, id: "ftc2", amount: "0,29", bu: "", account: "1407", accountName: "Abziehbare Vorsteuer nach § 13b UStG 19 %" }),
+            REVERSE_CHARGE_ROW({ ...FTC, id: "ftc3", amount: "0,29", bu: "", side: "H", account: "3837", accountName: "Umsatzsteuer nach § 13b UStG 19 %" }),
+          ]}
+          editable
+          onCancel={() => {}}
+          onSave={() => {}}
+        />
+      </Frame>
+    </div>
   ),
 };
 

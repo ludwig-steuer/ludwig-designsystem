@@ -615,3 +615,23 @@ Gegenkonto im Journal) lässt Zeilen auf den § 13b-/igE-Konten weg
 Der Beleg ist dort netto; das Steuerpaar legt der Kern an. Standard-VSt bleibt
 drin — netto + 1576 ist das Brutto des Belegs. Die Zeilen bleiben sichtbar.
 Story `ReverseCharge13b`: vier Zeilen, Beleg 8,66 → Rest 0,00 ✓.
+
+## Nachtrag 2026-10-01 — Journal rechnete die § 13b-Steuerzeile ins Gegenkonto (lldev1, Owner-Demo)
+
+Befund lldev1: Das Journal im Editor (`function Journal`,
+`JournalEntryEditor.tsx`) war eine veraltete Kopie von `journalLines()` in
+`journal-entry.ts`. Beim Gegenkonto summierte es alle Zeilen der Belegseite,
+also auch die § 13b-Steuerkonten (`REVERSE_CHARGE_TAX_ACCOUNTS`).
+`journalLines()` nimmt `documentSideTotal()`, das sie auslässt (P50). Folge an
+einem ausgeglichenen Satz (FTC Gephyra, Beleg OCAKSCTE-0037, SKR04: 6837 S 1,50
+BU 94 · 1407 S 0,29 · 3837 H 0,29, Kreditor 70145): Gegenkonto H 1,79 statt
+1,50, Kopf „Σ S 1,79 € ≠ Σ H 2,08 €".
+
+Behoben: `Journal` baut seine Zeilen über `journalLines()` und den Kopf über
+`journalBalanceText()`; die eigene Schleife und die eigenen Summen sind weg, die
+Darstellung über `JournalEntryCard` bleibt. Nachweis: Story `ReverseCharge13b`
+zeigt jetzt zusätzlich den FTC-Fall mit Gegenkonto — „Σ S 1,79 € = Σ H 1,79 €",
+70145 Haben 1,50 €. Gegenprobe: der erste § 13b-Fall (ohne Gegenkonto) „Σ S
+10,31 € = Σ H 10,31 €", `S2_SplitFull` „Σ S 1.475,60 € = Σ H 1.475,60 €",
+unverändert. `journalLines()` mit dem Satz nachgerechnet (esbuild + node):
+`6837 S 1.50 | 1407 S 0.29 | 3837 H 0.29 | 70145 H 1.50`.
