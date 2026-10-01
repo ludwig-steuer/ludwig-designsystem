@@ -306,3 +306,13 @@ Kriterium `error`, Spalte „Pflicht" an `CommandItem`); vorbestehend M3
 | M4 Storybook-Gruppe „Frame" statt „Rahmen" | vorbestehend für drei Familien — Systementscheid, eigener Auftrag | offen |
 | H3 Fokus nach ⌘+Klick am Link | bleibt: Pfeile und Enter wirken weiter (sie hängen an der Palette, nicht am Feld); nur Tippen ginge ins Leere | offen, Beobachtung |
 
+## Offene Frage an den Owner (2026-10-01): das Wort für den Zweitweg
+
+Die App hat den Zweitweg mit dem Label „Drawer" eingebaut (`bbf63e90`), die
+Story `ServerHits` zeigt „Im Drawer öffnen". Beides ist ein Systemwort (T4:
+Wörter der Kanzlei, nicht des Systems), und das Set hat bisher kein Nutzerwort
+für „rechts daneben ansehen". Ein neues Wort entscheidet der Owner (CLAUDE.md §7).
+*Vorschlag:* **„Ansehen"** — nach der Hausregel „ansehen im Drawer, bearbeiten im
+Detail"; Enter öffnet die Seite, Shift ↵ „Ansehen". *Bis zur Antwort* bleibt der
+Text, wie er ist.
+
