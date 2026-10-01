@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Status | in Arbeit — fremde Abnahme 2026-10-01: nicht abgenommen (M1 blockierend, M2–M7) |
+| Status | fertig — abgenommen 2026-10-01 (Nachprüfung Stand 8b27ae7; H3, H4, H6 offen als Hinweise) |
 | Stufe | `entities/journal-entry/` (`ReviewReasonCell`, T3 `JournalEntryReviewList`) |
 | Klassen-Test | „Ergäbe das auch in einer Versicherungs-App Sinn?" → nein: Prüfbedarf eines Buchungsvorschlags (F232), Judge, Präzedenz |
 | Quelle | Anfrage llcto 2026-10-01, Owner-Wunsch; Brief `ludwig/app` `docs/backlog/F355-booking-review-unified-design-brief.md` (6999e08f, Nachtrag f301c10b „Prüfgrund statt Stufe", cc28c51f), §1, §2, §5 Punkte 1–2 |
@@ -103,23 +103,23 @@ alle Töne, „+n", leer und „entschieden".
 
 Fest (gilt immer):
 
-- [ ] `pnpm typecheck` und `pnpm build` grün
-- [ ] Datei nach der Familie benannt, Story daneben, Titel in der richtigen Gruppe
-- [ ] Code englisch; `@when`/`@instead` an jedem Export
-- [ ] Kein Hex, kein px, keine lokale Label-Map; Status nur über Registry
-- [ ] Alle Stories oben vorhanden; ausgeschlossene Zustände begründet
-- [ ] Prüfliste `design-guidelines.md` §9 durchgegangen
-- [ ] Im Browser angesehen (Storybook), nicht nur gebaut
+- [x] `pnpm typecheck` und `pnpm build` grün
+- [x] Datei nach der Familie benannt, Story daneben, Titel in der richtigen Gruppe
+- [x] Code englisch; `@when`/`@instead` an jedem Export
+- [x] Kein Hex, kein px, keine lokale Label-Map; Status nur über Registry
+- [x] Alle Stories oben vorhanden; ausgeschlossene Zustände begründet
+- [x] Prüfliste `design-guidelines.md` §9 durchgegangen
+- [x] Im Browser angesehen (Storybook), nicht nur gebaut
 
 Variabel (aus dieser Spec):
 
-- [ ] Prüfgrund: stärkstes Wort als Badge im Registry-Ton, `danger` → `warning`; „+n" mit den weiteren Wörtern im `title`; Einzelheit im `title` des Worts (`Grouped`)
-- [ ] (i) 24 × 24 px, per Tastatur; alle Gründe mit Einzelheit, Teile mit Vorzeichen (echtes Minus), Summe, Schwelle 50; Tabelle in Spalten (`Grouped`)
-- [ ] Routine ohne Gründe → leere Zelle ohne (i); entschieden → „entschieden" (`Grouped`)
-- [ ] „So gebucht": `0` → „erstmals", `n` → „n×", Rückfall `firstTime`; nicht mehr unter der Gegenpartei (`Grouped`, `Flat`)
-- [ ] Keine Konfidenz, kein Judge, kein „x von y" in der Zeile; „Prüfung durch Ludwig" über `include: ["verdict"]` (Code, `Grouped`)
-- [ ] T3 bei 1280 px ohne Querscroll, kein Gegenparteiname gekürzt, Zeilen ≤ 106 px (`Grouped`, `Flat`, gemessen); `Compact` mit Prüfgrund
-- [ ] Keine Wortliste im Set (`grep` nach den Wörtern in `ReviewReasonCell.tsx` leer); Befund `review_reason` in `docs/befunde-app.md`
+- [x] Prüfgrund: stärkstes Wort als Badge im Registry-Ton, `danger` → `warning`; „+n" mit den weiteren Wörtern im `title`; Einzelheit im `title` des Worts (`Grouped`)
+- [x] (i) 24 × 24 px, per Tastatur; alle Gründe mit Einzelheit, Teile mit Vorzeichen (echtes Minus), Summe, Schwelle 50; Tabelle in Spalten (`Grouped`)
+- [x] Routine ohne Gründe → leere Zelle ohne (i); entschieden → „entschieden" (`Grouped`)
+- [x] „So gebucht": `0` → „erstmals", `n` → „n×", Rückfall `firstTime`; nicht mehr unter der Gegenpartei (`Grouped`, `Flat`)
+- [x] Keine Konfidenz, kein Judge, kein „x von y" in der Zeile; „Prüfung durch Ludwig" über `include: ["verdict"]` (Code, `Grouped`)
+- [x] T3 bei 1280 px ohne Querscroll, kein Gegenparteiname gekürzt, Zeilen ≤ 106 px (`Grouped`, `Flat`, gemessen); `Compact` mit Prüfgrund
+- [x] Keine Wortliste im Set (`grep` nach den Wörtern in `ReviewReasonCell.tsx` leer); Befund `review_reason` in `docs/befunde-app.md`
 
 ## Abnahme
 
@@ -220,3 +220,43 @@ Offene Punkte: M1–M7 (M1 blockierend)
 | H5 50 Punkte ohne Prüfgrund möglich (25 + 25) | Befund an die App: dann leert die Zelle — entweder ein Grund „Mehrere kleine Gründe" oder die Grundlast in die Achse | an die App |
 | H6 (i) des alten Spaltenkopfs (`review_tab`) weg | bleibt: der Kopf „Prüfgrund" erklärt sich über das (i) je Zeile | — |
 
+
+## Nachprüfung 2026-10-01 (Stand 8b27ae7)
+
+Fremde Nachprüfung (weder Erbauer noch erste Abnahme). Playwright, 1280 × 900,
+eigener Browser-Kontext (danach geschlossen), Storybook :6107; Story-IDs ohne
+Präfix `v3-entitäten-buchungssatz-journalentryreviewlist--`. Arbeitsbaum bei der
+Messung sauber auf `8b27ae7`, daher ohne Worktree. `pnpm build` nicht selbst
+gelaufen (Auftrag); der Erbauer meldet ihn für `8b27ae7` grün.
+
+| Punkt | Nachweis | Ergebnis |
+|---|---|---|
+| M1 Hover in aufklappbaren Zeilen | `v3.css:4810` hebt `.v3rrc__word, .v3rrc__more` (`position: relative; z-index: 2`). `elementFromPoint` in der Mitte jedes Worts und jedes „+n" trifft das Element selbst: `grouped` 46/46, `flat` 11/11, `checks-without-expand` 4/4; nach `mouse.move` dorthin `:hover` jeweils `true`; alle tragen `title`. `title` am Wort = Einzelheit (z. B. „Beleg weist 7 % aus, gebucht wurde BU 9 (19 %).", „Ludwig: 38 %"), an „+n" die weiteren Wörter („§13b · Ludwig nicht ganz sicher · Hinweis vom Judge"). Klick auf Datum, Gegenpartei und auf die freie Fläche der Prüfgrund-Zelle trifft `BUTTON.v2rowbtn`, `aria-expanded` `false` → `true`: die Zeile klappt weiter auf | ✓ |
+| M2 Barrel | `src/ui/v3/index.ts:622` `export { ReviewReasonCell, type ReviewReasonView }` | ✓ |
+| M3 Reihenfolge `full` | Spec Z. 62–63 „… BU · So gebucht · (Satzart, nur flach) · Prüfgrund", Optional „Nr. · Beleg · Prüfung durch Ludwig" = `FULL` (`JournalEntryReviewList.tsx:121`: `… taxKey, document, precedent, verdict, kind, reviewReason`) mit `OPTIONAL` (`:129`). Gemessen: Köpfe `grouped` „… BU · So gebucht · Prüfgrund", `flat` „… BU · So gebucht · Satzart · Prüfgrund" | ✓ |
+| M4 Satz zum gekürzten Wort | Spec Z. 74–75 „ganz steht es im (i) (der `title` am Wort ist die Einzelheit)" = `ReviewReasonCell.tsx` (`title={top.detail ?? undefined}`) und Messung M1 | ✓ |
+| M5 Fixture | `stories.tsx:87` reicht `check_red` als `kind: "danger"` herein; im DOM 8 Zellen mit rotem Prüfpunkt im (i), stärkstes Wort „Steuerschlüssel" je `bdg bdg-warning`, 0 × `bdg-danger` in `.v3rrc` (Töne nur `bdg-warning`, `bdg-info`). Alle 29 (i) geöffnet: „Ludwig unsicher" in 2 Zellen, beide mit Teil „Konfidenz rot" im (i); 0 Zellen mit Konfidenz-Teil „rot" ohne das Wort. `confidence_red` nur ohne Dauerbuchung (`:89`) | ✓ |
+| M6 `grep` | `grep -nE "Steuerschlüssel\|Beanstandet\|§13b" ReviewReasonCell.tsx` → leer (Exit 1); auch die weite Liste der ersten Abnahme (`Sonderschl\|Korrigiert\|unsicher\|Hinweis vom\|gegengepr`) leer | ✓ |
+| M7 veraltete Sätze | nachgezogen: Dateikopf (`JournalEntryReviewList.tsx:31–32` „the strongest review reason (0218)"), `include`-JSDoc (`:135`, nennt `verdict`), beide `@when` (`:211`, `:372`), Aufklapper-Kommentar (`:428`, ohne „already says how many passed"), `Compact`-Story (`stories.tsx:229` „the review reason last"). Nicht in der Nacharbeit und noch da: `stories.tsx:103` „— the „Sonderfall" column" (R1) | ✓ (Rest R1) |
+| H1 „So gebucht" rechtsbündig | `align: "end"` (`:325`). `grouped` 40/40, `flat` 12/12 Zellen: Text bündig an der rechten Kante (Abstand 0,0 px, „12×" links 45,7 px frei, „erstmals" 17,7 px), Kopf `th.v2num` `text-align: right`, rechts 0,0 px, `tabular-nums`; Spur 72 px | ✓ |
+| H2 / H5 an die App | `docs/befunde-app.md:377` (§E, Zeile 0218): „Abnahme 0218, H2: die Labels der Teile in `review-score.ts` … an die Wörter der Achse angleichen" und „H5: 25 + 25 Punkte erreichen die Schwelle ohne Prüfgrund …" | ✓ |
+| Gegenprobe 1280 px | `.v2tbl__scroll` `grouped` 1246 = 1246, `flat` 1246 = 1246 (kein Querscroll); Datenzeilen `grouped` 63,7–105,6 px (40), `flat` 47,1–87,8 px (12) | ✓ |
+| Wächter | `pnpm typecheck` Exit 0, `pnpm check:language` Exit 0 („0 German comment lines"), `pnpm check:when` Exit 0; Konsole in allen gemessenen Stories 0 Fehler, 0 Warnungen | ✓ |
+
+**Rest und neue Hinweise** (blockieren nicht)
+
+- R1 (Rest aus M7): `src/ui/v3/entities/journal-entry/JournalEntryReviewList.stories.tsx:103`
+  — Fixture-Kommentar „§ 13b and a special key on a few invoices — the „Sonderfall"
+  column." Die Spalte gibt es nicht (Brief §1). Ein Kommentar, kein Verhalten; beim
+  nächsten Anfassen der Fixture streichen.
+- H8: Folge der M1-Lösung, wie bei Links in der Zeile: ein Klick auf Wort oder „+n"
+  klappt die Zeile nicht mehr auf (Treffer `SPAN.bdg`, `aria-expanded` bleibt
+  `false`), der Zeiger bleibt dort aber `pointer`. Die tote Fläche ist so breit wie das
+  Badge. Wenn das stört: Zeiger `default` über Wort und „+n" oder den Klick an den
+  Aufklapper weiterreichen — Entscheid für `DataTable`, nicht für 0218.
+
+**Urteil: abgenommen.** M1 ist in allen drei Stories mit Aufklapper behoben und
+gemessen, M2–M7 und H1 sind nachgezogen, H2/H5 stehen als Befund an der App. Offen
+als Hinweise: H3, H4, H6 (wie in der Nacharbeit entschieden), R1, H8.
+
+Abgenommen von / am: Claude (Nachprüfung), 2026-10-01 · Stand `8b27ae7`
