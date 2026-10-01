@@ -591,9 +591,122 @@ kopiert.
 
 **Kriterien:**
 
-- [ ] Story `Kinds` zeigt alle sechs Arten mit den Wörtern aus `CASE_KIND_LABEL`; nur Einzel- und laufender Sachverhalt tragen „Bearbeiten“, ihr Select hat genau diese zwei Optionen
-- [ ] Regelsachverhalt, Sammelfall und Mandantenstapel zeigen ihren Grund aus `CASE_KIND_LOCKED_REASON` sichtbar unter dem Wert, Kontrast ≥ 4,5:1
-- [ ] „Dauersachverhalt – Art offen“ zeigt den Hinweis; im Select steht die offene Art gesperrt als heutiger Wert, wählbar sind die zwei; Speichern einer Wahl ändert die Art (Label und Hinweis wechseln)
-- [ ] `InlineEdit` `Filled`: der Hinweis steht unter dem gesperrten Feld; im Bearbeitungszustand bleibt er, ein Fehler ersetzt ihn
-- [ ] `grep` findet außerhalb von `src/ludwig` keinen alten Art-Wert (`incoming_invoice`, `outgoing_invoice`, `adjustment_only`, `contract`/`expense_report`/`internal_transfer` als **Art**); `CasePage` zeigt „Regeln“ bei `rule`, `running`, `recurring_charge`
-- [ ] Keine Konsolenfehler in den Stories von `CaseEditor`, `InlineEdit`, `CaseCrud` und den Sachverhalts-Stories mit geänderten Fixtures
+- [x] Story `Kinds` zeigt alle sechs Arten mit den Wörtern aus `CASE_KIND_LABEL`; nur Einzel- und laufender Sachverhalt tragen „Bearbeiten“, ihr Select hat genau diese zwei Optionen — abgenommen 2026-10-01 (dazu „Art offen“ mit „Bearbeiten“, wie Kriterium 3 es will)
+- [x] Regelsachverhalt, Sammelfall und Mandantenstapel zeigen ihren Grund aus `CASE_KIND_LOCKED_REASON` sichtbar unter dem Wert, Kontrast ≥ 4,5:1 — abgenommen 2026-10-01 (4,51:1 auf `bg-soft`, 4,88:1 auf Weiß)
+- [ ] „Dauersachverhalt – Art offen“ zeigt den Hinweis; im Select steht die offene Art gesperrt als heutiger Wert, wählbar sind die zwei; Speichern einer Wahl ändert die Art (Label und Hinweis wechseln) — **nicht abgenommen** 2026-10-01: die Mechanik hält, aber der Hinweis schickt in den Reiter „Regeln“, und den gibt es nicht — er heißt „Wiederkehr“ (M1)
+- [x] `InlineEdit` `Filled`: der Hinweis steht unter dem gesperrten Feld; im Bearbeitungszustand bleibt er, ein Fehler ersetzt ihn — abgenommen 2026-10-01 (Bearbeitungszustand und Fehler aus dem Code)
+- [ ] `grep` findet außerhalb von `src/ludwig` keinen alten Art-Wert (`incoming_invoice`, `outgoing_invoice`, `adjustment_only`, `contract`/`expense_report`/`internal_transfer` als **Art**); `CasePage` zeigt „Regeln“ bei `rule`, `running`, `recurring_charge` — **nicht abgenommen** 2026-10-01: `src/showcase/case/CaseTabs.stories.tsx:785` führt im Rohdatensatz des Sachverhalts noch `kind: "incoming_invoice"` (M2); der Reiter (`rules`, Wort „Wiederkehr“) hält
+- [x] Keine Konsolenfehler in den Stories von `CaseEditor`, `InlineEdit`, `CaseCrud` und den Sachverhalts-Stories mit geänderten Fixtures — abgenommen 2026-10-01 (208 Story-Aufrufe, 0 Fehler, 0 Warnungen)
+
+### Abnahme F360 2026-10-01 (Stand 61d24cb)
+
+Fremde Abnahme gegen die sechs Kriterien des Nachtrags. Gelesen: `CLAUDE.md`,
+dieser Nachtrag, die Schnittstelle in `0020-inline-edit.md`, L-362 in
+`docs/befunde-app.md`, `CaseEditor.tsx`, `CaseEditor.stories.tsx`,
+`InlineEdit.tsx`, `InlineEdit.stories.tsx`, `CaseCrud.stories.tsx`,
+`CasePage.tsx`, der Spiegel `case.ts` und `tabs.ts`, der Diff von `61d24cb`.
+Gemessen in Storybook 6107, eigener Playwright-Kontext (1280 × 900, `de-DE`),
+echte Klicks und Tasten; Code nicht geändert.
+
+| Kriterium | Messung | Urteil |
+|---|---|---|
+| 1 `Kinds`: sechs Arten, Wörter, „Bearbeiten“, zwei Optionen | Sechs Felder „Art“: Einzelsachverhalt · Regelsachverhalt · Laufender Sachverhalt · Sammelfall · Mandantenstapel · Dauersachverhalt – Art offen — Zeichen für Zeichen `CASE_KIND_LABEL`. „Bearbeiten“ an Einzel, laufend und „Art offen“, an den drei gesperrten kein Knopf. Select bei `single`: `single` (gewählt), `running`; bei `running`: `single`, `running` (gewählt) — nichts sonst. Wert ohne Farbe (`rgb(45, 45, 45)`, Hintergrund transparent) | hält |
+| 2 Grund der gesperrten drei, Kontrast | Unter dem Wert (4 px Abstand, gleiche linke Kante) je der Satz aus `CASE_KIND_LOCKED_REASON`, Zeichen für Zeichen. `.v2field__hint` `#717171` 12,5 px: **4,51:1** auf dem Story-Grund `#F4F6F8` (`bg-soft`), **4,88:1** auf Weiß (Dialog in `CaseCrud`) — deckt sich mit dem Kommentar am Token | hält |
+| 3 „Art offen“: Hinweis, Select, Speichern | Hinweis steht in Ruhe und im Bearbeitungszustand (Reihenfolge Wort · Select · Hinweis · Knöpfe). Select: `recurring_charge` *disabled* und gewählt, dann `single`, `running`. Taste „L“ → `running`, Enter → Label „Laufender Sachverhalt“, Hinweis weg, wieder geöffnet nur noch die zwei. Enter bzw. „Speichern“ ohne Änderung schließt das Feld und ruft nichts (`Roundtrip`: „Gespeichert: nichts“; nach der Wahl „Art → running“). **Aber:** der Satz lautet „… oder im Reiter „Regeln“ eine Regel anlegen.“ — der Reiter heißt „Wiederkehr“ (`CASE_TAB_LABEL.rules` in `tabs.ts`, `FALL_TABS` im Showcase; gemessen an `recurring-with-rule` und `recurring-without-rule`) | **M1** |
+| 4 `InlineEdit` `Filled` | Zweites Feld „Belegart (gesperrt)“: kein Knopf, Hinweis unter dem Wert. Code: in beiden Zweigen `hint && !shownError` — bleibt beim Bearbeiten, ein Fehler (von außen oder aus `onSave`) ersetzt ihn; dieselbe Regel wie `Field` (`Form.tsx:47`) | hält |
+| 5 `grep`, Reiter | Alle Treffer außerhalb `src/ludwig` sind andere Achsen: Belegart (`FilterBar`, `MultiSelectFilter`, `Expectation`, `SourceDocument*`, `document-classification`, `DocumentOtherKinds`, `CaseEntries:297`), Buchungsgruppe `incoming_invoices` (`JournalEntry*`), Ereignisart `internal_transfer` (`CaseTimeline.stories:155`, `CaseEntries:563`), die Übergangsart in `CaseEditor.tsx:63`. **Ausnahme:** `src/showcase/case/CaseTabs.stories.tsx:785` — der Rohdatensatz `client_accounting_case` von 2026-0334 trägt `kind: "incoming_invoice"`; im Reiter „Technik“ nach „Datensatz anzeigen“ steht `kind incoming_invoice` unter einem Kopf, der „Einzelsachverhalt“ sagt. Reiter `rules` über `isRecurringKind`: da bei `rule` (Regelsachverhalt) und `running` (laufend, auch `contract`, `expense-report`, `clearing-group`), fehlt bei `single` und `client_batch`; `recurring_charge` aus dem Code (`RECURRING_CASE_KINDS`) | **M2** |
+| 6 Konsolenfehler | 208 Story-Aufrufe: `CaseEditor` (10), `InlineEdit` (6), `CaseCrud`, `CaseRow`/`CaseCard`/`CaseCell`/`CaseList`/`CaseDrawer`/`CasePicker`/`CaseFacts`/`CaseDetailView` (alle), `BankTransactionRow`/`List`/`Drawer`/`Facts`/`Worklist` (alle), `DataTable` (alle 24), Showcase Sachverhalt (Einzelfall, Sammel und Dauer, Reiter, Seite, Einträge) — **0** Fehler, **0** Warnungen, kein roher Art-Wert im Text. Art-Badges zeigen die neuen Wörter (`CaseList`, `CaseRow`, `CaseCard`, `DataTable` `with-groups`/`in-use`: Einzel-, Regel-, laufender Sachverhalt) | hält |
+
+**`CaseCrud`** (Auftrag, kein eigenes Kriterium): „Sachverhalt anlegen“ bietet
+genau `single` (vorgewählt) und `running`, ohne Hinweis. „Bearbeiten“ an
+2026-0141 (Regelsachverhalt): Select *disabled* mit der einen Option
+„Regelsachverhalt“, darunter der Grund aus `CASE_KIND_LOCKED_REASON.rule`.
+An 2026-0140 (Einzelsachverhalt): die zwei, frei. Hält.
+
+**Die Abweichung vom Tooltip trägt.** Gemessen: Tab läuft durch die
+`Kinds`-Story über die drei „Bearbeiten“ und überspringt die drei gesperrten
+Felder — sie haben kein fokussierbares Element. Ein Tooltip dort wäre für die
+Tastatur unerreichbar (oder bräuchte einen künstlichen Fokus-Halt ohne
+Handlung), und wer nach vier Wochen fragt, warum er die Art nicht ändern kann,
+findet den Satz ohne Hover. T8 („Tooltip erklärt, ersetzt kein Label“) spricht
+ebenfalls dafür. Keine Abweichung im Sinn eines Mangels.
+
+**Prop-Tabellen gegen den Code.** 0020: `label` … `multiline`, `hint` stimmen
+in Typ, Pflicht und Satz; `hint` „im Anzeige- und im Bearbeitungszustand — wie
+bei `Field`; ein Fehler ersetzt ihn“ ist genau der Code. 0083 `CaseKindEdit`:
+`value`, `onSave`, `pending`, `disabled` stimmen — es fehlt `error` (siehe M3).
+
+**Mängel (blockierend):**
+
+- **M1 — Der Hinweis nennt einen Reiter, den es nicht gibt.**
+  `src/ui/v3/entities/accounting-case/CaseEditor.tsx:75`: „… oder im Reiter
+  „Regeln“ eine Regel anlegen.“ Der Reiter heißt „Wiederkehr“
+  (`src/ludwig/modules/accounting-cases/domain/tabs.ts`, `CASE_TAB_LABEL.rules`;
+  `src/showcase/case/fixtures.ts:219`). Wer nach vier Wochen dem Satz folgt,
+  sucht ein Wort, das nicht dasteht — Sprache („ein Wort für eine Sache, aus der
+  Registry“) und Vier-Wochen-Test. *Abhilfe:* das Wort aus der Quelle ziehen —
+  `` `Einzel- oder laufenden Sachverhalt wählen oder im Reiter „${CASE_TAB_LABEL.rules}“ eine Regel anlegen.` ``
+  → „… im Reiter „Wiederkehr“ eine Regel anlegen.“; den Satz im Nachtrag (Zeile
+  „Art offen“) mitziehen. Ob „Regel anlegen“ dort der Weg ist, sagt der Reiter
+  selbst (Regel und Zuordnung, F196 O2) — kein neues Wort nötig.
+- **M2 — Eine alte Art als Sachverhalts-Art im Rohdatensatz.**
+  `src/showcase/case/CaseTabs.stories.tsx:785` `kind: "incoming_invoice"` im
+  `RawRecord` von `client_accounting_case` c-0334 — derselbe Sachverhalt ist in
+  `scenarios.tsx` `single`, und der DB-CHECK kennt den Wert nicht mehr.
+  *Abhilfe:* `kind: "single"`.
+- **M3 — Die Spec sagt an zwei Stellen das Gegenteil des Codes.**
+  `0083` „Kann bewusst nicht“ (Zeile 131 f.): „**Die Art einschränken.** … die
+  Komponente zeigt alle sieben und lässt `onSave` ablehnen“ — seit F360 schränkt
+  sie genau das ein. Stories-Tabelle (Zeile 161): „`Kinds` | Alle sieben Arten“ —
+  es sind sechs, mit Sperre und Bitte um Wahl. Dazu fehlt `error` in der
+  Prop-Tabelle von `CaseKindEdit` (der Code nimmt es über `Shared` und reicht es
+  an `InlineEdit` durch; vorbestehend, aber die Tabelle wurde in F360
+  angefasst). *Abhilfe:* den Spiegelstrich in „Kann bewusst nicht“ streichen
+  oder umkehren („Die Art frei wählen lassen — wählbar ist nur
+  `AssignableCaseKindSchema`, gesperrt sagt warum“), die Zeile `Kinds` auf
+  sechs Arten mit Sperre und „Art offen“, `error` als Zeile wie bei
+  `CaseDispositionEdit`.
+
+**Hinweise (nicht blockierend):**
+
+- **H1 — L-362 steht jetzt sichtbar.** Unter „Mandantenstapel“ liest die
+  Kanzlei „(F295)“, „Container“ und „Sammelbehälter“ — gegen „Technik hinter
+  Klartext“ (Owner 2026-09-27). Richtig als Befund an die App geführt (Text des
+  Kerns, keine zweite Quelle); bis dahin der eine Satz im Set mit Ticketnummer.
+- **H2 — Der Hinweis ist nicht mit dem Feld verbunden.** Im
+  Bearbeitungszustand fehlt `aria-describedby` vom Select auf den Hinweis — der
+  Screenreader hört die Bitte um Wahl nicht, wenn er im Select steht. `Field`
+  macht es genauso (das „wie bei `Field`“ stimmt), also eine Frage für beide,
+  nicht für F360.
+- **H3 — 4,51:1 ist knapp.** Der Hinweis besteht auf `bg-soft` mit 0,01
+  Abstand zur Grenze; jede Aufhellung von `--color-text-subtle` oder ein
+  dunklerer Grund kippt ihn.
+- **H4 — Bitte um Wahl ohne Weg.** `CaseKindEdit` mit `disabled`
+  (geschlossener Sachverhalt) und `recurring_charge` zeigt „… wählen …“, aber
+  keinen Knopf (`CaseEditor.tsx:73–76`, `hint` hängt nicht an `disabled`).
+  *Abhilfe:* den Satz nur ohne `disabled`.
+- **H5 — `CaseCrud` mit „Art offen“.** Bearbeitet man dort einen
+  `recurring_charge`-Fall, ist der `defaultValue` keine Option, und das Select
+  zeigt still „Einzelsachverhalt“ („nichts ist still vorgewählt“). Kein Fixture
+  trifft es; Showcase.
+- **H6 — 0020 `renderInput` (vorbestehend).** Die Tabelle nennt
+  `(props: { value, onChange, autoFocus })`, der Code
+  `(props: InlineEditInputProps)` mit zusätzlich `onKeyDown`, `id`, `disabled`
+  (0104, 0083-M5). Die Stories-Zeile `Filled` nennt den Hinweis noch nicht.
+- **H7 — `assertCaseKindTransition`** (Nachtrag, Zeile „Auswahl“) steht nur in
+  der App, nicht im Spiegel — im Set nicht nachprüfbar.
+- **H8 — Kriterium 1 und 3 im Wortlaut.** „Nur Einzel- und laufender
+  Sachverhalt tragen „Bearbeiten““ widerspricht Kriterium 3, das „Art offen“
+  mit Wahl will; abgenommen nach der Absicht.
+
+`pnpm typecheck`, `pnpm check:language`, `pnpm check:when`, `pnpm check:type`
+je Exit 0 (kein `pnpm build`).
+
+**Gesamturteil: nicht abgenommen.** Blockierend sind M1, M2 und M3. Die
+Mechanik ist richtig und gemessen — zwei wählbare Arten, drei gesperrte mit
+sichtbarem Grund, „Art offen“ als heutiger Wert ohne Ziel, Speichern ohne
+Änderung stumm, 0 Konsolenfehler; die Abweichung vom Tooltip trägt. Was fehlt,
+sind drei Textstellen: ein Satz, der in einen Reiter schickt, den es so nicht
+gibt (M1), ein Rohdatensatz mit alter Art (M2), und eine Spec, die an zwei
+Stellen noch die sieben Arten beschreibt (M3). Alle drei sind kleine
+Korrekturen ohne Systementscheid.
