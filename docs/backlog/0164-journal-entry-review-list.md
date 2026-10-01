@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Status | **fertig — abgenommen 2026-09-29 (mit Auflagen M2 setweit, M5); Nachtrag 2026-10-01 (Soll/Haben ruhiger, Zeilen oben) in Arbeit — fremde Abnahme 2026-10-01 nicht abgenommen, allein wegen Spec-Text (M8 macht Kriterium 9 rot, dazu M7); Code erfüllt die Kriterien 1–8 und gilt bis zur Nacharbeit; nicht blockierend M6 (vorbestehend), M9**; gebaut 2026-09-29; aus dem Backlog geholt 2026-09-29 (F334 T3, Owner-Auftrag über ll-dev; ersetzt den Default „bis `export-batch` steht"). Gebaut nach Abnahme von 0211, ohne Sortierung nach Aufmerksamkeit (L-295) und ohne `DiffView` |
+| Status | **fertig — Nachtrag 2026-10-01 abgenommen** (Nachprüfung 2026-10-01, Stand `2db675c`; abgenommen 2026-09-29 mit Auflagen M2 setweit, M5; offen (App): Hauptkonto zuerst und `accountNames={false}` in der flachen Ansicht, `docs/befunde-app.md` §E); gebaut 2026-09-29; aus dem Backlog geholt 2026-09-29 (F334 T3, Owner-Auftrag über ll-dev; ersetzt den Default „bis `export-batch` steht"). Gebaut nach Abnahme von 0211, ohne Sortierung nach Aufmerksamkeit (L-295) und ohne `DiffView` |
 | Stufe | `entities/journal-entry/` |
 | Klassen-Test | „Ergäbe das auch in einer Versicherungs-App Sinn?" → nein: Buchungsvorschlag, Judge-Verdikt, Stapel, Herkunft Mandantenstapel |
 | Quelle | Entitätsprofil `docs/entitaeten/journal-entry.md`, Abschnitte „Listen" (dritte Zeile), „Formen" (Zeile `JournalEntryReviewList`) und „Zuschnitt" |
@@ -251,7 +251,7 @@ flach ohne Satzart, flach mit Querscroll.
 Liste mit „ / " — gebuchte Sätze haben fast immer ein Konto je Seite; zieht
 nach, wenn ein Screen es verlangt.
 
-Status: **in Arbeit** (Nachtrag; fremde Abnahme 2026-10-01 unten). Kriterien für die fremde Abnahme:
+Status: **fertig — Nachtrag 2026-10-01 abgenommen** (fremde Abnahme und Nachprüfung 2026-10-01 unten). Kriterien für die fremde Abnahme:
 
 - [x] `full` mit Namen: Köpfe „Soll" · (leer, sr „Kontoname Soll") · „Haben" · (leer, sr „Kontoname Haben"); je Seite genau eine Nummer und ein Name (`Grouped`)
 - [x] „+n weitere" = Zahl der Konten der Seite minus eins, nur bei mehr als einem; `title` nennt alle Konten mit Nummer und Name (`Grouped`, `Flat`)
@@ -262,7 +262,7 @@ Status: **in Arbeit** (Nachtrag; fremde Abnahme 2026-10-01 unten). Kriterien fü
 - [x] Keine Spalte „Nr." im Standard; `include: ["number"]` bringt sie zurück (Code, `OPTIONAL`); `aria-label` der Auswahl = Datum · Gegenpartei (DOM-Probe `Grouped`)
 - [x] Setweit: `.v2tbl__row` oben ausgerichtet, Kopf mittig; einzeilige Zeilen weiter auf einer Grundlinie (zwei fremde Tabellen-Stories gemessen); Regel in `design-guidelines.md` mit Datum
 - [ ] offen (App): die App ordnet `accounts.debit`/`credit` nach Summe absteigend (Hauptkonto zuerst) und übergibt in der flachen Ansicht `accountNames={false}` — `docs/befunde-app.md` §E
-- [ ] Spec-Tabelle „Ausprägung" oben und Code stimmen überein; `pnpm typecheck`, `pnpm build`, `pnpm check:type` grün — ✗ M8 (fremde Abnahme 2026-10-01)
+- [x] Spec-Tabelle „Ausprägung" oben und Code stimmen überein; `pnpm typecheck`, `pnpm build`, `pnpm check:type` grün — M8 behoben, Nachprüfung 2026-10-01 (`2db675c`)
 
 ### Fremde Abnahme Nachtrag 2026-10-01
 
@@ -401,3 +401,38 @@ bei 1280 px nachmessen; M9 als Übergabe an die App. Daneben bleiben M2
 | Hinweis M5-Rest | Story: der Sammelkontoname „Verbindlichkeiten aus Lieferungen und Leistungen" steht auf **1600** statt auf der Kreditorennummer 70021 | behoben |
 | M2 Trefferfläche Nummern-Link 19,4 px | setweit, Backlog 0213 (Owner 2026-09-29: nicht jetzt) | offen |
 
+## Nachprüfung 2026-10-01 (Stand 2db675c)
+
+Nachprüfer: Claude (fremde Sitzung, weder Bau noch erste Abnahme). Geprüft
+nur, ob die Nacharbeit hält, was sie behauptet. `pnpm typecheck` und
+`pnpm check:type` an `2db675c` Exit 0; `pnpm build` nicht nachgelaufen, der
+Erbauer meldet ihn grün. Storybook 6107 bei 1280 × 900 in einem eigenen
+Playwright-Kontext (danach geschlossen); `--grouped`, `--flat`, `--compact` ohne
+Warnung oder Fehler in der Konsole. Story-IDs mit dem Präfix
+`v3-entitäten-buchungssatz-journalentryreviewlist--`.
+
+| Punkt | Nachweis | Ergebnis |
+|---|---|---|
+| M8 Ausprägung = Code (Kriterium 9) | Zeile `full`: Datum · Gegenpartei (+ „erstmals") · Soll · (Kopf nur Screenreader „Kontoname Soll") · Haben · („Kontoname Haben") · Betrag · BU · Prüfung durch Ludwig · Satzart (nicht in Gruppen nach Satzart) · Prüfbedarf („entschieden"); „Nr." und „Beleg" nur über `include`. Code: `FULL` und `OPTIONAL = ["number", "document"]` (`JournalEntryReviewList.tsx:94`, `:97`), Köpfe „Soll" `:231`, `<span className="v2vh">Kontoname Soll</span>` `:245`, „Haben" `:252`, „Kontoname Haben" `:258`. DOM `--grouped`: Datum · Gegenpartei · Soll · „Kontoname Soll" (`v2vh`, 1 × 1 px, `clip-path: inset(50%)`) · Haben · „Kontoname Haben" (ebenso) · Betrag · BU · Prüfung durch Ludwig · Prüfbedarf · Aktionen (Satzart über `without`); `--flat` mit Satzart, ohne Namensspalten. Zeile `compact`: `--compact` Datum · Gegenpartei · Konten („4930 an 1600") · Betrag · Prüfung durch Ludwig | ✓ |
+| M7 Messwerte | Text jetzt „Zeilen 64–106 px (vorher 67–88 laut Nachprüfung 2026-09-29; die höchste, 105,6 px, ist Fall 11 — dreizeiliger Kontoname plus „3 Zeilen")"; die Nachprüfung 2026-09-29 nennt `Grouped` 67–88 px. Gemessen `--grouped`: 63,7–105,6 px; die höchste ist 11.09.2026 Aral Tankstelle (Fall 11) mit einem Prüfbedarf-Grund, Kontoname Soll „Muster Bürobedarf GmbH" plus „3 Zeilen"; die nächsten 87,8 px | ✓ |
+| M6 Satzart-Spur | Code `width: "100px"` (`:300`). `--flat`: Spur 100 px; „Dauerbuchung" in allen vier Zeilen (3, 6, 9, 12) 99,7 px, rechter Rand 0,3 px innerhalb der Zelle, 10,3 px Luft zum Text der Nachbarspalte, kein innerer Überlauf; „Rechnung" 73,5, „Zahlung" 62,7 px. `.v2tbl__scroll` 1246 = 1246. Spuren Gegenpartei 135,1, Soll/Haben je 96,5 px (Böden 120/68), wie in M6 vorausgerechnet. Screenshot `.playwright-mcp/np164-flat.png` | ✓ |
+| M9 App-Pflichten | Kriterium „offen (App)" in der Liste des Nachtrags. `docs/befunde-app.md:375`, in §E (ab `:316`): Zeile `JournalEntryReviewList` (0164, Nachtrag 2026-10-01) mit (a) `accounts.debit`/`credit` nach Summe absteigend, Hauptkonto zuerst, und (b) `accountNames={false}` in der flachen Ansicht | ✓ |
+| Story-Daten 1600 | `JournalEntryReviewList.stories.tsx:48–50`. `--grouped`: 1600 in fünf Zeilen (Fälle 6, 16, 21, 31, 36), `title` „1600 Verbindlichkeiten aus Lieferungen und Leistungen"; kein `title` „70021 Verbindlichkeiten …", 70021 nur noch mit „Muster Bürobedarf GmbH"; `--flat` Zeile 6 ebenso. `--grouped` 1246 = 1246, Spuren wie im Nachtrag (Gegenpartei 135,9, Soll 44, Name 97,1, Haben 44, Name 97,1), kein Gegenparteiname gekürzt, keine Nummer über ihre Spur | ✓ |
+
+**Hinweise (keine Mängel).**
+
+- Die Messwert-Tabelle des Nachtrags, Zeile `Flat`, nennt noch die Spuren vor
+  M6 („Gegenpartei 142, Soll/Haben je 101 px"); seit `2db675c` sind es 135,1
+  und 96,5 px (Zeile M6 oben). Kriterium 9 betrifft die Tabelle „Ausprägung",
+  nicht diese.
+- Die Satzart-Spur hat 0,3 px Reserve. Rendert die App „Dauerbuchung" breiter
+  (andere Schriftglättung), liegt der Rest im Polster der Nachbarspalte, nicht
+  auf ihrem Text (10,3 px Luft).
+
+### Urteil
+
+**Nachtrag 2026-10-01 abgenommen.** Die Nacharbeit hält, was sie behauptet:
+M8 und M7 sind im Spec-Text behoben, M6 ist gemessen behoben, M9 ist an die
+App übergeben, die Story-Daten stimmen. Kriterium 9 ist grün. Offen bleiben,
+wie vorgesehen und nicht blockierend, das Kriterium „offen (App)" sowie M2
+(setweit, Backlog 0213).
