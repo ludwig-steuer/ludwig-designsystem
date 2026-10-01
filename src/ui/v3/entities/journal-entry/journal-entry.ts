@@ -26,6 +26,7 @@ export type JournalStatus = "proposed" | "accepted" | "posted" | "reversed";
 /** One line of an entry, as it is read. The editor's row adds what it edits. */
 export interface JournalRow {
   id: string;
+  /** ISO (`2026-08-21`) — the editor's date input needs it; read, it shows as 21.08.2026. A German date is shown as given. */
   datum: string;
   currency?: string;
   /** Gross, German format („1.475,60"). */

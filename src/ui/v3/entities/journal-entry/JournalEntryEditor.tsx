@@ -25,6 +25,9 @@ import { JournalEntryCard } from "./JournalEntryCompact";
 import { TaxKeyCell } from "./TaxKey";
 import { AiBookingNotes } from "./AiBookingNotes";
 
+/** A date in ISO form — the one the date input takes. */
+const ISO_DATE = /^\d{4}-\d{2}-\d{2}/;
+
 // One currency, one formatter (T7, 0043). The editor computes in gross and
 // always needs a number, so `toNumber` falls back to 0 where `parseAmount`
 // returns `null`/`"invalid"`.
@@ -319,7 +322,9 @@ export function JournalEntryEditor(props: JournalEntryEditorProps) {
         </div>
       ) : null}
 
-      <div className="bse__tbl bse__tbl--edit" style={{ "--bse-cols": cols } as React.CSSProperties}>
+      {/* The action cell is pinned only while editing — read, it is empty or a
+          ledger link, and an empty white strip would only cover text (H3). */}
+      <div className={editable ? "bse__tbl bse__tbl--edit" : "bse__tbl"} style={{ "--bse-cols": cols } as React.CSSProperties}>
         <div className="bse__head">
           <span>Datum</span>
           {full ? <span>Whg.</span> : null}
@@ -740,8 +745,9 @@ function EditorRow({
         ) : (
           <>
             <span>
-              {/* `datum` is ISO (the date input needs it); read, it is TT.MM.JJJJ (T7). */}
-              <Time value={row.datum} format="date" size="sm" />
+              {/* ISO (the date input needs it) reads as TT.MM.JJJJ (T7); a date that
+                  comes German already stands as given — not every caller sends ISO. */}
+              {ISO_DATE.test(row.datum) ? <Time value={row.datum} format="date" size="sm" /> : row.datum}
             </span>
             {full ? <span>{row.currency ?? "EUR"}</span> : null}
             <span className="v2num">{row.amount}</span>

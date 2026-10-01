@@ -781,3 +781,13 @@ Vier Linsen:
 **Urteil: nicht abgenommen.** Kriterien 1, 2 und 5 erfüllt; 3 scheitert an M2, 4
 und 6 an M1. Nachprüfung danach: Kriterien 3, 4, 6 und die Konto-Seite
 `long-name` mit `#entry=k12-2`.
+
+### Nacharbeit Spurbreiten 2026-10-01 (nach der fremden Abnahme)
+
+| Punkt | Änderung | Stand |
+|---|---|---|
+| M1 `datum` nicht überall ISO | Gelesen wird nur ein ISO-Datum über `Time` formatiert (`ISO_DATE`); ein schon deutsches Datum steht wie geliefert — die Grid-Stories („26.08.2026") und der Konto-Showcase (TT.MM.JJJJ) zeigen wieder das richtige Datum. JSDoc an `JournalRow.datum`: ISO, ein deutsches Datum wird so gezeigt | behoben |
+| M2 angeheftete Zelle verdeckt das fokussierte Textfeld | `.bse__tbl--edit { scroll-padding-inline-end: 44px }` — gemessen in `S2_SplitFull`: Textfeld rechts 853, angeheftete Zelle ab 865, verdeckt 0 px | behoben |
+| H3 leere angeheftete Zelle im Lesezustand | angeheftet wird nur beim Bearbeiten (`editable` → `.bse__tbl--edit`) | behoben; offen beim Owner: soll die Fall-Ansicht im Modus `simple` starten, damit „Text" ohne Scrollen sichtbar ist? |
+| H1 Kontenliste des `AccountField` im Editor abgeschnitten | **vorbestehend seit 0044 (7390c50)**: `.bse__tbl` scrollt quer, damit auch senkrecht, und schneidet die absolut gesetzte Liste ab. Abhilfe ist die Liste in der obersten Ebene (`popover`, wie die Popover-Familie) — eigener Auftrag, an llcto gemeldet | offen, eigener Auftrag |
+| H2 „Zeile entfernen" 13 × 13 px | vorbestehend, setweit Backlog 0213 (Trefferflächen) | offen |

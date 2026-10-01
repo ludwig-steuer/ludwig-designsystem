@@ -1817,6 +1817,8 @@ a.ki__src:hover { text-decoration: underline; color: var(--color-accent-700); }
    reading grid it is KOST, so only here: it stays at the right edge
    while the entry scrolls — otherwise removing a line meant scrolling first.
    The shadow covers the gap, so scrolled text does not show beside it. */
+/* Focus scrolls a field into view beside the pinned cell, not under it (M2). */
+.bse__tbl--edit { scroll-padding-inline-end: 44px; }
 .bse__tbl--edit .bse__head > :last-child,
 .bse__tbl--edit .bse__cells > :last-child {
   position: sticky; right: 0;

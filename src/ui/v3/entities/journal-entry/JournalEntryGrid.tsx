@@ -22,6 +22,9 @@ import {
   type Side,
 } from "./journal-entry";
 
+/** A date in ISO form — the one the date input takes. */
+const ISO_DATE = /^\d{4}-\d{2}-\d{2}/;
+
 const euro = (n: number) => formatAmount(n, "EUR");
 
 export interface JournalGridMessage {
@@ -255,8 +258,9 @@ function Row({
     <div className="bse__row">
       <div className="bse__cells" role="row">
         <span>
-          {/* `datum` is ISO (the editor's date input needs it); read, it is TT.MM.JJJJ (T7). */}
-          <Time value={row.datum} format="date" size="sm" />
+          {/* ISO (the date input needs it) reads as TT.MM.JJJJ (T7); a date that
+              comes German already stands as given — not every caller sends ISO. */}
+          {ISO_DATE.test(row.datum) ? <Time value={row.datum} format="date" size="sm" /> : row.datum}
         </span>
         {full ? <span className="v2muted">{row.currency ?? "EUR"}</span> : null}
         <span className="v2num">{euro(rowAmount(row.amount))}</span>
