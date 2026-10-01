@@ -21,8 +21,9 @@ Prüfpunkte sagen, was der Judge sagt. Was leer ist, steht nicht da.
 ## Einordnung
 
 - **Wiederverwenden:** `JournalEntryCard` (Satz kompakt), `AiBookingNotesBody`
-  (Begründung bzw. Satz des Judge, je für sich), `StatusBadge` (Achsen
-  `journal_entry`, `judge`), `CheckItems` (Prüfpunkte), `Badge` (Satzart).
+  (Begründung mit Quellen), `ProvenanceRows` (Satz des Judge als „Einschätzung"),
+  `StatusBadge` (Achsen `journal_entry`, `judge`, `confidence`), `CheckItems`
+  (Prüfpunkte), `Badge` (Satzart).
 - **Neu, weil:** §3 Regel 5 — eine Entitätsform „Prüfung" (Größe L) für die
   Sätze eines Falls, die die App heute zweimal zusammensetzt. Keine vorhandene
   Form trägt Reihenfolge, Blöcke und mehrere Sätze.
@@ -97,6 +98,9 @@ die stehen beim Aufrufer unter dem Baustein, weil Freigeben den **Fall** freigib
   Überschrift.
 - **Mehrere Sätze** (Zwei-Satz-Fall, §3a): alle untereinander, jeder mit eigener
   Satzart und eigenen Prüfpunkten, durch eine Linie getrennt.
+- **Der Editor im Slot bekommt kein `aiReview`:** Konfidenz, Urteil, Begründung,
+  Satz des Judge und Quellen zeigt dieser Baustein; gibt der Aufrufer sie dem
+  Editor zusätzlich, stehen sie zweimal.
 - Server-Component (kein Zustand); Tastatur und Fokus bringen die Bausteine mit.
 - **Zustände:** gefüllt; leer (`entries` leer) → nichts (der Aufrufer zeigt „kein
   Vorschlag"); lädt/Fehler → beim Aufrufer (die Daten kommen mit dem Fall).
@@ -119,7 +123,6 @@ dazu „im Einsatz":
 
 | Was fehlt | Welche Prop es trägt | Woran man merkt, dass es Zeit ist |
 |---|---|---|
-| Quellen der Begründung (heute im Editor über `aiReview`) | `entry.sources?: AiSource[]` an `AiBookingNotesBody` | die Liste soll Quellen zeigen |
 | Vormonats-/Regelkontext („Regel & Periode") | `entry.context?` | ein Regel-Fall in der Liste braucht ihn |
 
 ## Abnahmekriterien
@@ -317,3 +320,16 @@ Judge-Zeile, `caseKind` und Schnittstellen-Tabellen sind grün; offen sind N1–
 Editor-Befund bleiben offen.
 
 Nachgeprüft von / am: Claude (fremder Nachprüfer), 2026-10-01
+
+## Nacharbeit 2 (2026-10-01, nach der Nachprüfung)
+
+| Punkt | Änderung | Stand |
+|---|---|---|
+| N1 Belegfeld im Satz widerspricht dem Befund | Der Satz im Slot trägt jetzt Belegfeld 1 „RE-4417" — genau das, was P-BELEG beanstandet | behoben |
+| N2 Spec | „Einordnung" nennt `ProvenanceRows` und die Achse `confidence`; Zeile „Quellen" aus „Ausbau" gestrichen (gebaut); „Verhalten": der Editor im Slot bekommt kein `aiReview`; derselbe Satz in `befunde-app.md` §E | behoben |
+| N3 Beschreibung `InUse` | sagt jetzt, was gerendert wird (`JournalEntryGrid`), und verweist auf den Editor-Befund | behoben |
+| Hinweis P-UST wiederholt den Judge-Satz (19 %) | P-UST-Begründung ohne 19 % | behoben |
+| Hinweis P-AUSGLEICH am falschen Satz | eigene Prüfpunkte für die Zahlung (`CHECKS_PAYMENT`); Rechnung und § 13b-Satz ohne Ausgleich | behoben |
+| Hinweis „(P58)" im sichtbaren `title` | gestrichen (Technik hinter Klartext, T4) | behoben |
+| H2 Editor-Spalte „Text" 0 px auch bei 728 px | vorbestehend, eigener Auftrag am Editor; betrifft die Fall-Ansicht der App bei 1280 px | offen, an llcto gemeldet |
+
