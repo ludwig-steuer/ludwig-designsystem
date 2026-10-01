@@ -214,7 +214,16 @@ export function AccountField({
   }
 
   return (
-    <div ref={box} className="v2kf">
+    <div
+      ref={box}
+      className="v2kf"
+      // When the focus leaves field **and** list (Tab goes through the options
+      // first), the list closes — left open, it covered the next row and its
+      // focus (WCAG 2.4.11, acceptance 0013 B1). React's onBlur is focusout.
+      onBlur={(e) => {
+        if (!e.currentTarget.contains(e.relatedTarget as Node | null)) setOpen(false);
+      }}
+    >
       <div className="v2kf__box">
         <input
           id={id}
@@ -279,16 +288,21 @@ export function AccountField({
               Kein Konto zu „{query}" — weder unter den Vorschlägen noch im Kontenrahmen.
             </div>
           ) : (
-            groups.map((g) => (
-              <div key={g.key}>
+            // Index in the key: the caller's `all` and the search hits can share
+            // the group key (acceptance 0013 B2).
+            groups.map((g, gi) => (
+              <div key={`${g.key}-${gi}`}>
                 <div className="v2kf__grp">{g.label}</div>
                 {g.items.map((c) => (
                   <button
-                    key={`${g.key}-${c.number}`}
+                    key={`${g.key}-${gi}-${c.number}`}
                     type="button"
                     role="option"
                     aria-selected={c.number === value}
                     className={`v2kf__opt${c.number === value ? " is-active" : ""}`}
+                    // The field keeps the focus: no blur before the click, and
+                    // after the choice the focus is where typing goes on (B4).
+                    onMouseDown={(e) => e.preventDefault()}
                     onClick={() => choose(c)}
                   >
                     <span className="v2kf__num">{c.number}</span>

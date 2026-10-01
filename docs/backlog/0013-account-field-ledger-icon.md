@@ -400,3 +400,13 @@ eigene Aufgabe ans Set (Bedienung, WCAG 2.4.11); B2 als Hinweis an den, der
 `AccountField` oder `RecurringRuleEditor` als Nächstes öffnet.
 
 Abgenommen von / am: Claude (fremder Abnehmer), 2026-10-01
+
+### Nacharbeit Kontenliste 2026-10-01 (Befunde der Abnahme, vorbestehend)
+
+| Punkt | Änderung | Stand |
+|---|---|---|
+| B1 Tab aus dem Feld ließ die Liste offen (verdeckte die nächste Zeile, WCAG 2.4.11) | `onBlur` (focusout) am Rahmen `.v2kf`: verlässt der Fokus Feld **und** Liste, schließt sie. Tab geht weiter erst durch die Einträge. Gemessen `--s-2-split-full`: Feld → Tab → Eintrag 1 → Tab → Eintrag 2 (Liste offen) → Tab → „Belegfeld 1", Liste zu | behoben |
+| B2 doppelter React-Schlüssel „all" | Gruppen- und Eintragsschlüssel mit Index | behoben |
+| B4 Fokus nach der Wahl auf `body` | Einträge mit `onMouseDown` ohne Fokuswechsel: das Feld behält den Fokus, auch nach der Wahl (gemessen: Wahl „6600", Fokus im Feld, Liste zu) | behoben |
+| B3 weder unten noch oben Platz | außerhalb des Desktop-Ziels | offen |
+| B5 Leertext bei nie befülltem Feld ohne Kandidaten | eigener Punkt (drei Leertexte, T6) | offen |
