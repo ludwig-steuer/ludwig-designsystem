@@ -341,8 +341,62 @@ Escape schließt. `AccountField --with-candidates` (380 px Feld): Liste 380 px b
 
 Kriterien für die fremde Abnahme:
 
-- [ ] Im Editor (`--s-2-split-full`, `BookingReview --case-editable`) ist die Kontenliste ganz sichtbar, nicht abgeschnitten, und die Tabelle scrollt nicht senkrecht
-- [ ] Liste mindestens feldbreit, ≥ 20 rem, nie über den Fensterrand; klappt nach oben, wenn unten kein Platz ist (Fenster flach machen)
-- [ ] läuft beim Querscrollen der Tabelle und beim Scrollen der Seite mit
-- [ ] Tastatur und Wahl wie vorher: Enter wählt den ersten Treffer, Escape schließt, Klick auf einen Eintrag setzt ihn, Klick außerhalb schließt, Tippen öffnet
-- [ ] eigene Stories `AccountField --*` unverändert bedienbar
+- [x] Im Editor (`--s-2-split-full`, `BookingReview --case-editable`) ist die Kontenliste ganz sichtbar, nicht abgeschnitten, und die Tabelle scrollt nicht senkrecht
+- [x] Liste mindestens feldbreit, ≥ 20 rem, nie über den Fensterrand; klappt nach oben, wenn unten kein Platz ist (Fenster flach machen)
+- [x] läuft beim Querscrollen der Tabelle und beim Scrollen der Seite mit
+- [x] Tastatur und Wahl wie vorher: Enter wählt den ersten Treffer, Escape schließt, Klick auf einen Eintrag setzt ihn, Klick außerhalb schließt, Tippen öffnet
+- [x] eigene Stories `AccountField --*` unverändert bedienbar
+
+### Fremde Abnahme Nachtrag Kontenliste 2026-10-01
+
+Stand `82090ad`. Bedient in einem eigenen Playwright-Kontext (1280 × 900, `de-DE`)
+gegen Storybook 6107, mit Klicks, Mausrad und Tasten; gemessen über
+`getBoundingClientRect` und `elementFromPoint` (Mitte jedes Gruppenkopfs und
+jedes Eintrags).
+
+| Kriterium | Nachweis | Ergebnis |
+|---|---|---|
+| 1 Im Editor ganz sichtbar, Tabelle scrollt nicht senkrecht | `--s-2-split-full`, erstes Kontofeld (148 px) angeklickt, geleert: Liste `:popover-open`, `position: fixed`, 320 × 190 px, 4 px unter dem Feld; beide Gruppen und beide Einträge per `elementFromPoint` getroffen, kein Name gekürzt; `.bse__tbl` scrollHeight 210 = clientHeight 210, scrollTop 0. Zweites Feld (Wert 6600): 320 × 74, „Alle Konten · 6600" getroffen, Tabelle 210 = 210. `BookingReview --case-editable` (ein Kontofeld, 148 px): Liste 320 × 80, 4 px unter dem Feld, ganz getroffen; `.bse__tbl` 143 = 143. Gegenprobe mit der alten absoluten Liste (im Browser nachgestellt): `.bse__tbl` 359 zu 210 — der Befund ist damit wirklich weg | ✓ |
+| 2 Breite ≥ Feld und ≥ 20 rem, nie über den Fensterrand; klappt nach oben | Editor: 320 px = 20 rem bei 148-px-Feld; `AccountField --with-candidates` 380 → 380; `--number-and-name` 300 → 320. Fenster 900 px, `scrollLeft` 0 / 108 / 216: Liste links 439 / 331 / 223, rechts 759 / 651 / 543 — immer im Fenster. Fenster 700 px (Klemme geprüft): Feld bei 439, Liste bei 372, rechts 692 = 700 − 8. Fenster 1280 × 400, zweites Feld (235–264) geleert: Liste 41–231, also **über** dem Feld, 4 px Abstand; erstes Feld (unten Platz): unter dem Feld | ✓ |
+| 3 Läuft beim Querscrollen und beim Scrollen der Seite mit | Mausrad quer über der Tabelle: `scrollLeft` 120, Feld 439 → 319, Liste 439 → 319, Abstand 4 px; zurück auf 0 → beide 439. Fenster 1280 × 400, Mausrad senkrecht neben der Liste: `scrollY` 60, Feld oben 168 → 108, Liste 202 → 142, Abstand 4 px | ✓ |
+| 4 Tastatur und Wahl wie vorher | Editor: von „Umsatz" 3 × Tab ins Kontofeld → Liste offen; Escape → zu; „Porto" getippt → offen, gefiltert auf 6820 (dazu 6600 aus der Volltextsuche); Enter → 6820, zu; Tab → ruhend „6820 Porto". Frei „6820" getippt, Tab → ruhend „6820 Porto": der Fokusverlust meldet den Wert (`onChange`). Klick auf „6820" im zweiten Feld → Wert 6820, zu. „6600" getippt, Klick außerhalb → zu. Tab vom Feld auf einen Eintrag: Fokusring 2 px solid `rgb(59, 143, 196)`, `:focus-visible`; Enter darauf → „6600 Werbekosten" | ✓ |
+| 5 Eigene Stories unverändert bedienbar, keine Konsolenfehler | Alle sechs `AccountField --*`, jedes Feld: Fokus öffnet (4 px unter dem Feld, Breite ≥ Feld, alles getroffen), Escape schließt, Tippen „68" öffnet, Enter wählt den ersten Treffer (6815 / 6805 / 6815 / 6815), Klick außerhalb schließt; 0 Konsolenfehler. `--with-ledger`: Kontenblatt-Knopf (24 × 24) bei offener Liste geklickt → „Kontenblatt 6815", Liste bleibt. `PaymentAccountField` (6 Stories): `<select>`, kein `AccountField`, Wahl geht, 0 Fehler | ✓ |
+| Prüfliste Bedienung (`CLAUDE.md` §2) | Einträge 37,9–59,7 px hoch, 320 px breit (≥ 24 px); Hover `rgb(244, 246, 248)` nur auf Einträgen, Gruppenköpfe ohne Hover. Keine Tastaturfalle: Tab vom Feld → beide Einträge → „Belegfeld 1", Shift+Tab zurück bis ins Feld. Fokusring an Feld und Eintrag sichtbar. Verdeckter Fokus siehe B1 — vorbestehend | ✓ |
+| `pnpm typecheck`, `check:language`, `check:when` | alle drei Exit 0 („0 German comment lines left", „in Ordnung"). `pnpm build` auftragsgemäß nicht gestartet | ✓ |
+
+**Befunde ohne Mangel dieses Nachtrags** (alle vorbestehend, nicht durch `82090ad`):
+
+- **B1 — die Liste bleibt offen, wenn der Fokus per Tab das Feld verlässt.**
+  Geschlossen wird nur über Klick außerhalb (`AccountField.tsx:138`), Escape
+  oder Wahl; `onBlur` (`:242`) meldet nur den Wert. Im Editor: Tab aus dem
+  ersten Kontofeld → die Liste steht weiter; erreicht Tab das Kontofeld und
+  „Belegfeld 1" der zweiten Zeile, sind beide **ganz verdeckt**
+  (`elementFromPoint` an fünf Punkten 0 von 5), zwei Listen sind offen. Das
+  verletzt „Fokus nicht verdeckt" (2.4.11). Mit der alten absoluten Liste
+  nachgestellt: dasselbe Bild (0 von 5) — also nicht neu. Vorschlag als eigene
+  Aufgabe: bei `focusout`, dessen `relatedTarget` außerhalb des Felds liegt,
+  schließen.
+- **B2 — doppelter React-Schlüssel „all".** Bringt der Aufrufer `candidates.all`
+  mit und liefert die Suche Treffer, gibt es zwei Gruppen mit `key="all"`
+  (`AccountField.tsx:155`, `:283`). Gesehen bei der Gegenprobe in
+  `RecurringRuleEditor --filled`, `--modes`, `--error`, `--in-use`, `--edges`:
+  Konsolenfehler beim Fokussieren. Die eigenen Stories sind sauber.
+- **B3 — kein Platz unten und keiner oben.** Bei 1280 × 330 hängt die Liste
+  im Editor unter dem Feld bis 392 px, der letzte Eintrag liegt unter dem
+  Fensterrand; nach 80 px Seitenscrollen ist alles erreichbar (Abstand bleibt
+  4 px). `max-height` wird nicht auf den freien Platz gekürzt — außerhalb
+  des Desktop-Ziels, nur notiert.
+- **B4 — nach der Wahl steht der Fokus auf `body`.** Klick oder Enter auf
+  einen Eintrag (`:292`) entfernt den Knopf; der Fokus kehrt nicht ins Feld
+  zurück, der nächste Tab beginnt am Seitenanfang.
+- **B5 — `BookingReview --case-editable` reicht keine Kandidaten.** Die Liste
+  zeigt dort auch bei leerem Feld `Kein Konto zu „" — weder unter den
+  Vorschlägen noch im Kontenrahmen.` — der Leertext für „nie befüllt" fehlt.
+  Story- bzw. Datenfrage, für dieses Kriterium ohne Belang (der Kasten ist ganz
+  sichtbar).
+
+**Urteil: abgenommen.** Alle fünf Kriterien erfüllt, abgehakt. B1 sollte als
+eigene Aufgabe ans Set (Bedienung, WCAG 2.4.11); B2 als Hinweis an den, der
+`AccountField` oder `RecurringRuleEditor` als Nächstes öffnet.
+
+Abgenommen von / am: Claude (fremder Abnehmer), 2026-10-01
