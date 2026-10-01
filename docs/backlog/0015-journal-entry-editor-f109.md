@@ -706,10 +706,10 @@ Kriterien für die fremde Abnahme:
 
 - [x] Text-Spalte ≥ 160 px in `full` und `simple` bei 900 px Rahmen; kein überlagerter Kopf (`S2_SplitFull`, `S1_EditWithWarning`)
 - [x] Datum ganz lesbar („21.08.2026"), Feld ohne inneren Überlauf
-- [ ] Querscroll nur in `.bse__tbl`, nicht auf der Seite; Handlungszelle beim Scrollen sichtbar (Löschen erreichbar ohne Scrollen) — offen: M2 (fremde Abnahme)
-- [ ] Lese-Tabelle (`JournalEntryGrid`) unverändert, KOST nicht angeheftet — offen: M1 (fremde Abnahme)
+- [ ] Querscroll nur in `.bse__tbl`, nicht auf der Seite; Handlungszelle beim Scrollen sichtbar (Löschen erreichbar ohne Scrollen) — M2 behoben; offen: M3 (Nachprüfung, angeheftete Zelle deckt nur die Höhe ihres Inhalts)
+- [x] Lese-Tabelle (`JournalEntryGrid`) unverändert, KOST nicht angeheftet — Nachprüfung 5d00af6
 - [x] in `BookingReview --in-use` (728 px, Editor im Slot) Text lesbar, Handlungszelle sichtbar — gemessen: Tabelle 1008 in 694 px, Text 160 px, letzte Zelle bei 727 = rechter Rand
-- [ ] Datum im Lesezustand „21.08.2026" in Editor (`--in-use`) und Grid (`BookingReview --list-full`) — offen: M1 (fremde Abnahme)
+- [x] Datum im Lesezustand „21.08.2026" in Editor (`--in-use`) und Grid (`BookingReview --list-full`) — Nachprüfung 5d00af6
 
 ### Fremde Abnahme Nachtrag Spurbreiten 2026-10-01
 
@@ -791,3 +791,73 @@ und 6 an M1. Nachprüfung danach: Kriterien 3, 4, 6 und die Konto-Seite
 | H3 leere angeheftete Zelle im Lesezustand | angeheftet wird nur beim Bearbeiten (`editable` → `.bse__tbl--edit`) | behoben; offen beim Owner: soll die Fall-Ansicht im Modus `simple` starten, damit „Text" ohne Scrollen sichtbar ist? |
 | H1 Kontenliste des `AccountField` im Editor abgeschnitten | **vorbestehend seit 0044 (7390c50)**: `.bse__tbl` scrollt quer, damit auch senkrecht, und schneidet die absolut gesetzte Liste ab. Abhilfe ist die Liste in der obersten Ebene (`popover`, wie die Popover-Familie) — eigener Auftrag, an llcto gemeldet | offen, eigener Auftrag |
 | H2 „Zeile entfernen" 13 × 13 px | vorbestehend, setweit Backlog 0213 (Trefferflächen) | offen |
+
+### Nachprüfung Spurbreiten 2026-10-01 (Stand 5d00af6)
+
+Fremder Nachprüfer (nichts gebaut, nicht die erste Abnahme). Storybook :6107,
+eigener Playwright-Kontext 1280 × 900, Locale de-DE, Europe/Berlin.
+
+| Punkt | Nachweis | |
+|---|---|---|
+| M1 ISO lesend | `bookingreview--in-use` und `--list-full`: `<time datetime="2026-08-21">` „21.08.2026" | ✓ |
+| M1 deutsches Datum bleibt | `journalentrygrid--simple` „26.08.2026", ebenso die übrigen acht Grid-Stories mit Zeilen; kein „—" | ✓ |
+| M1 Konto-Seite | `seiten-konto-konten--long-name`, Zeile „09.07.2026" angeklickt → `#entry=k12-2`, „Große Ansicht": Grid „09.07.2026" = Liste = Drawer-Kopf, nicht vertauscht; die sechs übrigen Bewegungen tragen kein Grid | ✓ |
+| M1 Stichprobe | kein `JJJJ-MM-TT` im Seitentext der 13 Editor-, 10 Grid- und 6 BookingReview-Stories; ISO nur im Wert des Datumsfelds | ✓ |
+| M2 | `--s-2-split-full`, Tab aus „Belegfeld 2": scrollLeft 104, „Buchungstext" 693–853, Ring (3 px) bis 856; angeheftete Zelle ab 865, Schatten ab 859 → verdeckt 0 px. `focus()` auf beide Buchungstext-Felder ebenso; `End` + „ und Ordner" ganz sichtbar (scrollWidth 158 = clientWidth 158); jedes Feld der Zeile per `focus()` verdeckt 0 px | ✓ |
+| H3 | lesend `static` (`--in-use`, `--list-full`, S24, S25, lesende Tabellen in S20), keine `.bse__tbl--edit`; bearbeitend `sticky` in allen zehn Editor-Stories mit Zeilen und in `case-editable`; angeheftet 865–897 bei scrollLeft 0, 104, 184 (`case-editable` 841–873) | ✓ |
+| Kriterium 4 | `journalentrygrid--full`, `--edges`, `bookingreview--list-full`: letzte Zelle (KOST) `static` | ✓ |
+| Kriterium 3 | Seite 1280 = 1280 in allen 29 Stories und auf der Konto-Seite; `.bse__tbl` overflow-x auto; Löschen ohne Scrollen sichtbar. **Aber** die angeheftete Zelle deckt nur die Höhe ihres Inhalts (M3) | ✗ |
+| Kriterium 6 | siehe M1 | ✓ |
+| H1 | steht in der Nacharbeit mit Herkunft („vorbestehend seit 0044 (7390c50)"), eigener Auftrag, an llcto gemeldet | ✓ |
+| G | 29 Stories ohne Konsolenfehler; `pnpm typecheck` 0, `check:language` ok, `check:when` in Ordnung; `build` nicht gelaufen (Auftrag) | ✓ |
+
+**M3 — Die angeheftete Zelle deckt nur die Höhe ihres Inhalts.** Fundort
+`v3.css:1822–1826` (angeheftete Zelle) zusammen mit `.bse__head, .bse__cells
+{ align-items: center }` (`v3.css:1828–1833`). Die Zelle ist im Kopf leer und
+**0 px hoch** (y 135–135), in der Zeile 21 px (Knopf) neben 30 px hohen Feldern,
+ohne Löschen wieder 0 px (`case-editable`). Weiß und Schatten decken nur die
+Mitte. Gemessen in `--s-2-split-full`:
+- scrollLeft 0 (Ausgangslage): der Rahmen von „Buchungstext" (797–957) läuft
+  oben und unten um den Papierkorb weiter — das Löschen sieht aus wie ein Teil
+  des Textfelds.
+- scrollLeft 104 (genau die Lage nach Tab auf „Buchungstext", also der Weg aus
+  M2): der Kopf „KOST" (859–939) steht frei über der Löschspalte
+  (`elementFromPoint(880, Kopfmitte)` = „KOST"), der Rahmen von KOST 1 umrahmt
+  den Papierkorb, die Werte selbst liegen darunter.
+
+Verstößt gegen „Spaltenkopf folgt der Spalte" (`CLAUDE.md` §2 Darstellung). Die
+erste Abnahme nahm an, die leere Kopfzelle decke den Rest von „Text" — sie
+deckt nichts. Seit `82bfa0c`, nicht von der Nacharbeit verursacht. Probe ohne
+Commit: angeheftete Zelle `align-self: stretch; display: flex; align-items:
+center` → Kopf 19 px (125–144), Zeile 32 px (167–199) ≥ Feld 30 px,
+`elementFromPoint` im Kopf leer; `case-editable` ebenso.
+
+Hinweise, nicht blockierend:
+
+- **H4 (Konsistenz):** Ein deutsch geliefertes Datum steht ohne `Time` — 13,5 px
+  ohne `tnum` (`journalentrygrid--*`, Konto-Seite), ein ISO-Datum 12,5 px mit
+  `tnum` (`bookingreview--*`). Dieselbe Spalte hat je nach Aufrufer zwei
+  Schriftbilder. Der Weg aus M1 (Erzeuger auf ISO: `JournalEntryGrid.stories.tsx:19`,
+  `scenario.tsx:636`) hebt das auf und macht die Ausnahme am Vertrag
+  `JournalRow.datum` überflüssig.
+- **H5:** `ISO_DATE` steht zweimal (`JournalEntryEditor.tsx`, `JournalEntryGrid.tsx`)
+  — eine Quelle neben dem Vertrag in `journal-entry.ts`.
+- **H6 (vorbestehend seit 0044):** Kopf- und Zeilenlinie enden beim Querscrollen
+  an der Rahmenbreite: `--s-2-split-full` bei scrollLeft 184 enden `.bse__head`
+  und `.bse__row` bei 713, die Tabelle bei 897.
+
+Vier Linsen:
+- **Sprache:** Lesend TT.MM.JJJJ in Editor, Grid und Konto-Seite, kein ISO, kein
+  vertauschtes Datum; keine neuen Wörter.
+- **Bedienung:** Fokus und Ring auf „Buchungstext" frei (M2), Seite ohne
+  Querscroll, Löschen ohne Scrollen erreichbar.
+- **Logik:** Angeheftet nur beim Bearbeiten (H3), KOST im Grid `static`; das
+  Datum hängt am Aufrufer statt am Vertrag (H4).
+- **Darstellung:** Die angeheftete Zelle deckt nicht die Zeilenhöhe — Kopf „KOST"
+  über der Löschspalte, Feldrahmen um den Papierkorb (M3).
+
+**Urteil: nicht abgenommen.** M1, M2 und H3 sind behoben; Kriterien 4 und 6
+erfüllt und abgehakt. Kriterium 3 bleibt offen wegen M3. H1 und H2 bleiben
+eigene Aufträge, die Frage aus H3 (Fall-Ansicht in `simple`) liegt beim Owner.
+Nachprüfung danach: nur M3 — `--s-2-split-full` Kopf und Zeile bei scrollLeft 0
+und 104, `case-editable`.
