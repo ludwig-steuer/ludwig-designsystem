@@ -206,7 +206,7 @@ export function PaymentAccountEditor({
           />
         </Field>
       ) : (
-        <p className="v2sub">
+        <p className="lw-ui-hint">
           Für diese Art gibt es keine Kennung — eine Kasse und ein Auslagenkonto haben weder IBAN noch
           Kartennummer.
         </p>

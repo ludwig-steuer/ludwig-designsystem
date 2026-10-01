@@ -190,7 +190,7 @@ function DrawerBody({
     // (defect M3 of the first review — 87 px against 301 px).
     return (
       <Card>
-        <CardHead title="Kernfakten" />
+        <CardHead title="Kernfakten" headingLevel={3} />
         <div className="v2cdr__facts">
           <Skeleton lines={5} label="Sachverhalt wird geladen …" />
         </div>
@@ -212,7 +212,7 @@ function DrawerBody({
     /* Zone 3: the same component as the view, without `all` — that is the
        coverage 0052 asks for: the drawer invents no second field list. */
     <Card>
-      <CardHead title="Kernfakten" />
+      <CardHead title="Kernfakten" headingLevel={3} />
       <div className="v2cdr__facts">
         <CaseFacts
           case={record.facts}

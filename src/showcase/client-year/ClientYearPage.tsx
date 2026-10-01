@@ -140,7 +140,7 @@ function BatchHistory({ vm }: { vm: ClientYearVM }) {
       <CardHead title={`Stapel ${vm.year}`} />
       <div className="cy-hist">
         {vm.batches.length === 0 ? (
-          <p className="v2sub">Noch kein Stapel. Der erste entsteht, sobald die Einrichtung freigegeben ist.</p>
+          <p className="lw-ui-hint">Noch kein Stapel. Der erste entsteht, sobald die Einrichtung freigegeben ist.</p>
         ) : null}
         {pending.map((b) => (
           <a key={b.key} href={b.href} className="cy-hist__row">

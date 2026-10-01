@@ -309,11 +309,11 @@ function renderBlock(flow?: boolean) {
   return function block(b: Block, i: number) {
     if (b.type === "hr") return <hr className="v2mk__hr" key={i} />;
     if (b.type === "h") {
-      // Headings always render one level below the page — no agent text may
-      // produce an `h1`.
-      const H = (b.level <= 2 ? "h3" : b.level === 3 ? "h4" : "h5") as "h3" | "h4" | "h5";
+      // Headings always render below the surface the text sits in — no agent
+      // text may produce an `h1`, and nothing goes deeper than `h4` (0220 §2).
+      const H = b.level <= 2 ? "h3" : "h4";
       return (
-        <H className={`v2mk__h v2mk__h--${Math.min(b.level, 4)}`} key={i}>
+        <H className={`v2mk__h v2mk__h--${H === "h3" ? 3 : 4}`} key={i}>
           <Inline toks={b.toks} />
         </H>
       );

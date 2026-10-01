@@ -64,7 +64,7 @@ export const Gaps: Story = {
 export const TooFew: Story = {
   render: () => (
     <Frame>
-      <p className="v2sub">Darunter steht nichts im DOM:</p>
+      <p className="lw-ui-hint">Darunter steht nichts im DOM:</p>
       <Sparkline values={[1200, 940, 1310]} labels={MONTHS} format={EUR} />
     </Frame>
   ),

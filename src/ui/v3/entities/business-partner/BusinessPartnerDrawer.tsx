@@ -53,6 +53,7 @@ function Abstract({
     <Card>
       <CardHead
         title={title}
+        headingLevel={3}
         actions={
           <Link href={href} className="v2bpdrawer__way">
             {wayLabel}

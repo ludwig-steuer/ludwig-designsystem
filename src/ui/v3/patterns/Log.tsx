@@ -195,7 +195,7 @@ function LogRow({ entry, shown }: { entry: LogEntry; shown: ColumnKey[] }) {
     message: (
       <div>
         <div className="v2log__msg">{entry.message}</div>
-        {entry.detail ? <div className="v2sub">{entry.detail}</div> : null}
+        {entry.detail ? <div className="lw-ui-hint">{entry.detail}</div> : null}
         {hasPayload(entry.payload) ? (
           <div className="v2log__pay">
             <Disclosure summary="Einzelheiten" tone="quiet">

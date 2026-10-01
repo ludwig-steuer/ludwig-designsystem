@@ -176,7 +176,7 @@ function Body({
       <div className="v2btxf">
         {LOADING_BLOCKS.map(([title, lines]) => (
           <section className="v2fields v2fields--bare" key={title}>
-            <div className="v2fields__h">{title}</div>
+            <h3 className="v2fields__h">{title}</h3>
             <div className="v2btxd__skel">
               <Skeleton lines={lines} label={`${title} wird geladen …`} />
             </div>

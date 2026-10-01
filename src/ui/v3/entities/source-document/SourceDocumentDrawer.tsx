@@ -190,7 +190,7 @@ function DrawerBody({
     return (
       <>
         <Card>
-          <CardHead title={<span className="v2skel v2doc__headskel" aria-hidden="true" />} />
+          <CardHead title={<span className="v2skel v2doc__headskel" aria-hidden="true" />} headingLevel={3} />
           <span className="v2skel v2doc__origskel" aria-hidden="true" />
         </Card>
         <Skeleton lines={5} label="Beleg wird geladen …" />

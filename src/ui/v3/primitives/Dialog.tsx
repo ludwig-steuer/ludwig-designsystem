@@ -3,7 +3,7 @@
 import { ActionIcon } from "../Icons";
 import { trapTab } from "./focus";
 import { IconButton } from "./IconButton";
-import { useEffect, useRef, type ReactNode } from "react";
+import { useEffect, useId, useRef, type ReactNode } from "react";
 
 /**
  * The dialog (F123 T123.1) — the anatomy of the drawer (`.dr__h` /
@@ -66,6 +66,7 @@ export function Dialog({
   footer?: ReactNode;
 }) {
   const panel = useRef<HTMLDivElement>(null);
+  const titleId = useId();
   const opener = useRef<HTMLElement | null>(null);
   // Starts at `false`, not at `open`: a dialog that is already open in its
   // first render — the caller hooks it in instead of switching it on — would
@@ -145,13 +146,15 @@ export function Dialog({
         className={`v2dlg v2dlg--${size}`}
         role="dialog"
         aria-modal="true"
-        aria-label={title}
+        aria-labelledby={titleId}
         tabIndex={-1}
       >
         <div className="v2dlg__h">
           <div>
             {kicker ? <div className="v2dlg__kicker">{kicker}</div> : null}
-            <div className="v2dlg__title">{title}</div>
+            <h2 id={titleId} className="v2dlg__title">
+              {title}
+            </h2>
           </div>
           <IconButton label="Schließen" icon={<ActionIcon action="close" size={16} />} onClick={onClose} />
         </div>

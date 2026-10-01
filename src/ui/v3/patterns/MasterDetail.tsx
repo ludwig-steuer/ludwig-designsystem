@@ -168,7 +168,7 @@ export function DetailPane({
   }
   return (
     <div className="v2dp">
-      {title ? <div className="v2dp__title">{title}</div> : null}
+      {title ? <h2 className="v2dp__title">{title}</h2> : null}
       {sub ? <div className="v2dp__sub">{sub}</div> : null}
       {children}
     </div>

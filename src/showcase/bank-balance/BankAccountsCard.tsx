@@ -497,7 +497,7 @@ function Explanation({ c, mode }: { c: BankBalanceComparison; mode: Mode }) {
 
   return (
     <div className="v3bbr-explain">
-      <div className="lw-overline">Wie sich die Differenz erklärt</div>
+      <h3 className="lw-ui-group">Wie sich die Differenz erklärt</h3>
       <Table cols={EXPLAIN_COLS} density="compact">
         <HeadRow>
           <span />
@@ -799,7 +799,7 @@ function AccountRow({
             }}
           />
         ) : null}
-        <p role="status" className="v2sub">
+        <p role="status" className="lw-ui-hint">
           {saved}
         </p>
       </div>

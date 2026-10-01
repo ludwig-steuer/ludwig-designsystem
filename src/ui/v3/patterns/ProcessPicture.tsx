@@ -318,7 +318,7 @@ function History({ detail }: { detail: ProcessDialogDetail }) {
   }
   if (!detail.history.length) {
     return (
-      <p className="v2sub">
+      <p className="lw-ui-hint">
         Für diesen Beleg sind noch keine Zustandswechsel aufgezeichnet.
         {detail.historyHref ? (
           <>

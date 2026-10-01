@@ -53,7 +53,8 @@ Wenn unsicher, dort nachsehen — diese Datei ist der schnelle Index.
 - **Sans (UI + Body)**: Inter — humanistische Grotesk, `tnum` für Zahlen.
 - **Serif (Editorial)**: Source Serif 4 — Hero-Aussagen, Marken-Momente.
 - **Mono**: JetBrains Mono — Kontonummern, DATEV-Codes, technische Listen.
-- Skala: Display 56 / H1 40 / H2 30 / H3 22 / H4 18 / Body 16 / Small 14 / Caption 13 / Overline 12.
+- Skala des **lesenden** Registers (Login, Hilfe, Marketing): Display 56 / H1 40 / H2 30 / H3 22 / H4 18 / Body 16 / Small 14 / Caption 13 / Overline 12.
+- In der Oberfläche gelten die Rollen aus `design-guidelines.md` §2a (A14, 2026-10-01): Seitentitel 20 · Abschnitt und Fläche 16 · Kartenkopf 14 · Gruppe 12,5 · **Fließtext `lw-ui-text` 13,5** · Einleitung 13,5 gedämpft · Hinweis 12,5 · Beischrift `.v2sub` 11,5, eine Zeile, nie Absatz. Überschriften `h1`–`h4`, ein `h1` je Seite.
 - Body line-height 1.55. Beträge **immer** mit `font-variant-numeric: tabular-nums lining-nums`.
 
 ### Spacing
@@ -90,7 +91,7 @@ Quelle: `design/Ludwig Design System v2/ui_kits/app/`. Spiegel im Repo unter `ap
 - `Badge` — kinds `info | success | warning | danger | neutral`, optional Dot. Class: `bdg bdg-info` etc.
 - `Input` / `Label` / `Select` / `Checkbox` — Standard-Form-Primitives.
 - `Card` — `border` ODER `shadow`, niemals beides. Padding ≥ 20 px.
-- `PageHeader` — `title`, optional `sub`, optional `actions` rechts.
+- `PageHeader` — `title`, optional `overline`, `description`, `actions` rechts.
 - `Stat` — Kennzahl-Tile mit Label, Zahl, optional Delta.
 
 ### Layout
@@ -105,7 +106,7 @@ Quelle: `design/Ludwig Design System v2/ui_kits/app/`. Spiegel im Repo unter `ap
 - `Toast` — kinds `success | danger`, oben rechts (Stack, max-width 420 px).
 - `StatusBadge` — `draft | ready_to_book | booked | archived`, plus Pipeline `processing | succeeded | failed`.
 - `ConfidenceIndicator` — Balken/Score 0-100, farbkodiert.
-- `EmptyState` — Icon-Kreis, Titel, Sub, Aktionen. Erklärt **wie** etwas reinkommt (Upload / Mail-Inbox / Drag-Drop), nicht nur „leer".
+- `EmptyState` — Icon, Titel (Meldung, keine Überschrift), Beschreibung, Aktion. Erklärt **wie** etwas reinkommt (Upload / Mail-Inbox / Drag-Drop), nicht nur „leer".
 
 ### Daten
 - `DataTable` — sortier-/filterbar, Pagination, Row-Actions, Empty-State, Loading-Skeleton. Hauptelement für Belege, Buchungen, Kreditoren.

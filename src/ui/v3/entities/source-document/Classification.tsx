@@ -217,7 +217,7 @@ function Correction({ c }: { c: ClassificationCorrection }) {
 
   if (c.blockedReason) {
     return (
-      <p className="v2sub">
+      <p className="lw-ui-hint">
         <strong>Korrektur hier nicht möglich.</strong> {c.blockedReason}
       </p>
     );
@@ -284,7 +284,7 @@ function Correction({ c }: { c: ClassificationCorrection }) {
           <TextButton onClick={() => setOpen(false)}>Abbrechen</TextButton>
         ) : null}
       </div>
-      <p role="status" className="v2sub">
+      <p role="status" className="lw-ui-hint">
         {state === "saved" ? "Gespeichert. Ludwig liest den Beleg mit der neuen Einordnung noch einmal." : ""}
       </p>
     </div>

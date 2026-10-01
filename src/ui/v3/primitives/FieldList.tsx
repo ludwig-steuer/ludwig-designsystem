@@ -32,9 +32,15 @@ export function FieldList({
   split = false,
   values = "data",
   empty,
+  headingLevel = 3,
 }: {
   /** Without a title there is no header row — and no gap where it would be. */
   title?: string;
+  /**
+   * The title's `h` level, by position (0220 §2): 3 under a card head or a
+   * drawer title (default), 4 in a card under a section title.
+   */
+  headingLevel?: 3 | 4;
   rows: [ReactNode, ReactNode][];
   tone?: "surface" | "soft" | "bare";
   /** `row` puts the pairs next to each other, label above value (0049). */
@@ -53,13 +59,15 @@ export function FieldList({
   values?: "data" | "prose";
   empty?: string;
 }) {
+  const Title = headingLevel === 4 ? "h4" : "h3";
   const layoutClass =
     values === "prose"
       ? " v2fields--prose"
       : `${layout === "row" ? " v2fields--cols" : ""}${split ? " v2fields--split" : ""}`;
   return (
     <div className={`v2fields${tone === "surface" ? "" : ` v2fields--${tone}`}${layoutClass}`}>
-      {title ? <div className="v2fields__h">{title}</div> : null}
+      {/* Group head (0220 role 5): one level under its surface. */}
+      {title ? <Title className="v2fields__h">{title}</Title> : null}
       {rows.length === 0 ? (
         <div className="v2fields__empty">{empty ?? "Keine Angaben."}</div>
       ) : (

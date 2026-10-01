@@ -177,7 +177,7 @@ export function AccountDrawer({
             }
           />
           {/* Zone 4 — one sentence on what the quick look does not answer. */}
-          <p className="v2sub v2acc__limit">
+          <p className="lw-ui-hint v2acc__limit">
             Kontenrahmen, Steuerautomatik und die Monatsübersicht stehen in der
             vollständigen Kontoansicht.
           </p>

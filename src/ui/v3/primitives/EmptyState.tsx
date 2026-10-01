@@ -38,7 +38,8 @@ export function EmptyState({
   return (
     <div className={`v2empty${inline ? " v2empty--inline" : ""}${className ? ` ${className}` : ""}`}>
       {icon ? <span className="v2empty__ico">{icon}</span> : null}
-      <h3 className="v2empty__title">{title}</h3>
+      {/* A message, not a section: no `h` element (0220 §2.6). */}
+      <p className="v2empty__title">{title}</p>
       {description ? <p className="v2empty__desc">{description}</p> : null}
       {action ? <div className="v2empty__actions">{action}</div> : null}
     </div>

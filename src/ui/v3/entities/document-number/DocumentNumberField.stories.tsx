@@ -57,7 +57,7 @@ export const WithRegister: Story = {
         <Field label="Ohne Register" htmlFor="b4">
           <DocumentNumberField id="b4" value="RE-2026-0140" onChange={() => {}} sourceLabel={SOURCE_LABEL} />
         </Field>
-        <p className="v2sub">Register {opened}× geöffnet.</p>
+        <p className="lw-ui-hint">Register {opened}× geöffnet.</p>
       </div>
     );
   },
@@ -112,7 +112,7 @@ export const Interactive: Story = {
         <Field label="Belegfeld 1" htmlFor="b7">
           <DocumentNumberField id="b7" value={v} onChange={setV} sourceLabel={SOURCE_LABEL} />
         </Field>
-        <p className="v2sub">
+        <p className="lw-ui-hint">
           Wert: <code>{v || "(leer)"}</code> · {v.length} von {DATEV_MAX_BELEGFELD1} Zeichen
         </p>
       </div>

@@ -63,7 +63,7 @@ Alles Folgende gilt dem produktiven Register, wenn nicht anders gesagt.
 | Bereich | Regel |
 |---|---|
 | Palette | Fünf Farben: `primary` · `accent` · `text` · `bg-soft` · `bg`; Semantik `success`/`warning`/`danger`, entsättigt. Verboten: Gold, Warmtöne, Lila, Pink, Neon, Verläufe quer durchs Spektrum. Rollen §3. |
-| Schrift | `--font-sans` (Inter) UI + Text · `--font-serif` nur editorial (Hero, Zitat) · `--font-mono` Kontonummern, BU-Schlüssel, DATEV-Codes. Beträge immer `--font-feat-tabular`. |
+| Schrift | `--font-sans` (Inter) UI + Text · `--font-serif` nur editorial (Hero, Zitat) · `--font-mono` Kontonummern, BU-Schlüssel, DATEV-Codes. Beträge immer `--font-feat-tabular`. Welche Stufe für welche Rolle und welche Überschriften-Ebene: §2a. |
 | Raster | 4-px-Grundraster, 8-px-Rhythmus, Abstände nur aus `--space-*`. |
 | Rand | 1 px, nie dicker (Ausnahme aktiver Tab 2 px). `--color-border` Standard, `-strong` Tabellenblock, `-subtle` Zeile, `-control` Eingabeelement (3:1). |
 | Karte | Weiß; 1 px `--color-border` **oder** `--shadow-sm`, nie beides. Radius `--radius-md`, hervorgehoben `--radius-lg`. Kopf mit Trennlinie auf `--color-surface-head` (A3). Padding ≥ `--space-5`, Inhaltskarten `--space-6`. |
@@ -75,6 +75,70 @@ Alles Folgende gilt dem produktiven Register, wenn nicht anders gesagt.
 | Hover | **Jedes klickbare Element hat einen Hover-Zustand** — Zeile, Karte, Tab, Chip, Icon-Knopf, Link. Hintergrund eine Tonstufe (Link: Unterstreichung); nichts wächst, nichts springt. Ohne Hover-Antwort ist ein Element nicht klickbar; umgekehrt bekommt nichts Hover, was nicht klickt. |
 | Fokus | `:focus-visible` mit `--color-focus`, 2 px + Offset, nie abgeschaltet (V10). |
 | Ebenen | Backdrop-Blur nur Dialog-Overlay; kein Glassmorphism, keine Texturen, keine Illustrationen. |
+
+## 2a Typografie — Rollen und Überschriften (A14, Owner 2026-10-01)
+
+Jede Rolle hat **eine** Gestalt; das Element folgt der Lage, nicht der Optik.
+Spec und Begründung: `docs/backlog/0220-typography-roles.md`, Nachweis in der
+Story `v3/Grundlagen/Typografie` (`Roles`, `Headings`).
+
+**Rollen des produktiven Registers.** Was ein Baustein trägt, bleibt im
+Baustein. Für Text, den Aufrufer frei setzen, gibt es sechs Klassen
+`lw-ui-*` in `tokens.css`. `lw-*` ohne `ui` (`lw-h1`…`lw-h4`, `lw-body`,
+`lw-body-sm`, `lw-caption`, `lw-overline`, `lw-lede`, `lw-display`) ist das
+lesende Register: Login, Hilfe, Marketing, Onboarding-Erklärseiten.
+
+| Rolle | Klasse / Baustein | Stufe · Gewicht · Farbe | Element | Wo — nie |
+|---|---|---|---|---|
+| Seitentitel | `PageHeader`, `EntityHeader`, `StepHeader` | ui-xl · 600 · text | `h1`, eins je Seite | Kopf der Seite — nie in Karte, Drawer, Dialog |
+| Abschnittstitel | `.lw-ui-section` | ui-lg · 600 · text | `h2` | über ≥ 2 zusammengehörigen Karten — nie über einer einzigen |
+| Flächentitel | `Drawer`, `Dialog`, `DetailPane`, `StatusCallout`, Wizard-Schritt | ui-lg · 600 · text | `h2` | erster Titel einer Fläche ohne Kopfleiste |
+| Kartenkopf | `CardHead` | ui-md · 600 · text | `h2`/`h3` (`headingLevel`) | Kopfleiste jeder Karte — nie als zweiter Titel im Inhalt |
+| Gruppenkopf | `.lw-ui-group`, `FieldList` (`headingLevel` 3/4), `GroupRow`, `ProseCard` | ui-sm · 700 · muted | `h3`/`h4`; `th` in Tabellen | ≥ 2 Gruppen in einer Fläche — nie für eine einzige |
+| Overline | `.lw-ui-overline`; PageHeader `overline`, Dialog/Callout `kicker` | ui-xs · 600 · subtle | nie `h` | über einem Titel; Gruppenwort in Menü und Listbox — nie allein als Titel |
+| Zeilentitel | `.v2main`, Titel der Listenzeilen | Zeilenmaß · 600 · text | `span` | erste Zeile eines Eintrags |
+| Unterzeile | `CardHead sub`, `Drawer meta`, `DetailPane sub`, Listenzeile | ui-sm · 400 · muted | `div`, eine Zeile | unter einem Kopf — nie Absatz |
+| Beischrift | `.v2sub` | ui-xs · 400 · subtle | `span`, eine Zeile | zweite Zeile in der Zelle, Zähler, Taste — **nie `p`, nie Absatz** |
+| **Fließtext** | **`.lw-ui-text`** | ui · 400 · text, ≤ 68ch | `p` | Sätze in einer Fläche — nie in der Tabellenzelle |
+| Einleitung | `.lw-ui-lead`; PageHeader `description`, Wizard `intro` | ui · 400 · muted, ≤ 68ch | `p` | direkt unter Seiten-, Abschnitts- oder Flächentitel, ≤ 2 Sätze |
+| Hinweis | `.lw-ui-hint`; `Field hint` | ui-sm · 400 · subtle | `p`/`div` | unter Feld, Option, Block — nie als Einleitung oder Fehler |
+| Lesetext | `Markdown`, `ProseCard` | ui · 400 · text | `p`; Überschriften `h3`/`h4` | Begründung, Notiz, Agententext |
+| Feldlabel | `Field`, `legend` in `RadioGroup` | ui-sm · 600 · muted | `label`/`legend` | über jedem Feld (0089) |
+| Tabellenkopf | `HeadRow`, `DataTable` | ui-sm · 600 · subtle | `th scope=col` | Spaltenkopf |
+| Zahl, Mono | `.lw-numeric`, `.lw-mono`, Wertzellen | erbt | – | Beträge `tnum`; Konto, BU, DATEV-Code mono |
+| Zustandstitel | `EmptyState` | ui-md · 600 · text | `p`, kein `h` | Leerzustand — nie größer als der Kopf seiner Karte |
+
+**Überschriften-Ordnung.**
+
+1. Höchstens vier Ebenen, `h1`–`h4`: Seite → Abschnitt → Karte → Gruppe.
+2. Genau ein `h1` je Seite — der Seitentitel.
+3. Keine Sprünge nach unten. Fehlt der Abschnitt, rückt alles eine Ebene hoch
+   (Karte `h2`, Gruppe `h3`).
+4. Das Element folgt der Lage, die Gestalt der Rolle: ein Kartenkopf sieht als
+   `h2` und `h3` gleich aus. Bausteine haben die Ebene ihres häufigsten Orts
+   als Vorgabe, `headingLevel` für den anderen (`CardHead` 2/3, `FieldList` 3/4).
+5. Drawer und Dialog sind eigene Wurzeln: Titel `h2`, darin `h3`. `DetailPane`
+   und Wizard-Schritt gehören zur Seite: Titel `h2`.
+6. Overline, Unterzeile, Beischrift, Feldlabel, Einleitung und Zustandstitel
+   sind nie ein `h`-Element.
+7. Markdown liegt unter seiner Fläche: `#`/`##` → `h3`, tiefer → `h4`.
+
+**Box-Kopf.** Der Kartenkopf ist `CardHead`: Titel, optional eine Unterzeile,
+Meta und Aktionen rechts, auf `--color-surface-head` (A3). Er wiederholt nicht
+den Seitentitel, sondern nennt die Menge („Offene Belege · 38"). Keine
+doppelte Überschrift: kein zweiter Titel für denselben Inhalt unter dem Kopf,
+kein Abschnittstitel über einer einzigen Karte. Eine Overline ersetzt nie
+einen Titel.
+
+**Wann überhaupt eine Überschrift.** Nur als Wurzel einer Fläche (Seite,
+Drawer, Dialog, Karte, DetailPane, Wizard-Schritt) oder um mindestens zwei
+Geschwister derselben Ebene abzugrenzen. Kein Titel über einem einzelnen Satz,
+einem einzelnen Feld oder als „Bezeichnung: Wert".
+
+**Durchsetzung.** `pnpm check:type` meldet rohe `h1`–`h6` ohne Klasse
+(T-H1), `h5`/`h6` (T-H2), `sub`/`v2sub` an einem `p` (T-SUB) und das lesende
+Register im produktiven Code (T-REG). Die Folge der Ebenen und das eine `h1`
+prüft die Seitenprüfung (§10) im Browser.
 
 ## 3 Kritikalität und Farbrollen
 
@@ -218,7 +282,8 @@ Registry-Entscheid im Handoff, nicht still im Screen (F123 §2.4).
 - [ ] Jedes klickbare Element antwortet auf Hover; Listenzeile mit Detail ist ganz klickbar (§2, I11)
 - [ ] **Trefferfläche 24 × 24 px**, auch wo das Zeichen kleiner ist: das Polster wächst nach außen, ein negativer Rand hält die Zeilenhöhe (WCAG 2.5.8). Ein Knopf, dessen Fläche seine Glyphe ist, misst 12 × 12 — gemessen, nicht geschätzt. Vier Abnahmen an einem Tag haben dasselbe (i) gemeldet, weil die Regel nirgends stand (0099, 0100, 0103, 0105; Hausmaß aus 0113)
 - [ ] Icons Lucide 1.5 px, Maß aus der Leiter des Registers (A8); keine Emoji/Unicode-Icons, keine Versalien (§2, T9, A2)
-- [ ] **Schrift aus der Skala** (Owner 2026-09-27): Größe nur `var(--fs-…)`, Gewicht nur 400/500/600/700, Familie nur `var(--font-…)` — `pnpm check:type` grün. Im Browser: dieselbe Rolle hat dieselbe Stufe wie beim Nachbarbaustein (Zeilentitel `--fs-ui`, Unterzeile `--fs-ui-sm`, Beischrift `--fs-ui-xs`, Kartentitel `--fs-ui-lg`); gemessen mit `getComputedStyle(...).fontSize`, nicht geschätzt. Anlass: 12 px und 13,5 px von Hand in 0207, die neben 12,5 px der Skala unruhig wirkten
+- [ ] **Schrift aus der Skala** (Owner 2026-09-27): Größe nur `var(--fs-…)`, Gewicht nur 400/500/600/700, Familie nur `var(--font-…)` — `pnpm check:type` grün. Im Browser: dieselbe Rolle hat dieselbe Stufe wie beim Nachbarbaustein (Rollen §2a: Zeilentitel `--fs-ui`, Unterzeile `--fs-ui-sm`, Beischrift `--fs-ui-xs`, Kartenkopf `--fs-ui-md`, Flächentitel `--fs-ui-lg`); gemessen mit `getComputedStyle(...).fontSize`, nicht geschätzt. Anlass: 12 px und 13,5 px von Hand in 0207, die neben 12,5 px der Skala unruhig wirkten
+- [ ] **Überschriften nach §2a** (A14): jedes `h` trägt eine Rolle und eine Klasse, die Ebene folgt der Lage (`headingLevel`), Drawer und Dialog beginnen mit `h2`; Fließtext `lw-ui-text`, `.v2sub` nie als Absatz
 - [ ] Karte: Rand **oder** Schatten; linksbündig; kein Modal, wo Detail oder Drawer geht (L2–L4)
 - [ ] Ein Baustein mit `minWidth` oder innerem Scrollen steht in einem Raster- oder Flex-Kind nur mit `min-width: 0` bzw. `minmax(0, …)` — sonst schneidet das Kind ab, statt zu scrollen; gemessen bei der Breite, die der Baustein auf der Seite hat (vier Fälle in einer Abnahme-Welle: 0014, 0029, 0063, 0069; Owner-Regel 2026-09-07)
 - [ ] Ein Scroll-Container (`overflow: auto`) ist Bezugsrahmen (`position: relative`), sobald in ihm absolut positionierte Elemente stehen — auch Texte nur für die Vorlesehilfe (`.v2vh`). Sonst entkommen sie dem Scrollbereich und verbreitern die Seite (gemessen an `PeriodGrid`, 0162: 744 px Querlauf bei 1024).
@@ -245,6 +310,7 @@ Vor der Migration und bei der Abnahme jeder Route aus §11.4:
 - [ ] Beträge über `fmtMoney`, Zeiten absolut in Europe/Berlin (T7)
 - [ ] Kein Hex, kein px/`fontSize` in TSX, kein `text-align: center`, kein Emoji/Unicode-Icon, keine Versalien (V3, V13, T9, A2)
 - [ ] **Schrift der Seite:** höchstens drei Stufen im Lesetext einer Karte (Titel · Zeile · Unterzeile), alle aus der Skala; gleiche Rolle über die Karten hinweg gleich groß — `pnpm check:type` grün, im Browser je Rolle einmal gemessen
+- [ ] **Gliederung** (§2a): genau ein `h1`, keine Sprünge, höchstens `h4`; kein Abschnittstitel über einer einzigen Karte, kein zweiter Titel unter einem Kartenkopf — im Browser mit axe `heading-order` und `page-has-heading-one`
 - [ ] Nächster Schritt benannt; Leeres sagt, was fehlt (I10)
 - [ ] Nach vier Wochen Pause bedienbar: nichts nur per Hotkey, Farbe oder Icon (V14)
 - [ ] Alt-Komponenten `@deprecated`; `grep "@/ui/components"` sinkt; Stories `v2/…`; §11.4 Häkchen; `ui-repraesentationen.md` nachgezogen
@@ -572,11 +638,12 @@ nicht gebaut.
 
 ## 12 Werte-Protokoll (Quelle der Wahrheit: `tokens.css`, `v2.css`)
 
-**Maße produktiv (`v2.css`):** Zeilentext 13.5 px · Zeilenpadding 12/18 px (~38 px
-Zeile; Enterprise-Referenz kompakt 40–44, comfortable 48–56) · Spaltenkopf
-11.5 px normal, `letter-spacing 0.01em` · `.v2sub` 11.5 px · Kartenkopf 14/600,
-Unterzeile 12 · Kartenfuß 12.5 · Leerzustand 13 px, 30 px Padding ·
-Kartenradius `--radius-lg` · Kopffläche `--color-surface-head`.
+**Maße produktiv (`v3.css`, Stand 2026-10-01, Rollen §2a):** Zeilentext 13.5 px ·
+Zeilenpadding 12/18 px (~38 px Zeile; Enterprise-Referenz kompakt 40–44,
+comfortable 48–56) · Spaltenkopf 12.5/600 subtle · `.v2sub` 11.5 subtle ·
+Kartenkopf 14/600, Unterzeile 12.5 muted · Kartenfuß 12.5 · Leerzustand Titel
+14/600, Text 13.5 muted · Kartenradius `--radius-lg` · Kopffläche
+`--color-surface-head`.
 
 **Kontrast (gegen Weiß, WCAG 2.x; `bg-soft` in Klammern):**
 
@@ -621,6 +688,10 @@ außerhalb `tokens.css` ist der Test (§11.5).
 | | Owner 2026-09-10 |
 |---|---|
 | **A13** | **Neue CSS-Klassen heißen `v3`, alte bleiben `v2`.** Das Set trägt 664 Klassen mit `v2`-Präfix und keine einzige mit `v3` — Herkunft, nicht Entwurf: die Bausteine kamen aus `ludwig/app`, wo die Generation `v2` hieß, und beim Holen wurden Ordner und Datei umbenannt, die Klassennamen nicht (sonst hätte jede Komponente ungestylt gerendert). Ab jetzt bekommt **jede neu erfundene Klasse** das Präfix `v3`; die 664 bleiben, bis sie ohnehin angefasst werden. **Eine Datei behält dabei ihr Präfix** — zwei Präfixe in einer Komponente wären schlimmer als ein historisches. Das große Umbenennen ist damit nicht abgesagt, nur vertagt: es ist ein 664-Klassen-Diff, der jede offene Abnahme überdecken würde, und die App rendert dieselben Klassen. Begründung und die zwei verworfenen Wege: `docs/backlog/0156-css-praefix-v2.md`. |
+
+| | Owner 2026-10-01 (Befund über lldev1, Spec 0220) |
+|---|---|
+| **A14** | **Typografie nach Rollen, Überschriften nach Lage** (§2a). Siebzehn Rollen mit je einer Gestalt; **ein** Fließtext der Oberfläche, `lw-ui-text` (13,5 px) — `lw-body`/`lw-body-sm` gehören dem lesenden Register; `sub`/`.v2sub` ist Beischrift, eine Zeile, nie Absatz. Höchstens `h1`–`h4`, ein `h1` je Seite, keine Sprünge, Drawer und Dialog eigene Wurzel mit `h2`; der Kartenkopf ist `h2`/`h3` nach Lage und sieht gleich aus. Mit entschieden: Leerzustand auf die Stufe des Kartenkopfs (14/600, keine Überschrift), Titel des produktiven Registers in `text` statt `primary` (StatusCallout, Markdown), Wizard-Fuß mit Fortschritt links und Zurück/Weiter zusammen rechts. Anlass: in der App 32 rohe `h1`–`h4`, die durch Preflight die Umgebungsgröße erbten, und 28 Overlines als Abschnittstitel. |
 
 ## 14 Quellen
 

@@ -74,7 +74,7 @@ function Frame({ current, rail: items, children }: { current: string; rail: Rail
   return (
     <AppShell topbar={<TopBar crumb={CLIENT} />} sidebar={<NavList sections={NAV} activePath="/stapel" />}>
       <div style={{ display: "grid", gridTemplateColumns: "240px minmax(0, 1fr)", gap: "var(--space-6)", padding: "var(--space-6)" }}>
-        <StepRail items={items} ariaLabel="Schritte der Stapelabnahme" head={<p className="v2sub">Stapelabnahme · 09-2026-Ludwig</p>} />
+        <StepRail items={items} ariaLabel="Schritte der Stapelabnahme" head={<p className="lw-ui-hint">Stapelabnahme · 09-2026-Ludwig</p>} />
         <div style={{ display: "grid", gap: "var(--space-4)", alignContent: "start", minWidth: 0 }}>{children}</div>
       </div>
       <span hidden>{current}</span>
@@ -86,13 +86,11 @@ function StepHead({ step, title, sentence, next }: { step: number; title: string
   return (
     <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: "var(--space-4)" }}>
       <div>
-        <p className="v2sub" style={{ margin: 0 }}>
-          Schritt {step}
-        </p>
-        <h1 style={{ margin: 0, fontSize: "var(--fs-h2)" }}>{title}</h1>
-        <p className="v2sub" style={{ margin: 0 }}>
-          {sentence}
-        </p>
+        <div className="lw-ui-overline">Schritt {step}</div>
+        <h1 className="lw-h2" style={{ margin: 0 }}>
+          {title}
+        </h1>
+        <p className="lw-ui-lead">{sentence}</p>
       </div>
       <Button variant="primary">{next}</Button>
     </div>

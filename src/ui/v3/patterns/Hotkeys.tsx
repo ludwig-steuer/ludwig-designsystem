@@ -77,12 +77,12 @@ export function HotkeyLegend({
   );
   return (
     <Dialog open={open} onClose={() => setOpen(false)} title="Tasten" kicker="Zusatzweg" size="md">
-      <p style={{ marginTop: 0 }}>
+      <p className="lw-ui-lead">
         Jede dieser Handlungen geht auch mit der Maus — die Taste steht am jeweiligen Knopf.
       </p>
       {groups.map((g) => (
         <div key={g.title} style={{ marginTop: "var(--space-4)" }}>
-          <div className="lw-overline">{g.title}</div>
+          <h3 className="lw-ui-group">{g.title}</h3>
           {g.keys.map((t) => (
             <div className="v2fields__row" key={`${g.title}-${t.key}`}>
               <span>{t.label}</span>

@@ -30,8 +30,9 @@
    one go. **The head, not the bar inside it**: sticky never leaves its parent.
    The background is set, so the head covers what passes beneath. */
 .v2card__h--sticky { position: sticky; top: 0; z-index: 5; }
-.v2card__h .title { font-size: var(--fs-ui-md); font-weight: 600; color: var(--color-text); }
-.v2card__h .sub { font-size: var(--fs-ui-sm); color: var(--color-text-subtle); margin-top: 1px; }
+/* Card head (0220 role 4): `h2`/`h3` by position, one look. Sub-line role 8. */
+.v2card__h .title { margin: 0; font-size: var(--fs-ui-md); font-weight: 600; color: var(--color-text); }
+.v2card__h .sub { font-size: var(--fs-ui-sm); color: var(--color-text-muted); margin-top: 1px; }
 /* Buttons bring their size; a text link inherits it (`.v2link` says `inherit`
    so it can sit in running text). Before 2026-09-10 it inherited the body's
    16 px here and stood larger than the title. */
@@ -563,7 +564,7 @@
 .pz-dlg { display: flex; flex-direction: column; gap: var(--space-5); }
 /* In the dialog the phases share its width — five fit without wrapping. */
 .pz-dlg .pz-stepper > div { flex: 1 1 0; min-width: 0; }
-.pz-dlg__head { font-size: var(--fs-ui-sm); font-weight: 600; margin: 0 0 var(--space-2); }
+.pz-dlg__head { font-size: var(--fs-ui-sm); font-weight: 700; color: var(--color-text-muted); margin: 0 0 var(--space-2); } /* group head, 0220 role 5 */
 .pz-dlg__now { display: grid; grid-template-columns: 5rem 1fr; gap: var(--space-2) var(--space-4); margin: 0; }
 .pz-dlg__now dt { font-weight: 600; color: var(--color-text-subtle); font-size: var(--fs-ui-sm); }
 .pz-dlg__now dd { margin: 0; }
@@ -834,6 +835,7 @@ a.v2kpi--link:focus-visible { outline: 2px solid var(--color-focus); outline-off
 }
 .v2fields--soft { background: var(--color-bg-soft); }
 .v2fields__h {
+  margin-top: 0;
   font-size: var(--fs-ui-sm); font-weight: 700;
   color: var(--color-text-muted);
   border-bottom: 1px solid var(--color-border-subtle);
@@ -959,7 +961,7 @@ a.v2kpi--link:focus-visible { outline: 2px solid var(--color-focus); outline-off
   font-size: var(--fs-ui-sm); font-weight: 700;
   color: var(--color-text-muted); margin-bottom: 10px;
 }
-.v2prose__body { font-size: var(--fs-ui); line-height: 1.6; color: var(--color-text); }
+.v2prose__body { font-size: var(--fs-ui); line-height: var(--lh-ui); color: var(--color-text); }
 
 /* --- State header card --------------------------------------------------
  * Exception to "border OR shadow": the coloured border carries the state, the
@@ -983,7 +985,8 @@ a.v2kpi--link:focus-visible { outline: 2px solid var(--color-focus); outline-off
 .v2callout--success .v2callout__kicker { color: var(--color-success); }
 .v2callout--warning .v2callout__kicker { color: var(--color-warning); }
 .v2callout--danger .v2callout__kicker { color: var(--color-danger); }
-.v2callout__title { font-size: var(--fs-ui-lg); font-weight: 600; color: var(--color-primary); margin-bottom: 4px; }
+/* Titles of the productive register stand in `text` (0220, Owner 2026-10-01). */
+.v2callout__title { font-size: var(--fs-ui-lg); font-weight: 600; color: var(--color-text); margin-bottom: 4px; }
 .v2callout__sub { font-size: var(--fs-ui); color: var(--color-text-muted); }
 .v2callout--success .v2callout__sub { color: var(--color-success); }
 .v2callout--warning .v2callout__sub { color: var(--color-warning); }
@@ -1048,7 +1051,7 @@ a.v2kpi--link:focus-visible { outline: 2px solid var(--color-focus); outline-off
   font-size: var(--fs-ui-xs); font-weight: 600;
   color: var(--color-text-subtle); margin-bottom: 3px;
 }
-.v2dlg__title { font-size: var(--fs-ui-lg); font-weight: 600; color: var(--color-text); }
+.v2dlg__title { margin: 0; font-size: var(--fs-ui-lg); font-weight: 600; color: var(--color-text); }
 /* `.v2dlg__close` is gone since 0092: the cross is an `IconButton`. */
 .v2dlg__body { padding: 18px; overflow-y: auto; font-size: var(--fs-ui); line-height: 1.55; color: var(--color-text); }
 .v2dlg__foot {
@@ -1427,7 +1430,7 @@ select.v2in { padding-right: 26px; }
   background: var(--color-surface-head);
   border-bottom: 1px solid var(--color-border);
   font-size: var(--fs-ui-sm); font-weight: 700;
-  color: var(--color-text-subtle);
+  color: var(--color-text-muted); /* group head, 0220 role 5 */
   display: flex; align-items: center; justify-content: space-between; gap: 8px;
 }
 /* As a `<summary>` (TodoList, 0187): every group folds, one may start folded.
@@ -1465,7 +1468,7 @@ summary.v2lp__grp:focus-visible { outline: 2px solid var(--color-focus); outline
   padding: 22px 24px;
   min-height: 220px;
 }
-.v2dp__title { font-size: var(--fs-ui-lg); font-weight: 600; color: var(--color-text); margin-bottom: 4px; }
+.v2dp__title { font-size: var(--fs-ui-lg); font-weight: 600; color: var(--color-text); margin: 0 0 4px; }
 .v2dp__sub { font-size: var(--fs-ui-sm); color: var(--color-text-muted); margin-bottom: var(--space-4); }
 .v2dp__empty { font-size: var(--fs-ui); color: var(--color-text-subtle); }
 
@@ -1599,8 +1602,8 @@ a.v3jump__hit:focus-visible { outline: 2px solid var(--color-focus); outline-off
 .v2cmd__empty { padding: var(--space-4) var(--space-2); font-size: var(--fs-ui); color: var(--color-text-subtle); }
 .v2cmd__grp [cmdk-group-heading] {
   padding: var(--space-2) var(--space-2) var(--space-1);
-  font-size: var(--fs-ui-sm); font-weight: 600;
-  color: var(--color-text-muted);
+  font-size: var(--fs-ui-xs); font-weight: 600; /* menu group = overline step, 0220 role 6 */
+  color: var(--color-text-subtle);
 }
 .v2cmd__item {
   display: flex; align-items: center; gap: var(--space-2);
@@ -1949,7 +1952,7 @@ a.ki__src:hover { text-decoration: underline; color: var(--color-accent-700); }
 .s3zone__name { font-size: var(--fs-ui-lg); font-weight: 600; color: var(--color-text); }
 /* The running text of a zone — the case summary. One step below the body
    register; a bare `<p>` inherited 16 px and outgrew its neighbours (0187). */
-.s3zone__text { font-size: var(--fs-body-sm); line-height: var(--lh-body-sm); margin: 0 0 var(--space-4); }
+.s3zone__text { font-size: var(--fs-ui); line-height: var(--lh-ui); margin: 0 0 var(--space-4); }
 .s3zone__line { font-size: var(--fs-ui-sm); color: var(--color-text-muted); margin-top: 2px; }
 .s3zone__grid {
   display: grid; grid-template-columns: 1fr 1fr; gap: 6px 14px; font-size: var(--fs-ui-sm);
@@ -2052,16 +2055,21 @@ a.ki__src:hover { text-decoration: underline; color: var(--color-accent-700); }
   border: 1px solid var(--color-border);
   color: var(--color-text-muted);
 }
+/* State title (0220 role 17, Owner 2026-10-01): the card-head step, not
+   larger than the head of the card it sits in; a message, not a heading. */
 .v2empty__title {
   margin: 0;
-  font-size: var(--fs-body-lg);
+  font-size: var(--fs-ui-md);
+  line-height: var(--lh-ui-md);
   font-weight: 600;
   color: var(--color-text);
 }
+/* Lead (role 11): the productive body step, muted. */
 .v2empty__desc {
   margin: 0;
   max-width: var(--content-measure);
-  font-size: var(--fs-body-sm);
+  font-size: var(--fs-ui);
+  line-height: var(--lh-ui);
   color: var(--color-text-muted);
 }
 .v2empty__actions { display: flex; gap: var(--space-2); }
@@ -2205,7 +2213,7 @@ button.v2ibtn[aria-disabled="true"] > * { opacity: 0.5; }
   gap: var(--space-4); flex-wrap: wrap;
 }
 .v2phead__over {
-  font-size: var(--fs-ui-2xs); font-weight: 600;
+  font-size: var(--fs-ui-xs); font-weight: 600; /* overline, 0220 role 6 */
   color: var(--color-text-subtle); margin-bottom: 2px;
 }
 .v2phead__titlerow { display: flex; align-items: center; gap: var(--space-3); flex-wrap: wrap; }
@@ -2313,7 +2321,7 @@ button.v2ibtn[aria-disabled="true"] > * { opacity: 0.5; }
 }
 .v2cmb__grp {
   padding: 6px 8px 2px;
-  font-size: var(--fs-ui-2xs); font-weight: 600;
+  font-size: var(--fs-ui-xs); font-weight: 600; /* menu group = overline step, 0220 role 6 */
   color: var(--color-text-subtle);
 }
 .v2cmb__opt {
@@ -2377,7 +2385,7 @@ button.v2ibtn[aria-disabled="true"] > * { opacity: 0.5; }
 /* --- Timeline (0023) — the history ---------------------------------------- */
 .v2tl { display: grid; gap: 2px; }
 .v2tl__day {
-  font-size: var(--fs-ui-2xs); font-weight: 600;
+  font-size: var(--fs-ui-xs); font-weight: 600; /* overline step, 0220 role 6 */
   color: var(--color-text-subtle);
   padding: var(--space-3) 0 4px;
 }
@@ -2540,10 +2548,10 @@ button.v2ibtn[aria-disabled="true"] > * { opacity: 0.5; }
 .v2mk__list:last-child { margin-bottom: 0; }
 .v2mk__h { font-weight: 600; line-height: 1.3; margin: var(--space-6) 0 var(--space-2); }
 .v2mk__h:first-child { margin-top: 0; }
-.v2mk__h--1 { font-size: var(--fs-ui-lg); color: var(--color-primary-700); }
-.v2mk__h--2 { font-size: var(--fs-ui-md); color: var(--color-primary-700); }
-.v2mk__h--3 { font-size: var(--fs-ui); }
-.v2mk__h--4 { font-size: var(--fs-ui-sm); color: var(--color-text-muted); }
+/* Two levels, always below the surface the text sits in (0220 §2.7):
+   `#`/`##` → h3, `###` and deeper → h4; titles in `text`, never primary. */
+.v2mk__h--3 { font-size: var(--fs-ui-md); color: var(--color-text); }
+.v2mk__h--4 { font-size: var(--fs-ui); color: var(--color-text); }
 .v2mk__code { font-family: var(--font-mono); font-size: 0.92em; }
 .v2mk__pre {
   margin: 0 0 11px; padding: var(--space-3);
@@ -2750,6 +2758,7 @@ button.v2ibtn[aria-disabled="true"] > * { opacity: 0.5; }
   display: flex; align-items: center; gap: var(--space-3); flex-wrap: wrap;
   font-size: var(--fs-ui-xl); font-weight: 600; color: var(--color-text); line-height: 1.25;
 }
+.v2ehead__name { margin: 0; font: inherit; color: inherit; }
 /* The meta line is layout, not a component: a wrapping row with separators the
    caller fills with Badge, Link and InlineEdit. */
 .v2ehead__meta {
@@ -2976,7 +2985,7 @@ button.v2ibtn[aria-disabled="true"] > * { opacity: 0.5; }
   border-top: 1px solid var(--color-border-subtle);
   font-size: var(--fs-ui-sm);
   line-height: var(--lh-ui-sm);
-  font-weight: 600;
+  font-weight: 700; /* group head, 0220 role 5 */
   color: var(--color-text-muted);
 }
 .v2cl__count { font-weight: 400; }
@@ -3418,11 +3427,19 @@ button.v2ibtn[aria-disabled="true"] > * { opacity: 0.5; }
 .v2wiz__step[data-state="error"] .v2wiz__name { color: var(--color-danger); font-weight: 600; }
 
 .v2wiz__body { padding: var(--space-5) var(--space-6); min-height: 220px; }
+/* Step head (0220): surface title `h2` and lead, then the content. */
+.v2wiz__head { display: flex; flex-direction: column; gap: var(--space-1); margin-bottom: var(--space-5); }
 .v2wiz__foot {
   display: flex; align-items: center; gap: var(--space-2);
   padding: var(--space-3) var(--space-6);
   border-top: 1px solid var(--color-border);
   background: var(--color-surface-head);
+}
+/* Progress left, the caller's buttons right (0220, Owner 2026-10-01). */
+.v2wiz__progress {
+  flex: 1; min-width: 0;
+  font-size: var(--fs-ui-sm); line-height: var(--lh-ui-sm);
+  color: var(--color-text-muted); font-variant-numeric: tabular-nums;
 }
 
 /* --- Button in a table row (V1, defects from 0008 and 0010) ----------------
@@ -4393,7 +4410,7 @@ a.v3prov:focus-visible { text-decoration: underline; }
 .v3msel__search { margin: var(--space-2); box-sizing: border-box; width: calc(100% - 2 * var(--space-2)); font-size: var(--fs-ui-sm); }
 .v3msel__list { overflow-y: auto; padding: var(--space-1); outline: none; }
 .v3msel__list:focus-visible { box-shadow: inset 0 0 0 2px var(--color-focus); }
-.v3msel__group { padding: 6px 8px 2px; font-size: var(--fs-ui-2xs); font-weight: 600; color: var(--color-text-subtle); }
+.v3msel__group { padding: 6px 8px 2px; font-size: var(--fs-ui-xs); font-weight: 600; color: var(--color-text-subtle); } /* menu group, 0220 role 6 */
 .v3msel__opt {
   display: flex; align-items: center; gap: 8px;
   padding: 5px 8px; border-radius: var(--radius-sm);
@@ -4635,7 +4652,7 @@ a.v3bbr__val:hover { text-decoration-color: currentColor; }
 /* Dialog */
 .cl-dlg { display: flex; flex-direction: column; gap: var(--space-5); }
 .cl-dlg__section { display: grid; gap: var(--space-1); }
-.cl-dlg__head { font-size: var(--fs-ui-xs); font-weight: 600; color: var(--color-text-subtle); margin: 0; }
+.cl-dlg__head { font-size: var(--fs-ui-sm); font-weight: 700; color: var(--color-text-muted); margin: 0; } /* group head, 0220 role 5 */
 .cl-dlg__word { display: flex; align-items: center; gap: var(--space-2); font-size: var(--fs-ui-lg); font-weight: 600; }
 .cl-dlg__word .v2sub { font-size: var(--fs-ui-xs); font-weight: 400; }
 .cl-dlg__why { margin: 0; font-size: var(--fs-ui-sm); }
@@ -4658,7 +4675,7 @@ a.v3bbr__val:hover { text-decoration-color: currentColor; }
   display: flex; justify-content: space-between; align-items: center; gap: var(--space-3);
   padding: 12px 16px; background: var(--color-surface-head);
   border-top: 1px solid var(--color-border); border-bottom: 1px solid var(--color-border);
-  font-size: var(--fs-ui-sm); font-weight: 700;
+  font-size: var(--fs-ui-sm); font-weight: 700; color: var(--color-text-muted); /* group head, 0220 role 5 */
 }
 .v3task > section:first-child > .v3task__grp { border-top: 0; }
 .v3task__list { list-style: none; margin: 0; padding: 0; }

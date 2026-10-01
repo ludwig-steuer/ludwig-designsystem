@@ -49,8 +49,10 @@ export function CardHead({
   meta,
   actions,
   sticky,
+  headingLevel = 2,
 }: {
   title: ReactNode;
+  /** Sub-line (role 8, 0220): one line under the title — never a paragraph. */
   sub?: ReactNode;
   /** Symbol left of title and sub-line (0049) — says which entity this card is about. */
   icon?: ReactNode;
@@ -69,12 +71,19 @@ export function CardHead({
    * than wrong.
    */
   sticky?: boolean;
+  /**
+   * The title's `h` level, by position (0220 §2): 2 for a card right under
+   * the page (default), 3 under a section title, inside a drawer, dialog or
+   * detail pane. It looks the same at either level.
+   */
+  headingLevel?: 2 | 3;
 }) {
+  const Title = headingLevel === 3 ? "h3" : "h2";
   return (
     <div className={sticky ? "v2card__h v2card__h--sticky" : "v2card__h"}>
       {icon ? <span className="v2card__ico">{icon}</span> : null}
       <div>
-        <div className="title">{title}</div>
+        <Title className="title">{title}</Title>
         {sub ? <div className="sub">{sub}</div> : null}
       </div>
       {meta ? <div className="v2card__meta">{meta}</div> : null}

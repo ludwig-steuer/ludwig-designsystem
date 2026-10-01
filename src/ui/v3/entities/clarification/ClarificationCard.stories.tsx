@@ -95,7 +95,7 @@ export const InBatchReview: Story = {
           onResolve={async () => {}}
           onDefer={async () => {}}
         />
-        <p className="v2sub">{picked ? `Drawer öffnet: ${picked}` : "Klick auf eine Zeile öffnet einen Drawer."}</p>
+        <p className="lw-ui-hint">{picked ? `Drawer öffnet: ${picked}` : "Klick auf eine Zeile öffnet einen Drawer."}</p>
         {/* The thread of the case under the card (0214): the question on screen last, marked. */}
         <ClarificationThread items={THREAD} currentId="q4" />
       </div>

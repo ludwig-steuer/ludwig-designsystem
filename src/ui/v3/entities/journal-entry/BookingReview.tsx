@@ -107,7 +107,7 @@ export function BookingReview({
               {head ? (
                 <div className="v3bkr__head">
                   {entries.length > 1 ? (
-                    <span className="lw-overline">
+                    <span className="lw-ui-overline">
                       Satz {i + 1} von {entries.length}
                     </span>
                   ) : null}
@@ -148,7 +148,7 @@ export function BookingReview({
               {rationale ? <AiBookingNotesBody rationale={e.rationale ?? null} sources={[...(e.sources ?? [])]} /> : null}
               {on("checks") && e.checks && e.checks.length > 0 ? (
                 <section className="v3bkr__block">
-                  <h4 className="lw-overline v3bkr__label">Prüfpunkte</h4>
+                  <h4 className="lw-ui-group v3bkr__label">Prüfpunkte</h4>
                   <CheckItems items={[...e.checks]} />
                 </section>
               ) : null}

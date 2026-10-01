@@ -374,7 +374,7 @@ function Group({
   if (rows.length === 0 && !lead && !children) return null;
   return (
     <section className="v2fields v2fields--bare v2rrfacts__group">
-      <div className="v2fields__h">{title}</div>
+      <h3 className="v2fields__h">{title}</h3>
       {lead ? <p className="v2rrfacts__sentence">{lead}</p> : null}
       {rows.length > 0 ? <FieldList tone="bare" rows={rows} /> : null}
       {children}

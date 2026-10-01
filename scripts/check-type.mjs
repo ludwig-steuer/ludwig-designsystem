@@ -13,6 +13,16 @@
  *  - CSS `font-weight:` and TSX `fontWeight:` — only 400, 500, 600, 700, `inherit`, `normal`.
  *  - CSS `font-family:` and TSX `fontFamily:` — only `var(--font-…)`, `inherit`.
  *
+ * And the roles of 0220 (A14, owner 2026-10-01), in TSX:
+ *  - T-H1 `<h1>`–`<h6>` without `className`: Tailwind's preflight makes a bare
+ *    heading inherit its surroundings — title and lead look the same.
+ *  - T-H2 `<h5>`, `<h6>`: a page has four levels, `h1`–`h4`.
+ *  - T-SUB `<p>` with `sub`/`v2sub`: the sub-line is one line, never a paragraph
+ *    (running text `lw-ui-text`, lead `lw-ui-lead`, hint `lw-ui-hint`).
+ *  - T-REG the reading register (`lw-h1`…`lw-h4`, `lw-body`, `lw-body-sm`,
+ *    `lw-caption`, `lw-overline`, `lw-lede`, `lw-display`) in productive code
+ *    (`src/ui/v3`, `src/showcase`, stories excepted) — there it is `lw-ui-*`.
+ *
  * A ratchet like `check:language`: `scripts/type-baseline.json` counts the
  * findings per file that existed on 2026-09-27, and a file may only go down.
  * New files start at zero.
@@ -55,9 +65,63 @@ function files(dir) {
   return out;
 }
 
-/** Every hand-written type value in one file, with its line. */
-export function findings(path, text) {
+// 0220: the role rules. They read the whole text, since a JSX tag may span lines.
+const READING = /\blw-(h[1-4]|body-sm|body|caption|overline|lede|display)\b/g;
+
+function productive(path) {
+  return /^src\/(ui\/v3|showcase)\//.test(path) && !path.endsWith(".stories.tsx");
+}
+
+/**
+ * Markup inside a template string is data — the HTML of a foreign document in
+ * a story — not our JSX. Blank the literal parts, keep the lines; `${…}` stays
+ * code and may open a template of its own (`${encodeURIComponent(`<h1>…`)}`).
+ */
+function blankTemplates(src) {
+  const out = src.split("");
+  const stack = []; // "t" = template literal, number = brace depth inside `${`
+  for (let i = 0; i < src.length; i++) {
+    const c = src[i];
+    const top = stack[stack.length - 1];
+    if (top === "t") {
+      if (c === "\\") {
+        if (src[i + 1] !== "\n") out[i + 1] = " ";
+        out[i] = " ";
+        i++;
+      } else if (c === "`") stack.pop();
+      else if (c === "$" && src[i + 1] === "{") {
+        stack.push(0);
+        i++;
+      } else if (c !== "\n") out[i] = " ";
+    } else if (c === "`") stack.push("t");
+    else if (typeof top === "number") {
+      if (c === "{") stack[stack.length - 1]++;
+      else if (c === "}") top === 0 ? stack.pop() : stack[stack.length - 1]--;
+    }
+  }
+  return out.join("");
+}
+
+function roleFindings(path, source) {
   const found = [];
+  const text = blankTemplates(source);
+  const lineOf = (index) => text.slice(0, index).split("\n").length;
+  for (const m of text.matchAll(/<h([1-6])\b([^>]*)>/g)) {
+    if (m[1] === "5" || m[1] === "6") found.push({ line: lineOf(m.index), text: `T-H2 <h${m[1]}>` });
+    else if (!/\bclassName\s*=/.test(m[2])) found.push({ line: lineOf(m.index), text: `T-H1 <h${m[1]}> without className` });
+  }
+  for (const m of text.matchAll(/<p\b[^>]*\bclassName\s*=\s*[^>]*?\b(v2sub|sub)\b[^>]*>/g)) {
+    found.push({ line: lineOf(m.index), text: `T-SUB <p> with ${m[1]}` });
+  }
+  if (productive(path)) {
+    for (const m of text.matchAll(READING)) found.push({ line: lineOf(m.index), text: `T-REG ${m[0]}` });
+  }
+  return found;
+}
+
+/** Every hand-written type value and role finding in one file, with its line. */
+export function findings(path, text) {
+  const found = path.endsWith(".tsx") ? roleFindings(path, text) : [];
   const lines = text.split("\n");
   lines.forEach((line, i) => {
     if (path.endsWith(".css")) {
@@ -95,6 +159,20 @@ function selfTest() {
   expect(c.includes("font-weight: 650"), "odd weight");
   expect(c.includes("font-family: monospace"), "family");
   expect(t.length === 1 && t[0] === "fontSize: 13", "TSX number size, weight 600 and token family pass");
+  const roles = (path, src) => findings(path, src).map((f) => f.text);
+  expect(roles("src/a.tsx", "<h2>Titel</h2>")[0] === "T-H1 <h2> without className", "bare h2");
+  expect(roles("src/a.tsx", '<h2\n  className="lw-ui-section"\n>Titel</h2>').length === 0, "h2 with class over lines");
+  expect(roles("src/a.tsx", '<h5 className="x">T</h5>')[0] === "T-H2 <h5>", "h5");
+  expect(roles("src/a.tsx", '<p className="sub">Satz.</p>')[0] === "T-SUB <p> with sub", "p.sub");
+  expect(roles("src/a.tsx", '<p className="v2sub v2acc">Satz.</p>')[0] === "T-SUB <p> with v2sub", "p.v2sub");
+  expect(roles("src/a.tsx", '<div className="sub">x</div><span className="v2sub">y</span>').length === 0, "sub-line outside p passes");
+  expect(roles("src/ui/v3/x/A.tsx", '<div className="lw-overline">x</div>')[0] === "T-REG lw-overline", "reading class in v3");
+  expect(roles("src/ui/v3/x/A.tsx", '<div className="lw-ui-overline lw-numeric">x</div>').length === 0, "productive class passes");
+  expect(roles("src/ui/v3/x/A.stories.tsx", '<p className="lw-body-sm">x</p>').length === 0, "stories may show the reading register");
+  expect(roles("src/a.tsx", "const html = `<h1>ACME GmbH</h1>`;\n<h2>x</h2>")[0] === "T-H1 <h2> without className", "template string is data, line kept");
+  expect(findings("src/a.tsx", "const html = `\n<h1>ACME</h1>\n`;\n<h3>x</h3>")[0].line === 4, "line numbers survive blanking");
+  expect(roles("src/a.tsx", "const u = `data:${enc(`\n<h1>ACME</h1>\n`)}`;").length === 0, "nested template is data too");
+  expect(roles("src/a.tsx", "<h2 className={`a ${b}`}>x</h2>").length === 0, "class from a template still counts");
   console.log("check:type — self-test ok.");
 }
 
@@ -131,7 +209,7 @@ for (const [f, n] of Object.entries(counts)) {
   const allowed = baseline[f] ?? 0;
   if (n > allowed) {
     bad++;
-    console.log(`  ✗ ${f}: ${n} hand-written type values, baseline ${allowed}`);
+    console.log(`  ✗ ${f}: ${n} findings, baseline ${allowed}`);
     for (const d of detail[f]) console.log(`      ${d.line}: ${d.text}`);
   } else if (args.includes("--list")) {
     console.log(`  · ${f}: ${n} (baseline ${allowed})`);
@@ -140,9 +218,10 @@ for (const [f, n] of Object.entries(counts)) {
 const total = Object.values(counts).reduce((a, b) => a + b, 0);
 if (bad) {
   console.log(
-    `\ncheck:type — ${bad} files with new hand-written type values. Take size, weight and family from the scale ` +
-      "(`--fs-*`, 400/500/600/700, `--font-*`, src/styles/tokens.css).",
+    `\ncheck:type — ${bad} files with new findings. Take size, weight and family from the scale ` +
+      "(`--fs-*`, 400/500/600/700, `--font-*`, src/styles/tokens.css); headings, sub-lines and text from " +
+      "the roles of docs/design-guidelines.md §2a (0220).",
   );
   process.exit(1);
 }
-console.log(`check:type — ok. ${total} older hand-written values left in ${Object.keys(counts).length} files (baseline).`);
+console.log(`check:type — ok. ${total} older findings left in ${Object.keys(counts).length} files (baseline).`);

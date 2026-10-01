@@ -290,3 +290,20 @@ Props`), v3 exportiert ihn als `WizardProps`. Import-Closure wie erwartet:
   Inline-Styles.
 - **Die `.wz*`-Regeln in `src/styles/components.css` bleiben unangetastet**,
   wie die Spec sagt: sie fallen, wenn die App ihren v1-`Wizard` löscht.
+
+## Nachtrag 2026-10-01 — Schrittkopf und Fortschritt (0220)
+
+Auftrag lldev1 (Owner-Befund): Im Rahmen fehlte ein definierter Schrittkopf.
+Die App setzte rohe `<h2>` und `<p className="sub">`, die durch Preflight
+beide als 16 px normal liefen. Gebaut nach `0220-typography-roles.md` §7:
+
+| Prop | Typ | Pflicht | Bedeutung | Nachweis |
+|---|---|---|---|---|
+| `WizardStep.title` | `string` | nein | Flächentitel `h2` (`lw-ui-section`, 16/600 text) über dem Inhalt; ohne ihn kein Kopf | `Filled`, `States` |
+| `WizardStep.intro` | `ReactNode` | nein | Einleitung `p.lw-ui-lead` (13,5 muted, ≤ 68ch) | `Filled`, `InUse` |
+| `progress` | `ReactNode` | nein | Fortschritt links im Fuß, 12,5 muted `tnum`, `aria-live="polite"` | `WithFooter`, `InUse` |
+
+Der Fuß hat jetzt den Fortschritt links und `footer` rechts, also Zurück und
+Weiter beieinander (Owner 2026-10-01). Ein Fuß entsteht, sobald `footer`
+oder `progress` gesetzt ist. Die `.wz*`-Regeln in `components.css` fallen,
+sobald die App umgestellt ist (lldev1).

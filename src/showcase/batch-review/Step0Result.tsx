@@ -185,7 +185,7 @@ function Report({ vm }: { vm: Step0VM }): ReactNode {
       <CardHead title="Was Ludwig meldet" sub={`Übergabebericht, Durchgang ${vm.run.number}`} />
       <div className="v3boxbody s0-report">
         {vm.report === null ? (
-          <p className="v2sub">Ludwig hat keinen Bericht hinterlassen.</p>
+          <p className="lw-ui-hint">Ludwig hat keinen Bericht hinterlassen.</p>
         ) : (
           <>
             <h3 className="s0-report__head">Auffälligkeiten</h3>
@@ -196,7 +196,7 @@ function Report({ vm }: { vm: Step0VM }): ReactNode {
                 ))}
               </ul>
             ) : (
-              <p className="v2sub">Keine Auffälligkeiten.</p>
+              <p className="lw-ui-hint">Keine Auffälligkeiten.</p>
             )}
             <Disclosure tone="quiet" summary="Was Ludwig gemacht hat">
               <Markdown text={vm.report.summary} />

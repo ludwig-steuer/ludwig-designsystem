@@ -85,7 +85,7 @@ export const Opened: Story = {
     return (
       <div style={{ minHeight: 420 }}>
         <Button onClick={() => setOpen(true)}>Beleg ansehen</Button>
-        {opened ? <p className="v2sub">{opened}</p> : null}
+        {opened ? <p className="lw-ui-hint">{opened}</p> : null}
         <SourceDocumentDrawer
           open={open}
           onClose={() => setOpen(false)}

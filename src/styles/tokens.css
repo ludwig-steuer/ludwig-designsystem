@@ -319,6 +319,81 @@
   color: var(--color-text-muted);
 }
 
+/* ==========================================================================
+   PRODUCTIVE ROLES (0220, A14) — for text a caller sets freely in `children`.
+
+   `lw-ui-*` is the productive register (every v3 surface), `lw-*` without
+   `ui` is the reading register above (login, help, marketing). What a
+   building block carries (PageHeader, CardHead, Drawer, Field …) stays in
+   the block; these six exist for the rest. Type only: size, line, weight,
+   colour, measure — spacing belongs to the layout around them.
+
+   Contrast on white / bg-soft / surface-head (WCAG 1.4.3 AA, 4.5:1):
+   text 13.77 / 12.71 / 13.29 · muted 6.69 / 6.17 / 6.45 · subtle 4.88 / 4.51 / 4.71.
+   ========================================================================== */
+
+/* Section title: above two or more cards that belong together. `h2`. */
+.lw-ui-section {
+  margin: 0;
+  font-family: var(--font-sans);
+  font-weight: 600;
+  font-size: var(--fs-ui-lg);
+  line-height: var(--lh-ui-lg);
+  color: var(--color-text);
+}
+
+/* Group head: names one of two or more groups inside a surface. `h3`/`h4`. */
+.lw-ui-group {
+  margin: 0;
+  font-family: var(--font-sans);
+  font-weight: 700;
+  font-size: var(--fs-ui-sm);
+  line-height: var(--lh-ui-sm);
+  color: var(--color-text-muted);
+}
+
+/* Overline: places a title above it — never a title of its own, never `h`.
+   Alone only as the group word in a menu or listbox. */
+.lw-ui-overline {
+  font-family: var(--font-sans);
+  font-weight: 600;
+  font-size: var(--fs-ui-xs);
+  line-height: var(--lh-ui-xs);
+  color: var(--color-text-subtle);
+}
+
+/* Running text: THE body text of the interface — sentences in a surface. */
+.lw-ui-text {
+  margin: 0;
+  max-width: var(--content-measure);
+  font-family: var(--font-sans);
+  font-weight: 400;
+  font-size: var(--fs-ui);
+  line-height: var(--lh-ui);
+  color: var(--color-text);
+}
+
+/* Lead: directly under a page, section or surface title; two sentences at most. */
+.lw-ui-lead {
+  margin: 0;
+  max-width: var(--content-measure);
+  font-family: var(--font-sans);
+  font-weight: 400;
+  font-size: var(--fs-ui);
+  line-height: var(--lh-ui);
+  color: var(--color-text-muted);
+}
+
+/* Hint: under a field, an option or a block; one or two sentences. */
+.lw-ui-hint {
+  margin: 0;
+  font-family: var(--font-sans);
+  font-weight: 400;
+  font-size: var(--fs-ui-sm);
+  line-height: var(--lh-ui-sm);
+  color: var(--color-text-subtle);
+}
+
 .lw-mono, code, kbd, samp {
   font-family: var(--font-mono);
   font-size: 0.92em;

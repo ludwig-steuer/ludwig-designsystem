@@ -226,7 +226,7 @@ export const Interactive: Story = {
             />
           ))}
         </Frame>
-        <p className="v2sub" style={{ paddingLeft: "var(--space-4)" }}>
+        <p className="lw-ui-hint" style={{ paddingLeft: "var(--space-4)" }}>
           {open ? `Geöffnet: Personenkonto ${open}` : "Noch nichts geöffnet."}
         </p>
       </div>

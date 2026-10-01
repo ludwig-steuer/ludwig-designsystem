@@ -92,7 +92,9 @@ export function EntityHeader({
         <div className="v2ehead__id">
           {overline ? <div className="v2ehead__over">{overline}</div> : null}
           <div className="v2ehead__title">
-            <span>{title}</span>
+            {/* The page title (0220 role 1): the one `h1` of a detail page. The
+                status sits beside it, not inside it. */}
+            <h1 className="v2ehead__name">{title}</h1>
             {status}
           </div>
           {meta ? <div className="v2ehead__meta">{meta}</div> : null}

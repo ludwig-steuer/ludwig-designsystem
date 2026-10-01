@@ -93,7 +93,7 @@ export function BankTransactionFacts({
         // right-aligned prose is unreadable. It borrows the frame and the
         // heading, not the row.
         <section className={`v2fields${tone === "bare" ? " v2fields--bare" : ""}`}>
-          <div className="v2fields__h">Verwendungszweck</div>
+          <h3 className="v2fields__h">Verwendungszweck</h3>
           <div className="v2btxf__purpose">
             <BankTransactionPurpose purpose={t.purpose} tags={t.sepaTags} variant="block" />
           </div>

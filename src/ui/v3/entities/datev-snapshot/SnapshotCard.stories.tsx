@@ -169,7 +169,7 @@ export const Interactive: Story = {
             setLog((l) => [...l, "Import angestoßen"]);
           }}
         />
-        <p className="v2sub">{log.length ? log.join(" · ") : "Noch nichts geschehen."}</p>
+        <p className="lw-ui-hint">{log.length ? log.join(" · ") : "Noch nichts geschehen."}</p>
       </div>
     );
   },

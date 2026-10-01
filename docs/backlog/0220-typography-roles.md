@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Status | spec — **Entwurf zur Owner-Abnahme**, gebaut wird erst danach |
+| Status | Abnahme — Entwurf vom Owner freigegeben (2026-10-01, „durchführen“), gebaut am 2026-10-01; fremde Abnahme steht aus |
 | Stufe | keine Komponente: Regel (`design-guidelines.md`, neuer Entscheid A14), sechs Rollenklassen in `tokens.css`, Erweiterung `scripts/check-type.mjs`, Typografie-Story; Anwendungsfall `Wizard` (Nachtrag 0079) |
 | Klassen-Test | „Ergäbe das auch in einer Versicherungs-App Sinn?" → ja, Schriftrollen und Überschriften-Ordnung sind fachfrei |
 | Quelle | Owner-Befund 2026-10-01 über lldev1 („das System soll die Schnitte genauer definieren, sub ist kein Fließtext"; „Typo und Typo-Verwendung festlegen, wo Überschriften verwendet werden, wie viele Ebenen, welche Ordnung, was sind Box-Header") |
@@ -88,7 +88,8 @@ sie nicht (heute 4 × `lw-overline`, siehe Abweichungen).
 4. **Das Element folgt der Lage, die Gestalt folgt der Rolle.** Ein
    Kartenkopf sieht als `h2` und als `h3` gleich aus. Bausteine mit Titel
    haben die Ebene ihres häufigsten Orts als Vorgabe und `headingLevel` für
-   den anderen (CardHead 2|3, FieldList 3|4, EntityHeader 1|2|3).
+   den anderen (CardHead 2|3, FieldList 3|4). EntityHeader steht fest auf `h1`
+   (siehe Nachtrag Bau).
 5. **Drawer und Dialog sind eigene Wurzeln:** Titel `h2` (wie Radix
    `Dialog.Title`), darin Gruppen `h3`. Sie hängen nicht an der Ebene der
    Seite darunter. `DetailPane` und der Wizard-Schritt gehören zur Seite:
@@ -222,6 +223,47 @@ Ebenen-Folge ohne Sprung und genau ein `h1` (axe `heading-order`,
    verlassen `primary`; `primary` bleibt Marke und lesendem Register.
 3. **Wizard-Fuß:** Fortschritt links, Zurück und Weiter zusammen rechts,
    Weiter außen — wie im Dialog.
+
+## Nachtrag Bau (2026-10-01)
+
+Gebaut wie oben, mit diesen Abweichungen vom Entwurf:
+
+- **EntityHeader ohne `headingLevel`:** Im Set steht er nur als Seitenkopf
+  (fünf Showcase-Seiten, keine Seite hat daneben einen PageHeader). Eine Prop
+  für eine Ebene, die niemand braucht, ist eine tote Prop (A12). Der Titel
+  ist jetzt `h1.v2ehead__name`, der Status steht daneben, nicht darin.
+- **StatusCallout-Titel und ProseCard-Kopf bleiben `div`.** Der Callout ist
+  eine Meldung, kein Abschnitt. Die Ebene des ProseCard-Kopfs hängt von der
+  Lage ab, die der Baustein nicht kennt. Beide haben die Gestalt ihrer Rolle
+  (Flächentitel bzw. Gruppenkopf), nur kein `h`.
+- **Wizard-Titel in `lw-ui-section`:** Der Flächentitel hat dieselbe Stufe wie
+  der Abschnittstitel. Er bekommt keine eigene Klasse mit denselben Werten,
+  sonst gäbe es eine zweite Quelle.
+- **`check:type` überspringt Template-Strings:** Zwei Stories tragen das HTML
+  einer Rechnung als Daten (`<h1>ACME GmbH</h1>`). Das ist fremdes Markup,
+  kein JSX. Der Scanner leert die literalen Teile und lässt `${…}`
+  (auch verschachtelt) Code bleiben. Selbsttest deckt beides.
+- **Gefundene `p.v2sub` außerhalb der Liste in §6** (Showcase, Stories, 15
+  Dateien) wurden mitgezogen, meist zu `lw-ui-hint`. Die Baseline bleibt
+  leer.
+- **Nicht angefasst:** `payment-account-columns.tsx:150` („von Hand" als
+  `div.v2sub` unter einem Wert) ist eine richtige Beischrift. `.s3case__title`
+  (v3.css, nur App) steht auf `--fs-h3` (22 px, lesend). Das ist ein
+  Seitentitel im produktiven Register. Die Klasse wird mit der App-Migration
+  (lldev1) auf `ui-xl` gezogen oder durch `PageHeader` ersetzt.
+
+**Gemessen** (Storybook, 1280 px, Playwright, `getComputedStyle` und
+`getBoundingClientRect`): Story `Roles` liefert je Rolle Stufe, Gewicht und
+Farbe wie §1, z. B. Kartenkopf `h2` 14/600 `rgb(45,45,45)`, Gruppe `h3`
+12,5/700 `rgb(92,92,92)`, Beischrift 11,5/400 `rgb(113,113,113)`,
+Zustandstitel `p` 14/600. `Headings` hat ein `h1` und keinen Sprung (h1 →
+h2 → h3 → h4 → h3 → h2 → h3). Wizard `Filled`: Titel `h2` 16/600, Titel →
+Einleitung 4 px, Kopf → Inhalt 20 px. `States` hat keinen Kopf im DOM.
+`WithFooter`: Fortschritt links (41–1045 px, `aria-live="polite"`), Zurück
+und Weiter rechts (1053–1239). `InUse`: Einleitung 579 px = 67,9 ch, nach
+„Weiter" „Schritt 2 von 3". Dialog `h2` über `aria-labelledby`, Drawer-Titel
+`h2`, CaseDrawer-Karte `h3`, Höhe des Kartenkopfs unverändert. 47 berührte
+Stories ohne Konsolenfehler.
 
 ## Abnahmekriterien
 

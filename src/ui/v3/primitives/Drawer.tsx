@@ -171,7 +171,7 @@ export function Drawer({
       >
         <div className="v2drawer__h">
           <div className="v2drawer__titl">
-            <h3 className="v2drawer__title">{title}</h3>
+            <h2 className="v2drawer__title">{title}</h2>
             {meta ? <div className="v2drawer__meta">{meta}</div> : null}
           </div>
           <IconButton

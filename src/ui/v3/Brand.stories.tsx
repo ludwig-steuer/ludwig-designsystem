@@ -537,13 +537,7 @@ function Pair({
       {/* A real heading, not a bold `div`: `Marks` and `Sizes` give their
           sections an `h3` via `Section` — two outlines in one file are none for a
           screen reader (0056). */}
-      <h3
-        style={{
-          fontSize: "var(--fs-ui-md)",
-          fontWeight: 600,
-          margin: "0 0 var(--space-1)",
-        }}
-      >
+      <h3 className="lw-ui-section" style={{ margin: "0 0 var(--space-1)" }}>
         {title}
       </h3>
       <div

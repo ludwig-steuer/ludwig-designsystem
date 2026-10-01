@@ -12,15 +12,25 @@ export default meta;
 type Story = StoryObj<typeof Wizard>;
 
 const THREE: WizardStep[] = [
-  { label: "Datei wählen" },
-  { label: "Vorschau prüfen" },
-  { label: "Ergebnis" },
+  {
+    label: "Datei wählen",
+    title: "Kontoauszug hochladen",
+    intro: "CSV aus dem Onlinebanking der Musterfirma GmbH. Trennzeichen und Kodierung erkennt Ludwig selbst.",
+  },
+  {
+    label: "Vorschau prüfen",
+    title: "Vorschau prüfen",
+    intro: "Ludwig zeigt die ersten Zeilen so, wie sie übernommen werden. Stimmen Datum und Betrag, geht es weiter.",
+  },
+  { label: "Ergebnis", title: "Ergebnis" },
 ];
 
 /**
  * Drei Schritte, der zweite ist dran: seine Nummer sitzt auf primary, sein
- * Wort trägt `aria-current="step"`. Ohne `footer` steht kein Fuß im DOM —
- * vergleiche `WithFooter`.
+ * Wort trägt `aria-current="step"`. Über dem Inhalt steht der Kopf des
+ * Schritts aus `title` und `intro` (0220): Flächentitel als `h2`, darunter
+ * die Einleitung gedämpft, dann mit Abstand der Inhalt. Ohne `footer` und
+ * `progress` steht kein Fuß im DOM — vergleiche `WithFooter`.
  */
 export const Filled: Story = {
   render: () => (
@@ -35,7 +45,8 @@ export const Filled: Story = {
 /**
  * Alle vier Zustände in einer Leiste. Keiner steht auf Farbe allein (V7):
  * erledigt zeigt den Haken, gescheitert das Warnzeichen auf danger, dran die
- * Nummer auf primary, offen die Nummer gedämpft.
+ * Nummer auf primary, offen die Nummer gedämpft. Die Schritte tragen keinen
+ * `title` — dann gibt es keinen Kopf, der Inhalt beginnt oben.
  */
 export const States: Story = {
   render: () => (
@@ -49,7 +60,7 @@ export const States: Story = {
       current={2}
       states={["done", "error", "active", "pending"]}
     >
-      <p>
+      <p className="lw-ui-text">
         Zwei von 340 Zeilen ohne Konto. Der Schritt „Spalten zuordnen" ist rot,
         bis beide zugeordnet sind.
       </p>
@@ -58,9 +69,10 @@ export const States: Story = {
 };
 
 /**
- * Der Fuß: „Zurück" secondary, „Weiter" primary mit sichtbarer Taste (V14),
- * dazwischen der Fortschrittstext. Was im Fuß steht, entscheidet der Aufrufer
- * — die Hülle stellt nur den Platz.
+ * Der Fuß: links der Fortschritt aus `progress` (wird bei jedem Wechsel
+ * angesagt), rechts „Zurück" secondary und „Weiter" primary mit sichtbarer
+ * Taste (V14) beieinander — wie im Dialog (Owner 2026-10-01). Die Worte im
+ * Fuß wählt der Aufrufer, die Hülle stellt die Plätze.
  */
 export const WithFooter: Story = {
   render: () => (
@@ -68,11 +80,10 @@ export const WithFooter: Story = {
       steps={[...THREE, { label: "Abschluss" }]}
       current={1}
       states={["done", "active", "pending", "pending"]}
+      progress="Schritt 2 von 4"
       footer={
         <>
           <Button variant="secondary">Zurück</Button>
-          <span style={{ flex: 1 }} />
-          <span className="v2sub lw-numeric">Schritt 2 von 4</span>
           <Button variant="primary" hotkey="⏎">
             Weiter
           </Button>
@@ -105,7 +116,7 @@ export const ManySteps: Story = {
       current={3}
       states={["done", "done", "error", "active", "pending", "pending", "pending"]}
     >
-      <p>Sieben Schritte sind viel. Ab hier gehört der Ablauf zerlegt.</p>
+      <p className="lw-ui-text">Sieben Schritte sind viel. Ab hier gehört der Ablauf zerlegt.</p>
     </Wizard>
   ),
 };
@@ -123,15 +134,12 @@ function ImportRun() {
       steps={THREE}
       current={step}
       states={states}
+      progress={`Schritt ${step + 1} von ${THREE.length}`}
       footer={
         <>
           <Button variant="secondary" disabled={step === 0} onClick={() => setStep((s) => s - 1)}>
             Zurück
           </Button>
-          <span style={{ flex: 1 }} />
-          <span className="v2sub lw-numeric">
-            Schritt {step + 1} von {THREE.length}
-          </span>
           <Button
             variant="primary"
             hotkey="⏎"
@@ -179,7 +187,9 @@ function ImportRun() {
           </Table>
         </Card>
       ) : null}
-      {step === 2 ? <p>340 Zeilen übernommen, 2 ohne Gegenkonto.</p> : null}
+      {step === 2 ? (
+        <p className="lw-ui-text">340 Zeilen übernommen, 2 ohne Gegenkonto.</p>
+      ) : null}
     </Wizard>
   );
 }

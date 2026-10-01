@@ -128,7 +128,7 @@ function AcceptCell({
         valid: (v) => /^\d{4,20}$/.test(v) && !isTaken(v),
         render: ({ value, set }) => (
           <div className="v2stack">
-            <p className="v2sub">
+            <p className="lw-ui-hint">
               Vorgeschlagen ist die reservierte Nummer aus dem System-Bereich (89xxxx). Übernehmen Sie sie oder
               tragen Sie die Nummer nach Ihrer DATEV-Konvention ein. Offene Buchungen ziehen auf das neue Konto um.
             </p>
@@ -136,7 +136,7 @@ function AcceptCell({
               <Input id={id} inputMode="numeric" value={value} onChange={(e) => set(e.target.value.trim())} />
             </Field>
             {isTaken(value) ? (
-              <p className="v2sub" role="alert">
+              <p className="lw-ui-hint" role="alert">
                 Die Nummer {value} ist schon vergeben. Wählen Sie eine andere.
               </p>
             ) : null}

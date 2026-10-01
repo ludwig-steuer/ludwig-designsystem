@@ -103,7 +103,7 @@ export const Interactive: Story = {
           sourceLabel={SOURCE_LABEL}
           stateLabel={STATE_LABEL}
         />
-        <p className="v2sub" style={{ marginTop: "var(--space-4)" }}>
+        <p className="lw-ui-hint" style={{ marginTop: "var(--space-4)" }}>
           {picked ? `Übernommen: ${picked}` : "Noch nichts übernommen."}
         </p>
       </Frame>

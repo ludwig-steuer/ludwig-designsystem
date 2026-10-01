@@ -249,7 +249,7 @@ function History({ months }: { months: MonthRow[] }) {
           </>
         ) : (
           <>
-            <p className="v2sub">
+            <p className="lw-ui-hint">
               {movementCount(count)} in {booked} {booked === 1 ? "Monat" : "Monaten"} — zu wenig für einen Verlauf.
             </p>
             <MonthTable months={months} />

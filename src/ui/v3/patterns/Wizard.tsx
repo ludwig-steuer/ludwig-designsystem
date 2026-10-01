@@ -8,6 +8,14 @@ export type WizardStepState = "pending" | "active" | "done" | "error";
 export interface WizardStep {
   /** The word in the head of the step. Long ones get an ellipsis. */
   label: string;
+  /**
+   * Title above the step's content (`h2`, surface title, 0220): names the
+   * task — „Stammdaten erfassen" — while `label` stays the noun. Without it
+   * the step has no head.
+   */
+  title?: string;
+  /** Lead under the title (`lw-ui-lead`): two sentences at most. */
+  intro?: ReactNode;
 }
 
 export interface WizardProps {
@@ -18,8 +26,13 @@ export interface WizardProps {
   states: WizardStepState[];
   /** The content of the current step. */
   children: ReactNode;
-  /** Back/next and a progress line. Without it there is no foot in the DOM. */
+  /** Back and next, right in the foot. Without it and `progress` there is no foot. */
   footer?: ReactNode;
+  /**
+   * Progress line, left in the foot and announced on change — the step count,
+   * or a closing note on the last step. The caller words it.
+   */
+  progress?: ReactNode;
 }
 
 /**
@@ -42,6 +55,10 @@ const STATE_WORD: Record<string, string> = { done: "erledigt", error: "Fehler" }
  * whether a step failed — the module knows that and passes it in. A summary is
  * a step like any other; its content is `children`.
  *
+ * The head of the current step (`title`, `intro`) comes from the step itself,
+ * so the words travel with the step. The foot holds the progress left and the
+ * caller's buttons right — back and next side by side, as in a dialog (0220).
+ *
  * Never color alone (V7): `done` shows a check instead of the number, `error`
  * an alert on danger, `active` the number on primary, `pending` the number
  * muted. Both signs come from the icon registry (`confirm`, `alert`, 0087) —
@@ -52,7 +69,8 @@ const STATE_WORD: Record<string, string> = { done: "erledigt", error: "Fehler" }
  * @instead Every step reachable at any time → StepRail. Phases the system
  *          runs through → ProcessStepper. Two to four views → Tabs.
  */
-export function Wizard({ steps, current, states, children, footer }: WizardProps) {
+export function Wizard({ steps, current, states, children, footer, progress }: WizardProps) {
+  const head = steps[current];
   return (
     <div className="v2wiz">
       <div
@@ -84,8 +102,23 @@ export function Wizard({ steps, current, states, children, footer }: WizardProps
           );
         })}
       </div>
-      <div className="v2wiz__body">{children}</div>
-      {footer ? <div className="v2wiz__foot">{footer}</div> : null}
+      <div className="v2wiz__body">
+        {head?.title ? (
+          <div className="v2wiz__head">
+            <h2 className="lw-ui-section">{head.title}</h2>
+            {head.intro ? <p className="lw-ui-lead">{head.intro}</p> : null}
+          </div>
+        ) : null}
+        {children}
+      </div>
+      {footer || progress ? (
+        <div className="v2wiz__foot">
+          <span className="v2wiz__progress" aria-live="polite">
+            {progress}
+          </span>
+          {footer}
+        </div>
+      ) : null}
     </div>
   );
 }
