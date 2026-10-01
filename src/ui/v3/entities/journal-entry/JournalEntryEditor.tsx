@@ -25,7 +25,6 @@ import { JournalEntryCard } from "./JournalEntryCompact";
 import { TaxKeyCell } from "./TaxKey";
 import { AiBookingNotes } from "./AiBookingNotes";
 
-
 // One currency, one formatter (T7, 0043). The editor computes in gross and
 // always needs a number, so `toNumber` falls back to 0 where `parseAmount`
 // returns `null`/`"invalid"`.

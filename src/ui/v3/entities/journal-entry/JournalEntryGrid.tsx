@@ -23,7 +23,6 @@ import {
   type Side,
 } from "./journal-entry";
 
-
 const euro = (n: number) => formatAmount(n, "EUR");
 
 export interface JournalGridMessage {
