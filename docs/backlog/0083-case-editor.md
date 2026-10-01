@@ -74,9 +74,8 @@ Also **jede** Umstufung braucht einen Grund, und `isDocumentNumberModeDowngrade`
 - Herabstufung auf `single` → derselbe Dialog, im `children`-Slot die Wahl
   der künftig gültigen Belegnummer aus den heute verknüpften. Ohne Wahl kein
   Bestätigen.
-- `none` ist im Set **nicht** wählbar: der Kern lässt es nur bei
-  `kind in ('internal_transfer','adjustment_only')` und ohne verknüpften
-  Beleg zu, und diese Prüfung liegt im Kern, nicht in der Übergangstabelle.
+- `none` ist im Set **nicht** wählbar: der Kern lässt es nur beim
+  Einzelsachverhalt (`kind = 'single'`) und ohne verknüpften Beleg zu (F360), und diese Prüfung liegt im Kern, nicht in der Übergangstabelle.
   Die Komponente bietet an, was sie prüfen kann; `none` kommt als Prop
   (`allowNone`) von der Seite, die den Kern gefragt hat.
 
@@ -209,7 +208,7 @@ Fest (gilt immer):
 
 Variabel (aus dieser Spec):
 
-- [ ] `CaseKindEdit` zeigt genau die sieben Arten mit den Labels aus `CASE_KIND_LABEL`; `grep` findet keine zweite Map in der Datei (Story `Kinds`)
+- [ ] ~~`CaseKindEdit` zeigt genau die sieben Arten~~ (überholt durch F360, 2026-10-01: sechs Arten, zwei wählbar — siehe Nachtrag) mit den Labels aus `CASE_KIND_LABEL`; `grep` findet keine zweite Map in der Datei (Story `Kinds`)
 - [ ] Die Art trägt **keine** Farbe und keinen Zustandsstil — sie ist kein Status (Story `Kinds`, `getComputedStyle` gemessen)
 - [ ] `CaseDocumentNumberModeEdit` bietet je Ausgangswert genau die Ziele aus `CASE_DOCUMENT_NUMBER_MODE_TRANSITIONS` an, `none` nur mit `allowNone` (Story `Modes`, alle vier Ausgangswerte durchgezählt)
 - [ ] Jede Umstufung öffnet den `ReasonDialog`; ohne Grund bleibt „Bestätigen" gesperrt (Story `Downgrade`, Knopf-Zustand gemessen)
@@ -589,7 +588,7 @@ kopiert.
 | Gesperrte Arten | `rule`, `pool`, `client_batch`: Label ohne „Bearbeiten“, darunter `CASE_KIND_LOCKED_REASON[kind]` als Hinweiszeile. **Abweichung vom Auftrag (Tooltip):** ein Tooltip auf einem Label, das keinen Fokus nimmt, erreicht weder die Tastatur noch den Vier-Wochen-Test; der Satz steht deshalb sichtbar, über die neue Prop `hint` von `InlineEdit` (0020) |
 | Art offen | `recurring_charge`: Hinweis „Einzel- oder laufenden Sachverhalt wählen oder im Reiter „Wiederkehr“ eine Regel anlegen.“ (Reiterwort aus `CASE_TAB_LABEL.rules`; nur ohne `disabled`) — ohne das vorangestellte „Art offen —“ des Auftrags, weil das Label es schon sagt; „laufenden“ im Akkusativ. In der Auswahl steht die offene Art als heutiger Wert, gesperrt, nicht als Ziel |
 | Belegnummern-Modus | `allowNone`-Kommentar und Story `Modes`: `none` nur beim Einzelsachverhalt ohne verknüpften Beleg (`case.ts:117`) |
-| Showcase | Reiter „Regeln“ in `CasePage` über `isRecurringKind`; `CaseCrud`-Formular bietet nur die zwei wählbaren Arten, eine gesperrte steht gesperrt mit Grund |
+| Showcase | Reiter `rules` („Wiederkehr“) in `CasePage` über `isRecurringKind`; `CaseCrud`-Formular bietet nur die zwei wählbaren Arten, eine gesperrte steht gesperrt mit Grund |
 | Fixtures | Rechnungen, Umbuchung, Korrektur, Auslagen → `single`; Auslagen mit Verrechnungskonto, Vertrag, Zahlungsdienst-Auszahlungen → `running`; Dauersachverhalt mit Regel → `rule`; ohne Regel → `running`; Mandantenstapel → `client_batch`. Ereignisarten (`internal_transfer`, `document_received`) und Belegarten (`contract`, `expense_report`) sind andere Achsen und bleiben |
 
 **Kriterien:**
@@ -598,7 +597,7 @@ kopiert.
 - [x] Regelsachverhalt, Sammelfall und Mandantenstapel zeigen ihren Grund aus `CASE_KIND_LOCKED_REASON` sichtbar unter dem Wert, Kontrast ≥ 4,5:1 — abgenommen 2026-10-01 (4,51:1 auf `bg-soft`, 4,88:1 auf Weiß)
 - [x] „Dauersachverhalt – Art offen“ zeigt den Hinweis; im Select steht die offene Art gesperrt als heutiger Wert, wählbar sind die zwei; Speichern einer Wahl ändert die Art (Label und Hinweis wechseln) — abgenommen 2026-10-01 in der Nachprüfung (Stand 1379f57): der Hinweis nennt den Reiter „Wiederkehr“ aus `CASE_TAB_LABEL.rules`, die Mechanik hält unverändert (erste Abnahme: M1, Reiter „Regeln“)
 - [x] `InlineEdit` `Filled`: der Hinweis steht unter dem gesperrten Feld; im Bearbeitungszustand bleibt er, ein Fehler ersetzt ihn — abgenommen 2026-10-01 (Bearbeitungszustand und Fehler aus dem Code)
-- [ ] `grep` findet außerhalb von `src/ludwig` keinen alten Art-Wert (`incoming_invoice`, `outgoing_invoice`, `adjustment_only`, `contract`/`expense_report`/`internal_transfer` als **Art**); `CasePage` zeigt „Regeln“ bei `rule`, `running`, `recurring_charge` — abgenommen 2026-10-01 in der Nachprüfung (Stand 1379f57): der volle grep findet nur andere Achsen und die Übergangsart in `CaseEditor`/`CaseCrud`, `CaseTabs` Technik zeigt `kind single`; der Reiter ist `rules` mit dem Wort „Wiederkehr“, nicht „Regeln“ (N1) (erste Abnahme: M2)
+- [x] `grep` findet außerhalb von `src/ludwig` keinen alten Art-Wert (`incoming_invoice`, `outgoing_invoice`, `adjustment_only`, `contract`/`expense_report`/`internal_transfer` als **Art**); `CasePage` zeigt den Reiter `rules` („Wiederkehr“) bei `rule`, `running`, `recurring_charge` — abgenommen 2026-10-01 in der Nachprüfung (Stand 1379f57): der volle grep findet nur andere Achsen und die Übergangsart in `CaseEditor`/`CaseCrud`, `CaseTabs` Technik zeigt `kind single`; der Reiter ist `rules` mit dem Wort „Wiederkehr“, nicht „Regeln“ (N1) (erste Abnahme: M2)
 - [x] Keine Konsolenfehler in den Stories von `CaseEditor`, `InlineEdit`, `CaseCrud` und den Sachverhalts-Stories mit geänderten Fixtures — abgenommen 2026-10-01 (208 Story-Aufrufe, 0 Fehler, 0 Warnungen)
 
 ### Abnahme F360 2026-10-01 (Stand 61d24cb)
@@ -803,3 +802,6 @@ Ziel, mit einem Hinweis, der den Reiter mit seinem echten Wort nennt — und
 dort steht der Knopf, der die Regel anlegt. 0 Konsolenfehler in 87
 Story-Aufrufen, die vier Wächter grün. Offen bleibt N1, zwei Sätze in dieser
 Spec, nicht blockierend.
+
+Nachzug 2026-10-01 (nur Spec-Text, nach der Nachprüfung): N1 (a) `none` nur beim Einzelsachverhalt, (b) Reiter `rules` („Wiederkehr“) in Nachtrag und Kriterium 5 — Kriterium 5 nach dem Urteil der Nachprüfung abgehakt; H10 Kriterium „sieben Arten“ als überholt gekennzeichnet; H9 in 0020. Offen: H11 (`Failed` zeigt den Fehler von außen an der Zuständigkeit), H12/H13 Showcase-Reiter (Links statt Hash, zweite Quelle `FALL_TABS`).
+

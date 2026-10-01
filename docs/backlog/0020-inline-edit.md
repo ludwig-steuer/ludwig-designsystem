@@ -70,7 +70,7 @@ Titel `v3/Primitives/Formular/InlineEdit`. Abgeleitet nach §6: 4 Zustände
 
 | Story | Beweist |
 |---|---|
-| `Filled` | Anzeige mit Wert, Bearbeiten-Knopf, dazu `disabled` |
+| `Filled` | Anzeige mit Wert, Bearbeiten-Knopf, dazu `disabled` mit `hint` (F360) |
 | `Empty` | ohne Wert steht „—", der Knopf heißt trotzdem „Bearbeiten" |
 | `Pending` | Feld gesperrt, Knopf lädt |
 | `Error` | Speichern schlug fehl, der getippte Text steht noch da |
