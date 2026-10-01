@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Status | Abnahme — gebaut 2026-10-01 |
+| Status | in Arbeit — gebaut 2026-10-01; fremde Abnahme 2026-10-01 nicht bestanden, M1–M6 offen |
 | Stufe | `patterns/` — Gruppe Prüfen (Familie `Review.tsx`, neben `CheckItems` und `checkSummary`) |
 | Klassen-Test | „Ergäbe das auch in einer Versicherungs-App Sinn?" → ja: jedes Prüfergebnis eines Antrags mit Regeln |
 | Quelle | Anfrage llcto 2026-10-01, Owner-Wunsch: Prüfpunkte auch in der Vorschlagsliste (Schritt 3, T3, Ansichten „Übersicht" und „Liste"), als eigener Baustein, damit sie überall gleich erscheinen |
@@ -144,8 +144,63 @@ Variabel (aus dieser Spec):
 
 ## Abnahme
 
+Fremde Abnahme, Stand `b13f3b4`. Gemessen mit Playwright, 1280 × 900, eigener
+Browser-Kontext; Story-IDs ohne Präfix `v3-entitäten-buchungssatz-journalentryreviewlist--`
+bzw. `v3-patterns-prüfen-checklist--`. Screenshots `.playwright-mcp/abn0217-*.png`.
+
 | Kriterium | Nachweis (Story-ID · Befehl · Screenshot) | Ergebnis |
 |---|---|---|
-| … | … | … |
+| `pnpm typecheck` und `pnpm build` grün | `pnpm typecheck` Exit 0. `pnpm build` nicht selbst gelaufen (parallele Sitzungen, Auftrag); der Erbauer meldet ihn für `b13f3b4` grün | ✓ (build übernommen) |
+| Datei nach der Familie, Story daneben, Titel in der Gruppe | `CheckResult` in `patterns/Review.tsx` neben `CheckItems`/`checkSummary`; Story in `Review.stories.tsx`, Titel `v3/Patterns/Prüfen/Checklist`; T3-Stories `v3/Entitäten/Buchungssatz/JournalEntryReviewList` | ✓ |
+| Code englisch; `@when`/`@instead` an jedem Export | `pnpm check:language` Exit 0 („0 German comment lines"), `pnpm check:when` Exit 0; `CheckResult` trägt beide (`Review.tsx:457–460`). Rückverweis der Nachbarn → eigene Zeile unten (M3) | ✓ |
+| Kein Hex, kein px, keine lokale Label-Map; Status nur über Registry | CSS `.v2pp__result-line*` nur Tokens (`--space-2`, `--color-danger`, `--color-warning`, `--color-text-muted`); Wörter aus `SUMMARY_WORD` der Familie, keine Registry-Achse berührt; Spur `"156px"` folgt der `ColumnDef`-API wie alle Spalten der Datei; `pnpm check:type` Exit 0 | ✓ |
+| Alle Stories vorhanden; ausgeschlossene Zustände begründet | `check-result-tones`, `grouped`, `flat` vorhanden. Aber: Fakt nur in einem Ton (M4); „leer nach Filter" weder gezeigt noch begründet (M5); „ohne `expand` nur der Prüfpunkte wegen" ohne Story (M2) | ✗ |
+| Prüfliste `design-guidelines.md` §9 | Rot nur bei verletztem Punkt, Grün nur am Zeichen; jedes Zeichen mit Wort; Schrift 13,5 px = `--fs-ui` wie die Gründe daneben; Lucide 1,5 px, 15 px; kein Hover auf Nichtklickbarem (Hintergrund/Farbe vor = nach Hover, `cursor: auto`); Zeilen ≤ 106 px; Kontraste unten. Fünf Zustände → Zeile davor | ✓ (bis auf fünf Zustände) |
+| Im Browser angesehen | `check-result-tones`, `grouped`, `flat`, `compact`, `states` gerendert; 0 Konsolenfehler, 0 Warnungen im eigenen Kontext | ✓ |
+| x/y wie die Gruppenzeile von `CheckItems`; Ton nach schlechtestem Punkt, `open` zählt nicht | `grouped` 39, `flat` 11 Zeilen mit `checks`: Text, Ton-Klasse und `title` gegen die Fixture `checksFor(i)` nachgerechnet — 0 Abweichungen. Fall 4: Zeile „6 von 8 bestanden" (1 rot, 1 nicht prüfbar), aufgeklappt „6 von 8 Prüfpunkten bestanden". „7 von 8 bestanden", `title` „1 nicht prüfbar · 7 bestanden" ist grün | ✓ |
+| Rot/Gelb: Zeichen und Text im Ton, ≥ 4,5:1; Grün: Zeichen grün, Text Grundfarbe | T3 auf Weiß: Rot Text `rgb(168, 64, 60)` **6,06:1**, Zeichen `--color-danger`; Gelb `rgb(140, 96, 30)` 5,52:1, Zeichen `--color-warning`; Grün Text `rgb(45, 45, 45)`, Zeichen `--color-success`. `check-result-tones` auf `#F4F6F8`: 5,60:1 / 5,09:1 | ✓ |
+| Nur `open` → „nicht prüfbar"; `[]` → „Keine Prüfpunkte" | `check-result-tones`: „nicht prüfbar", Zeichen `open` (`--color-text-subtle`), Text `rgb(92, 92, 92)`; `[]` „Keine Prüfpunkte" ohne Zeichen, gedämpft. T3 Fall 6: „nicht prüfbar", `title` „8 nicht prüfbar", 6,69:1 | ✓ |
+| Eine Zeile auch bei „12 von 12 bestanden"; `title` = `checkSummary()` | Probetext „12 von 12 bestanden" in `flat` (Zeilen 1 und 4): 152,6 px in der 156-px-Spur, eine Zeilenbox, Zeile 20,9 px, Zeilenhöhe unverändert (87,8 / 66,8 px), kein Querscroll. `title` = `checkSummary()` in allen 50 T3-Zeilen und 6 Story-Zeilen (z. B. „1 verletzt · 2 offen · 9 bestanden") | ✓ |
+| T3: „x von y" ohne Aufklappen sichtbar, Gründe darunter; Aufklapper zeigt `CheckItems` über dem `expand`, kein Satz doppelt | `flat` Zeile 11: `CheckResult` oben (y 909,9), Gründe darunter (y 930,9). Fall 12 ohne `checks`: nur „Ludwig ist unsicher / Betrag über 1.000,00 €". Aufgeklappt (`grouped` Fall 4; `flat` Fall 4, 6, 12): `.v3prop__checks` erstes Kind, 12 px über der Karte des Aufrufers (`v2je`); „Prüfpunkten bestanden" genau 1×; Fall 12 zeigt nur den Satz des Aufrufers. Siehe H1 | ✓ |
+| T3 bei 1280 px ohne Querscroll, Zeilen ≤ 106 px | `.v2tbl__scroll`: `grouped` 1246 = 1246, `flat` 1246 = 1246. Zeilen `grouped` 66,8–105,6 px, `flat` 65,8–87,8 px; Prüfbedarf-Zelle 156 px | ✓ |
+| `CheckResult` und `checkSummary` zwei Namen für zwei Dinge (Barrel, `@instead`) | Barrel `index.ts:275`/`:279` beide exportiert; `CheckResult` → `checkSummary` (`Review.tsx:459–460`). Rückweg fehlt: `checkSummary` (`Review.tsx:266`) nennt nur `CheckItems`, `CheckItems` (`Review.tsx:396`) sagt „The count alone → checkSummary" | ✗ M3 |
+| Spec-Satz „Kann bewusst nicht: … in `compact` erscheinen" | `compact`: 6 Aufklapp-Knöpfe auf 6 Zeilen (die Story übergibt kein `expand`), der Aufklapper zeigt `CheckItems` („8 Prüfpunkte nicht prüfbar"). Screenshot `abn0217-compact-fold.png` | ✗ M1 |
+| T3-Tabelle: `checks` `undefined` → „nichts erscheint"; „ohne `expand` nur der Prüfpunkte wegen" | Code `JournalEntryReviewList.tsx:405–416`: ohne `expand` bekommt jede Zeile einen Aufklapper, sobald irgendeine Zeile `checks` trägt — die Zeile ohne `checks` klappt ins Leere. Keine Story deckt den Fall | ✗ M2 |
+| Spec Zeichen für Zeichen gegen den Code | Prop-Tabelle = `Review.tsx:462` (`items: readonly CheckItem[]`, `kind?: CheckKind`, Vorgabe `rule`); T3-Tabelle = `JournalEntryReviewList.tsx:75`, Spur `:314`; „Befund beim Bauen" nachgemessen (1246 = 1246, Prüfbedarf 156, Zeilen 67–106, Zeile 21 px, Töne). Abweichungen in Sätzen: M5, M6 | ✗ |
 
-Abgenommen von / am: … · Offene Punkte: …
+**Mängel**
+
+| Nr. | Fundort | Befund · Messwert |
+|---|---|---|
+| M1 (blockierend) | `src/ui/v3/entities/journal-entry/JournalEntryReviewList.tsx:405` | `fold = expand \|\| rows.some((r) => r.checks)` fragt `variant` nicht ab. In `compact` (Drawer, Reiter „Zum Schließen") erscheinen die Prüfpunkte im Aufklapper — gemessen 6 Knöpfe auf 6 Zeilen, vor `b13f3b4` keiner. Widerspricht Spec Z. 59–61 und `befunde-app.md` §E („`compact` zeigt keine Prüfpunkte") |
+| M2 | `JournalEntryReviewList.tsx:405–416` | Ohne `expand` und mit gemischten Zeilen bekommt auch die Zeile ohne `checks` einen Aufklapper mit leerem Inhalt. Spec Z. 53 „`undefined`: … nichts erscheint". Der Weg „ohne `expand`" (Z. 55) hat keine Story |
+| M3 | `src/ui/v3/patterns/Review.tsx:264–266`, `:396` | Der Nachbarfall trägt keinen `@instead`-Verweis auf `CheckResult` (`CLAUDE.md` §3). `checkSummary` beginnt sein `@when` wie `CheckResult` („The result of a set of checks in …", dort „or an overview"); `CheckItems` schickt „the count alone" an `checkSummary`, für die Zeile einer Liste ist es jetzt `CheckResult` |
+| M4 | `src/ui/v3/patterns/Review.stories.tsx:312` | `CheckResultTones` zeigt `kind="fact"` nur gelb („2 von 4 geklärt"). Spec Z. 84–85 verlangt rot · gelb · grün · nicht prüfbar · leer „je Regel und Fakt" — für Fakten fehlen vier |
+| M5 | `docs/backlog/0217-check-result.md` Z. 47, 73–76, 93–94, 139 | Die Spec nennt für die Sonderfälle nur die Regel-Wörter; der Code sagt bei `fact` „nicht erhoben" und „Keine Fakten" (`Review.tsx:466–471`). „Leer nach Filter" ist weder gezeigt noch als nicht anwendbar begründet |
+| M6 | Spec Z. 39 und Z. 69; `src/styles/v3.css:4250` | (a) „Setzt auf: `StateIcon`, `CheckItems`, `checkSummary`" — `CheckResult` nutzt `CheckItems` nicht, nur T3 tut es. (b) „`--color-danger` 6,07:1" (Spec und CSS-Kommentar) — gemessen 6,06:1, `design-guidelines.md:593` führt 6.06 |
+
+**Hinweise** (kein Mangel, für den Owner)
+
+- H1: Aufgeklappt stehen „6 von 8 bestanden" (Zeile, x 899 / y 281) und „6 von 8
+  Prüfpunkten bestanden" (Gruppenzeile von `CheckItems`, x 93 / y 445) zugleich im
+  Bild, 164 px tiefer und 806 px links. Wörtlich nicht derselbe Satz und von der Spec
+  so gewollt („Befund beim Bauen"), aber dieselbe Aussage zweimal — genau das, was die
+  Ausbau-Zeile der Klapp-Form verbietet.
+- H2: `title` erreicht nur die Maus (die Zeile ist nicht fokussierbar); die Zahlen
+  stehen aber vollständig im Aufklapper, es geht nichts verloren.
+- H3: Die Zelle „Prüfbedarf" stapelt mit `.v3prop__who` (`JournalEntryReviewList.tsx:318`),
+  der Klasse der Gegenpartei-Zelle — trägt, aber der Name sagt etwas anderes.
+
+**Vier Linsen.** *Sprache:* „9 von 12 bestanden", „nicht prüfbar", „Keine
+Prüfpunkte" sind kurz, Kanzleiwörter, dasselbe „bestanden" wie in `CheckItems`;
+die Fakt-Wörter stehen nicht in der Spec (M5). *Bedienung:* nicht klickbar und
+ohne Hover, das Zeichen trägt sein Wort als `aria-label`, aufgeklappt wird über
+den Knopf der Zeile; `compact` bekommt ungefragt Aufklapper (M1). *Logik:* die
+Rechnung hat einen Ort (`SUMMARY_WORD`, `PP_ICON`, `checkSummary` in der Familie),
+der Aufklapper legt `CheckItems` einmal hinein; Zeilen ohne `checks` klappen ohne
+`expand` ins Leere (M2), der Rückverweis im Barrel fehlt (M3). *Darstellung:* Farbe
+nur als Kritikalität, Grün nur am Zeichen, Zeile 20,9 px in `--fs-ui`, `nowrap` in
+156 px ohne Querscroll.
+
+Abgenommen von / am: nicht abgenommen — Claude (Abnahme-Agent), 2026-10-01 ·
+Offene Punkte: M1–M6 (M1 blockierend)
