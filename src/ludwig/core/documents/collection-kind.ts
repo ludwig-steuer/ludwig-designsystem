@@ -16,6 +16,8 @@
  * `document-simple-classifier`.
  */
 
+import type { CaseKind } from "@/ludwig/modules/accounting-cases";
+
 export const COLLECTION_KINDS = [
   "expense_report",
   "credit_card_statement",
@@ -102,12 +104,12 @@ export const CLEARING_TYPE_BY_COLLECTION_KIND: Partial<Record<CollectionKind, st
  * `null` heißt „der Agent wählt weiter": bei `document_with_annexes` bestimmt
  * der Hauptbeleg die Art, bei `not_connected` jedes Kind für sich.
  */
-export const CASE_KIND_BY_COLLECTION_KIND: Record<CollectionKind, string | null> = {
-  expense_report: "expense_report",
-  credit_card_statement: "expense_report",
-  cash_register_report: "expense_report",
-  payment_gateway_payout: "expense_report",
-  vendor_collective_invoice: "incoming_invoice",
+export const CASE_KIND_BY_COLLECTION_KIND: Record<CollectionKind, CaseKind | null> = {
+  expense_report: "running",
+  credit_card_statement: "running",
+  cash_register_report: "running",
+  payment_gateway_payout: "running",
+  vendor_collective_invoice: "single",
   document_with_annexes: null,
   not_connected: null,
 };

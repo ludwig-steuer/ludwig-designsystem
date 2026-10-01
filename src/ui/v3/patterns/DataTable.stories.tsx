@@ -52,14 +52,14 @@ type Story = StoryObj<typeof DataTable>;
    become questions at all. */
 
 const PARTNERS: Array<[string, string, CaseKind, number]> = [
-  ["Musterfirma GmbH", "Eingangsrechnung: Musterfirma GmbH", "incoming_invoice", 1800],
-  ["Vermieter Musterstraße", "Dauersachverhalt: Vermieter Musterstraße", "recurring_charge", 1450],
-  ["Werbeagentur Nord", "Eingangsrechnung: Werbeagentur Nord", "incoming_invoice", 420],
-  ["Bürobedarf GmbH", "Eingangsrechnung: Bürobedarf GmbH", "incoming_invoice", 64.9],
-  ["Telekom Deutschland", "Dauersachverhalt: Telekom Deutschland", "recurring_charge", 89],
-  ["Stadtwerke Musterstadt", "Dauersachverhalt: Stadtwerke Musterstadt", "recurring_charge", 213.4],
-  ["Kfz-Werkstatt Berger", "Eingangsrechnung: Kfz-Werkstatt Berger", "incoming_invoice", 1276.55],
-  ["Hotel Adler", "Auslagen: Hotel Adler", "expense_report", 348.2],
+  ["Musterfirma GmbH", "Eingangsrechnung: Musterfirma GmbH", "single", 1800],
+  ["Vermieter Musterstraße", "Dauersachverhalt: Vermieter Musterstraße", "rule", 1450],
+  ["Werbeagentur Nord", "Eingangsrechnung: Werbeagentur Nord", "single", 420],
+  ["Bürobedarf GmbH", "Eingangsrechnung: Bürobedarf GmbH", "single", 64.9],
+  ["Telekom Deutschland", "Dauersachverhalt: Telekom Deutschland", "rule", 89],
+  ["Stadtwerke Musterstadt", "Dauersachverhalt: Stadtwerke Musterstadt", "rule", 213.4],
+  ["Kfz-Werkstatt Berger", "Eingangsrechnung: Kfz-Werkstatt Berger", "single", 1276.55],
+  ["Hotel Adler", "Auslagen: Hotel Adler", "running", 348.2],
 ];
 
 const LIFECYCLES: CaseLifecycle[] = [
@@ -807,12 +807,12 @@ function kindGroup(kind: CaseKind, aside = true): TableGroup<CaseListItem> {
 
 const KIND_GROUPS = [
   {
-    ...kindGroup("incoming_invoice"),
+    ...kindGroup("single"),
     // Z4: the explanation stands **once per section**, not once per row.
-    labelAside: "Lieferantenrechnungen mit Beleg",
+    labelAside: "Ein Geschäftsvorfall, ein Beleg",
   },
-  kindGroup("recurring_charge"),
-  kindGroup("expense_report"),
+  kindGroup("rule"),
+  kindGroup("running"),
 ];
 
 /**
@@ -853,14 +853,14 @@ export const GroupEmpty: Story = {
     <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
       <DataTable<CaseListItem>
         groups={[
-          kindGroup("incoming_invoice", false),
+          kindGroup("single", false),
           {
-            key: "recurring_charge",
-            label: caseKindLabel("recurring_charge"),
+            key: "rule",
+            label: caseKindLabel("rule"),
             rows: [],
             emptyHint: "Kein Dauersachverhalt in diesem Stapel.",
           },
-          { key: "expense_report", label: caseKindLabel("expense_report"), rows: [] },
+          { key: "running", label: caseKindLabel("running"), rows: [] },
         ]}
         columns={[NUMBER, TITLE, AMOUNT]}
         rowKey={rowKey}
@@ -868,8 +868,8 @@ export const GroupEmpty: Story = {
       />
       <DataTable<CaseListItem>
         groups={[
-          { key: "incoming_invoice", label: caseKindLabel("incoming_invoice"), rows: [] },
-          { key: "recurring_charge", label: caseKindLabel("recurring_charge"), rows: [] },
+          { key: "single", label: caseKindLabel("single"), rows: [] },
+          { key: "rule", label: caseKindLabel("rule"), rows: [] },
         ]}
         columns={[NUMBER, TITLE, AMOUNT]}
         rowKey={rowKey}
@@ -1179,9 +1179,9 @@ export const FilteredListTemplate: Story = {
             selected={kinds}
             onChange={setKinds}
             options={[
-              { key: "incoming_invoice", label: "Eingangsrechnung", count: count((c) => c.kind === "incoming_invoice") },
-              { key: "recurring_charge", label: "Dauersachverhalt", count: count((c) => c.kind === "recurring_charge") },
-              { key: "expense_report", label: "Auslagen", count: count((c) => c.kind === "expense_report") },
+              { key: "single", label: caseKindLabel("single"), count: count((c) => c.kind === "single") },
+              { key: "rule", label: caseKindLabel("rule"), count: count((c) => c.kind === "rule") },
+              { key: "running", label: caseKindLabel("running"), count: count((c) => c.kind === "running") },
             ]}
           />
           <PeriodField label="Eröffnet" from={span.from} to={span.to} onChange={(from, to) => setSpan({ from, to })} />

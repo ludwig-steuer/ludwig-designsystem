@@ -2,7 +2,7 @@ import type { ReactNode } from "react";
 
 import type { Currency } from "@/ludwig/shared/money";
 import type { CaseFactsVM } from "@/ui/v3/entities/accounting-case/CaseFacts";
-import { caseDisplayTitle, caseKindLabel } from "@/ludwig/modules/accounting-cases/domain/case";
+import { caseDisplayTitle, caseKindLabel, isRecurringKind } from "@/ludwig/modules/accounting-cases/domain/case";
 
 import { EntityIcon } from "@/ui/v3/Icons";
 import { CaseAmount } from "@/ui/v3/entities/accounting-case/CaseAmount";
@@ -113,9 +113,10 @@ export function CasePage({
       {...(signal ? { signal } : {})}
       tabs={
         <Tabs
-          items={FALL_TABS.filter((t) => t.key !== "rules" || accountingCase.kind === "recurring_charge").map(
-            (t) => ({ ...t, href: tabHref(t.key) }),
-          )}
+          items={FALL_TABS.filter((t) => t.key !== "rules" || isRecurringKind(accountingCase.kind)).map((t) => ({
+            ...t,
+            href: tabHref(t.key),
+          }))}
           active={tab}
           ariaLabel="Sachverhalt"
         />

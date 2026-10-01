@@ -22,7 +22,7 @@ type Story = StoryObj<typeof CaseDetailView>;
 
 const FACTS: CaseFactsVM = {
   caseNumber: "2026-0412",
-  kind: "incoming_invoice",
+  kind: "single",
   lifecycleStatus: "open",
   openedAt: "2026-08-26",
   summary:

@@ -46,6 +46,8 @@ Frage, was Escape tut.
 | `pending` | `boolean` | nein | Von außen gesteuertes Speichern (Server Action des Aufrufers) | `Pending` |
 | `error` | `string` | nein | Fehler von außen; sonst kommt er aus `onSave` | `Error` |
 | `disabled` | `boolean` | nein | Nicht bearbeitbar — die Anzeige bleibt, der Knopf verschwindet | `Filled` |
+| `multiline` | `boolean` | nein | Mehrzeilig: Strg+Enter speichert, Enter macht eine neue Zeile | `WithTextarea` |
+| `hint` | `string` | nein | Ein Satz unter dem Wert, im Anzeige- und im Bearbeitungszustand — wie bei `Field`; ein Fehler ersetzt ihn (F360, 2026-10-01) | `Filled` |
 
 Was die Komponente **nicht** kann: mehrere Felder gleichzeitig (das ist ein
 Formular), automatisch speichern beim Verlassen (I2: nichts passiert ohne

@@ -14,7 +14,7 @@ const accountHref = (nr: string) => `#konto-${nr}`;
 
 const FULL: CaseFactsVM = {
   caseNumber: "2026-0412",
-  kind: "incoming_invoice",
+  kind: "single",
   lifecycleStatus: "open",
   openedAt: "2026-08-26",
   summary:
@@ -83,7 +83,7 @@ export const Sparse: Story = {
         all
         case={{
           caseNumber: "2026-0501",
-          kind: "internal_transfer",
+          kind: "single",
           lifecycleStatus: "open",
           openedAt: "2026-09-05",
           personalAccountNumber: null,

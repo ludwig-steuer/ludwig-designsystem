@@ -39,22 +39,22 @@ export type CaseLifecycle = (typeof CASE_LIFECYCLE)[number];
 
 // EINZIGE TS-Quelle der Case-Arten (F11-T11.2). Spiegel des DB-CHECK
 // ``client_accounting_case_kind_check`` in Migration
-// ``supabase/migrations/20260925120000_case_kind_client_batch.sql`` (vorher
-// ``20260617140000_client_source_docs_contracts.sql``) — bei Änderung BEIDE
-// anfassen. Keine lokalen z.enum-Duplikate mehr;
-// bewusste Einschränkungen als ``CaseKindSchema.exclude([...])`` mit
+// ``supabase/migrations/20261002120000_case_kind_mechanics.sql`` — bei
+// Änderung BEIDE anfassen. Keine lokalen z.enum-Duplikate mehr;
+// bewusste Einschränkungen als ``CaseKindSchema.extract/exclude`` mit
 // Kommentar am Konsumenten.
+// Die Art beantwortet eine Frage (F360): Wie kommt der Sachverhalt zu seinen
+// Buchungen, und wann ist er fertig? Die Richtung trägt ``counterparty_side``.
+// ``recurring_charge`` ist nur Übergang („Art offen") — nie neu schreiben.
 export const CASE_KIND = [
-  "incoming_invoice",
-  "outgoing_invoice",
-  "recurring_charge",
-  "internal_transfer",
-  "expense_report",
-  "adjustment_only",
-  "contract",
+  "single",
+  "rule",
+  "running",
+  "pool",
   // F295: der Sammel-Sachverhalt eines importierten Mandantenstapels — ohne
   // Gegenpartei, vergibt nur der Import.
   "client_batch",
+  "recurring_charge",
 ] as const;
 export type CaseKind = (typeof CASE_KIND)[number];
 
@@ -62,15 +62,12 @@ export type CaseKind = (typeof CASE_KIND)[number];
  *  Kein Status (keine Farbe, keine Übergänge), deshalb bewusst hier statt in
  *  der Status-Registry. */
 export const CASE_KIND_LABEL: Record<CaseKind, string> = {
-  incoming_invoice: "Eingangsrechnung",
-  outgoing_invoice: "Ausgangsrechnung",
-  // „Dauersachverhalt" ist der Begriff aus GLOSSARY.md — nicht „Wiederkehrend".
-  recurring_charge: "Dauersachverhalt",
-  internal_transfer: "Umbuchung",
-  expense_report: "Auslagen",
-  adjustment_only: "Korrektur",
-  contract: "Vertrag",
+  single: "Einzelsachverhalt",
+  rule: "Regelsachverhalt",
+  running: "Laufender Sachverhalt",
+  pool: "Sammelfall",
   client_batch: "Mandantenstapel",
+  recurring_charge: "Dauersachverhalt – Art offen",
 };
 
 /** Label für Aufrufer, die den Wert nur als ``string`` haben (Query-Ergebnisse,
@@ -117,8 +114,8 @@ export const CaseDocumentNumberModeSchema = z.enum(CASE_DOCUMENT_NUMBER_MODES);
 /**
  * Erlaubte Umstufungen (F100 §5). Hochstufen ist begründungspflichtig,
  * Herabstufen verlangt zusätzlich die Wahl der künftig gültigen Nummer.
- * ``none`` nur bei ``kind in ('internal_transfer','adjustment_only')`` und ohne
- * verknüpften Beleg — das prüft der Kern, nicht diese Tabelle.
+ * ``none`` nur bei ``kind = 'single'`` und ohne verknüpften Beleg — das prüft
+ * der Kern, nicht diese Tabelle.
  */
 export const CASE_DOCUMENT_NUMBER_MODE_TRANSITIONS: Record<
   CaseDocumentNumberMode,
@@ -141,9 +138,21 @@ export function isDocumentNumberModeDowngrade(
 /** Zod-Schema über ``CASE_KIND`` — für alle Input-Validierungen (Agent-Kerne,
  *  MCP-Tool-Defs, Server-Actions) importieren statt Listen duplizieren. */
 export const CaseKindSchema = z.enum(CASE_KIND);
-/** F295: Arten, die Agent und Kanzlei anlegen oder setzen dürfen —
- *  ``client_batch`` vergibt nur der Mandantenstapel-Import. */
-export const AssignableCaseKindSchema = CaseKindSchema.exclude(["client_batch"]);
+/** F360: setzen Agent und Kanzlei; ``rule`` entsteht nur mit einer Regel,
+ *  ``pool``/``client_batch`` nur maschinell. */
+export const AssignableCaseKindSchema = CaseKindSchema.extract(["single", "running"]);
+export type AssignableCaseKind = z.infer<typeof AssignableCaseKindSchema>;
+
+/** F360: warum eine Art nicht umgestuft wird — Fehlertext des Kerns und Tooltip im Editor. */
+export const CASE_KIND_LOCKED_REASON = {
+  rule: "Ein Regelsachverhalt wird über seine Regel beendet, nicht umgestuft.",
+  pool: "Ein Sammelfall wird aufgeteilt (Split), nicht umgestuft.",
+  client_batch:
+    "Art ändern ist am Mandantenstapel-Container nicht möglich — er ist der Sammelbehälter des importierten Stapels (F295).",
+} as const satisfies Partial<Record<CaseKind, string>>;
+
+/** F360: Regel- und laufender Sachverhalt — und der Übergang „Art offen". */
+export const RECURRING_CASE_KINDS = ["rule", "running", "recurring_charge"] as const satisfies readonly CaseKind[];
 
 // Zuständigkeits-Achse (agentic booking loop): wer ist am Zug? Orthogonal zur
 // lifecycle-Achse. NULL = in Pipeline-Bearbeitung oder abgeschlossen.
@@ -341,7 +350,7 @@ export interface CaseListItem {
   clientId: string;
   fiscalYear: number | null;
   /** Pflichtangabe seit Migration ``20260529060000_case_kind_not_null``.
-   *  Default ``incoming_invoice``; im Detail-View per User-Action änderbar. */
+   *  Default ``single`` (F360); im Detail-View per User-Action änderbar. */
   kind: CaseKind;
   /** Kompakter UI-Kurztitel (max ~5 Wörter), Format „<Belegart>: <Lieferant>".
    *  Vom Classifier-LLM erzeugt, User-editierbar.  Wenn null → Fallback auf
@@ -440,8 +449,8 @@ export interface CaseFilter {
   /** Freitext-Suche über ``case_number``, ``summary`` und vendor_name
    *  der verknüpften Belege. ILIKE-Pattern, case-insensitive. */
   searchQuery?: string;
-  /** „einmalig" = alle ``kind`` außer ``recurring_charge``;
-   *  „dauer" = nur ``recurring_charge``. ``undefined`` = beides. */
+  /** „einmalig" = alle ``kind`` außer ``RECURRING_CASE_KINDS``;
+   *  „dauer" = nur sie. ``undefined`` = beides. */
   recurringMode?: "one_off" | "recurring";
   /**
    * Nur Dauersachverhalte **ohne** Regelwerk.
@@ -470,9 +479,9 @@ export interface CaseFilter {
   disposition?: CaseDisposition[];
 }
 
-/** Helper: ist dieser ``kind`` ein Dauersachverhalt? */
+/** Helper: ist dieser ``kind`` ein Dauersachverhalt (Regel, laufend, Art offen)? */
 export function isRecurringKind(kind: CaseKind | null | undefined): boolean {
-  return kind === "recurring_charge";
+  return !!kind && (RECURRING_CASE_KINDS as readonly string[]).includes(kind);
 }
 
 export const CASE_LIST_TABS = [

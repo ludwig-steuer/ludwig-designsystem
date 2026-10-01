@@ -15,7 +15,7 @@ const CASE = (over: Partial<CaseCardData> = {}): CaseCardData => ({
   caseNumber: "2026-0412",
   fiscalYear: 2026,
   title: "Wartung der Klimaanlage",
-  kind: "incoming_invoice",
+  kind: "single",
   counterpartyName: "Bürobedarf Meier GmbH",
   lifecycleStatus: "open",
   // `totalAmount` is the case's amount (rank 4); `CaseLink.amount` belongs to
@@ -115,12 +115,12 @@ export const Edges: Story = {
           totalAmount: 1284900.55,
         })}
       />
-      <CaseCard case={CASE({ title: null, kind: "recurring_charge", counterpartyName: "Telekom Deutschland GmbH", totalAmount: -89.9 })} />
+      <CaseCard case={CASE({ title: null, kind: "rule", counterpartyName: "Telekom Deutschland GmbH", totalAmount: -89.9 })} />
       <CaseCard case={CASE({ caseId: "c-9002abcdef01", caseNumber: null, fiscalYear: null, title: "Vortrag ohne Jahr" })} />
       <CaseCard
         case={CASE({
           title: "Umbuchung Verrechnungskonto",
-          kind: "internal_transfer",
+          kind: "single",
           counterpartyName: null,
           totalAmount: null,
           summary: null,
@@ -128,7 +128,7 @@ export const Edges: Story = {
         })}
       />
       <CaseCard
-        case={CASE({ title: null, counterpartyName: null, kind: "internal_transfer" })}
+        case={CASE({ title: null, counterpartyName: null, kind: "single" })}
         summaryLimit={40}
       />
     </Frame>
@@ -149,7 +149,7 @@ export const InUse: Story = {
         <span className="v2grpbtn__n">Buchungsvorschläge dieses Laufs</span>
       </div>
       <div style={{ display: "grid", gap: "var(--space-4)" }}>
-        {[CASE(), CASE({ caseId: "c-4413", caseNumber: "2026-0413", title: "Abschlag Strom 08/2026", kind: "recurring_charge", counterpartyName: "Stadtwerke Musterstadt", amount: -412, lifecycleStatus: "needs_clarification", disposition: "agent", summary: "Monatlicher Abschlag laut Vertrag." }), CASE({ caseId: "c-4414", caseNumber: "2026-0414", title: "Ausgangsrechnung Musterbau", kind: "outgoing_invoice", counterpartyName: "Musterbau GmbH", amount: 1800, summary: "Leistung im August erbracht, Zahlung eingegangen." })].map((c) => (
+        {[CASE(), CASE({ caseId: "c-4413", caseNumber: "2026-0413", title: "Abschlag Strom 08/2026", kind: "rule", counterpartyName: "Stadtwerke Musterstadt", amount: -412, lifecycleStatus: "needs_clarification", disposition: "agent", summary: "Monatlicher Abschlag laut Vertrag." }), CASE({ caseId: "c-4414", caseNumber: "2026-0414", title: "Ausgangsrechnung Musterbau", kind: "single", counterpartyName: "Musterbau GmbH", amount: 1800, summary: "Leistung im August erbracht, Zahlung eingegangen." })].map((c) => (
           <CaseCard
             key={c.caseId}
             case={c}

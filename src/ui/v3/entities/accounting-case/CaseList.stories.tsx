@@ -28,7 +28,7 @@ const CASE = (over: Partial<CaseListItem> = {}): CaseListItem => ({
   caseNumber: "2026-0412",
   clientId: "cl-1",
   fiscalYear: 2026,
-  kind: "incoming_invoice",
+  kind: "single",
   title: "Wartung der Klimaanlage",
   summary: null,
   counterpartyName: "Bürobedarf Meier GmbH",
@@ -49,9 +49,9 @@ const CASE = (over: Partial<CaseListItem> = {}): CaseListItem => ({
 
 const CASES: CaseListItem[] = [
   CASE(),
-  CASE({ caseId: "c-4413", caseNumber: "2026-0413", kind: "outgoing_invoice", title: "Beratung Q2 2026", counterpartyName: "Musterbau GmbH", totalAmount: 1800, lifecycleStatus: "closed_accepted", disposition: "agent", openClarificationsCount: 0, openedAt: "2026-06-02", exportStatus: "exported" }),
-  CASE({ caseId: "c-4414", caseNumber: "2026-0414", kind: "recurring_charge", title: "Abschlag Strom 08/2026", counterpartyName: "Stadtwerke Musterstadt", counterpartyPartnerId: null, totalAmount: 412, lifecycleStatus: "waiting_for_documents", disposition: "client", openClarificationsCount: 0, openedAt: "2026-08-28", exportStatus: null }),
-  CASE({ caseId: "c-4415", caseNumber: "2026-0415", kind: "internal_transfer", title: null, counterpartyName: null, totalAmount: null, currency: null, lifecycleStatus: "needs_clarification", disposition: null, openClarificationsCount: 3, openedAt: "2026-09-01", exportStatus: null }),
+  CASE({ caseId: "c-4413", caseNumber: "2026-0413", kind: "single", title: "Beratung Q2 2026", counterpartyName: "Musterbau GmbH", totalAmount: 1800, lifecycleStatus: "closed_accepted", disposition: "agent", openClarificationsCount: 0, openedAt: "2026-06-02", exportStatus: "exported" }),
+  CASE({ caseId: "c-4414", caseNumber: "2026-0414", kind: "rule", title: "Abschlag Strom 08/2026", counterpartyName: "Stadtwerke Musterstadt", counterpartyPartnerId: null, totalAmount: 412, lifecycleStatus: "waiting_for_documents", disposition: "client", openClarificationsCount: 0, openedAt: "2026-08-28", exportStatus: null }),
+  CASE({ caseId: "c-4415", caseNumber: "2026-0415", kind: "single", title: null, counterpartyName: null, totalAmount: null, currency: null, lifecycleStatus: "needs_clarification", disposition: null, openClarificationsCount: 3, openedAt: "2026-09-01", exportStatus: null }),
   CASE({ caseId: "c-4416", caseNumber: "2026-0416", title: "Sanierung Serverraum, Teilrechnung 2 von 3", counterpartyName: "Handwerk Schulz KG", totalAmount: 2480.55, openClarificationsCount: 0, openedAt: "2026-08-20", exportStatus: "partial" }),
 ];
 

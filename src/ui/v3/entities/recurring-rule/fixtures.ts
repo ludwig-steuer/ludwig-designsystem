@@ -19,7 +19,7 @@ export function caseLink(over: Partial<CaseLink> = {}): CaseLink {
     caseNumber: "2026-0413",
     fiscalYear: 2026,
     title: "Miete Musterstraße 12",
-    kind: "recurring_charge",
+    kind: "rule",
     counterpartyName: "Musterfirma Immobilien GmbH",
     lifecycleStatus: "open",
     ...over,

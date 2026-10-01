@@ -147,7 +147,7 @@ export const withDatevEntry: CaseScenario = {
 export const openItemCarryover: CaseScenario = {
   accountingCase: caseFixture({
     caseNumber: "2026-0187",
-    kind: "outgoing_invoice",
+    kind: "single",
     openedAt: "2026-06-01",
     summary: "Offener Posten aus DATEV übernommen: Ausgangsrechnung vom 18.04., die der Kunde noch nicht bezahlt hat.",
     counterpartyName: "Beispielbau Handels GmbH",
@@ -259,7 +259,7 @@ export const completeAndExported: CaseScenario = {
 export const recurringWithoutRule: CaseScenario = {
   accountingCase: caseFixture({
     caseNumber: "2026-0355",
-    kind: "recurring_charge",
+    kind: "running",
     openedAt: "2026-07-03",
     summary: "Monatlicher Abschlag für Strom, abgebucht per Lastschrift.",
     counterpartyName: "Beispiel-Energie AG",
@@ -405,7 +405,7 @@ export const awaitingDocumentEscalated: CaseScenario = {
 export const outgoingWithPayment: CaseScenario = {
   accountingCase: caseFixture({
     caseNumber: "2026-0377",
-    kind: "outgoing_invoice",
+    kind: "single",
     openedAt: "2026-07-10",
     summary: "Ausgangsrechnung über Wartungsarbeiten; der Kunde hat am 02.08. überwiesen.",
     counterpartyName: "Beispielbau Handels GmbH",
@@ -615,7 +615,7 @@ export const superseded: CaseScenario = {
                 caseNumber: "2026-0334",
                 fiscalYear: 2026,
                 title: null,
-                kind: "incoming_invoice",
+                kind: "single",
                 counterpartyName: "Musterbau Fahrzeugteile GmbH",
                 lifecycleStatus: "open",
               },
@@ -639,7 +639,7 @@ export const superseded: CaseScenario = {
 };
 
 const judgeCase = (over: Parameters<typeof caseFixture>[0]) =>
-  caseFixture({ kind: "incoming_invoice", disposition: "agent", currency: "EUR", ...over });
+  caseFixture({ kind: "single", disposition: "agent", currency: "EUR", ...over });
 
 /** Point 7 — the judge flags the proposal. */
 export const judgeFlagged: CaseScenario = {

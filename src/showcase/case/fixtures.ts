@@ -23,7 +23,7 @@ export const TODAY = "2026-08-05";
 export function caseFixture(over: Partial<CaseFactsVM> = {}): CaseFactsVM {
   return {
     caseNumber: "2026-0334",
-    kind: "incoming_invoice",
+    kind: "single",
     lifecycleStatus: "open",
     openedAt: "2026-07-31",
     summary:

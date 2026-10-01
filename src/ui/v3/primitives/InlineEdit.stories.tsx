@@ -20,7 +20,13 @@ export const Filled: Story = {
     return (
       <div style={{ display: "grid", gap: "var(--space-5)", maxWidth: 460 }}>
         <InlineEdit label="Zusammenfassung" value={v} onSave={async (n) => setV(n)} />
-        <InlineEdit label="Belegart (gesperrt)" value="Eingangsrechnung" onSave={async () => {}} disabled />
+        <InlineEdit
+          label="Belegart (gesperrt)"
+          value="Eingangsrechnung"
+          onSave={async () => {}}
+          disabled
+          hint="Die Belegart kommt aus der Klassifikation des Belegs."
+        />
       </div>
     );
   },

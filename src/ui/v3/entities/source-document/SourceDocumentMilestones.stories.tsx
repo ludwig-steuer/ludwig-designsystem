@@ -37,7 +37,7 @@ const CASE: DocumentMilestone = {
     caseNumber: "SV-2026-0656",
     fiscalYear: 2026,
     title: "MAGURA Rechnung 93874967",
-    kind: "incoming_invoice",
+    kind: "single",
     counterpartyName: "MAGURA",
     lifecycleStatus: "closed_accepted",
   },

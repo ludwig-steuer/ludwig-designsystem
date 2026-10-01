@@ -3,6 +3,7 @@ import { useState } from "react";
 
 import {
   CASE_DOCUMENT_NUMBER_MODES,
+  CASE_KIND,
   type CaseDisposition,
   type CaseDocumentNumberMode,
   type CaseKind,
@@ -64,7 +65,7 @@ const Frame = ({ children }: { children: React.ReactNode }) => (
  */
 export const Filled: Story = {
   render: function Render() {
-    const [kind, setKind] = useState<CaseKind>("incoming_invoice");
+    const [kind, setKind] = useState<CaseKind>("single");
     const [disp, setDisp] = useState<CaseDisposition | null>("accounting");
     return (
       <Frame>
@@ -76,24 +77,36 @@ export const Filled: Story = {
   },
 };
 
-/** Alle sieben Arten aus `CASE_KIND_LABEL` — deutsche Wörter, keine lokale Map. */
+/**
+ * Alle sechs Arten aus `CASE_KIND_LABEL` — deutsche Wörter, keine lokale Map
+ * (F360). Von Hand wählbar sind nur Einzel- und laufender Sachverhalt.
+ * Regelsachverhalt, Sammelfall und Mandantenstapel stehen ohne „Bearbeiten“
+ * und sagen darunter, warum. „Dauersachverhalt – Art offen“ bittet um die Wahl
+ * und steht in der Auswahl nur als heutiger Wert.
+ */
 export const Kinds: Story = {
   render: function Render() {
-    const [kind, setKind] = useState<CaseKind>("incoming_invoice");
     return (
       <Frame>
-        <CaseKindEdit value={kind} onSave={setKind} />
+        {CASE_KIND.map((k) => (
+          <KindRow key={k} initial={k} />
+        ))}
       </Frame>
     );
   },
 };
 
+function KindRow({ initial }: { initial: CaseKind }) {
+  const [kind, setKind] = useState<CaseKind>(initial);
+  return <CaseKindEdit value={kind} onSave={setKind} />;
+}
+
 /**
  * Alle vier Ausgangswerte mit ihren erlaubten Zielen aus
  * `CASE_DOCUMENT_NUMBER_MODE_TRANSITIONS`. Die obere Reihe bietet `none` nicht
- * an, die untere schon (`allowNone`) — der Kern erlaubt es nur bei Umbuchung
- * und Korrektur ohne verknüpften Beleg, und diese Prüfung steht nicht in der
- * Übergangstabelle.
+ * an, die untere schon (`allowNone`) — der Kern erlaubt es nur beim
+ * Einzelsachverhalt ohne verknüpften Beleg (F360), und diese Prüfung steht
+ * nicht in der Übergangstabelle.
  */
 export const Modes: Story = {
   render: () => (
@@ -168,7 +181,7 @@ export const Downgrade: Story = {
 export const Pending: Story = {
   render: () => (
     <Frame>
-      <CaseKindEdit value="incoming_invoice" onSave={() => {}} pending />
+      <CaseKindEdit value="single" onSave={() => {}} pending />
       <CaseDispositionEdit value="accounting" onSave={() => {}} pending />
       <CaseDocumentNumberModeEdit value="single" onSave={() => {}} pending />
     </Frame>
@@ -180,7 +193,7 @@ export const Failed: Story = {
   render: () => (
     <Frame>
       <CaseKindEdit
-        value="incoming_invoice"
+        value="single"
         onSave={() => {
           throw new Error("Der Sachverhalt ist gesperrt, solange der Lauf läuft.");
         }}
@@ -222,7 +235,7 @@ export const Invalid: Story = {
  */
 export const Roundtrip: Story = {
   render: function Render() {
-    const [kind, setKind] = useState<CaseKind>("incoming_invoice");
+    const [kind, setKind] = useState<CaseKind>("single");
     const [disp, setDisp] = useState<CaseDisposition | null>("agent");
     const [mode, setMode] = useState<CaseDocumentNumberMode>("single");
     const [log, setLog] = useState<string[]>([]);
@@ -264,7 +277,7 @@ export const Roundtrip: Story = {
  */
 export const InUse: Story = {
   render: function Render() {
-    const [kind, setKind] = useState<CaseKind>("incoming_invoice");
+    const [kind, setKind] = useState<CaseKind>("single");
     const [disp, setDisp] = useState<CaseDisposition | null>("accounting");
     const [mode, setMode] = useState<CaseDocumentNumberMode>("multiple");
     return (

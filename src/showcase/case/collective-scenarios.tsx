@@ -88,7 +88,7 @@ const batchDetail = (e: CaseTimelineEvent): EventDetail => {
 export const clientBatch: CaseScenario = {
   accountingCase: caseFixture({
     caseNumber: "2026-0101",
-    kind: "adjustment_only",
+    kind: "client_batch",
     title: "Mandantenstapel 2026",
     lifecycleStatus: "needs_clarification",
     openedAt: "2026-01-02",
@@ -166,7 +166,7 @@ const RULE_EVENTS: CaseTimelineEvent[] = [
 export const recurringWithRule: CaseScenario = {
   accountingCase: caseFixture({
     caseNumber: "2026-0044",
-    kind: "recurring_charge",
+    kind: "rule",
     openedAt: "2026-01-01",
     summary: "Miete für die Halle Musterstraße 12, monatlich am 1. fällig; gebucht wird vom Regelwerk.",
     counterpartyName: "Beispiel-Mieter GmbH",
@@ -252,7 +252,7 @@ const clearingBase = (last: number): Omit<CaseScenario, "todo"> => {
   return {
     accountingCase: caseFixture({
       caseNumber: "2026-0250",
-      kind: "internal_transfer",
+      kind: "running",
       title: "Auszahlungen Zahlungsdienstleister Juli",
       openedAt: "2026-07-03",
       summary: "Zwölf Auszahlungen des Zahlungsdienstleisters gegen seine Monatsabrechnung.",
@@ -453,7 +453,7 @@ const RECEIPT_TOTAL = Math.round(RECEIPTS.reduce((s, e) => s + (e.amount ?? 0), 
 export const expenseReport: CaseScenario = {
   accountingCase: caseFixture({
     caseNumber: "2026-0312",
-    kind: "expense_report",
+    kind: "running",
     title: "Reisekosten Außendienst Juli",
     openedAt: "2026-07-01",
     summary: "Monatliche Reisekostenabrechnung des Außendienstes, per Überweisung erstattet.",
@@ -516,7 +516,7 @@ export const expenseReport: CaseScenario = {
 export const contract: CaseScenario = {
   accountingCase: caseFixture({
     caseNumber: "2026-0029",
-    kind: "contract",
+    kind: "running",
     openedAt: "2026-03-01",
     summary: "Leasingvertrag für einen Transporter, 36 Monate, 489,00 € monatlich.",
     counterpartyName: "Beispiel-Leasing AG",
@@ -568,7 +568,7 @@ export const contract: CaseScenario = {
 export const noEvents: CaseScenario = {
   accountingCase: caseFixture({
     caseNumber: "2026-0415",
-    kind: "recurring_charge",
+    kind: "running",
     openedAt: "2026-07-01",
     summary: null,
     counterpartyName: "Beispiel-Versicherung AG",

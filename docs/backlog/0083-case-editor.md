@@ -47,7 +47,7 @@ Aufrufstelle neu entstünde:
 
 | Export | Trägt |
 |---|---|
-| `CaseKindEdit` | die sieben Arten aus `CASE_KIND_LABEL` — die einzige Quelle, nicht lokal nachgebaut; die Art ist **kein Status** (keine Farbe, keine Übergänge) |
+| `CaseKindEdit` | die Arten aus `CASE_KIND_LABEL` — die einzige Quelle, nicht lokal nachgebaut; wählbar nur `AssignableCaseKindSchema` (F360); die Art ist **kein Status** (keine Farbe, keine Übergänge) |
 | `CaseDocumentNumberModeEdit` | `CASE_DOCUMENT_NUMBER_MODE_TRANSITIONS` (was von hier aus erlaubt ist), die Begründungspflicht und die Nummernwahl bei der Herabstufung |
 | `CaseDispositionEdit` | die Achse `disposition` aus der Registry und die Einschränkung: schreibbar sind **`agent`** und **`accounting`**, `client` nie von hier aus |
 
@@ -92,7 +92,7 @@ Status-Registry.
 
 | Prop | Typ | Bedeutung | Story |
 |---|---|---|---|
-| `value` | `CaseKind` | die heutige Art | `Kinds` |
+| `value` | `CaseKind` | die heutige Art; bei `rule`, `pool`, `client_batch` gesperrt mit Grund, bei `recurring_charge` mit Bitte um Wahl (F360) | `Kinds` |
 | `onSave` | `(next: CaseKind) => Promise<void> \| void` | wirft oder lehnt ab → das Feld bleibt offen und zeigt den Fehler | `Roundtrip`, `Failed` |
 | `pending` | `boolean` (optional) | Speichern läuft von außen | `Pending` |
 | `disabled` | `boolean` (optional) | geschlossener Sachverhalt | `Filled` |
@@ -571,3 +571,29 @@ die Grenze aus §4 gerissen, und beide Male ist der Vergleich innerhalb einer
 Story ohnehin die stärkere Aussage.
 
 `pnpm typecheck` und die fünf Wächter auf Exit 0.
+
+### Nachtrag 2026-10-01 — Art nach Mechanik (F360)
+
+Die App hat die Sachverhalts-Art von der Belegart auf die **Mechanik**
+umgestellt (llcto, F360): `single` · `rule` · `running` · `pool` ·
+`client_batch`, dazu als Übergang `recurring_charge` („Dauersachverhalt – Art
+offen“). Spiegel `case.ts` und `collection-kind.ts` auf App-Stand, Glossar
+kopiert.
+
+| Punkt | Was getan |
+|---|---|
+| Auswahl | `CaseKindEdit` bietet nur `AssignableCaseKindSchema.options` an — Einzel- und laufender Sachverhalt. Kern und Editor sagen dasselbe (`assertCaseKindTransition`) |
+| Gesperrte Arten | `rule`, `pool`, `client_batch`: Label ohne „Bearbeiten“, darunter `CASE_KIND_LOCKED_REASON[kind]` als Hinweiszeile. **Abweichung vom Auftrag (Tooltip):** ein Tooltip auf einem Label, das keinen Fokus nimmt, erreicht weder die Tastatur noch den Vier-Wochen-Test; der Satz steht deshalb sichtbar, über die neue Prop `hint` von `InlineEdit` (0020) |
+| Art offen | `recurring_charge`: Hinweis „Einzel- oder laufenden Sachverhalt wählen oder im Reiter „Regeln“ eine Regel anlegen.“ — ohne das vorangestellte „Art offen —“ des Auftrags, weil das Label es schon sagt; „laufenden“ im Akkusativ. In der Auswahl steht die offene Art als heutiger Wert, gesperrt, nicht als Ziel |
+| Belegnummern-Modus | `allowNone`-Kommentar und Story `Modes`: `none` nur beim Einzelsachverhalt ohne verknüpften Beleg (`case.ts:117`) |
+| Showcase | Reiter „Regeln“ in `CasePage` über `isRecurringKind`; `CaseCrud`-Formular bietet nur die zwei wählbaren Arten, eine gesperrte steht gesperrt mit Grund |
+| Fixtures | Rechnungen, Umbuchung, Korrektur, Auslagen → `single`; Auslagen mit Verrechnungskonto, Vertrag, Zahlungsdienst-Auszahlungen → `running`; Dauersachverhalt mit Regel → `rule`; ohne Regel → `running`; Mandantenstapel → `client_batch`. Ereignisarten (`internal_transfer`, `document_received`) und Belegarten (`contract`, `expense_report`) sind andere Achsen und bleiben |
+
+**Kriterien:**
+
+- [ ] Story `Kinds` zeigt alle sechs Arten mit den Wörtern aus `CASE_KIND_LABEL`; nur Einzel- und laufender Sachverhalt tragen „Bearbeiten“, ihr Select hat genau diese zwei Optionen
+- [ ] Regelsachverhalt, Sammelfall und Mandantenstapel zeigen ihren Grund aus `CASE_KIND_LOCKED_REASON` sichtbar unter dem Wert, Kontrast ≥ 4,5:1
+- [ ] „Dauersachverhalt – Art offen“ zeigt den Hinweis; im Select steht die offene Art gesperrt als heutiger Wert, wählbar sind die zwei; Speichern einer Wahl ändert die Art (Label und Hinweis wechseln)
+- [ ] `InlineEdit` `Filled`: der Hinweis steht unter dem gesperrten Feld; im Bearbeitungszustand bleibt er, ein Fehler ersetzt ihn
+- [ ] `grep` findet außerhalb von `src/ludwig` keinen alten Art-Wert (`incoming_invoice`, `outgoing_invoice`, `adjustment_only`, `contract`/`expense_report`/`internal_transfer` als **Art**); `CasePage` zeigt „Regeln“ bei `rule`, `running`, `recurring_charge`
+- [ ] Keine Konsolenfehler in den Stories von `CaseEditor`, `InlineEdit`, `CaseCrud` und den Sachverhalts-Stories mit geänderten Fixtures

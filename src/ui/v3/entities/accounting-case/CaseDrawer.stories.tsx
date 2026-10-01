@@ -23,7 +23,7 @@ const RECORD: CaseQuickView = {
     currency: "EUR",
     disposition: "accounting",
     caseNumber: "2026-0412",
-    kind: "incoming_invoice",
+    kind: "single",
     lifecycleStatus: "open",
     openedAt: "2026-08-26",
     summary:
@@ -49,7 +49,7 @@ const RECORD_STROM: CaseQuickView = {
     currency: "EUR",
     disposition: "client",
     caseNumber: "2026-0413",
-    kind: "recurring_charge",
+    kind: "rule",
     lifecycleStatus: "waiting_for_documents",
     openedAt: "2026-08-27",
     summary: "Monatlicher Abschlag; die Jahresabrechnung steht noch aus.",
@@ -151,7 +151,7 @@ export const Sparse: Story = {
           // Deliberately without a number: the head must then still show the
           // reference that was looked up, not a sliced id (defect M1).
           caseNumber: null,
-          kind: "internal_transfer",
+          kind: "single",
           lifecycleStatus: "open",
           openedAt: "2026-09-05",
           personalAccountNumber: null,

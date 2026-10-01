@@ -49,6 +49,7 @@ export function InlineEdit({
   error,
   disabled,
   multiline,
+  hint,
 }: {
   label: string;
   value: string;
@@ -65,6 +66,8 @@ export function InlineEdit({
   disabled?: boolean;
   /** Multi-line: Ctrl+Enter saves, Enter makes a new line. */
   multiline?: boolean;
+  /** One sentence under the value, at rest and while editing — as in `Field`; an error replaces it. */
+  hint?: string;
 }) {
   const [editing, setEditing] = useState(false);
   const fieldId = useId();
@@ -124,6 +127,7 @@ export function InlineEdit({
           {disabled ? null : <TextButton onClick={open}>Bearbeiten</TextButton>}
         </div>
         {shownError ? <div className="v2field__err">{shownError}</div> : null}
+        {hint && !shownError ? <div className="v2field__hint">{hint}</div> : null}
       </div>
     );
   }
@@ -159,6 +163,7 @@ export function InlineEdit({
         />
       )}
       {shownError ? <div className="v2field__err">{shownError}</div> : null}
+      {hint && !shownError ? <div className="v2field__hint">{hint}</div> : null}
       <div className="v2iedit__acts">
         <Button size="xs" variant="primary" loading={running} loadingLabel="Speichere …" onClick={() => void save()}>
           Speichern

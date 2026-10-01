@@ -18,7 +18,7 @@ const ONE: CaseLink = {
   caseNumber: "2026-0412",
   fiscalYear: 2026,
   title: "Wartung der Klimaanlage",
-  kind: "incoming_invoice",
+  kind: "single",
   counterpartyName: "Bürobedarf Meier GmbH",
   lifecycleStatus: "open",
 };

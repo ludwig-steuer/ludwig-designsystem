@@ -5,8 +5,9 @@ import { useState } from "react";
 import {
   CASE_DISPOSITION_WRITABLE,
   CASE_DOCUMENT_NUMBER_MODE_TRANSITIONS,
-  CASE_KIND,
+  AssignableCaseKindSchema,
   CASE_KIND_LABEL,
+  CASE_KIND_LOCKED_REASON,
   isDocumentNumberModeDowngrade,
   type CaseDisposition,
   type CaseDispositionWritable,
@@ -54,20 +55,37 @@ export function CaseKindEdit({
   value: CaseKind;
   onSave: (next: CaseKind) => Promise<void> | void;
 }) {
+  // F360: by hand only `single` and `running`. A rule case ends through its
+  // rule, a pool is split, a client batch is the batch's container — the field
+  // offers nothing and says why, visibly: a tooltip on a label that takes no
+  // focus would reach neither the keyboard nor the reader after four weeks.
+  const locked = (CASE_KIND_LOCKED_REASON as Partial<Record<CaseKind, string>>)[value];
+  const undecided = value === "recurring_charge";
   return (
     <InlineEdit
       label="Art"
       value={value}
-      onSave={(next) => onSave(next as CaseKind)}
+      // Today's value is no change — and the open kind is no target the core takes.
+      onSave={(next) => (next === value ? undefined : onSave(next as CaseKind))}
       pending={pending}
-      disabled={disabled}
+      disabled={disabled || Boolean(locked)}
       error={error}
-      // The seven kinds come from `CASE_KIND_LABEL` — the one source. And the
-      // kind is **not** a status: no colour, no transitions, no registry axis.
+      hint={
+        locked ??
+        (undecided ? "Einzel- oder laufenden Sachverhalt wählen oder im Reiter „Regeln“ eine Regel anlegen." : undefined)
+      }
+      // The labels come from `CASE_KIND_LABEL` — the one source. And the kind
+      // is **not** a status: no colour, no transitions, no registry axis.
       renderValue={(v) => CASE_KIND_LABEL[v as CaseKind] ?? v}
       renderInput={({ value: v, onChange, ...rest }) => (
         <Select {...rest} value={v} onChange={(e) => onChange(e.target.value)}>
-          {CASE_KIND.map((k) => (
+          {/* The open kind stands as today's value, not as a choice. */}
+          {undecided ? (
+            <option value={value} disabled>
+              {CASE_KIND_LABEL[value]}
+            </option>
+          ) : null}
+          {AssignableCaseKindSchema.options.map((k) => (
             <option key={k} value={k}>
               {CASE_KIND_LABEL[k]}
             </option>
@@ -105,9 +123,9 @@ export function CaseDocumentNumberModeEdit({
    */
   documentNumbers?: readonly KnownDocumentNumber[];
   /**
-   * Whether `none` is offered. Only the page knows: the core allows it for
-   * `internal_transfer` and `adjustment_only` without a linked document, and
-   * that check is not in the transition table.
+   * Whether `none` is offered. Only the page knows: the core allows it only
+   * for a `single` case without a linked document (F360), and that check is
+   * not in the transition table.
    */
   allowNone?: boolean;
 }) {

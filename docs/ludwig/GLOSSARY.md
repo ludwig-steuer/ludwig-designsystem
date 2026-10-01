@@ -83,7 +83,7 @@ Seit dem Datenmodell-Review 2026-07-11 gilt zusätzlich:
 | Quelle (Subtyp Rechnung) | `client_source_docs_invoices` | Rechnungs-Detail | Rename ex `client_invoices` | 1:1-Subtyp zu `client_source_docs`. Trägt `doc_direction` (`inbound` / `outbound`; ex `accounting_role`, F87). |
 | Quelle (Bank) | `client_bank_transactions` | Kontoauszugsposition | bleibt | Eine Zeile aus CSV / Qonto-API. |
 | Ereignis | `client_accounting_event` | Geschäftsereignis | neu | Punkt-in-Zeit-Ereignis: Belegeingang, Bankbewegung, manuelle Erfassung. Hängt 1:N am Sachverhalt, 1:0..1 an genau einer Quelle. |
-| Klammer | `client_accounting_case` | Sachverhalt / Geschäftsvorfall | Rename ex `btx` | Fachliche Klammer um zusammengehörige Ereignisse. Bleibt bei `kind=recurring_charge` offen über mehrere Realisierungen. |
+| Klammer | `client_accounting_case` | Sachverhalt / Geschäftsvorfall | Rename ex `btx` | Fachliche Klammer um zusammengehörige Ereignisse. Bleibt als Regel- oder laufender Sachverhalt (`kind=rule|running`) offen über mehrere Realisierungen. |
 | Buchung (Header) | `client_journal_entry` | Buchungssatz | Rename + Refactor ex `client_bookkeeping_entries` | Pro Ereignis genau eine Buchung. `status` ∈ {proposed, accepted, posted, reversed}. |
 | Buchung (Lines) | `client_journal_entry_line` | Buchungszeile | neu (heute am Header) | Side-Pattern (`side ∈ {debit, credit}`, `amount > 0`). Sum-Constraint pro Header. |
 | Klärung | `client_accounting_case_clarification` | Klärungsfrage | Rename ex `btx_clarifications` | Hängt am Sachverhalt. `severity='required'` blockiert die Buchung bis zur Antwort (die früheren `blocks_*`-Spalten sind seit Migration 20260705113000 entfernt — nie befüllt, F11-T11.5). Fragesteller: `raised_by_kind` + `raised_by_user_id` (Vokabular `actor_kind`, NULL = Altbestand). |
@@ -110,7 +110,7 @@ Seit dem Datenmodell-Review 2026-07-11 gilt zusätzlich:
 
 **Bewusst NICHT in Phase 1:**
 
-- `client_contract` (Vertrag) — Recurring bleibt als `kind=recurring_charge` am Case.
+- `client_contract` (Vertrag) — ein Vertrag ist ein Beleg; die Wiederkehr steht als `kind=rule|running` am Case (F360).
 - `client_open_item` (Offene Posten) — wird über offene Cases ausgedrückt. Seit F77 (2026-08-15) gibt es die **Zuordnung** Rechnung↔Zahlung als eigene Tabelle `client_open_item_links` (siehe „Ausgleichs-Zuordnung“); der offene Posten selbst bleibt abgeleitet.
 - `client_journal_entry_audit_log` — Trail-Spalten am Header reichen erstmal.
 
@@ -314,7 +314,7 @@ Seit dem Datenmodell-Review 2026-07-11 gilt zusätzlich:
 - English: `accounting case`
 - German: `Sachverhalt` / `Geschäftsvorfall`
 - Table: `ludwig.client_accounting_case` (Refactor 2026-05-27; vorher `ludwig.btx`)
-- Definition: Aggregat-Root für einen fachlichen Buchhaltungs-Vorgang. Verklammert 0..N **Ereignisse** (`client_accounting_event`) zu **einem** Vorgang. Recurring (Miete, Versicherung, Abo) bleibt bei `kind=recurring_charge` offen über mehrere Realisierungen.
+- Definition: Aggregat-Root für einen fachlichen Buchhaltungs-Vorgang. Verklammert 0..N **Ereignisse** (`client_accounting_event`) zu **einem** Vorgang. Recurring (Miete, Versicherung, Abo) bleibt als Regel- oder laufender Sachverhalt (`kind=rule|running`, [[Case kind]]) offen über mehrere Realisierungen.
 - Data type: entity / table (`ludwig.client_accounting_case`)
 - Notes:
   - Phase-1-Pipeline: 1 Belegeingang → 1 Case (über ein `document_received`-Event). Recurring-Auto-Merging ist Phase-2-Backlog.
@@ -456,6 +456,21 @@ Seit dem Datenmodell-Review 2026-07-11 gilt zusätzlich:
   - **Der Server exekutiert die Konsequenz** beim Beantworten: `confirm_close` schließt mit Audit-Grund (Freeze-Guards), eine mitgegebene `bankTransactionId` landet per `manual`-Match auf dem Bank-Leg der Spiegel-Tilgung (fällt via `is_datev_booked` aus Gate 1f), `escalate_accounting` reicht an die Kanzlei weiter.
   - Idempotent über einen partiellen Unique-Index je (Sachverhalt, Befund-Typ); löst ein späterer Abzug den Befund auf, wird die Klärung automatisch beantwortet.
 
+### Case kind (Art des Sachverhalts)
+
+- English: `case kind`
+- German: `Art des Sachverhalts`
+- Data type: `client_accounting_case.kind text not null default 'single'`, CHECK in Migration `20261002120000_case_kind_mechanics.sql`, TS `CASE_KIND` (`accounting-cases/domain/case.ts`).
+- Definition: Die Mechanik des Sachverhalts — **wie kommt er zu seinen Buchungen, und wann ist er fertig?** Belegart und Richtung gehören nicht dazu; die Richtung trägt `counterparty_side`. Regel: `sachverhalt.md` S22 (F360).
+- Werte:
+  - **Einzelsachverhalt** — `single`: ein Geschäftsvorfall, auch Umbuchung/Korrektur ohne Gegenpartei. Default.
+  - **Regelsachverhalt** — `rule`: Wiederkehr mit fester Regel ([[Recurring rule]]), der Server bucht. Entsteht nur mit der Regel.
+  - **Laufender Sachverhalt** — `running`: wiederkehrend, jede Buchung wird einzeln entschieden (z. B. Vertrag ohne feste Raten, Auslagen über die Zeit).
+  - **Sammelfall** — `pool`: aus Mehrdeutigkeit entstanden (OPOS-Zuordnung, Zahlungs-Sammelfall), Ziel ist der Split. Nur maschinell.
+  - **Mandantenstapel** — `client_batch`: Container eines importierten Stapels (F295). Nur der Import.
+  - **Dauersachverhalt – Art offen** — `recurring_charge`: nur Übergang, alter Dauersachverhalt ohne Regel; Gate 2a legt ihn Ludwig als Aufgabe vor. Kein Code schreibt ihn neu.
+- Notes: „Dauersachverhalt" bleibt der Oberbegriff für `rule` + `running`. Setzen dürfen Agent und Kanzlei nur `single`/`running` (`assertCaseKindTransition`).
+
 ### Sammelsachverhalt und OPOS-Pool (collective case / open item pool)
 
 - English: `collective case` / `open item pool`
@@ -465,7 +480,7 @@ Seit dem Datenmodell-Review 2026-07-11 gilt zusätzlich:
 - Data type: Anker-Präfix am `batch_opos_reference` (keine eigene Spalte).
 - Notes:
   - **Zahlungs-Sammelfall:** eine Zahlung, die die Kaskade nicht eindeutig auflöst (mehrdeutige Beträge, kein Treffer), wird EIN Sachverhalt mit Avis-Klärung an die Kanzlei — bewusst kein Leer-Case je Nummer (nicht buchbar, unterläuft den Schließ-Deckel).
-  - **Mandantenstapel-Container** (`kind='client_batch'`, F295): der eine Sammel-Sachverhalt je importiertem Mandantenstapel. Anders als die beiden anderen Ausprägungen **kein Split-Ziel** — die Sätze sind vom Mandanten fertig gebucht, `multiple` ist Dauerzustand. Keine Gegenpartei (sie steht am einzelnen Satz, DB-CHECK `client_accounting_case_client_batch_check`); Art/Modus/Gegenpartei nicht änderbar, `dissolve_case`/`merge_cases`/Freigabe je Sachverhalt abgelehnt — abgenommen wird über den Buchungszyklus (Schritt 11). Die Art vergibt nur der Import.
+  - **Mandantenstapel-Container** (`kind='client_batch'`, F295): der eine Sammel-Sachverhalt je importiertem Mandantenstapel. Anders als die beiden anderen Ausprägungen (`kind='pool'`, F360) **kein Split-Ziel** — die Sätze sind vom Mandanten fertig gebucht, `multiple` ist Dauerzustand. Keine Gegenpartei (sie steht am einzelnen Satz, DB-CHECK `client_accounting_case_client_batch_check`); Art/Modus/Gegenpartei nicht änderbar, `dissolve_case`/`merge_cases`/Freigabe je Sachverhalt abgelehnt — abgenommen wird über den Buchungszyklus (Schritt Buchungen des Mandanten). Die Art vergibt nur der Import.
   - **OPOS-Pool:** offene Posten **ohne Belegfeld 1** kommen je Personenkonto zusammen. Belegfeld-los heißt nicht identitätslos — DATEVs `open_item_number` klammert auch ohne Belegfeld. Ehrliche Grenze: ohne Belegfeld ziffert DATEV nicht automatisch aus, die Zahlung darauf braucht immer einen Abnahme-Schritt.
   - **Klassenregel** (Owner-Bestätigung 2026-08-20): Einzel- und Dauersachverhalt tragen genau EINE dominante Nummer (beim Dauersachverhalt je Periode/Vorgang), nur der Sammelsachverhalt darf mehrere oder keine tragen. Als Norm + Plausibilitäts-Check (P1), bewusst NICHT als DB-Constraint — die Realität verletzt die Norm gelegentlich, und genau das soll sichtbar werden.
 
@@ -568,7 +583,7 @@ Seit dem Datenmodell-Review 2026-07-11 gilt zusätzlich:
 - English: `recurring rule`
 - German: `Wiederkehr-Regel` / `Dauersachverhalt-Regel`
 - Table: `ludwig.client_accounting_case_rule` (ex `client_recurring_charge_rule`, Rename 2026-06-16)
-- Definition: Deterministische Regel an einem Dauersachverhalt (`kind='recurring_charge'`): Match-Kriterien gegen Bank-Transaktionen (Richtung, Name, IBAN, Betrag ± Toleranz, Zweck-Regex) + Buchungs-Vorlage. Treffer beim Rescan → `payment_in/out`-Event + `client_journal_entry`-Vorschlag. Genau eine Regel je Sachverhalt (Unique auf `case_id`).
+- Definition: Deterministische Regel an einem Regelsachverhalt (`kind='rule'` — die Regel macht den Fall dazu, F360): Match-Kriterien gegen Bank-Transaktionen (Richtung, Name, IBAN, Betrag ± Toleranz, Zweck-Regex) + Buchungs-Vorlage. Treffer beim Rescan → `payment_in/out`-Event + `client_journal_entry`-Vorschlag. Genau eine Regel je Sachverhalt (Unique auf `case_id`).
 - Notes:
   - Historie: Audit-Ereignisse mit `resource_kind = 'recurring_rule'` — Agent (`case.rule_*_by_agent`) und Kanzlei (`case.rule_created`, `case.rule_updated`, `case.rule_matching_note_updated`, `case.rule_deleted`), `payload.caseId` verweist auf den Fall.
   - **Split-Vorlage** (`template_lines`, jsonb, 2026-07-10): N Gegenkonto-Zeilen mit festen Beträgen + 1 Bank-Zeile (z. B. Miete/NK/Heizung/Garage gegen einen Kreditor). Gesetzt → `fy_template_counter_account_id` wird ignoriert; Vorschlag entsteht nur, wenn die Zeilensumme den Zahlbetrag deckt. DATEV kann Splits nur als parallele Buchungssätze mit gemeinsamem Beleglink ausdrücken; Korrekturen macht Agent/UI am Vorschlag.
@@ -581,7 +596,7 @@ Seit dem Datenmodell-Review 2026-07-11 gilt zusätzlich:
 
 - English: `recurring case with recurring postings`
 - German: `Dauersachverhalt mit wiederkehrenden Buchungen` (intern: **LDSV mit WK**)
-- Abkürzungen (Owner 2026-08-21, L-Präfix-Konvention siehe Rules): **LSV** = Ludwig-Sachverhalt ([[Accounting case]]) · **LDSV** = Ludwig-Dauersachverhalt (`client_accounting_case` mit `kind='recurring_charge'`) · **WK** = wiederkehrende Buchungen (bewusst ohne L-Präfix — gleicher Begriff wie in DATEV: Stapel „Wiederkehrende Buchungen", Buchungen mit `mark_of_origin='WK'`). „LDSV mit WK" ergibt sich aus beidem.
+- Abkürzungen (Owner 2026-08-21, L-Präfix-Konvention siehe Rules): **LSV** = Ludwig-Sachverhalt ([[Accounting case]]) · **LDSV** = Ludwig-Dauersachverhalt (`client_accounting_case` mit `kind in ('rule','running')` — Oberbegriff für Regel- und laufenden Sachverhalt; der Übergangswert `recurring_charge` heißt „Art offen", [[Case kind]]) · **WK** = wiederkehrende Buchungen (bewusst ohne L-Präfix — gleicher Begriff wie in DATEV: Stapel „Wiederkehrende Buchungen", Buchungen mit `mark_of_origin='WK'`). „LDSV mit WK" ergibt sich aus beidem.
 - Definition: Ein LDSV, dessen Aufwands-/Erlösbuchungen **ohne neuen Beleg** entstehen — Grundlage ist eine Dauerrechnung ([[Billing mode]] `recurring`), in DATEV typischerweise als monatlicher WK-Stapel unter derselben Belegnummer gebucht. Beim Onboarding werden LDSV mit WK deterministisch aus der DATEV-Buchungshistorie abgeleitet (F91); die Erkennung ist herkunfts-agnostisch (auch handgebuchte regelmäßige Sollstellungen zählen, der WK-Marker ist nur Konfidenz-Signal). Im laufenden Betrieb legt der Agent neue LDSV mit WK bei Eingang einer Dauerrechnung an.
 - Notes:
   - Das DATEV-Herkunfts-Kennzeichen `SV` in `mark_of_origin` bedeutet „Stapelverarbeitung" — genau wegen solcher Kollisionen tragen Ludwig-Kürzel das L-Präfix. Beobachtete Herkunfts-Werte: `RE` (manuell), `WK` (wiederkehrend), `SV` (Stapel/Import — auch der „Ludwig-Export"-Stapel), `JA` (Jahresabschluss), `AN` (Anlagen), `KS` (KSt).
@@ -648,7 +663,7 @@ Seit dem Datenmodell-Review 2026-07-11 gilt zusätzlich:
 - German: `Bankabgleich`
 - Definition: Je Zahlungskonto drei Werte zum Stichtag X (F292): **L** der Ledger-Saldo aus den Buchungen auf dem Sachkonto (Effektiv-Sicht ohne Vorschläge, ab Wirtschaftsjahresbeginn), **B** der Kontostand laut Auszug (aus einem Auszug mit Saldenkette abgeleitet, sonst unbekannt), **A** der Kontostand laut Anwender (siehe Balance confirmation). L ist die einzige Zahl, die Ludwig ausweist; B und A sind Gegencheck. Die Differenz L − R zerlegt sich in Buchungen ohne Umsatz, ungebuchte Umsätze, Datumsversatz und einen nicht erklärbaren Rest.
 - Data type: abgeleitet, nicht persistiert — `loadLedgerBalanceAt` und `loadPaymentAccountReconciliation` (`bank-transactions`), Zerlegung `explainLedgerDifference` und Bewertung `reconcileBankAccounts` in `apps/web/src/modules/batch-review/domain/bank-reconciliation.ts`.
-- Notes: Reporting-Reiter des Bankkontos (Stichtag frei wählbar) und Schritt 4 der Abnahme (F298: Matrix Quelle × Alt · Bewegung · Neu, Urteil `fits` · `fits_with_proposals` · `explained` · `differs` · `not_checkable` · `optional`, `buildBankBalanceComparison` in `batch-review/domain/bank-balance-comparison.ts`). An beiden Orten lässt sich ein eigener Kontostand hinterlegen. Die Brücke aus F205 (DATEV laut Spiegel + Stapel, die DATEV noch nicht hat) bleibt als Zerlegung von L; weicht ihre Summe ab (`bridgeGap`), zählt sie Sätze ohne Spiegel-Treffer doppelt oder gar nicht. Regel: `docs/topics/bank.md` R8. Introduced 2026-09-10 (F204), umgestellt 2026-09-24 (F292).
+- Notes: Reporting-Reiter des Bankkontos (Stichtag frei wählbar) und Schritt Kontenausgleich der Abnahme (F298: Matrix Quelle × Alt · Bewegung · Neu, Urteil `fits` · `fits_with_proposals` · `explained` · `differs` · `not_checkable` · `optional`, `buildBankBalanceComparison` in `batch-review/domain/bank-balance-comparison.ts`). An beiden Orten lässt sich ein eigener Kontostand hinterlegen. Die Brücke aus F205 (DATEV laut Spiegel + Stapel, die DATEV noch nicht hat) bleibt als Zerlegung von L; weicht ihre Summe ab (`bridgeGap`), zählt sie Sätze ohne Spiegel-Treffer doppelt oder gar nicht. Regel: `docs/topics/bank.md` R8. Introduced 2026-09-10 (F204), umgestellt 2026-09-24 (F292).
 
 ### Balance confirmation (Saldenbestätigung)
 
@@ -656,7 +671,7 @@ Seit dem Datenmodell-Review 2026-07-11 gilt zusätzlich:
 - German: `Saldenbestätigung`, `bestätigter Kontostand`
 - Definition: Der vom Anwender zum Stichtag hinterlegte Kontostand eines Zahlungskontos — „Stand der Buchungen übernehmen" (A = L) oder der Betrag aus einer anderen Quelle (Papierauszug, Online-Banking, Bankbestätigung, Sonstiges) — zusammen mit dem Ledger-Saldo, der dabei galt.
 - Data type: `ludwig.client_payment_account_balance_confirmations` (`payment_account_id`, `as_of_date`, `ledger_balance`, `confirmed_balance`, `note`, `source` ∈ `paper_statement` · `online_banking` · `bank_confirmation` · `other` (NULL = vor F298), `confirmed_by`, `confirmed_at`); ein Punkt je Konto und Stichtag (Upsert). Kern-Write `confirmPaymentAccountBalance`, Audit `bank_balance.confirmed`.
-- Notes: Der jüngste Punkt ist der **Anker**: weicht der heute gerechnete Ledger-Saldo zum Anker-Stichtag vom gespeicherten ab (**Anker-Drift**), wurden Buchungen vor dem bestätigten Stichtag nachträglich verändert. Auszugssalden werden nie gespeichert. Kein Status, keine Registry-Achse — ein Datensatz mit Datum. Introduced 2026-09-24 (F292), Quelle und Schritt 4 als Schreibort 2026-09-25 (F298).
+- Notes: Der jüngste Punkt ist der **Anker**: weicht der heute gerechnete Ledger-Saldo zum Anker-Stichtag vom gespeicherten ab (**Anker-Drift**), wurden Buchungen vor dem bestätigten Stichtag nachträglich verändert. Auszugssalden werden nie gespeichert. Kein Status, keine Registry-Achse — ein Datensatz mit Datum. Introduced 2026-09-24 (F292), Quelle und Schritt Kontenausgleich als Schreibort 2026-09-25 (F298).
 
 ### Agent work queue
 
@@ -694,7 +709,7 @@ Seit dem Datenmodell-Review 2026-07-11 gilt zusätzlich:
 
 - English: `check point` (`CHECKPOINT_TEXTS`, `BANK_CHECK_LABELS`)
 - German: `Prüfpunkt`
-- Definition: Eine Zeile des Prüfprotokolls in Schritt 8 der *Stapelabnahme* — „Kontoauszüge lückenlos", „Jede Auszugszeile ist gebucht" usw. Derselbe Name steht in dem Schritt, der seine Befunde zeigt (Schritt 4: die Bank-Prüfpunkte wortgleich). Je Prüfpunkt: Stand (was offen ist), was zu tun ist (Kanzlei-Satz + Link) und die aufklappbaren Befunde.
+- Definition: Eine Zeile des Prüfprotokolls der *Stapelabnahme* — „Kontoauszüge lückenlos", „Jede Auszugszeile ist gebucht" usw. Derselbe Name steht in dem Schritt, der seine Befunde zeigt (Schritt Kontenausgleich: die Bank-Prüfpunkte wortgleich). Je Prüfpunkt: Stand (was offen ist), was zu tun ist (Kanzlei-Satz + Link) und die aufklappbaren Befunde.
 - Data type: Zeilen-Key `ChecklistRowKey` (`batch-review/domain/checklist.ts`); Texte in `batch-review/domain/checkpoint-texts.ts`; Quittung gelber Zeilen in `ludwig.client_review_checks` (`check_kind` = Zeilen-Key).
 - Notes: Nicht das *Review item* am Buchungssatz (P-SUMME…P-JUDGE), auch wenn beide „Prüfpunkt" heißen (Doppelbelegung offen, `web-ui-offen.md` P45). Der Agenten-Text eines Befunds (`problem`) erscheint im Prüfprotokoll nie (F246).
 
@@ -710,9 +725,9 @@ Seit dem Datenmodell-Review 2026-07-11 gilt zusätzlich:
 
 - English: `review tab` — `needs_review` · `likely_correct` · `client_batch`
 - German: Reiter „Bitte anschauen" · „Wahrscheinlich richtig" · „Mandantenstapel"
-- Definition: Die drei Reiter von Schritt 3 der Stapelabnahme und die drei Gruppen der Sachverhalts-Seite, geteilt nach *Prüfbedarf*: ab der Schwelle „Bitte anschauen", darunter „Wahrscheinlich richtig", importierte Mandantenbuchungen (`origin='client_import'`) im eigenen Reiter „Mandantenstapel", der nur erscheint, wenn er etwas enthält. Schritt 3 hat dahinter den Reiter „Freigegeben" (`released`) für alles Entschiedene — kein Prüfbedarf, deshalb nicht in `REVIEW_TABS`, sondern `Step3Tab` (`batch-review/domain/review-tabs.ts`).
+- Definition: Die drei Reiter von Schritt Buchungsvorschläge der Stapelabnahme und die drei Gruppen der Sachverhalts-Seite, geteilt nach *Prüfbedarf*: ab der Schwelle „Bitte anschauen", darunter „Wahrscheinlich richtig", importierte Mandantenbuchungen (`origin='client_import'`) im eigenen Reiter „Mandantenstapel", der nur erscheint, wenn er etwas enthält. Schritt Buchungsvorschläge hat dahinter den Reiter „Freigegeben" (`released`) für alles Entschiedene — kein Prüfbedarf, deshalb nicht in `REVIEW_TABS`, sondern `Step3Tab` (`batch-review/domain/review-tabs.ts`).
 - Data type: `ReviewTab` / `REVIEW_TABS` (`accounting-cases/domain/review-score.ts`); Labels in der Status-Registry, Achse `review_tab`.
-- Notes: „Alle übernehmen" (Schritt 3) und „Alle Vorschläge übernehmen" (Sachverhalts-Seite) nehmen alles außerhalb von „Bitte anschauen"; die Rot-Sperre im Kern bleibt das Netz (R17a). Bis F232 hießen die Reiter „Wiederkehrende" / „Einzelfälle" (nach Herkunft) und die Gruppen „Prüfen" / „Kurz ansehen" / „Durchwinker" / „Übernehmen".
+- Notes: „Alle übernehmen" (Schritt Buchungsvorschläge) und „Alle Vorschläge übernehmen" (Sachverhalts-Seite) nehmen alles außerhalb von „Bitte anschauen"; die Rot-Sperre im Kern bleibt das Netz (R17a). Bis F232 hießen die Reiter „Wiederkehrende" / „Einzelfälle" (nach Herkunft) und die Gruppen „Prüfen" / „Kurz ansehen" / „Durchwinker" / „Übernehmen".
 
 ### Convention (Konvention)
 
@@ -727,7 +742,7 @@ Seit dem Datenmodell-Review 2026-07-11 gilt zusätzlich:
 - English: `product finding`
 - German: `Produktbefund`
 - Definition: Eine Meldung des Agenten an die Entwicklung: was er tun wollte, was ihn aufgehalten hat, welches Tool oder welcher Schritt betroffen ist. Fehlende Funktionen, Umwege, die ein Tool erzwingt, falsche Automatik, und Informationen, die eigentlich an eine Entität gehören.
-- Data type: table `ludwig.platform_product_feedback` (ohne Mandantenbezug — der Beleg steht als Klartext in `evidence`). Status `open` | `accepted` | `rejected`. `feedback_number` ist die laufende Nummer (im UI `#12`), unter der über den Befund geredet wird; `agent_response` der jederzeit überschreibbare Freitext des Entwicklungsagenten, was aus ihm geworden ist (anders als `resolution`, die am Abhaken hängt).
+- Data type: table `ludwig.platform_product_feedback` (hängt an der Kanzlei; `client_id` nennt den meldenden Mandanten — beim Muster den der ersten Meldung — nur zum Filtern im Admin-UI, der Entwicklungs-MCP sieht ihn nicht; der Beleg steht als Klartext in `evidence`). Status `open` | `accepted` | `rejected`. `feedback_number` ist die laufende Nummer (im UI `#12`), unter der über den Befund geredet wird; `agent_response` der jederzeit überschreibbare Freitext des Entwicklungsagenten, was aus ihm geworden ist (anders als `resolution`, die am Abhaken hängt).
 - Notes: Eine Richtung, **kein Rückkanal zum Buchungsagenten**: er erfährt das Ergebnis irgendwann als neues Tool oder geänderten Ablauf, nicht als Ticket-Antwort — die Antwort des Entwicklungsagenten steht nur im Admin-UI. Keine Priorisierung durch den Agenten. Gelesen unter `/admin/product-feedback`; der Zielort einer übernommenen Meldung ist ein `P<n>` im passenden Themen-Dossier. Verdichtung (derselbe Befund aus vielen Läufen, dieselbe Konvention bei mehreren Kanzleien) ist bewusst noch nicht gebaut. Regel: `docs/topics/buchung.md` R15f.
 
 ### Clarification question
@@ -754,7 +769,7 @@ Seit dem Datenmodell-Review 2026-07-11 gilt zusätzlich:
 - German: `Erwartung`
 - Definition: A structured, dated statement that something is still missing at an accounting case — either an incoming document (`kind='document'`) or a payment (`kind='payment'`). Unlike a `Clarification question` it is not *answered* but **resolved by an event**: the document arrives, the payment clears.
 - Data type: entity (table `ludwig.client_accounting_case_expectation`)
-- Example: `{ kind: "document", direction: "incoming", expected_counterparty_name: "The Growth Group AG", expected_amount: 464.10, due_date: "2026-07-31", due_source: "client_default", escalation_level: 1, audience: "client" }`
+- Example: `{ kind: "document", direction: "incoming", expected_counterparty_name: "The Muster Group AG", expected_amount: 464.10, due_date: "2026-07-31", due_source: "client_default", escalation_level: 1, audience: "client" }`
 - Notes: Both directions share one table on purpose — the expected document and the expected payment are the same list read from opposite ends, and that list is what the bank-statement reconciliation matches against. **The document expectation is the ONLY representation of a missing document (F125)** — there is no clarification for it any more; `audience` says who fetches it (`client` = the client uploads it in the portal, `accounting` = the firm gets it itself), and `note` is one sentence of context (amount, reference and date have columns and never belong in that text). **Created by the booking, never by a due date**: posting to a personal account opens the payment expectation; the DATEV open-item mirror (`client_datev_open_items`) stays a mirror and creates none. Carries **no open balance** — that is computed from the events by `loadCaseOpenPayments`; `expected_amount` is the matching key, not the running total. Maturity (`pending`/`due`/`escalated`/`resolved`) is derived, not stored. `escalated` = escalation_level > 0 or ≥ 30 calendar days overdue (F318). `escalation_level` is Ludwig's own maturity axis and must never be exported as a DATEV dunning level. Rules: `docs/topics/sachverhalt.md` S7–S9, `docs/topics/belege.md` R24. See also [[Beleg-Nachforderung (document request)]].
 
 ### Beleg-Nachforderung (document request)
@@ -1039,7 +1054,7 @@ Konsolidierung auf eine Beleg-Detail-Log wiegt schwerer als die Trennung, und
 
 - English: `doc direction line`
 - German: `Richtungszeile`
-- Definition: Deterministisch gerenderte Kopfzeile über der Beleg-Zusammenfassung, abgeleitet ausschließlich aus verifizierten strukturierten Feldern (`doc_direction` + Gegenpartei + Betrag), z.B. `Eingangsrechnung von Telekom · 119,00 EUR` / `Ausgangsrechnung an Certina Management · 20.000,00 EUR`. Fehlt `doc_direction`, gibt es KEINE Zeile — lieber nichts als geraten (Owner 2026-08-14).
+- Definition: Deterministisch gerenderte Kopfzeile über der Beleg-Zusammenfassung, abgeleitet ausschließlich aus verifizierten strukturierten Feldern (`doc_direction` + Gegenpartei + Betrag), z.B. `Eingangsrechnung von Telekom · 119,00 EUR` / `Ausgangsrechnung an Musterholding Management · 20.000,00 EUR`. Fehlt `doc_direction`, gibt es KEINE Zeile — lieber nichts als geraten (Owner 2026-08-14).
 - Data type: pure Funktion `renderDocDirectionLine` / `prefixSummaryWithDirectionLine` in `apps/web/src/modules/source-docs/domain/doc-direction-line.ts`.
 - Example: `get_case`-Events und `list_docs(open)` liefern die Summary mit vorangestellter Richtungszeile; die Invoice-Detailansicht (GlanceCard) zeigt sie fett über der `document_summary`.
 - Notes: Hintergrund: Die Classifier-`summary` ist Orientierungs-Info und trifft seit dem Prompt-Update 2026-08-14 bewusst keine Richtungsaussagen mehr (Vorfall: Summaries dreier SCV-Ausgangsrechnungen behaupteten die falsche Richtung, das strukturierte Feld war korrekt). Richtung kommt ausschließlich aus dem verifizierten Rollen-Feld.
@@ -1114,7 +1129,7 @@ Konsolidierung auf eine Beleg-Detail-Log wiegt schwerer als die Trennung, und
 - German: `Beleg-Charakter` (buchhalterische Natur des Belegs)
 - Definition: One axis of `Document classification`. Beschreibt die **buchhalterische Natur** des Belegs — wie er gebucht werden muss. Orthogonal zu `doc_direction` (wer zahlt wen), `document_form` (Verarbeitungs-Pipeline) und `doc_category` (Folgeprozess). Werte: `original`, `credit_note`, `self_billing`, `refund`, `unknown`. Vorgängername: `delivery_lifecycle` (umbenannt 2026-05-14, siehe Decision Log).
 - Data type: enum value (Python `DocumentKind`)
-- Example: `self_billing` für eine JobRad-Provisionsabrechnung an einen Fahrradhändler.
+- Example: `self_billing` für eine Muster Dienstrad-Provisionsabrechnung an einen Fahrradhändler.
 - Notes: Unabhängig von `doc_direction`. Ein und derselbe `document_kind` kann mit `inbound` ODER `outbound` kombiniert werden — die Felder beantworten unterschiedliche Fragen. **Buchhalterische Tabelle** (Spalten: `document_kind` × `doc_direction`):
 
   | `document_kind` | bei `inbound` (Beleg eingehend) | bei `outbound` (Beleg ausgehend) | Vorzeichen-Flip? |
@@ -1949,7 +1964,7 @@ The project rule is English names for all code, schemas, and columns (see decisi
 - Definition: Was ein einzelner Buchungssatz **tut** — fünf Werte, aus den Konten seiner Zeilen abgeleitet und beim Buchen am Satz gestempelt: **`expense` / `revenue`** (bucht den Geschäftsvorfall selbst), **`payment`** (gleicht einen offenen Posten aus: Geld gegen Forderung, Verbindlichkeit oder Privatkonto), **`money_transfer`** (Geld zwischen eigenen Zahlungskonten, nach außen fließt nichts), **`reclassification`** (reine Umsortierung zwischen Bestandskonten). Leiter, erste passende Stufe gewinnt: Erfolgskonto beteiligt (`skr_class`) → Aufwand/Erlös (bei beidem der größere Betrag; SKR-Klasse 8 entscheidet über die Buchungsseite) · alle Zeilen auf Zahlungskonten → Geldtransit · mindestens eine → Zahlung · sonst Umbuchung. **Der Geschäftsvorfall schlägt die Zahlung**: „Bürobedarf an Bank" ist ein Aufwand, der direkt bezahlt wurde.
 - Data type: `client_journal_entry.entry_kind text` (CHECK auf die fünf Werte, `NULL` nur bei Sätzen ohne Zeilen); Klassifikation in der pure Domain-Funktion `apps/web/src/core/accounting/entry-kind.ts` (`classifyEntryKind`, `ENTRY_KIND_LABEL/DESCRIPTION`), gestempelt von `datev-export/application/journal-entry-stamp.ts`.
 - Example: `70100 Diverse B an 1800 Bank` → Zahlung; `1800 Bank an 1461 EC-Cash` → Geldtransit; `material_expense an Kreditor` → Aufwand.
-- Notes: Abgrenzung zur [Beleggruppe](#beleggruppe-stapel-sortierung): die sortiert den Stapel für die **Ablage** („wo liegt der Beleg?"), die Satzart erklärt den **einzelnen Satz** („was tut er?"). Beide sind kontobasiert, werden vom selben Helper in einer Fahrt gestempelt und teilen bewusst keinen Klassifikations-Code. Wer Zeilen ändert, stempelt neu — alle Schreibpfade tun das nach dem Zeilen-Insert. `client_accounting_event.kind` taugt nicht als Quelle (auf Stapel 206ebf8c tragen 42 `document_received`-Sätze ein Zahlungskonto und 44 `payment_*`-Sätze bewegen nur Geld zwischen eigenen Konten). Fehlt die `skr_class`, fällt der Satz auf die Geld-Stufen zurück statt zu raten. Angezeigt als Badge am Kopf jeder Buchungskarte in der Abnahme (Schritt 3, Fall-Vollbild); ohne Wert kein Badge statt eines geratenen. Introduced 2026-09-09, persistiert seit F184 (2026-09-09).
+- Notes: Abgrenzung zur [Beleggruppe](#beleggruppe-stapel-sortierung): die sortiert den Stapel für die **Ablage** („wo liegt der Beleg?"), die Satzart erklärt den **einzelnen Satz** („was tut er?"). Beide sind kontobasiert, werden vom selben Helper in einer Fahrt gestempelt und teilen bewusst keinen Klassifikations-Code. Wer Zeilen ändert, stempelt neu — alle Schreibpfade tun das nach dem Zeilen-Insert. `client_accounting_event.kind` taugt nicht als Quelle (auf Stapel 206ebf8c tragen 42 `document_received`-Sätze ein Zahlungskonto und 44 `payment_*`-Sätze bewegen nur Geld zwischen eigenen Konten). Fehlt die `skr_class`, fällt der Satz auf die Geld-Stufen zurück statt zu raten. Angezeigt als Badge am Kopf jeder Buchungskarte in der Abnahme (Schritt Buchungsvorschläge, Fall-Vollbild); ohne Wert kein Badge statt eines geratenen. Introduced 2026-09-09, persistiert seit F184 (2026-09-09).
 
 ### Export marking / export batch
 
@@ -1974,17 +1989,18 @@ The project rule is English names for all code, schemas, and columns (see decisi
 - Data type: table `ludwig.client_datev_export_batches` (`stapelnummer`, `description`, `kind ∈ regular|client_batch`, `state ∈ agent|prepared|review|ready|exporting|inspection|confirmed|mirrored|closed|failed|cancelled`, `period_from/to`, `supplements_batch_id`, `datev_sequence_id`); Stapelnummer-Vergabe geteilt via `nextStapelnummer(tx, clientId, year)`. Der Umfang eines Stapels ist die Zahl der Sätze mit seinem Stempel (`export_batch_id`). Status-Achse `export_batch` in der Registry.
 - Example: Der Zyklus `2026-0007` / `08-2026-Ludwig` steht auf `review`; die Kanzlei gibt ihn zurück an den Agenten, der einen zweiten Durchgang darin fährt.
 - **Nachzügler / carry-over entries**: Buchungen, die **vor** dem gewählten Stapel-Zeitraum liegen und noch keinem Stapel zugeordnet sind — typisch die Rechnung, die erst nach dem Monatsexport hereinkam und nachgebucht wurde. Sie gehen standardmäßig mit (`includeEarlierUnbatched`, Wizard-Schritt 1, default an, mit Zähler + separater Auflistung in der Vorschau), weil sie sonst bis zum nächsten Export desselben Alt-Zeitraums liegen bleiben — für die Umsatzsteuer-Meldung müssen sie raus. Der Stapel-**Beginn** wird dafür auf das älteste Nachzügler-Datum vorgezogen (Dateiname, `period_from`, EXTF-Header, DATEV-`date_from` ziehen mit); der gewählte Zeitraum bleibt im Audit als `requestedFrom` + `carryOverCount`. Grenze: nur dasselbe Wirtschaftsjahr (`carryOverRange`) — ein EXTF-Stapel umfasst genau eines.
-- Notes: Der **Stempel** `export_batch_id` auf Buchung, Sachverhalt, Ereignis, Klärung, Notiz und Regel ist **Herkunft, keine Zugehörigkeit** — nur `client_journal_entry` gehört ab `ready` genau einem Zyklus. Belege tragen ihn seit F216 bei der Entscheidung (*Source doc batch*); ihre Erledigung bleibt abgeleitet (`done_via`). Die Sperre hängt am Zustand, nicht am Stempel: ein Satz in `agent`/`review` bleibt editierbar. Der **Reset** gilt dem Zyklus (`resetBatchAction`, aus `agent|prepared|review` → `prepared`) und nimmt Agenten- wie Kanzlei-Arbeit mit. UI (F118/F119): `Mandant → Jahr → Buchungsstapel` — Liste mit *Prozessbild* und *Staffelstab* je Zeile und der DATEV-Seite daneben, Stapel-Detail mit sechs Tabs (Übersicht · Durchgänge · Buchungen · Artefakte · DATEV · Log), und von dort die *Stapelabnahme*. Angelegt wird im Dialog „Stapel anlegen" mit Server-Vorschau (`planManualBatch`); „nur manuell buchen" startet den Zyklus per Übergang direkt in `review`. Einen eigenen Ort „DATEV-Export" gibt es nicht mehr; freigegeben wird in der Abnahme (Schritt 8/9), `/export` bleibt Archiv.
+- Notes: Der **Stempel** `export_batch_id` auf Buchung, Sachverhalt, Ereignis, Klärung, Notiz und Regel ist **Herkunft, keine Zugehörigkeit** — nur `client_journal_entry` gehört ab `ready` genau einem Zyklus. Belege tragen ihn seit F216 bei der Entscheidung (*Source doc batch*); ihre Erledigung bleibt abgeleitet (`done_via`). Die Sperre hängt am Zustand, nicht am Stempel: ein Satz in `agent`/`review` bleibt editierbar. Der **Reset** gilt dem Zyklus (`resetBatchAction`, aus `agent|prepared|review` → `prepared`) und nimmt Agenten- wie Kanzlei-Arbeit mit. UI (F118/F119): `Mandant → Jahr → Buchungsstapel` — Liste mit *Prozessbild* und *Staffelstab* je Zeile und der DATEV-Seite daneben, Stapel-Detail mit sechs Tabs (Übersicht · Durchgänge · Buchungen · Artefakte · DATEV · Log), und von dort die *Stapelabnahme*. Angelegt wird im Dialog „Stapel anlegen" mit Server-Vorschau (`planManualBatch`); „nur manuell buchen" startet den Zyklus per Übergang direkt in `review`. Einen eigenen Ort „DATEV-Export" gibt es nicht mehr; freigegeben wird in der Abnahme (Prüfprotokoll/Übergabe an DATEV), `/export` bleibt Archiv.
 
 ### Stapelabnahme
 
 - English: `batch review`
 - German: **Stapelabnahme**; die Schritte: *Prüfschritt*, die Runden: *Abnahme-Runde*
-- Definition: Der elfstufige Prüfprozess (Schritte 0–10), mit dem die Kanzlei einen *Buchungszyklus / Stapel* abnimmt: Ergebnis · Vollständigkeit · Rückfragen · Buchungsvorschläge · Kontenausgleich · offene Posten · Plausibilität · Konventionen · Prüfprotokoll · Übergabe an DATEV · Nachlese. Sie beginnt mit „Prüfung übernehmen" (`prepared → review`) und endet mit „Freigeben" (`→ ready`) oder „Zurück an Ludwig" (`→ agent`). **„Zurück an Ludwig"** ist app-weit *das* Wort für den Rückweg — am Stapel, am Sachverhalt (Gruppe „Ohne Vorschlag") und am Beleg, der ohne Buchung erledigt wurde (Schritt 1, `?view=unbooked`, Beleg-Drawer-Fuß; belege.md R14d, F220). Einzige Ausnahme: am Buchungsvorschlag in Schritt 3 heißt der Rückweg *Zurück an Ludwig* (F260).
-  - Der **Rail ist ein Vorschlag, kein Zwang**: jeder Schritt ist jederzeit erreichbar; Schritt 8 sagt am Ende, was offen blieb.
+- Definition: Der Prüfprozess, mit dem die Kanzlei einen *Buchungszyklus / Stapel* abnimmt: Ergebnis · Vollständigkeit · Rückfragen · Buchungsvorschläge · Kontenausgleich · offene Posten · Plausibilität · Konventionen · Prüfprotokoll · Übergabe an DATEV · Nachlese. Sie beginnt mit „Prüfung übernehmen" (`prepared → review`) und endet mit „Freigeben" (`→ ready`) oder „Zurück an Ludwig" (`→ agent`). **„Zurück an Ludwig"** ist app-weit *das* Wort für den Rückweg — am Stapel, am Sachverhalt (Reiter „Ohne Vorschlag") und am Beleg, der ohne Buchung erledigt wurde (Schritt Vollständigkeit, `?view=unbooked`, Beleg-Drawer-Fuß; belege.md R14d, F220). Einzige Ausnahme: am Buchungsvorschlag in Schritt Buchungsvorschläge heißt der Rückweg *Zurück an Ludwig* (F260).
+  - Der **Rail ist ein Vorschlag, kein Zwang**: jeder Schritt ist jederzeit erreichbar; das Prüfprotokoll sagt am Ende, was offen blieb.
+  - **Ein Schritt heißt mit Namen, nicht mit Nummer** (2026-09-29): URL-Segment ist der englische Schlüssel (`completeness`, `proposals`, `account-clearing`, `protocol` …), die Zahl im Rail nur die Position 1…n in der Stapelart. Verweise nennen den Namen („Schritt Vollständigkeit"); alte Nummern 0–11 in Specs und Dossiers löst `LEGACY_REVIEW_STEP_NUMBERS` auf.
   - **Geschrieben wird nur in `review`.** Vorher hat niemand übernommen, nachher sind die Sätze geclaimt. Jede Server Action prüft das selbst.
-- Data type: Routen `clients/[slug]/[year]/batches/[batchId]/review/[step]`; Modul `apps/web/src/modules/batch-review` (`domain/steps.ts`, `domain/gating.ts`).
-- Example: „Stapel 2026-0009 wartet auf deine Abnahme → Schritt 0."
+- Data type: Routen `clients/[slug]/[year]/batches/[batchId]/review/[step]` (`step` = `ReviewStepKey`); Modul `apps/web/src/modules/batch-review` (`domain/steps.ts`, `domain/gating.ts`).
+- Example: „Stapel 2026-0009 wartet auf deine Abnahme → Ergebnis des Stapels."
 - Notes: Sie baut **keinen zweiten Kern** nach — die Schritte rufen dieselben Kerne wie Agent und Stammdatenpflege. Eigene Oberflächen hat sie sehr wohl (F123): das Grundmuster jedes Schritts ist *Todo-Liste* links, Detail rechts, Sprung zum nächsten offenen Punkt nach jeder Entscheidung; der Rail trägt je Schritt Ampel und Zähler. Nicht zu verwechseln mit der *Abnahme* eines einzelnen Buchungsvorschlags (Freigeben/Ablehnen am Satz), die ein Teil davon ist.
 
 ### In den Folgemonat schieben
@@ -1992,55 +2008,55 @@ The project rule is English names for all code, schemas, and columns (see decisi
 - English: `defer case to next cycle`
 - German: **In den Folgemonat schieben**
 - Definition: Einen offenen *Sachverhalt* ohne lebenden Buchungssatz aus seinem *Buchungszyklus* in den nächsten regulären Zyklus stempeln — weil Beleg oder Leistung nach dem Zeitraum liegen und keine Zahlung im Stapel steht. Der Fall bleibt `open` beim Agenten; nur `export_batch_id` an Fall und Ereignissen wandert. Gibt es noch keinen Folgestapel, wird der Fall zur Waise (`null`) und `openBatchForPeriod` adoptiert ihn bei der nächsten Eröffnung — erkannt an der Audit-Spur `case.defer_to_next_cycle`, nicht an einer Spalte.
-- Data type: Kern `accounting-cases/application/case-defer-core.ts` (`deferCaseToNextCycle`, `assignOrphanCasesToBatch`); Agent-Tool `defer_case_to_next_cycle`; Abnahme Schritt 3, Gruppe „Ohne Vorschlag" (`deferCaseToNextCycleAction`).
-- Example: „ADVICON-Rechnung vom 01.09. im August-Stapel — in den Folgemonat schieben, nicht mit verbogenem Datum buchen."
+- Data type: Kern `accounting-cases/application/case-defer-core.ts` (`deferCaseToNextCycle`, `assignOrphanCasesToBatch`); Agent-Tool `defer_case_to_next_cycle`; Abnahme Schritt Buchungsvorschläge, Reiter „Ohne Vorschlag" (`deferCaseToNextCycleAction`).
+- Example: „MUSTER STB-Rechnung vom 01.09. im August-Stapel — in den Folgemonat schieben, nicht mit verbogenem Datum buchen."
 - Notes: Nie ein Guard, nie der Server beim Lauf-Ende — die Entscheidung trifft der Agent (Tool) oder die Kanzlei (UI). Ein Fall mit lebendem Satz am Stapel lässt sich nicht schieben (erst `withdraw_proposal`). F217.
 
 ### Zurück an Ludwig
 
 - English: `return proposal to agent`
 - German: **Zurück an Ludwig**
-- Definition: Einen Buchungsvorschlag in Schritt 3 der *Stapelabnahme* mit Notiz an den Agenten zurückgeben: der Satz wird zurückgezogen (`reversed`, Notiz unter `proposal_rationale.review_return_note`), der Sachverhalt bleibt offen beim Agenten, die Notiz geht als Agent-Frage (`question_type = 'proposal_returned'`, `accounting_event_id` = Ereignis) an ihn.
-- Data type: Kern `returnProposalToAgent` (`accounting-cases/application/booking-actions.ts`); Action `returnProposalToAgentAction`; Reiter `returned` in Schritt 3 (`listReturnedToAgent`).
+- Definition: Einen Buchungsvorschlag in Schritt Buchungsvorschläge der *Stapelabnahme* mit Notiz an den Agenten zurückgeben: der Satz wird zurückgezogen (`reversed`, Notiz unter `proposal_rationale.review_return_note`), der Sachverhalt bleibt offen beim Agenten, die Notiz geht als Agent-Frage (`question_type = 'proposal_returned'`, `accounting_event_id` = Ereignis) an ihn.
+- Data type: Kern `returnProposalToAgent` (`accounting-cases/application/booking-actions.ts`); Action `returnProposalToAgentAction`; Reiter `returned` in Schritt Buchungsvorschläge (`listReturnedToAgent`).
 - Example: „Zurück an Ludwig: 4980 statt 4970 — das ist Wartung, keine Nebenkosten."
 - Notes: Nicht *Ablehnen* — das schließt den Fall, sobald nichts mehr offen ist, und der Agent bucht ihn nie neu. Der Fall steht im Reiter „Zurück an Ludwig", bis der Agent neu vorschlägt oder die Frage erledigt. F260.
 
-### Technische Details (Schritt 2)
+### Technische Details (Rückfragen)
 
 - English: `technical details` (group of `gate_override` items)
 - German: **Technische Details**; bis F218 „Overrides des Agenten"
-- Definition: Die letzte Gruppe in Schritt 2 der *Stapelabnahme*: die Stellen, an denen der Agent ein rotes Gate bewusst übergangen hat (`check_kind='gate_override'`, `batch-review/application/agent-overrides.ts`). Sie werden nicht beantwortet, sondern **quittiert** — die Gruppe zeigt „n zu quittieren", und Schritt 8 zählt sie weiter.
+- Definition: Die letzte Gruppe in Schritt Rückfragen der *Stapelabnahme*: die Stellen, an denen der Agent ein rotes Gate bewusst übergangen hat (`check_kind='gate_override'`, `batch-review/application/agent-overrides.ts`). Sie werden nicht beantwortet, sondern **quittiert** — die Gruppe zeigt „n zu quittieren", und Schritt Prüfprotokoll zählt sie weiter.
 - Data type: `AgentOverride` (`agent-overrides.ts`); UI `batch-review/ui/Step2List.tsx`.
 - Example: „4d · Gate übergangen — 1 offen · Verrechnungskonto 1360 hat 12,00 € Rest".
 - Notes: Steht zuletzt und (sobald das Designsystem `TodoGroup.collapsed` liefert) zugeklappt — die Buchhalterin liest zuerst die Fragen, nicht die Gate-Technik. Umbenannt auf Owner-Wunsch 2026-09-15 (F218).
 
-### Kontenausgleich (Schritt 4)
+### Kontenausgleich
 
-- English: `account clearing` (review step 4)
+- English: `account clearing` (review step `account-clearing`)
 - German: **Kontenausgleich**; bis F220 hieß der Schritt „Bank"
-- Definition: Schritt 4 der *Stapelabnahme* — „Prüfen, ob Bank- und Verrechnungskonten zum Periodenende aufgehen." Drei Karten (F245): **Bankkonten** (je Zahlungskonto DATEV-Stand · dieser Stapel · *Saldo neu* · *Saldo laut Auszug* · Differenz, aufgeklappt die Brücke, auf Abruf die Buchungen; am Ende die Zeile „Zahlungskonten ohne Umsätze"), **Verrechnungskonten** (drei Gruppen: Im Stapel bebucht · Saldo offen ohne Bewegung · Ausgeglichen; mit Vorschlägen gerechnet wie Gate 4d, offene Vorschläge als Warnhinweis; aufgeklappt die Zeilen des Zeitraums als „warum") und **Prüfpunkte** (zugeordnet · gebucht · Sammelsachverhalte gehen auf, aus Gate 2a und 4d).
-- Data type: `batch-review/domain/steps.ts` (n = 4), `ui/Step4.tsx`, `domain/bank-reconciliation.ts`, `application/clearing-balances.ts`, `domain/clearing-state.ts`, `ui/ClearingAccountsCard.tsx`.
-- Example: „Schritt 4 zeigt 1360 Geldtransit mit 12,00 € Rest — zwei Zeilen im Zeitraum erklären ihn."
-- Notes: Der Saldo je Zahlungskonto wohnt **nur** hier, nicht in Schritt 1 (Owner 2026-09-15). Umbenannt mit F220.
+- Definition: Prüfschritt der *Stapelabnahme* — „Prüfen, ob Bank- und Verrechnungskonten zum Periodenende aufgehen." Drei Karten (F245): **Bankkonten** (je Zahlungskonto DATEV-Stand · dieser Stapel · *Saldo neu* · *Saldo laut Auszug* · Differenz, aufgeklappt die Brücke, auf Abruf die Buchungen; am Ende die Zeile „Zahlungskonten ohne Umsätze"), **Verrechnungskonten** (drei Gruppen: Im Stapel bebucht · Saldo offen ohne Bewegung · Ausgeglichen; mit Vorschlägen gerechnet wie Gate 4d, offene Vorschläge als Warnhinweis; aufgeklappt die Zeilen des Zeitraums als „warum") und **Prüfpunkte** (zugeordnet · gebucht · Sammelsachverhalte gehen auf, aus Gate 2a und 4d).
+- Data type: `batch-review/domain/steps.ts` (`account-clearing`), `ui/Step4.tsx`, `domain/bank-reconciliation.ts`, `application/clearing-balances.ts`, `domain/clearing-state.ts`, `ui/ClearingAccountsCard.tsx`.
+- Example: „Schritt Kontenausgleich zeigt 1360 Geldtransit mit 12,00 € Rest — zwei Zeilen im Zeitraum erklären ihn."
+- Notes: Der Saldo je Zahlungskonto wohnt **nur** hier, nicht in Schritt Vollständigkeit (Owner 2026-09-15). Umbenannt mit F220.
 
-### Saldo neu (Schritt 4)
+### Saldo neu (Kontenausgleich)
 
 - English: `booked balance` (`BankReconciliationRow.bookedBalance`)
 - German: **Saldo neu** — DATEV-Stand plus dieser Stapel, plus frühere Stapel, die DATEV noch nicht hat, plus Freigegebenes ohne Stapel; Vorschläge zählen nie (`domain/bank-reconciliation.ts`).
 
-### Saldo laut Auszug (Schritt 4)
+### Saldo laut Auszug (Kontenausgleich)
 
 - English: `statement balance` (`statementBalance`, `statementDate`, `statementSourceDocId`)
 - German: **Saldo laut Auszug** — Endsaldo des jüngsten Auszugs, der im Zeitraum endet, geordnet nach Auszugsende; mit Datum und, wenn die Auszugsdatei ein Quelldokument ist, dem Beleg (`reconciliation-queries.ts`).
 
-### Offene Posten in der Stapelabnahme (Schritt 5)
+### Offene Posten in der Stapelabnahme
 
 - English: `open items overview` (review step 5)
-- German: **Offene Posten** — in Schritt 5 der Ausschnitt zum Periodenende
-- Definition: Schritt 5 der *Stapelabnahme* zeigt oben die Gesamtübersicht **Kreditoren / Debitoren** zum Periodenende aus **beiden** Quellen — DATEV (OPOS-Spiegel, Stand des letzten Abgleichs) über Ludwig (offene Zahlungs-Erwartungen) — und darunter Ludwigs Erwartungsliste. Je Personenkonto steht der DATEV-Posten mit dem eindeutig zugeordneten Ludwig-Sachverhalt (Personenkonto + Belegnummer, F241); Erwartungen ohne DATEV-Posten stehen als ‚nur Ludwig erwartet‘. Die Volliste aller offenen Posten bleibt `[year]/open-items`; Schritt 5 ist der Ausschnitt, kein zweiter Ort (F221).
+- German: **Offene Posten** — in Schritt Offene Posten der Ausschnitt zum Periodenende
+- Definition: Schritt Offene Posten der *Stapelabnahme* zeigt oben die Gesamtübersicht **Kreditoren / Debitoren** zum Periodenende aus **beiden** Quellen — DATEV (OPOS-Spiegel, Stand des letzten Abgleichs) über Ludwig (offene Zahlungs-Erwartungen) — und darunter Ludwigs Erwartungsliste. Je Personenkonto steht der DATEV-Posten mit dem eindeutig zugeordneten Ludwig-Sachverhalt (Personenkonto + Belegnummer, F241); Erwartungen ohne DATEV-Posten stehen als ‚nur Ludwig erwartet‘. Die Volliste aller offenen Posten bleibt `[year]/open-items`; Schritt Offene Posten ist der Ausschnitt, kein zweiter Ort (F221).
 - Data type: `batch-review/application/open-items-overview.ts` (`getOpenItemsOverview`, `sideOfExpectation`, `groupOpenItemsByAccount`), `application/open-item-cases.ts` (`resolveOpenItemCases`), `ui/Step5.tsx` (`OpenItemsOverviewCard`), `ui/SourcePair.tsx`.
 - Example: „Kreditoren: DATEV 7 Posten · 4.812,50 € — Ludwig 2 erwartet · 100,00 €."
-- Notes: Kein Gate, kein Rail-Zähler aus der Übersicht — Schritt 5 blockiert weiter nichts (S6: keine Mahnstufen).
+- Notes: Kein Gate, kein Rail-Zähler aus der Übersicht — Schritt Offene Posten blockiert weiter nichts (S6: keine Mahnstufen).
 
 ### Abnahme-Runde
 
@@ -2055,12 +2071,20 @@ The project rule is English names for all code, schemas, and columns (see decisi
 
 - English: `process strip`, `baton`, `relay bar`
 - German: **Prozessbild** (die vier Phasen), **Staffelstab** (wer dran ist), **Staffel-Leiste** (wo die Zeit hinging)
-- Definition: Die drei Darstellungen, mit denen eine Zustands-Achse ohne Klick lesbar wird. Das **Prozessbild** fasst die Zustände zu vier Phasen zusammen (beim Stapel: buchen · prüfen · übertragen · angekommen) und zeigt sie als Strip (Liste), Stepper (Detail-Kopf) oder Mini. Der **Staffelstab** sagt, wer gerade dran ist — Icon **und** Wort, nie nur Farbe. Die **Staffel-Leiste** legt die Zeit zwischen den Zustandswechseln als Zeitachse aus, je Abschnitt eingefärbt nach Besitzer.
+- Definition: Die drei Darstellungen, mit denen eine Zustands-Achse ohne Klick lesbar wird. Das **Prozessbild** fasst die Zustände zu vier Phasen zusammen (beim Stapel: buchen · prüfen · übertragen · angekommen) und zeigt sie als Strip (Liste), Stepper (Detail-Kopf) oder Mini. Ist der Lauf durch (Stapel `closed`, Beleg erledigt), sind alle Phasen erledigt und die Leiste wird durchgehend grün. Der **Staffelstab** sagt, wer gerade dran ist — Icon **und** Wort, nie nur Farbe. Die **Staffel-Leiste** legt die Zeit zwischen den Zustandswechseln als Zeitachse aus, je Abschnitt eingefärbt nach Besitzer.
   - **Alles drei ist abgeleitet**, kein gespeichertes Feld: Phasen und Besitzer aus dem Zustand (`domain/batch-process.ts`), die Abschnitte aus den Zustands-Ereignissen im Audit (`domain/staffel.ts`). Ein zweiter Speicher würde von der Zustands-Achse abweichen, und dann gälte welcher?
   - Die Komponenten (`@/ui/v2`) kennen **kein Fachmodul**: sie bekommen Phasen, Besitzer und Abschnitte als Props. Sonst wäre das Prozessbild an den Stapel gefesselt und der nächste Prozess bekäme ein eigenes.
 - Data type: `ui/v2/Prozessbild.tsx` (`ProzessMini`, `ProzessStepper`, `Staffelstab`, `StaffelLeiste`); Ableitungen in `modules/datev-export/domain/{batch-process,staffel}.ts`, Deckungstest gegen die Status-Achse `export_batch`.
 - Example: „Zwei Tage Agent, neun Tage Warten auf den Mandanten, ein Tag Kanzlei" — die Staffel-Leiste zum August-Stapel.
 - Notes: Erstmals an der Stapel-Seite (F119); gedacht für jede Achse mit Staffelstab-Charakter. Die Phasen-Zuordnung muss die Achse **vollständig** abdecken — ein Zustand ohne Phase fällt sonst still aus dem Bild.
+
+### Command-Menü
+
+- English: `command palette`
+- German: **Command-Menü** (⌘K)
+- Definition: Das Suchfeld der Kopfzeile (⌘K), das im aktiven Mandanten Seiten, Konten, Belege, Sachverhalte, Stapel, Jahre und Beträge findet und mit dem Präfix `m:` den Mandanten wechselt.
+- Data type: Modul `apps/web/src/modules/command-palette` (`domain/command-query.ts`, `application/search-command-palette.ts`); Regel `docs/topics/web-ui.md` R25.
+- Example: „⌘K, `SV-2026-0012` → Sachverhalt 2026-0012; `2026-0001` → erst der Stapel, darunter der Sachverhalt."
 
 ### Prüf-Quittung (review check)
 
@@ -2368,26 +2392,18 @@ Spalten mit DB-`CHECK`-Constraints, die kein eigenständiges Geschäftskonzept r
 - Data type: workflow step (F21-T21.3) + `client_datev_mirror_entries.match_state` (`matched_ludwig | matched_split | matched_corrected | new_unprocessed | unclear | disappeared | disappeared_committed`) + `client_datev_snapshots.reconciliation_report`.
 - Notes: `list_reconciliation_items` ist eine Query auf `match_state`, keine eigene Tabelle. Baseline für den Monatslauf: Snapshot frisch + `unclear` leer/adressiert + Case-Hints abgearbeitet.
 
-### Mengengerüst
-
-- English: `volume comparison`
-- German: **Mengengerüst**
-- Definition: Acht Zeilen in *Schritt 1* der *Stapelabnahme*, die den laufenden Monat gegen den Schnitt der drei Vormonate stellen — **Beträge und Stückzahlen**: Eingangsbelege, Ausgangsrechnungen, Kassenbelege, Bank-Umsätze je Konto, Buchungssätze, Σ Erlöse, bebuchte Sachkonten, Gegenparteien mit Bewegung.
-- Data type: Aggregation in `modules/batch-review/application/volume-comparison.ts`; Bewertung über `domain/comparison.ts`, Quittung `check_kind='volume_row'`.
-- Notes: Beides, weil eine halbierte Belegzahl bei gleicher Summe ein anderer Befund ist als umgekehrt. Vor dem Ludwig-Start gibt es keine Historie — solche Zeilen sagen „zu jung", nicht „unauffällig". Gegenstück je Konto ist der *Kontenvergleich* in Schritt 6. Steuer- und Aufwandssummen fehlen bis `web-ui-offen` P43 entschieden ist.
-
 ### Abgleichliste
 
 - English: `coverage list`
 - German: **Abgleichliste**
-- Definition: Die Vollliste eines Bestands mit zwei Häkchen je Zeile — *zugeordnet* und *gebucht*. In *Schritt 1* für Belege und Bankzeilen: nicht nur was fehlt, sondern alles, damit sichtbar ist, wovon die Ausnahmen Ausnahmen sind.
+- Definition: Die Vollliste eines Bestands mit zwei Häkchen je Zeile — *zugeordnet* und *gebucht*. In *Schritt Vollständigkeit* für Belege und Bankzeilen: nicht nur was fehlt, sondern alles, damit sichtbar ist, wovon die Ausnahmen Ausnahmen sind.
 - Notes: Ausnahmen stehen oben, Erledigtes darunter. Nicht zu verwechseln mit dem *Abgleich* (DATEV-Spiegel ↔ Ludwig), der einem anderen Zweck dient.
 
 ### Zone
 
 - English: `zone`
 - German: **Zone**
-- Definition: Ein Kontext-Block am Sachverhalt in *Schritt 3* der *Stapelabnahme*. Sieben Stück: Sachverhalt · Gegenpartei · Beleg & USt · Zahlung · Regel & Periode · Notizen · Danach.
+- Definition: Ein Kontext-Block am Sachverhalt in *Schritt Buchungsvorschläge* der *Stapelabnahme*. Sieben Stück: Sachverhalt · Gegenpartei · Beleg & USt · Zahlung · Regel & Periode · Notizen · Danach.
 - Notes: Jede Zone beantwortet „warum steht dieser Vorschlag hier?" aus einer anderen Richtung. Ohne sie muss die Prüferin für jede Entscheidung die Seite wechseln — und genau das kostet die Zeit, die das Review sparen soll. „Danach" ist reine Ableitung: was bleibt offen, wenn ich jetzt übernehme?
 
 ### Transition (Übergang)

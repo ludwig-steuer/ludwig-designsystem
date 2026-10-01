@@ -1409,7 +1409,7 @@ export const VatWithoutDocumentApproved: Story = {
         <CaseFacts
           case={caseFixture({
             caseNumber: "2026-0171",
-            kind: "incoming_invoice",
+            kind: "single",
             summary: "Abo GitHub Team; gezahlt, Rechnung liegt noch nicht vor.",
             counterpartyName: "GitHub, Inc.",
             personalAccountNumber: "70455",

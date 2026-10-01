@@ -41,7 +41,12 @@ import {
   useToast,
   type TimelineItem,
 } from "@/ui/v3";
-import { CASE_KIND, CASE_KIND_LABEL, type CaseListItem } from "@/ludwig/modules/accounting-cases/domain/case";
+import {
+  AssignableCaseKindSchema,
+  CASE_KIND_LABEL,
+  CASE_KIND_LOCKED_REASON,
+  type CaseListItem,
+} from "@/ludwig/modules/accounting-cases/domain/case";
 
 
 /**
@@ -66,7 +71,7 @@ const CASES: CaseListItem[] = [
     caseNumber: "2026-0140",
     clientId: "m1",
     fiscalYear: 2026,
-    kind: "incoming_invoice",
+    kind: "single",
     title: "Eingangsrechnung: Musterfirma GmbH",
     summary: "Bürobedarf für das dritte Quartal, geliefert am 24.08.2026.",
     counterpartyName: "Musterfirma GmbH",
@@ -88,7 +93,7 @@ const CASES: CaseListItem[] = [
     caseNumber: "2026-0141",
     clientId: "m1",
     fiscalYear: 2026,
-    kind: "recurring_charge",
+    kind: "rule",
     title: "Dauersachverhalt: M-net",
     summary: "Telefon Juli — Betrag weicht vom Vormonat um +119,00 € ab.",
     counterpartyName: "M-net Telekommunikations GmbH",
@@ -110,7 +115,7 @@ const CASES: CaseListItem[] = [
     caseNumber: "2026-0138",
     clientId: "m1",
     fiscalYear: 2026,
-    kind: "outgoing_invoice",
+    kind: "single",
     title: "Ausgangsrechnung: Deutsche Telekom AG",
     summary: null,
     counterpartyName: "Deutsche Telekom AG",
@@ -139,6 +144,8 @@ function CasePage() {
   const [openedOn, setOpenedOn] = useState<string | null>("2026-08-26");
   const [creating, setCreating] = useState(false);
   const [editing, setEditing] = useState<CaseListItem | null>(null);
+  // F360: a rule case, a pool and a client batch keep their kind — the form shows it locked.
+  const kindLocked = editing ? (CASE_KIND_LOCKED_REASON as Partial<Record<string, string>>)[editing.kind] : undefined;
   const [deleting, setDeleting] = useState<CaseListItem | null>(null);
 
   const [filters, setFilters] = useState(0);
@@ -350,9 +357,9 @@ function CasePage() {
           <Field label="Titel" htmlFor="titel">
             <Input id="titel" defaultValue={editing?.title ?? ""} placeholder="Eingangsrechnung: …" />
           </Field>
-          <Field label="Art" htmlFor="art">
-            <Select id="art" defaultValue={editing?.kind ?? "incoming_invoice"}>
-              {CASE_KIND.map((k) => (
+          <Field label="Art" htmlFor="art" {...(kindLocked ? { hint: kindLocked } : {})}>
+            <Select id="art" defaultValue={editing?.kind ?? "single"} disabled={Boolean(kindLocked)}>
+              {(kindLocked && editing ? [editing.kind] : AssignableCaseKindSchema.options).map((k) => (
                 <option key={k} value={k}>
                   {CASE_KIND_LABEL[k]}
                 </option>
