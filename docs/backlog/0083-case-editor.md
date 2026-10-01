@@ -596,9 +596,9 @@ kopiert.
 
 - [x] Story `Kinds` zeigt alle sechs Arten mit den Wörtern aus `CASE_KIND_LABEL`; nur Einzel- und laufender Sachverhalt tragen „Bearbeiten“, ihr Select hat genau diese zwei Optionen — abgenommen 2026-10-01 (dazu „Art offen“ mit „Bearbeiten“, wie Kriterium 3 es will)
 - [x] Regelsachverhalt, Sammelfall und Mandantenstapel zeigen ihren Grund aus `CASE_KIND_LOCKED_REASON` sichtbar unter dem Wert, Kontrast ≥ 4,5:1 — abgenommen 2026-10-01 (4,51:1 auf `bg-soft`, 4,88:1 auf Weiß)
-- [ ] „Dauersachverhalt – Art offen“ zeigt den Hinweis; im Select steht die offene Art gesperrt als heutiger Wert, wählbar sind die zwei; Speichern einer Wahl ändert die Art (Label und Hinweis wechseln) — **nicht abgenommen** 2026-10-01: die Mechanik hält, aber der Hinweis schickt in den Reiter „Regeln“, und den gibt es nicht — er heißt „Wiederkehr“ (M1)
+- [x] „Dauersachverhalt – Art offen“ zeigt den Hinweis; im Select steht die offene Art gesperrt als heutiger Wert, wählbar sind die zwei; Speichern einer Wahl ändert die Art (Label und Hinweis wechseln) — abgenommen 2026-10-01 in der Nachprüfung (Stand 1379f57): der Hinweis nennt den Reiter „Wiederkehr“ aus `CASE_TAB_LABEL.rules`, die Mechanik hält unverändert (erste Abnahme: M1, Reiter „Regeln“)
 - [x] `InlineEdit` `Filled`: der Hinweis steht unter dem gesperrten Feld; im Bearbeitungszustand bleibt er, ein Fehler ersetzt ihn — abgenommen 2026-10-01 (Bearbeitungszustand und Fehler aus dem Code)
-- [ ] `grep` findet außerhalb von `src/ludwig` keinen alten Art-Wert (`incoming_invoice`, `outgoing_invoice`, `adjustment_only`, `contract`/`expense_report`/`internal_transfer` als **Art**); `CasePage` zeigt „Regeln“ bei `rule`, `running`, `recurring_charge` — **nicht abgenommen** 2026-10-01: `src/showcase/case/CaseTabs.stories.tsx:785` führt im Rohdatensatz des Sachverhalts noch `kind: "incoming_invoice"` (M2); der Reiter (`rules`, Wort „Wiederkehr“) hält
+- [ ] `grep` findet außerhalb von `src/ludwig` keinen alten Art-Wert (`incoming_invoice`, `outgoing_invoice`, `adjustment_only`, `contract`/`expense_report`/`internal_transfer` als **Art**); `CasePage` zeigt „Regeln“ bei `rule`, `running`, `recurring_charge` — abgenommen 2026-10-01 in der Nachprüfung (Stand 1379f57): der volle grep findet nur andere Achsen und die Übergangsart in `CaseEditor`/`CaseCrud`, `CaseTabs` Technik zeigt `kind single`; der Reiter ist `rules` mit dem Wort „Wiederkehr“, nicht „Regeln“ (N1) (erste Abnahme: M2)
 - [x] Keine Konsolenfehler in den Stories von `CaseEditor`, `InlineEdit`, `CaseCrud` und den Sachverhalts-Stories mit geänderten Fixtures — abgenommen 2026-10-01 (208 Story-Aufrufe, 0 Fehler, 0 Warnungen)
 
 ### Abnahme F360 2026-10-01 (Stand 61d24cb)
@@ -729,3 +729,77 @@ Korrekturen ohne Systementscheid.
 
 Nachzuprüfen: Kriterien 3 und 5 (`CaseEditor --kinds`, Showcase-Reiter, `CaseTabs` Technik), H4 und H5 im Code.
 
+
+### Nachprüfung F360 2026-10-01 (Stand 1379f57)
+
+Fremde Nachprüfung der Nacharbeit gegen M1–M3, H4/H5 und die
+Konsole. Gelesen: `CLAUDE.md`, Nachtrag, Abnahme und Nacharbeit F360 oben,
+der Diff von `1379f57`, `CaseEditor.tsx`, `CaseEditor.stories.tsx`,
+`InlineEdit.tsx`, `CaseCrud.stories.tsx`, `CaseTabs.stories.tsx`, `CasePage.tsx`,
+`showcase/case/fixtures.ts`, der Spiegel `case.ts` und `tabs.ts`, `0020-inline-edit.md`.
+Gemessen in Storybook 6107, eigener Playwright-Kontext je Lauf (1280 × 900,
+`de-DE`), echte Klicks und Tasten; Code nicht geändert.
+
+| Punkt | Messung | Urteil |
+|---|---|---|
+| M1 Hinweis „Art offen“ | `Kinds`: sechs Felder, „Bearbeiten“ an Einzel-, laufendem Sachverhalt und „Art offen“. Der Hinweis lautet Zeichen für Zeichen „Einzel- oder laufenden Sachverhalt wählen oder im Reiter „Wiederkehr“ eine Regel anlegen.“, in Ruhe und im Bearbeitungszustand. Das Wort kommt aus `CASE_TAB_LABEL.rules` (`CaseEditor.tsx:79`, Template). Showcase: `Sammel und Dauer` `RecurringWithRule` (Regelsachverhalt) und `Einzelfall` `RecurringWithoutRule` (laufender Sachverhalt) zeigen die Reiter Übersicht · Ereignisse · Belege · Rückfragen · Plausibilität · **Wiederkehr** · Stammdaten · Technik; `ProposalPending` (Einzelsachverhalt) und `ClientBatch` ohne „Wiederkehr“. Der Weg hinter dem Satz steht da: `Reiter` `Recurrence` ohne Regel zeigt „Noch keine Regel.“ und den Knopf „Regel aus der Lastschrift vom 04.08. anlegen“. **Mechanik (Kriterium 3):** Klick auf „Bearbeiten“ → Fokus im `SELECT`, Optionen `recurring_charge` (*disabled*, gewählt), `single`, `running`; Taste „l“ → `running`, Enter → Label „Laufender Sachverhalt“, Hinweis weg (drei Hinweise bleiben, die gesperrten); wieder geöffnet nur `single`, `running` (gewählt), Escape lässt alles stehen. `Roundtrip`: Enter ohne Änderung → „Gespeichert: nichts“ | behoben |
+| M2 alte Art | Voller `grep` (ohne `head`): **44** Treffer außerhalb `src/ludwig`, jeder eine andere Achse oder die Übergangsart — Belegart `contract` (`MultiSelectFilter`, `FilterBar`, `source-document-detail.ts`, `SourceDocumentFacts`, `SourceDocument`, `source-document-columns`, `Expectation`, `DocumentOtherKinds`, `CaseEntries:297`, `document-classification/fixtures.ts`), Belegform/Sammelbeleg-Art `expense_report` (`classDocumentForm`, `collectionKind`, `parentCollectionKind`; `core/documents/collection-kind.ts`), Buchungsgruppe `incoming_invoices`/`outgoing_invoices` (`JournalEntry*`), Ereignisart `internal_transfer` (`CaseTimeline.stories:155`, `CaseEntries:563`), Übergangsart `recurring_charge` (`CaseEditor.tsx:64`, `CaseCrud.stories.tsx:363–365`). `Reiter` `Technical`: „Datensatz anzeigen“ aufgeklappt → `kind` `single` unter dem Kopf „Einzelsachverhalt“. Textscan aller 87 Story-Aufrufe (unten): kein roher Art-Wert im Bild | behoben |
+| M3 Spec gegen Code | „Kann bewusst nicht“ (Z. 132 ff.) „Die Art frei setzen … `AssignableCaseKindSchema` … gesperrt mit Grund“ = Code (`renderInput` über `AssignableCaseKindSchema.options`, `CASE_KIND_LOCKED_REASON` → `disabled` + `hint`). Stories-Zeile `Kinds` (Z. 164) = Story und ihr JSDoc (sechs, zwei wählbar, drei gesperrt mit Grund, „Art offen“ mit Bitte). Prop-Tabelle `CaseKindEdit` Zeichen für Zeichen: `value` `CaseKind` · `onSave` `(next: CaseKind) => Promise<void> \| void` · `pending`/`disabled` `boolean` optional · `error` `string` optional, „ein Fehler von außen — sonst kommt er aus `onSave`“ = `Shared.error?: string` /** An error from outside — otherwise it comes from `onSave`. */. 0020 `renderInput`: `(props: InlineEditInputProps) => ReactNode` — `{ value, onChange, autoFocus, onKeyDown, id, disabled }` = `InlineEdit.tsx:59` und das Interface (dieselben sechs Felder, dieselbe Reihenfolge) | behoben — dazu **N1** an anderer Stelle |
+| H4 | `CaseEditor.tsx:78` `undecided && !disabled` — mit `disabled` hat `InlineEdit` kein „Bearbeiten“, also auch keine Bitte. Aus dem Code; keine Story zeigt `disabled` mit `recurring_charge` | behoben |
+| H5 | `CaseCrud.stories.tsx:362–367`: bei `editing.kind === "recurring_charge"` steht vor den zwei Arten eine eigene Option `recurring_charge` *disabled*; `defaultValue` ist die heutige Art, also gewählt — nicht still „Einzelsachverhalt“. Kein Fixture hat die offene Art, daher aus dem Code (dasselbe Muster wie in `CaseKindEdit`, dort gemessen: *disabled* und gewählt). Gegenprobe im Browser: „Sachverhalt anlegen“ `single`/`running`; 2026-0140 bearbeiten `single`/`running` frei, ohne Hinweis; 2026-0141 `rule` allein, Select *disabled*, Grund aus `CASE_KIND_LOCKED_REASON.rule` | behoben |
+| Konsole | **87** Story-Aufrufe: `CaseEditor` (10), `InlineEdit` (6), `Sachverhalt CRUD` (1), `Sachverhalt/Reiter` = `CaseTabs` (6), `Einzelfall` (18), `Sammel und Dauer` (6), `Einträge` (36), `Seite` (3), `Muster/Detailseite` `Sachverhalt` (1); dazu die Interaktionen oben (`Kinds` Wahl und Escape, `Roundtrip`, CRUD anlegen und dreimal bearbeiten, Technik-Disclosure, `Recurrence`) — **0** Fehler, **0** Warnungen, kein „No Preview“ | hält |
+| Wächter | `pnpm typecheck`, `pnpm check:language`, `pnpm check:when`, `pnpm check:type` je Exit 0 (kein `pnpm build`) | hält |
+
+**Neuer Mangel (nicht blockierend):**
+
+- **N1 — Die Spec nennt an zwei Stellen noch die alte Welt.**
+  (a) „Was das Datenmodell anders sagt“ (Z. 77–79): `none` gehe „nur bei
+  `kind in ('internal_transfer','adjustment_only')`“ — beide Arten gibt es
+  nicht mehr. Der Spiegel (`case.ts:117`), der Code (`CaseEditor.tsx:132`,
+  JSDoc von `allowNone`) und die Nachtrag-Zeile „Belegnummern-Modus“ sagen:
+  nur beim Einzelsachverhalt (`kind = 'single'`) ohne verknüpften Beleg; die
+  Spec widerspricht sich also selbst. (b) Nachtrag-Zeile „Showcase“ (Z. 592)
+  und der Wortlaut von Kriterium 5 (Z. 601): Reiter „Regeln“ — der Reiter ist
+  `rules` mit dem Wort „Wiederkehr“, derselbe Fehler wie M1, nur im Dokument.
+  *Abhilfe:* (a) „… nur beim Einzelsachverhalt (`kind = 'single'`) und ohne
+  verknüpften Beleg (F360) …“; (b) „Reiter `rules` („Wiederkehr“)“.
+  *Nicht blockierend,* weil kein Code und kein sichtbarer Text betroffen ist,
+  die sechs Kriterien halten und die Prüfung von `none` im Kern liegt — die
+  Komponente nimmt nur `allowNone`. Bei der nächsten Berührung der Spec
+  mitziehen.
+
+**Hinweise (nicht blockierend):**
+
+- **H9 — Rest von H6.** 0020, Stories-Zeile `Filled` (Z. 73): „Anzeige mit
+  Wert, Bearbeiten-Knopf, dazu `disabled`“ — der Hinweis fehlt, obwohl die
+  Prop-Zeile `hint` auf `Filled` zeigt und die Story ihn trägt.
+- **H10 — Kriterium vom 2026-09-07.** Z. 212 „`CaseKindEdit` zeigt genau die
+  sieben Arten“ steht unverändert in der festen Kriterienliste; mit „überholt
+  durch F360 (sechs Arten, siehe Nachtrag)“ kennzeichnen. Z. 267 und 333 sind
+  Protokoll und bleiben.
+- **H11 — `error` an `Failed`.** Die Story zeigt den Fehler von außen am
+  `CaseDispositionEdit`, nicht an der Art. Derselbe `Shared`-Weg nach
+  `InlineEdit`, also gedeckt — aber die Story-Spalte der Zeile `error` von
+  `CaseKindEdit` verspricht ihn dort für die Art.
+- **H12 — Showcase-Reiter verlassen die Story (vorbestehend, nicht F360).**
+  Die Reiter in `CasePage` sind Links `?tab=…` (`fixtures.ts:224`); ein Klick
+  auf „Wiederkehr“ führt im Story-iframe nach `iframe.html?tab=rules` → „No
+  Preview“, weil die Story-ID wegfällt. Muster `useHash` (showcase/account).
+  Der Reiterinhalt ist über `Seiten/Sachverhalt/Reiter` `Recurrence` erreichbar.
+- **H13 — Zwei Quellen für das Reiterwort (vorbestehend).** `CasePage` liest
+  `FALL_TABS` (`showcase/case/fixtures.ts:219`), `CaseEditor` liest
+  `CASE_TAB_LABEL` (`tabs.ts`). Heute beide „Wiederkehr“; auseinanderlaufen
+  können sie. `tabs.ts` nennt `FALL_TABS` seine Vorlage — die Showcase-Seite
+  könnte `CASE_TAB_LABEL` lesen.
+- H1 (L-362 sichtbar), H2 (`aria-describedby`), H3 (4,51:1) bleiben, wie die
+  Nacharbeit sie führt; H7 ist erledigt (Nachtrag-Zeile „Auswahl“ kennzeichnet
+  `assertCaseKindTransition` als App-Funktion).
+
+**Gesamturteil: abgenommen.** M1, M2 und M3 sind behoben und gemessen, H4 und
+H5 im Code erledigt; Kriterien 3 und 5 des Nachtrags sind abgehakt, damit
+stehen alle sechs. Die Mechanik hält wie in der ersten Runde: zwei wählbare
+Arten, drei gesperrte mit sichtbarem Grund, „Art offen“ als heutiger Wert ohne
+Ziel, mit einem Hinweis, der den Reiter mit seinem echten Wort nennt — und
+dort steht der Knopf, der die Regel anlegt. 0 Konsolenfehler in 87
+Story-Aufrufen, die vier Wächter grün. Offen bleibt N1, zwei Sätze in dieser
+Spec, nicht blockierend.
