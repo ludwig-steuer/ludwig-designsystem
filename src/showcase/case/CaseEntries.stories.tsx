@@ -651,7 +651,7 @@ export const ManualCorrection: Story = {
 };
 
 /**
- * **17 · Sollstellung einer Dauerbuchung.** Je Regel und Periode genau eine.
+ * **17 · Sollstellung eines Regelsachverhalts.** Je Regel und Periode genau eine.
  * Periode (`accrualPeriod`, B-05) und Regel (`recurringRuleLabel`, F251) stehen
  * in der zweiten Zeile — die Regel mit ihrem Wort, nicht mit ihrer Id.
  */
@@ -668,7 +668,7 @@ export const RecurringAccrual: Story = {
         }),
       ]}
     >
-      <Pane title="Miete März 2026" sub="01.03.2026 · aus der Dauerbuchung">
+      <Pane title="Miete März 2026" sub="01.03.2026 · aus der Wiederkehr-Regel">
         <FieldList
           tone="bare"
           rows={[
@@ -684,7 +684,7 @@ export const RecurringAccrual: Story = {
 };
 
 /**
- * **18 · Zahlung zur Dauerbuchung.** Der Ausgleich trägt **keine** Periode: er
+ * **18 · Zahlung zum Regelsachverhalt.** Der Ausgleich trägt **keine** Periode: er
  * gehört zum Dauerauftrag, nicht zum Monat. Sonst stünde die Miete zweimal in
  * der Periode 2026-03.
  */

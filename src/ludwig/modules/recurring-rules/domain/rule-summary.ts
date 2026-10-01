@@ -1,5 +1,5 @@
 /**
- * Ein-Satz-Klartext einer Dauerbuchungs-Regel für die Übersicht im
+ * Ein-Satz-Klartext einer Wiederkehr-Regel für die Übersicht im
  * Regelwerk-Tab („was diese wiederkehrende Buchung bedeutet"). Reine Funktion,
  * kein IO — die strukturierten Details (Kriterien, Buchungssatz) rendert der
  * Tab daneben; hier nur die menschlesbare Zusammenfassung.

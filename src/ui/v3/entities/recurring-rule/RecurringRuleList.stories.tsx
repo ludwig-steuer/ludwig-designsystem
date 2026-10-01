@@ -100,7 +100,7 @@ export const InUse: Story = {
         rules={THREE}
         caseHref={caseHref}
         period="August 2026"
-        title="Offene Dauerbuchungen dieses Stapels"
+        title="Offene Wiederkehr-Regeln dieses Stapels"
       />
     </div>
   ),

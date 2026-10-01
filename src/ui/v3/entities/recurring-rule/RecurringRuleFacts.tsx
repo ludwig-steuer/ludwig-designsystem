@@ -220,7 +220,7 @@ export function RecurringRuleFacts({
   // carries the OPOS clearing. It stands in no component of the app today.
   if (rule.datevDocumentNumber) {
     effect.push([
-      "Belegnummer der Dauerbuchung",
+      "Belegnummer der DATEV-WK",
       say(
         <MonoCell key="dn" value={rule.datevDocumentNumber} />,
         "datevDocumentNumber",

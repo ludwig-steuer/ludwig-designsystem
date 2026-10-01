@@ -122,7 +122,7 @@ const TASKS: { task: string; state: "done" | "open"; word: string; href: string 
   { task: "Kontoauszüge abgeglichen", state: "done", word: "erledigt", href: "#schritt-1" },
   { task: "Belege den Zahlungen zugeordnet", state: "done", word: "erledigt", href: "#schritt-2" },
   { task: "Buchungen vorgeschlagen", state: "done", word: "erledigt", href: "#schritt-3" },
-  { task: "Dauerbuchungen gesollt", state: "done", word: "erledigt", href: "#schritt-4" },
+  { task: "Wiederkehrende Buchungen erzeugt", state: "done", word: "erledigt", href: "#schritt-4" },
   { task: "Erwartungen geprüft", state: "done", word: "erledigt", href: "#schritt-5" },
   { task: "Rückfragen gestellt", state: "open", word: "2 offen", href: "#schritt-6" },
   { task: "Umsatzsteuer abgestimmt", state: "open", word: "Differenz 12,40 €", href: "#schritt-7" },

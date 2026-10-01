@@ -25,6 +25,8 @@ Wenn unsicher, dort nachsehen — diese Datei ist der schnelle Index.
 
 **Verboten**: „smart", „intelligent" (Buzzword), „revolutionär", „magisch", „Hey", „Cool", „Power-Feature", Anglizismen außer Fachsprache (DATEV, USt., BWA, SKR03/04).
 
+**Kein DATEV-Wort, das DATEV nicht kennt** (Owner 2026-10-01, App c9a280d7): nicht „Dauerbuchung“. Die DATEV-Vorlage heißt „wiederkehrende Buchung“ (am Feld „DATEV-WK“, z. B. „Belegnummer der DATEV-WK“), Buchungen aus einer Regel „wiederkehrende Buchung“ (L-360), die Regel „Wiederkehr-Regel“, der Fall „Regelsachverhalt“, die Buchung zur Fälligkeit „Sollstellung“. „Dauersachverhalt“ bleibt Oberbegriff für Regel- und laufenden Sachverhalt.
+
 ---
 
 ## 2. Tokens (in `globals.css` als CSS-Variables, in Tailwind als Aliases)

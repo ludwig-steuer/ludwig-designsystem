@@ -23,7 +23,7 @@ const ALL_DONE: Step0Task[] = [
   T("bank", "Bank-Transaktionen zugeordnet", "97 von 97", 4),
   T("cases", "Sachverhalte gebucht oder mit Rückfrage", "86 von 86", 3),
   T("questions", "Rückfragen gestellt", "4", 2),
-  T("recurring", "Dauerbuchungen erzeugt", "6 von 6", 5),
+  T("recurring", "Wiederkehrende Buchungen erzeugt", "6 von 6", 5),
   T("opos", "Offene Posten abgeglichen", "12 von 12", 6),
   T("conventions", "Konventionen geprüft", "3 von 3", 7),
 ];
@@ -37,7 +37,7 @@ const REPORT = {
   summary:
     "231 Belege eingeordnet und ausgelesen, 86 Sachverhalte gebildet, 97 Bank-Transaktionen zugeordnet. " +
     "4 Rückfragen an die Kanzlei gestellt (Bewirtung, zwei Doppelbelege, eine Privatentnahme). " +
-    "6 Dauerbuchungen (Miete, Leasing, Versicherungen) aus den Regeln erzeugt.",
+    "6 wiederkehrende Buchungen (Miete, Leasing, Versicherungen) aus den Regeln erzeugt.",
 };
 
 const BASE: Step0VM = {

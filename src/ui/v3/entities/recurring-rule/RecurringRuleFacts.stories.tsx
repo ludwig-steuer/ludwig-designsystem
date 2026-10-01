@@ -108,7 +108,7 @@ function facts(r: RecurringRule) {
  * Die importierte Regel des Bestands: Gegenpartei, Sollstellung, aktiv,
  * 1.800,00 € ± 0,00 €, monatlich zum 1., Personenkonto 10001, Gegenkonto 4210,
  * Belegnummer 20260016 — und die Vorschau als `JournalEntryCard`, nicht als
- * eigene Tabelle. Die Belegnummer der Dauerbuchung (Rang 8) steht heute in
+ * eigene Tabelle. Die Belegnummer der DATEV-WK (Rang 8) steht heute in
  * **keiner** Komponente der App; sie trägt den OPOS-Ausgleich.
  */
 export const Filled: Story = {

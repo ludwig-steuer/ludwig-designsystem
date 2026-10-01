@@ -1,5 +1,5 @@
 /**
- * Buchungssatz-Vorschau für die Dauerbuchungs-Verwaltungssicht (F40 Teil B,
+ * Buchungssatz-Vorschau für die Verwaltungssicht der Wiederkehr-Regeln (F40 Teil B,
  * Interface). Reine Funktionen — aus einer Regel (Modus, Richtung, aufgelöste
  * Konten, Vorlage) den Satz ableiten, der bei einem Treffer entstünde. Kein IO,
  * damit die testbare Formatierungs-Logik von der Query (aufgelöste Konten)

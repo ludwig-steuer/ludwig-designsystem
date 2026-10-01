@@ -141,7 +141,7 @@ export const Dense: Story = {
           ...TASKS,
           { key: "q2", level: "info", title: "Stapel 2026-0007 freigeben", sub: "Juli · alles geprüft", action: { label: "Zur Freigabe", href: "#f" } },
           { key: "d2", level: "info", title: "Kontoauszug 08/2026 zuordnen", sub: "Bankkonto fehlt", action: { label: "Zuordnen", href: "#k" } },
-          { key: "d3", level: "info", title: "2 Dauerbuchungen bestätigen", sub: "Miete, Leasing", action: { label: "Bestätigen", href: "#d" } },
+          { key: "d3", level: "info", title: "2 wiederkehrende Buchungen bestätigen", sub: "Miete, Leasing", action: { label: "Bestätigen", href: "#d" } },
           { key: "d4", level: "info", title: "4 Rückfragen des Mandanten beantwortet", sub: "Antworten prüfen", action: { label: "Antworten lesen", href: "#a" } },
           { key: "d5", level: "info", title: "Belegart für 3 Scans festlegen", sub: "unbekanntes Formular", action: { label: "Festlegen", href: "#s" } },
           { key: "d6", level: "info", title: "Kreditkartenabrechnung zerlegen", sub: "9 Belege im Sammel-PDF", action: { label: "Öffnen", href: "#z" } },

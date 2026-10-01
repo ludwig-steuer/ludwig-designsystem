@@ -16,7 +16,7 @@ const PARTNERS = ["Deutsche Telekom Geschäftskunden GmbH", "Stadtwerke Beispiel
 const KINDS = [
   { key: "invoice", label: "Rechnung" },
   { key: "payment", label: "Zahlung" },
-  { key: "recurring", label: "Dauerbuchung" },
+  { key: "recurring", label: "Sollstellung" },
 ];
 
 /** Eight checks of an entry — the questions of the case view (0217). */

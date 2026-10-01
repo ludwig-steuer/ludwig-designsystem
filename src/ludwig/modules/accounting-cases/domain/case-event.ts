@@ -125,7 +125,7 @@ export interface CaseEvent {
    *  Regel-Tabelle hat keine Namensspalte. */
   recurringRuleLabel: string | null;
   /** Periode der Sollstellung (`accrual_period`, „YYYY-MM"); der Ausgleich
-   *  einer Dauerbuchung trägt sie NICHT — dort steht NULL. */
+   *  einer Sollstellung trägt sie NICHT — dort steht NULL. */
   accrualPeriod: string | null;
   /** Nur am Server-Zwilling im Verrechnungs-Regime: die Bank-Transaktion, die
    *  ihn ausgelöst hat (`pass_through_of_bank_transaction_id`). Der Zwilling

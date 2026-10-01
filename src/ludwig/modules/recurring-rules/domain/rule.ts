@@ -355,13 +355,13 @@ export interface RecurringRule {
   expectedInterval: RuleExpectedInterval | null;
   /** Erwarteter Zahltag im Monat (1–31), rein informativ. */
   expectedDayOfMonth: number | null;
-  /** Laufzeit der Dauerbuchung (DATEV Beginn-/Enddatum), rein informativ. */
+  /** Laufzeit der Regel (Beginn-/Enddatum der DATEV-WK), rein informativ. */
   validFrom: string | null;
   validUntil: string | null;
   /** Idempotenz-Anker des DATEV-Imports; NULL bei manuell angelegten Regeln. */
   importReference: string | null;
   /**
-   * Belegfeld 1 der DATEV-Dauerbuchung (F91) — Identität des DSV. Sollstellungs-
+   * Belegfeld 1 der DATEV-WK (F91) — ihre Identität. Sollstellungs-
    * und Settle-Vorschläge schreiben sie als `external_document_number` auf alle
    * Journal-Lines (Export-Belegfeld 1, OPOS-Ausgleich). NULL bei Alt-Regeln.
    */
