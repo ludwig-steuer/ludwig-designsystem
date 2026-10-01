@@ -188,7 +188,7 @@ Ebenen-Folge ohne Sprung und genau ein `h1` (axe `heading-order`,
   Hinweis schon je Schritt (OnboardingReviewSteps `s.title`, `s.hint`).
 - Fuß: Fortschritt links (`flex: 1`), `footer` rechts — wie im Dialog
   stehen Zurück und Weiter beieinander, die Hauptaktion außen rechts
-  (offene Frage 3).
+  (entschieden 2026-10-01).
 - Danach räumt der Bau `.wz*` (components.css:133–149) ab, sobald lldev1 die
   App umgestellt hat.
 
@@ -214,17 +214,14 @@ Ebenen-Folge ohne Sprung und genau ein `h1` (axe `heading-order`,
 | Abschnitt mit Aktionen rechts | `SectionHead` (Titel, Aktionen) | zwei Seiten brauchen eine Aktion am Abschnittstitel |
 | `Wizard` in einem Dialog (Ebene 3) | `headingLevel` am Wizard | erste Verwendung im Dialog |
 
-## Offene Fragen (je mit Vorgabe)
+## Entschieden (Owner 2026-10-01)
 
-1. **Leerzustand kleiner?** Titel 18 → 14 px, Text 14 → 13,5 px, Titel
-   keine Überschrift mehr. Heute ist der Leerzustand in einer Karte größer
-   als ihr Kopf. *Ohne Antwort: ja.*
-2. **Titel in `text` statt `primary`** für StatusCallout und
-   Markdown-Überschriften? Alle anderen Titel des produktiven Registers
-   stehen in `text`; `primary` bleibt Marke und lesendem Register.
-   *Ohne Antwort: ja.*
-3. **Wizard-Fuß:** Fortschritt links, Zurück und Weiter zusammen rechts?
-   Heute steht Zurück allein links. *Ohne Antwort: ja, wie im Dialog.*
+1. **Leerzustand kleiner:** Titel 18 → 14 px (ui-md 600 `text`), Text
+   14 → 13,5 px (Einleitung, `muted`), der Titel ist keine Überschrift mehr.
+2. **Titel in `text`:** StatusCallout-Titel und Markdown-Überschriften
+   verlassen `primary`; `primary` bleibt Marke und lesendem Register.
+3. **Wizard-Fuß:** Fortschritt links, Zurück und Weiter zusammen rechts,
+   Weiter außen — wie im Dialog.
 
 ## Abnahmekriterien
 
