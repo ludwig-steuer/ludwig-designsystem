@@ -11,6 +11,7 @@ import {
   type ColumnDef,
   type TableGroup,
 } from "../../patterns/DataTable";
+import { CheckItems, CheckResult, type CheckItem } from "../../patterns/Review";
 import { StatusHeader } from "../../patterns/StatusHeader";
 import { Badge } from "../../primitives/Badge";
 import { Link } from "../../primitives/Link";
@@ -66,6 +67,12 @@ export interface ProposalRow {
   reasons: readonly string[];
   /** Released or rejected already — the reasons give way to „entschieden". */
   decided?: boolean;
+  /**
+   * The checks of the entry, as the case view shows them (0217). The pass
+   * count stands in the reasons column, the items in the fold-out. Without
+   * them nothing appears.
+   */
+  checks?: readonly CheckItem[];
 }
 
 export type ProposalColumn =
@@ -303,20 +310,26 @@ export function proposalReviewColumns(options: ProposalColumnOptions = {}): Colu
     reasons: {
       key: "reasons",
       header: <StatusHeader axis="review_tab" label="Prüfbedarf" />,
-      width: "124px",
-      // One line per reason; what does not fit is cut, the title carries it.
-      cell: (p) =>
-        p.decided ? (
-          <span>entschieden</span>
-        ) : (
-          <span className="v3prop__reasons">
-            {p.reasons.slice(0, 2).map((r) => (
-              <span key={r} className="v2trunc" title={r}>
-                {r}
-              </span>
-            ))}
-          </span>
-        ),
+      // „12 von 12 bestanden" with its sign measures 153 px, on one line (0217).
+      width: "156px",
+      // The checks first — „x von y bestanden" without opening (0217) —, then
+      // one line per reason; what does not fit is cut, the title carries it.
+      cell: (p) => (
+        <span className="v3prop__who">
+          {p.checks ? <CheckResult items={p.checks} /> : null}
+          {p.decided ? (
+            <span>entschieden</span>
+          ) : (
+            <span className="v3prop__reasons">
+              {p.reasons.slice(0, 2).map((r) => (
+                <span key={r} className="v2trunc" title={r}>
+                  {r}
+                </span>
+              ))}
+            </span>
+          )}
+        </span>
+      ),
     },
   };
   return (variant === "compact" ? COMPACT : FULL)
@@ -385,10 +398,26 @@ export function JournalEntryReviewList(
     ...(loading ? { loading } : {}),
     ...(error ? { error } : {}),
   };
-  const table = expand
+  // The fold-out carries the checks above the caller's own content (0217) —
+  // the same block in every list, so the app does not put them in a second
+  // time. `CheckItems` directly: the row already says „x von y".
+  const rows = props.groups ? props.groups.flatMap((g) => g.rows) : props.rows!;
+  const fold = expand || rows.some((r) => r.checks)
+    ? (row: ProposalRow) => (
+        <>
+          {row.checks ? (
+            <div className="v3prop__checks">
+              <CheckItems items={[...row.checks]} />
+            </div>
+          ) : null}
+          {expand?.(row)}
+        </>
+      )
+    : undefined;
+  const table = fold
     ? props.groups
-      ? <DataTable<ProposalRow> {...shared} expand={expand} groups={props.groups} />
-      : <DataTable<ProposalRow> {...shared} expand={expand} rows={[...props.rows!]} />
+      ? <DataTable<ProposalRow> {...shared} expand={fold} groups={props.groups} />
+      : <DataTable<ProposalRow> {...shared} expand={fold} rows={[...props.rows!]} />
     : props.groups
       ? <DataTable<ProposalRow> {...shared} groups={props.groups} />
       : <DataTable<ProposalRow> {...shared} rows={[...props.rows!]} />;

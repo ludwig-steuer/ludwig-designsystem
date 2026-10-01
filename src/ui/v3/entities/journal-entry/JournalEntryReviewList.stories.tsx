@@ -1,5 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 
+import type { CheckItem } from "../../patterns/Review";
 import { JournalEntryCard } from "./JournalEntryCompact";
 import { JournalEntryReviewList, type ProposalRow } from "./JournalEntryReviewList";
 
@@ -16,6 +17,31 @@ const KINDS = [
   { key: "payment", label: "Zahlung" },
   { key: "recurring", label: "Dauerbuchung" },
 ];
+
+/** Eight checks of an entry — the questions of the case view (0217). */
+const CHECK_BASE: [string, string, string][] = [
+  ["P-BETRAG", "Stimmt der gebuchte Betrag mit dem Beleg überein?", "Betrag und Beleg stimmen auf den Cent."],
+  ["P-BELEG", "Stimmt die Belegnummer mit dem Beleg überein?", "Belegfeld 1 entspricht der Nummer auf dem Beleg."],
+  ["P-KONTO", "Passt das Sachkonto zur Leistung?", "Wie die letzten drei Buchungen dieser Gegenpartei."],
+  ["P-UST", "Passt der Steuerschlüssel zum ausgewiesenen Steuersatz?", "Beleg weist 19 % aus, gebucht mit BU 9."],
+  ["P-LEISTUNG", "Liegt der Leistungszeitraum in dieser Periode?", "Leistung im September 2026."],
+  ["P-EMPFAENGER", "Ist der Mandant der Rechnungsempfänger?", "Empfänger laut Beleg ist der Mandant."],
+  ["P-VORMONAT", "Wurde im Vormonat gleich gebucht?", "Gleiche Konten wie im Vormonat."],
+  ["P-13B", "Ist die Umkehr der Steuerschuld richtig behandelt?", "Lieferant im Inland, § 13b greift nicht."],
+];
+
+/** A realistic spread: mostly passed, some with a finding, some thin entries with nothing checkable. */
+function checksFor(i: number): CheckItem[] {
+  return CHECK_BASE.map(([code, question, reason], k) => {
+    if (i % 7 === 5) return { code, question, reason: "Kein Belegbetrag hinterlegt — nicht vergleichbar.", state: "open" as const };
+    if (i % 4 === 3 && code === "P-UST")
+      return { code, question, reason: "Beleg weist 7 % aus, gebucht wurde BU 9 (19 %).", state: "red" as const };
+    if (i % 4 === 2 && code === "P-VORMONAT")
+      return { code, question, reason: "Im Vormonat auf 4980 gebucht, jetzt auf 4930.", state: "yellow" as const };
+    if (k === 7 && i % 3 === 0) return { code, question, reason: "Ob § 13b greift, ist am Beleg nicht vermerkt.", state: "open" as const };
+    return { code, question, reason, state: "green" as const };
+  });
+}
 
 // Batch 09-2026-Ludwig: forty open proposals.
 const ROWS: ProposalRow[] = Array.from({ length: 40 }, (_, i) => {
@@ -61,6 +87,8 @@ const ROWS: ProposalRow[] = Array.from({ length: 40 }, (_, i) => {
     kindLabel: kind.label,
     reasons: i % 4 === 3 ? ["Ludwig ist unsicher", "Betrag über 1.000,00 €"] : i % 4 === 2 ? ["Konto weicht vom Vorjahr ab"] : ["erstmals gebucht"],
     decided: i < 5,
+    // One case without checks — the app sends none; the cell stays as before.
+    ...(i === 11 ? {} : { checks: checksFor(i) }),
   };
 });
 

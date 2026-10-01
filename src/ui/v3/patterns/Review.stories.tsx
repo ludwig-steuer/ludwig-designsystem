@@ -2,7 +2,7 @@ import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { useState } from "react";
 import { Button } from "../primitives/Button";
 import { DetailPane, MasterDetail } from "./MasterDetail";
-import { Checklist, Messages, CheckItems, StateIcon, checkSummary, type CheckItem, type ChecklistRow } from "./Review";
+import { Checklist, Messages, CheckItems, CheckResult, StateIcon, checkSummary, type CheckItem, type ChecklistRow } from "./Review";
 import { StatusBadge } from "./StatusBadge";
 
 const meta: Meta<typeof Checklist> = { title: "v3/Patterns/Prüfen/Checklist", component: Checklist };
@@ -289,6 +289,27 @@ export const CheckSummaryLine: Story = {
           { code: "VST-02", question: "", reason: "", state: "green" },
         ])}
       </span>
+    </div>
+  ),
+};
+
+const rule = (state: CheckItem["state"], n: number): CheckItem[] =>
+  Array.from({ length: n }, (_, i) => ({ code: `P${state}${i}`, question: "Beispielprüfung", reason: "In Ordnung.", state }));
+
+/**
+ * `CheckResult` (0217) in every tone, side by side — the line of a list row.
+ * Red and yellow colour the words, green only the sign; nothing checkable says
+ * so instead of „0 von 12"; the title carries every count.
+ */
+export const CheckResultTones: Story = {
+  render: () => (
+    <div style={{ display: "grid", gap: "var(--space-3)", maxWidth: 360 }}>
+      <CheckResult items={[...rule("red", 1), ...rule("yellow", 2), ...rule("green", 9)]} />
+      <CheckResult items={[...rule("yellow", 1), ...rule("green", 6), ...rule("open", 1)]} />
+      <CheckResult items={[...rule("green", 7), ...rule("open", 1)]} />
+      <CheckResult items={NOT_CHECKABLE} />
+      <CheckResult items={[]} />
+      <CheckResult items={FACTS} kind="fact" />
     </div>
   ),
 };

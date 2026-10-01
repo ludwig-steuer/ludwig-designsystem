@@ -276,6 +276,7 @@ export {
   type CheckKind,
   Checklist,
   CheckItems,
+  CheckResult,
   Messages,
   type ChecklistRow,
   type Message,

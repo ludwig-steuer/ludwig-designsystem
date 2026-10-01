@@ -437,6 +437,48 @@ export function CheckItems({ items, kind = "rule" }: { items: CheckItem[]; kind?
   );
 }
 
+/**
+ * The worst state of a set — what the result line says first. „Not checkable"
+ * is no finding (0148), so it decides only when nothing else is there.
+ */
+function worst(items: readonly CheckItem[]): CheckItem["state"] | null {
+  for (const state of ["red", "yellow", "green", "open"] as const) if (items.some((i) => i.state === state)) return state;
+  return null;
+}
+
+/**
+ * „9 von 12 bestanden" in one line, in the tone of the worst item — red before
+ * yellow before green (0217, owner 2026-10-01). Red and yellow colour the
+ * words too; green colours only the sign: green is the normal case, the signal
+ * is the deviation, and forty green lines in a row would be no calm. The title
+ * carries every count. The items themselves stand where the row unfolds, as
+ * `CheckItems` — not under a second line that says the same.
+ *
+ * @when    The result of a set of checks in a row of a list, where the items
+ *          fit only on demand.
+ * @instead The items themselves → CheckItems. All counts as plain text, e.g.
+ *          for a title → checkSummary.
+ */
+export function CheckResult({ items, kind = "rule" }: { items: readonly CheckItem[]; kind?: CheckKind }) {
+  const words = SUMMARY_WORD[kind];
+  const state = worst(items);
+  const passed = items.filter((i) => i.state === "green").length;
+  const text =
+    state === null
+      ? kind === "fact"
+        ? "Keine Fakten"
+        : "Keine Prüfpunkte"
+      : state === "open"
+        ? words.open
+        : `${passed} von ${items.length} ${words.green}`;
+  return (
+    <span className={`v2pp__result-line v2pp__result-line--${state ?? "none"}`} title={checkSummary(items, kind)}>
+      {state ? <StateIcon state={PP_ICON[state]} /> : null}
+      <span>{text}</span>
+    </span>
+  );
+}
+
 /* ── Messages ──────────────────────────────────────────────────────────── */
 
 export interface Message {

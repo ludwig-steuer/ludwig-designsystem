@@ -4246,6 +4246,14 @@ button.v2oil__side:focus-visible { outline: 2px solid var(--color-focus); outlin
 /* Summary row of the checks (0148) — sign, sentence, codes in one line in a
    `Disclosure`'s head. */
 .v2pp__sum { display: inline-flex; align-items: center; gap: var(--space-2); min-width: 0; }
+/* 0217 · the result of a set of checks in one line. Red and yellow colour the
+   words (danger 6.07:1, warning 5.52:1 on white); green only the sign. */
+.v2pp__result-line { display: inline-flex; align-items: center; gap: var(--space-2); min-width: 0; white-space: nowrap; }
+.v2pp__result-line > svg { flex: none; }
+.v2pp__result-line--red { color: var(--color-danger); }
+.v2pp__result-line--yellow { color: var(--color-warning); }
+.v2pp__result-line--open,
+.v2pp__result-line--none { color: var(--color-text-muted); }
 
 /* --- PeriodGrid (0162): periods as columns, one state per cell, a gap is a
    cell with a statement. The subject column stays while the grid scrolls in
@@ -4767,6 +4775,8 @@ a.v3bbr__val:hover { text-decoration-color: currentColor; }
   display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 3; line-clamp: 3; overflow: hidden;
 }
 .v3prop__reasons { display: grid; min-width: 0; color: var(--color-text-muted); }
+/* 0217: the checks above the caller's fold-out content. */
+.v3prop__checks { margin-bottom: var(--space-3); }
 /* T2: the counterparty under the booking text (hint ll-dev 11) — the text cell becomes two lines. */
 .v2ae__text:has(.v2ae__who) { flex-wrap: wrap; row-gap: 0; }
 .v2ae__who { flex-basis: 100%; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }

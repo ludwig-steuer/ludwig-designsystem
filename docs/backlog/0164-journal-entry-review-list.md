@@ -38,7 +38,7 @@ Aus dem Entitätsprofil, damit die Spec es nicht neu erheben muss:
 
 | Ausprägung | Spalten |
 |---|---|
-| `full` | Datum · Gegenpartei (+ „erstmals") · Soll · (Name des Soll-Kontos, Kopf nur für den Screenreader: „Kontoname Soll") · Haben · (Name des Haben-Kontos, „Kontoname Haben") (Nachtrag 2026-10-01: Hauptkonto, „+n weitere"; ohne Namen mit `accountNames: false`) · Betrag · BU · Prüfung durch Ludwig · Satzart (nicht in Gruppen nach Satzart) · Prüfbedarf („entschieden"). „Nr." und „Beleg" nur über `include` |
+| `full` | Datum · Gegenpartei (+ „erstmals") · Soll · (Name des Soll-Kontos, Kopf nur für den Screenreader: „Kontoname Soll") · Haben · (Name des Haben-Kontos, „Kontoname Haben") (Nachtrag 2026-10-01: Hauptkonto, „+n weitere"; ohne Namen mit `accountNames: false`) · Betrag · BU · Prüfung durch Ludwig · Satzart (nicht in Gruppen nach Satzart) · Prüfbedarf („x von y bestanden" über den Gründen, 0217; „entschieden"). „Nr." und „Beleg" nur über `include` |
 | `compact` | Datum · Gegenpartei · Konten („4930 an 70021") · Betrag · Prüfung durch Ludwig |
 
 Rahmen: `expand` (Aufklapper der App: Satz, Begründung, Aktionen) · `rowActions`
