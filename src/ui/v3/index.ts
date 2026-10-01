@@ -614,6 +614,12 @@ export {
   type ProposalColumn,
   type ProposalColumnOptions,
 } from "./entities/journal-entry/JournalEntryReviewList";
+export {
+  BookingReview,
+  type BookingReviewBlock,
+  type BookingReviewEntry,
+} from "./entities/journal-entry/BookingReview";
+export { ReviewReasonCell, type ReviewReasonView } from "./entities/journal-entry/ReviewReasonCell";
 export type { JournalEntryRowData } from "./entities/journal-entry/journal-entry";
 export {
   businessPartnerColumns,

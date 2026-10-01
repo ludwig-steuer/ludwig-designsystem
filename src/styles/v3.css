@@ -4779,6 +4779,28 @@ a.v3bbr__val:hover { text-decoration-color: currentColor; }
 .v3prop__reasons { display: grid; min-width: 0; color: var(--color-text-muted); }
 /* 0217: the checks above the caller's fold-out content. */
 .v3prop__checks { margin-bottom: var(--space-3); }
+/* 0219 · the booking review: entry on white, then rationale, checks, judge; the
+   evidence beside it. Entries of one case one under the other. */
+.v3bkr { display: grid; gap: var(--space-5); min-width: 0; container-type: inline-size; }
+.v3bkr__item { display: grid; gap: var(--space-5); min-width: 0; }
+.v3bkr__item + .v3bkr__item { border-top: 1px solid var(--color-border-subtle); padding-top: var(--space-5); }
+.v3bkr__item--aside { grid-template-columns: minmax(0, 1fr) minmax(0, 22rem); align-items: start; }
+.v3bkr__main { display: grid; gap: var(--space-4); min-width: 0; }
+.v3bkr__head { display: flex; align-items: center; gap: var(--space-2); flex-wrap: wrap; }
+.v3bkr__status { margin-left: auto; }
+.v3bkr__entry {
+  background: var(--color-surface); border: 1px solid var(--color-border-subtle);
+  border-radius: var(--radius-md); padding: var(--space-3) var(--space-4); min-width: 0; overflow-x: auto;
+}
+.v3bkr__block { display: grid; gap: var(--space-2); min-width: 0; }
+.v3bkr__label { margin: 0; }
+.v3bkr__judge { display: flex; align-items: center; gap: var(--space-2); }
+.v3bkr__actions { display: flex; gap: var(--space-2); flex-wrap: wrap; }
+.v3bkr__aside { min-width: 0; }
+/* Narrower than the case view needs: the evidence goes under the entry — by the
+   width of this block, not of the window, so a drawer or a fold-out gets the same. */
+@container (max-width: 64rem) { .v3bkr__item--aside { grid-template-columns: minmax(0, 1fr); } }
+
 /* 0218 · the review reason: the strongest as a badge, „+n", the (i) with all
    reasons and the sum. The badge is cut, never wrapped: the title carries it. */
 .v3rrc { display: inline-flex; align-items: center; gap: var(--space-1); min-width: 0; max-width: 100%; }
