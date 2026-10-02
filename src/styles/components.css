@@ -128,27 +128,6 @@
 @keyframes uz-pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.3; } }
 
 /* ====================================================================
-   WIZARD
-   ==================================================================== */
-.wz { background: #fff; border: 1px solid var(--color-border); border-radius: 8px; box-shadow: 0 1px 2px rgba(20,36,56,0.04), 0 4px 14px rgba(20,36,56,0.05); overflow: hidden; }
-.wz__steps { display: grid; border-bottom: 1px solid var(--color-border); background: #FAFBFC; }
-.wz__step { padding: 14px 16px; display: flex; align-items: center; gap: 10px; border-right: 1px solid var(--color-border-subtle); }
-.wz__step:last-child { border-right: none; }
-.wz__num { width: 24px; height: 24px; border-radius: 999px; background: var(--color-bg-sunken); color: var(--color-text-muted); font-size: var(--fs-ui-sm); font-weight: 600; display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0; font-variant-numeric: tabular-nums; }
-.wz__step.done .wz__num { background: var(--color-success); color: #fff; }
-.wz__step.active .wz__num { background: var(--color-primary); color: #fff; box-shadow: 0 0 0 3px rgba(26,58,92,0.14); }
-.wz__lbl { display: flex; flex-direction: column; min-width: 0; }
-.wz__lbl .small { font-size: var(--fs-ui-2xs); letter-spacing: 0.06em; text-transform: uppercase; color: var(--color-text-subtle); font-weight: 600; }
-.wz__lbl .name { font-size: var(--fs-ui); font-weight: 500; color: var(--color-text-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.wz__step.active .wz__lbl .name { color: var(--color-primary); font-weight: 600; }
-.wz__step.done .wz__lbl .name { color: var(--color-text); }
-.wz__body { padding: 22px 24px; min-height: 220px; }
-.wz__body h2 { margin: 0 0 4px; font-size: var(--fs-h4); font-weight: 600; color: var(--color-primary); letter-spacing: -0.01em; }
-.wz__body .sub { margin: 0 0 18px; font-size: var(--fs-ui); color: var(--color-text-muted); line-height: 1.5; }
-.wz__foot { padding: 14px 24px; border-top: 1px solid var(--color-border); background: #FAFBFC; display: flex; align-items: center; gap: 10px; }
-.wz__progress { flex: 1; font-size: var(--fs-ui-sm); color: var(--color-text-muted); font-variant-numeric: tabular-nums; }
-
-/* ====================================================================
    DRAWER (slide-over)
    ==================================================================== */
 .drawer-scrim { position: fixed; inset: 0; background: rgba(20,36,56,0.30); backdrop-filter: blur(2px); z-index: 90; }

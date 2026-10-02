@@ -1928,7 +1928,7 @@ a.ki__src:hover { text-decoration: underline; color: var(--color-accent-700); }
 
 /* --- The case head: number, title, amount, profile chips ---------------- */
 .s3case { display: flex; align-items: flex-start; justify-content: space-between; gap: var(--space-5); }
-.s3case__title { font-size: var(--fs-h3); font-weight: 600; color: var(--color-text); }
+/* The case title is `h2.lw-ui-section` since 0220 (app bf405abd); `.s3case__title` is gone. */
 .s3case__sub { font-size: var(--fs-ui-md); color: var(--color-text-muted); margin-top: 4px; }
 .s3case__chips { display: flex; gap: 8px; flex-wrap: wrap; justify-content: flex-end; max-width: 420px; }
 

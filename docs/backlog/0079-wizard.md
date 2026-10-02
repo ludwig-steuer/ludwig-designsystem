@@ -315,3 +315,8 @@ Inhalt 20 px, Einleitung 68ch, ohne `title` kein Kopf, Fortschritt links mit
 `aria-live`. Alles ✓. Offen bleibt 0220 M5: In `InUse` steht die Karte
 „Vorschau" als `h2` unter dem Schritttitel `h2` (`Wizard.stories.tsx:165`) und
 braucht `headingLevel={3}`.
+
+**Abgeräumt 2026-10-02:** Die App ist umgestellt (lldev1, App bf405abd,
+Zeiger 7ddcdae) und benutzt `.wz*` nirgends mehr (geprüft in
+`apps/web/src`). Die v1-Regeln `.wz*` sind deshalb aus `components.css`
+entfernt.

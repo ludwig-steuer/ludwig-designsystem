@@ -522,3 +522,12 @@ nicht aus dieser Lieferung):
   Eintrag (Beischrift) vom Zähler in einer Leiste (Unterzeile).
 - Die Zeile ui-xs der Story nennt `Kbd`, zeigt aber nur das `.v2sub`-Muster.
   Die Taste ist in `Kbd`-Stories mit 11,5 px gemessen.
+
+## Nachtrag 2026-10-02 — App umgestellt
+
+lldev1 hat die App umgestellt (App bf405abd, Zeiger 7ddcdae). Der
+Sachverhalt in Schritt 3 ist jetzt `h2.lw-ui-section`. Damit entfällt
+`.s3case__title` (v3.css, 22 px aus dem lesenden Register), die offene
+Zeile aus „Nachtrag Bau". `.s3case__sub` und `.s3case__chips` benutzt die
+App weiter. Die Wizard-Regeln `.wz*` sind aus `components.css` entfernt
+(0079).
