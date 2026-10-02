@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Status | in Arbeit — gebaut 2026-10-01 (aae9d49), nicht abgenommen (1d97638, M1–M7), Nacharbeit 2026-10-02 (37dd5f0), Nachprüfung 2026-10-02: M1–M5 und M7 behoben, offen M6 (Rest), N1, N2 (siehe „Nachprüfung") |
+| Status | fertig — abgenommen 2026-10-02, Stand `cbb76a3` (siehe „Nachprüfung 2"). Gebaut 2026-10-01 (aae9d49), nicht abgenommen (1d97638, M1–M7), Nacharbeit (37dd5f0), Nachprüfung (4baea66): offen M6 (Rest), N1, N2, Nacharbeit 2 (cbb76a3) |
 | Stufe | keine Komponente: Regel (`design-guidelines.md`, neuer Entscheid A14), sechs Rollenklassen in `tokens.css`, Erweiterung `scripts/check-type.mjs`, Typografie-Story; Anwendungsfall `Wizard` (Nachtrag 0079) |
 | Klassen-Test | „Ergäbe das auch in einer Versicherungs-App Sinn?" → ja, Schriftrollen und Überschriften-Ordnung sind fachfrei |
 | Quelle | Owner-Befund 2026-10-01 über lldev1 („das System soll die Schnitte genauer definieren, sub ist kein Fließtext"; „Typo und Typo-Verwendung festlegen, wo Überschriften verwendet werden, wie viele Ebenen, welche Ordnung, was sind Box-Header") |
@@ -469,3 +469,56 @@ der Nacharbeit und gehört zur Entitätsarbeit Beleg.
 
 `typecheck`, `check:type`, `check:language` und `check:contrast` mit
 Exit 0. Story `Interface` ohne Konsolenfehler.
+
+## Nachprüfung 2 (2026-10-02, Stand cbb76a3)
+
+Fremde Nachprüfung, nicht der Bauende. Geprüft werden die drei offenen
+Punkte der Nachprüfung und ob ein dort abgehakter Punkt wieder gerissen ist.
+Tiefe wie zuvor: **schlanke Abnahme (Schnittstelle)** plus die gemessenen
+Kriterien. Playwright im laufenden Storybook (Port 6107), Fenster 1280 px,
+`getComputedStyle`; axe-core 4.10.2 in die Seite geladen. Kein `pnpm build`
+im Arbeitsbaum.
+
+| Punkt | Nachweis (Story-ID · Befehl · Datei) | Ergebnis |
+|---|---|---|
+| **M6 (Rest)** Story `Interface` nach §1/§2a | `v3-grundlagen-typografie--interface`, sieben Zeilen gemessen: ui-xl 20/600 text · ui-lg `lw-ui-section` 16/600 text · ui-md 14/600 text · ui `lw-ui-text` 13,5/400 text · ui-sm `lw-ui-hint` 12,5/400 subtle · ui-xs `.v2sub` 11,5/400 subtle · ui-2xs 11/400 subtle. Die Zeile ui-xs (`Typography.stories.tsx:149`) nennt „.v2sub · .lw-ui-overline · Kbd" mit „Beischrift (eine Zeile), Overline (600), Taste, Zähler". Das deckt sich mit Rolle 9 in §1 und in `design-guidelines.md` §2a („zweite Zeile in der Zelle, Zähler, Taste") und mit `.v2kbd` auf `--fs-ui-xs` (`v3.css:712`; gemessen 11,5 px in `v3-primitives-aktion-kbd--filled`). Die Zeile ui-2xs (`:152`) heißt „Sparkline, Wizard — Kleinstmaß in Bausteinen — keine Rolle in §2a" und zeigt „Sep · Okt · Nov · Dez". Gemessen: `.v2spark__ax` 11 px in `v3-primitives-fläche-sparkline--filled`, `.v2wiz__n` 11 px in `v3-patterns-rahmen-wizard--in-use`. Die Beschreibung (`:118–126`) nennt Seitentitel, Kartenkopf und Zustandstitel als Bausteinstufen, ohne „Taste", und ui-2xs ohne Rolle. Notizen ui-xl bis ui-2xs stehen nicht gegen §1/§2a. Token `--fs-ui-2xs` (`tokens.css:117`): „smallest, inside blocks only: axis tick, step number" — englisch und richtig, denn alle Verwendungen in `v3.css` liegen in Bausteinen, keine in einer Rollenklasse | ✓ |
+| **N1** Kontrastkommentare der sechs `lw-ui-*` englisch | `tokens.css:342`, `:352`, `:362`, `:373`, `:384`, `:394`: je „`--color-…`, x:1 on white, y:1 on bg-soft, z:1 on surface-head"; im Block `:326–396` kein deutsches Wort. `pnpm check:contrast` Exit 0 („49 Angaben nachgerechnet"; die drei ungeprüften stehen wie zuvor in `v3.css:553` und `:4289`), Selbsttest Exit 0; der Wächter liest `on`/`white` (`check-contrast.mjs:39–46`, `:92`). Alle 18 Werte unabhängig nachgerechnet (WCAG-Luminanz) für `#2D2D2D`/`#5C5C5C`/`#717171` auf `#FFFFFF`/`#F4F6F8`/`#FAFBFC`: text 13,772 · 12,713 · 13,293; muted 6,687 · 6,172 · 6,454; subtle 4,881 · 4,505 · 4,711. Gerundet stimmt jeder Kommentar (13.77/12.71/13.29 · 6.69/6.17/6.45 · 4.88/4.51/4.71) | ✓ |
+| **N2** `EntityHeader` 1/2 in Spec und Guideline | Spec §2.4 (`:88–92`): „(CardHead 2\|3, FieldList 3\|4, EntityHeader 1\|2 — Nacharbeit M4)", der Verweis „fest `h1` (siehe Nachtrag Bau)" ist weg. `design-guidelines.md:119–120` (§2a Ordnung 4): „`CardHead` 2/3, `FieldList` 3/4, `EntityHeader` 1/2". Code `EntityHeader.tsx:93` `headingLevel?: 1 \| 2`, Vorgabe `= 1` (`:38`), `:95` wählt `h2` bei 2, sonst `h1`. Stimmt überein | ✓ |
+
+**Regression:** `pnpm typecheck`, `pnpm check:type` („0 older findings"),
+`node scripts/check-type.mjs --test`, `pnpm check:language` („0 German
+comment lines"), `pnpm check:when`, `pnpm check:icons`, `pnpm check:contrast`
+je Exit 0; Selbsttests von `check:language`, `check:when` und
+`check:contrast` Exit 0. Stories `v3-grundlagen-typografie--roles`,
+`--headings`, `--interface`, `--registers` und
+`v3-patterns-rahmen-wizard--in-use` bei 1280 px: alle mit Inhalt, keine
+Konsolenfehler oder -warnungen und kein fehlgeschlagener Request. Nur
+React-DevTools-Hinweise der Stufe info, diesmal auch kein `favicon.ico`-404.
+axe `heading-order` und `empty-heading` ohne Verstoß in `Roles`, `Headings`
+und Wizard `InUse`. Ein `h1` im Story-Wurzelelement von `Roles` und
+`Headings`. `Headings` mit Drawer: h1 h2 h3 h4 h4 h3 h2 h3 h3 │ Drawer h2 h3
+h3. Wizard `InUse`: nach „Weiter" `h2` „Vorschau prüfen" → `h3` „Vorschau".
+`cbb76a3` ändert nur die Story `Interface`, sieben Kommentare in
+`tokens.css` und zwei Dokumente. Keine Regression.
+
+Abgenommen von / am: Claude (fremde Nachprüfung, nicht der Bauende),
+2026-10-02, Stand `cbb76a3` — **schlanke Abnahme (Schnittstelle)** plus die
+gemessenen Kriterien der Spec; Maße, Kontraste, Hover und Fokus an vier
+Breiten vertagt nach 0119 · **Abgenommen.** M1–M7, N1 und N2 behoben; alle
+Kriterien der Tabelle „Abnahme" sind damit erfüllt.
+
+Hinweise ohne Mangel (für 0119 bzw. eine spätere Sprach- und Leiterpflege,
+nicht aus dieser Lieferung):
+
+- `src/styles/tokens.css:111–116` — die Kommentare der übrigen Leiterstufen
+  sind deutsch und stammen aus `49aa0233` (2026-09-03). `:112` nennt ui-lg
+  noch „Karten-, Detailtitel", nach §1 Rolle 4 ist der Kartenkopf ui-md.
+  `check:language` sieht Kommentare hinter einer Deklaration nicht (wie in N1).
+- Zähler im Code stehen nicht auf der Beischrift-Stufe, die Rolle 9 nennt.
+  `.review__step .count` (`v3.css:330`, StepRail) steht auf ui-2xs.
+  `.v2selbar__count` (`:1225`), `.v2fbar__count` (`:2352`),
+  `.v2caserow__count` (`:3902`) und `.v2grpbtn__n` (`:1390`) stehen auf
+  ui-sm. Entweder zieht der Code auf ui-xs, oder §1 trennt die Zahl am
+  Eintrag (Beischrift) vom Zähler in einer Leiste (Unterzeile).
+- Die Zeile ui-xs der Story nennt `Kbd`, zeigt aber nur das `.v2sub`-Muster.
+  Die Taste ist in `Kbd`-Stories mit 11,5 px gemessen.
