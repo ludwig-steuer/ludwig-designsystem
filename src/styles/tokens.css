@@ -114,7 +114,7 @@
   --fs-ui:       13.5px;  --lh-ui:      1.55;   /* Standard: Zeile, Feld, Fließtext */
   --fs-ui-sm:    12.5px;  --lh-ui-sm:   1.50;   /* Unterzeile, Hinweis */
   --fs-ui-xs:    11.5px;  --lh-ui-xs:   1.45;   /* Beischrift, Taste */
-  --fs-ui-2xs:   11px;    --lh-ui-2xs:  1.40;   /* Kleinstmaß: Taste, Zähler */
+  --fs-ui-2xs:   11px;    --lh-ui-2xs:  1.40;   /* smallest, inside blocks only: axis tick, step number */
 
   /* ====================================================================
      SPACING — 4px base, 8px rhythm
@@ -339,7 +339,7 @@
   font-weight: 600;
   font-size: var(--fs-ui-lg);
   line-height: var(--lh-ui-lg);
-  color: var(--color-text); /* `--color-text`, 13.77:1 auf Weiss, 12.71:1 auf bg-soft, 13.29:1 auf surface-head */
+  color: var(--color-text); /* `--color-text`, 13.77:1 on white, 12.71:1 on bg-soft, 13.29:1 on surface-head */
 }
 
 /* Group head: names one of two or more groups inside a surface. `h3`/`h4`. */
@@ -349,7 +349,7 @@
   font-weight: 700;
   font-size: var(--fs-ui-sm);
   line-height: var(--lh-ui-sm);
-  color: var(--color-text-muted); /* `--color-text-muted`, 6.69:1 auf Weiss, 6.17:1 auf bg-soft, 6.45:1 auf surface-head */
+  color: var(--color-text-muted); /* `--color-text-muted`, 6.69:1 on white, 6.17:1 on bg-soft, 6.45:1 on surface-head */
 }
 
 /* Overline: places a title above it — never a title of its own, never `h`.
@@ -359,7 +359,7 @@
   font-weight: 600;
   font-size: var(--fs-ui-xs);
   line-height: var(--lh-ui-xs);
-  color: var(--color-text-subtle); /* `--color-text-subtle`, 4.88:1 auf Weiss, 4.51:1 auf bg-soft, 4.71:1 auf surface-head */
+  color: var(--color-text-subtle); /* `--color-text-subtle`, 4.88:1 on white, 4.51:1 on bg-soft, 4.71:1 on surface-head */
 }
 
 /* Running text: THE body text of the interface — sentences in a surface. */
@@ -370,7 +370,7 @@
   font-weight: 400;
   font-size: var(--fs-ui);
   line-height: var(--lh-ui);
-  color: var(--color-text); /* `--color-text`, 13.77:1 auf Weiss, 12.71:1 auf bg-soft, 13.29:1 auf surface-head */
+  color: var(--color-text); /* `--color-text`, 13.77:1 on white, 12.71:1 on bg-soft, 13.29:1 on surface-head */
 }
 
 /* Lead: directly under a page, section or surface title; two sentences at most. */
@@ -381,7 +381,7 @@
   font-weight: 400;
   font-size: var(--fs-ui);
   line-height: var(--lh-ui);
-  color: var(--color-text-muted); /* `--color-text-muted`, 6.69:1 auf Weiss, 6.17:1 auf bg-soft, 6.45:1 auf surface-head */
+  color: var(--color-text-muted); /* `--color-text-muted`, 6.69:1 on white, 6.17:1 on bg-soft, 6.45:1 on surface-head */
 }
 
 /* Hint: under a field, an option or a block; one or two sentences. */
@@ -391,7 +391,7 @@
   font-weight: 400;
   font-size: var(--fs-ui-sm);
   line-height: var(--lh-ui-sm);
-  color: var(--color-text-subtle); /* `--color-text-subtle`, 4.88:1 auf Weiss, 4.51:1 auf bg-soft, 4.71:1 auf surface-head */
+  color: var(--color-text-subtle); /* `--color-text-subtle`, 4.88:1 on white, 4.51:1 on bg-soft, 4.71:1 on surface-head */
 }
 
 .lw-mono, code, kbd, samp {

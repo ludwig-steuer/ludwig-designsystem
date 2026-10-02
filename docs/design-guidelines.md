@@ -116,7 +116,8 @@ lesende Register: Login, Hilfe, Marketing, Onboarding-Erklärseiten.
    (Karte `h2`, Gruppe `h3`).
 4. Das Element folgt der Lage, die Gestalt der Rolle: ein Kartenkopf sieht als
    `h2` und `h3` gleich aus. Bausteine haben die Ebene ihres häufigsten Orts
-   als Vorgabe, `headingLevel` für den anderen (`CardHead` 2/3, `FieldList` 3/4).
+   als Vorgabe, `headingLevel` für den anderen (`CardHead` 2/3, `FieldList` 3/4,
+   `EntityHeader` 1/2).
 5. Drawer und Dialog sind eigene Wurzeln: Titel `h2`, darin `h3`. `DetailPane`
    und Wizard-Schritt gehören zur Seite: Titel `h2`.
 6. Overline, Unterzeile, Beischrift, Feldlabel, Einleitung und Zustandstitel

@@ -88,8 +88,8 @@ sie nicht (heute 4 × `lw-overline`, siehe Abweichungen).
 4. **Das Element folgt der Lage, die Gestalt folgt der Rolle.** Ein
    Kartenkopf sieht als `h2` und als `h3` gleich aus. Bausteine mit Titel
    haben die Ebene ihres häufigsten Orts als Vorgabe und `headingLevel` für
-   den anderen (CardHead 2|3, FieldList 3|4). EntityHeader steht fest auf `h1`
-   (siehe Nachtrag Bau).
+   den anderen (CardHead 2|3, FieldList 3|4, EntityHeader 1|2 — Nacharbeit
+   M4).
 5. **Drawer und Dialog sind eigene Wurzeln:** Titel `h2` (wie Radix
    `Dialog.Title`), darin Gruppen `h3`. Sie hängen nicht an der Ebene der
    Seite darunter. `DetailPane` und der Wizard-Schritt gehören zur Seite:
@@ -453,3 +453,19 @@ Variantenschauen mit zwei Köpfen nebeneinander (`…entityheader--without-metri
 unverändert seit `aae9d49`, keine Seite. Das doppelte `h3` „Rechnung" im
 SourceDocumentDrawer hat der Bauende selbst vermerkt; es bestand schon vor
 der Nacharbeit und gehört zur Entitätsarbeit Beleg.
+
+## Nacharbeit 2 (2026-10-02, Bauender)
+
+- **M6 (Rest)** Story `Interface`: Taste und Zähler stehen jetzt in der
+  Zeile ui-xs, wie `.v2kbd` (11,5 px) und Rolle 9. Die Zeile ui-2xs zeigt
+  die Achse der Sparkline und sagt „keine Rolle in §2a“. Den Kommentar am
+  Token `--fs-ui-2xs` habe ich dabei auf Englisch berichtigt: das kleinste
+  Maß, nur in Bausteinen (Achse, Schrittnummer).
+- **N1** Die sechs Kontrastkommentare in `tokens.css` sind englisch
+  („on white, on bg-soft, on surface-head“). `check:contrast` rechnet weiter
+  49 Angaben nach, Exit 0.
+- **N2** §2.4 hier und `design-guidelines.md` §2a nennen jetzt
+  `EntityHeader` 1/2.
+
+`typecheck`, `check:type`, `check:language` und `check:contrast` mit
+Exit 0. Story `Interface` ohne Konsolenfehler.

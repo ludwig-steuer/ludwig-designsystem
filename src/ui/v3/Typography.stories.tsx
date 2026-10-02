@@ -120,8 +120,9 @@ export const Scale: Story = {
  * v3-Komponente wählt (`--fs-ui-*` in `tokens.css`), je Stufe mit den Rollen
  * aus §2a, die sie tragen. Wo es für freien Text eine Rollenklasse gibt, steht
  * das Muster in ihr (`lw-ui-*`, `.v2sub`). Stufen, deren Rollen nur ein
- * Baustein trägt (Seitentitel, Kartenkopf, Feldlabel, Taste), zeigen den
- * Token direkt — eine Klasse dafür gibt es mit Absicht nicht (0220).
+ * Baustein trägt (Seitentitel, Kartenkopf, Zustandstitel), zeigen den Token
+ * direkt — eine Klasse dafür gibt es mit Absicht nicht (0220). `ui-2xs` hat
+ * keine Rolle: das Kleinstmaß lebt nur in Bausteinen (Achse, Schrittnummer).
  */
 export const Interface: Story = {
   render: () => (
@@ -145,12 +146,12 @@ export const Interface: Story = {
       <Row name="ui-sm · 12,5 px" cls=".lw-ui-group · .lw-ui-hint" note="Gruppenkopf (700), Unterzeile, Hinweis, Feldlabel, Spaltenkopf">
         <span className="lw-ui-hint">zuletzt geprüft am 31.08.2026</span>
       </Row>
-      <Row name="ui-xs · 11,5 px" cls=".v2sub · .lw-ui-overline" note="Beischrift (eine Zeile), Overline (600)">
+      <Row name="ui-xs · 11,5 px" cls=".v2sub · .lw-ui-overline · Kbd" note="Beischrift (eine Zeile), Overline (600), Taste, Zähler">
         <span className="v2sub">DE12 5001 0517 0648 4898 90</span>
       </Row>
-      <Row name="ui-2xs · 11 px" cls="Kbd, Zähler" note="Kleinstmaß — Baustein, keine Klasse">
+      <Row name="ui-2xs · 11 px" cls="Sparkline, Wizard" note="Kleinstmaß in Bausteinen — keine Rolle in §2a">
         <span style={{ fontSize: "var(--fs-ui-2xs)", lineHeight: "var(--lh-ui-2xs)", color: "var(--color-text-subtle)" }}>
-          Strg K
+          Sep · Okt · Nov · Dez
         </span>
       </Row>
     </div>
