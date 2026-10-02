@@ -336,7 +336,7 @@ hier durch Nachsehen, nicht durch eine Meldung.
 | v3-Baustein | Ersetzt in der App | Bewusst nicht mitgenommen |
 |---|---|---|
 | ~~`Drawer` / `DrawerFooter` (0042)~~ | ~~`ui/components/primitives/Drawer.tsx`~~ — **erledigt (App-Seite): Commit `26a593d7`.** Die Datei ist weg, `UrlDrawer` baut auf dem Set auf | — |
-| `SourceDocumentDrawer` (0052) | `BelegDrawer` und das Sachverhalts-Gegenstück in `ui/drawers/` | — |
+| `SourceDocumentDrawer` (0052) | `DocumentDrawer` (bis F384 `BelegDrawer`, App 31b95106) und das Sachverhalts-Gegenstück in `ui/drawers/` | — |
 | `AccountDrawer` (0068) | `AccountLedgerDrawerProvider` (`ui/drawers/AccountLedgerDrawer.tsx`, 365 Z.) | Spalte „Sachverhalt" (2 % gefüllt) und die Tab-Umschaltung — beides absichtlich |
 | `AccountCell` (0066) | `AccountRef` (`ui/booking/`, 5 Aufrufstellen, 13 Context-Dateien) | der Context-Weg wird ein `href` über den Search-Param (L3) |
 | `accountEntryColumns` / `AccountEntryList` (0067) | drei Handtabellen: die zwei `<tbody>` in `AccountLedgerDrawer.tsx` und die zwei Auszüge im Tab „Buchungen" der Kontoseite | Spalte „Sachverhalt" wandert in den `title` |

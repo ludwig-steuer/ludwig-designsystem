@@ -31,7 +31,8 @@ import { type SourceDocumentGroup } from "./SourceDocumentFacts";
  * facts · limit · foot. Zone 2 is the point here — a document *has* an
  * original, and it comes first and large.
  *
- * Taken from `ui/drawers/BelegDrawer.tsx`: the zones, the four states and the
+ * Taken from the app's `ui/drawers/DocumentDrawer.tsx` (`BelegDrawer.tsx`
+ * until F384): the zones, the four states and the
  * single way out came along. The loading did not — this drawer is handed
  * `record`, `loading` and `error` (0042), so it works in Storybook and in any
  * page, without a client scope.
