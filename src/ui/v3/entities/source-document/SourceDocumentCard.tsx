@@ -107,6 +107,11 @@ export interface SourceDocumentCardProps {
   factsTitle?: string | null;
   /** Where the counterparty stands as a business partner — passed to the facts. */
   counterpartyHref?: string | null;
+  /**
+   * The card head's `h` level, by position (0220 §2): 2 on a page (default),
+   * 3 inside a drawer, a dialog or under a section title.
+   */
+  headingLevel?: 2 | 3;
 }
 
 /**
@@ -137,6 +142,7 @@ export function SourceDocumentCard({
   history,
   factsTitle,
   counterpartyHref,
+  headingLevel,
 }: SourceDocumentCardProps) {
   const kind = sourceDocTypeLabel(document.sourceDocType, document.classDocumentForm);
   return (
@@ -159,6 +165,7 @@ export function SourceDocumentCard({
             title={kind}
             fileName={document.fileName}
             excerpt={excerpt}
+            {...(headingLevel ? { headingLevel } : {})}
           />
         }
         aside={
@@ -191,7 +198,11 @@ export function SourceDocumentCard({
             // kind and date under the name.
             <div id="parts">
               <Card>
-                <CardHead title="Teilbelege" meta={<span className="v2muted">{parts.length}</span>} />
+                <CardHead
+                  title="Teilbelege"
+                  meta={<span className="v2muted">{parts.length}</span>}
+                  {...(headingLevel ? { headingLevel } : {})}
+                />
                 <SourceDocumentList
                   documents={parts}
                   variant="narrow"

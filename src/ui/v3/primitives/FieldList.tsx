@@ -59,15 +59,13 @@ export function FieldList({
   values?: "data" | "prose";
   empty?: string;
 }) {
-  const Title = headingLevel === 4 ? "h4" : "h3";
   const layoutClass =
     values === "prose"
       ? " v2fields--prose"
       : `${layout === "row" ? " v2fields--cols" : ""}${split ? " v2fields--split" : ""}`;
   return (
     <div className={`v2fields${tone === "surface" ? "" : ` v2fields--${tone}`}${layoutClass}`}>
-      {/* Group head (0220 role 5): one level under its surface. */}
-      {title ? <Title className="v2fields__h">{title}</Title> : null}
+      {title ? <FieldListHead headingLevel={headingLevel}>{title}</FieldListHead> : null}
       {rows.length === 0 ? (
         <div className="v2fields__empty">{empty ?? "Keine Angaben."}</div>
       ) : (
@@ -94,4 +92,17 @@ export function FieldList({
  */
 export function FieldProse({ children }: { children: ReactNode }) {
   return <span className="v2fields__prose">{children}</span>;
+}
+
+/**
+ * The head of a facts group on its own (0220 role 5): the same `h3`/`h4` a
+ * `FieldList` sets over its rows, for a group whose content is not rows — a
+ * purpose text, a lead sentence, a skeleton while it loads.
+ *
+ * @when    A group beside FieldLists that holds something other than label/value rows.
+ * @instead Label/value rows → FieldList with `title`. A group head in free text → `.lw-ui-group`.
+ */
+export function FieldListHead({ children, headingLevel = 3 }: { children: ReactNode; headingLevel?: 3 | 4 }) {
+  const Title = headingLevel === 4 ? "h4" : "h3";
+  return <Title className="v2fields__h">{children}</Title>;
 }

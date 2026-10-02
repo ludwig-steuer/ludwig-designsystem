@@ -41,9 +41,15 @@ export function BankTransactionExcerpt<T extends BankTransactionFactsData>({
   actions,
   empty,
   extraColumn,
+  headingLevel,
 }: {
   title: ReactNode;
   sub?: ReactNode;
+  /**
+   * The card head's `h` level, by position (0220 §2): 2 on a page (default),
+   * 3 inside a drawer, a dialog or under a section title.
+   */
+  headingLevel?: 2 | 3;
   /**
    * The lines, in the caller's order — the excerpt does not sort. Whatever of
    * the detail they carry (IBAN, BIC, source, import) shows in the fold-out.
@@ -100,7 +106,12 @@ export function BankTransactionExcerpt<T extends BankTransactionFactsData>({
       rows={[...transactions]}
       columns={columns}
       rowKey={(t) => t.id}
-      head={{ title, ...(sub ? { sub } : {}), ...(headActions ? { actions: headActions } : {}) }}
+      head={{
+        title,
+        ...(sub ? { sub } : {}),
+        ...(headActions ? { actions: headActions } : {}),
+        ...(headingLevel ? { headingLevel } : {}),
+      }}
       expand={(t) => <BankTransactionFoldout transaction={t} caseHref={caseHref} />}
       empty={{
         title: empty?.title ?? "Keine Zahlung.",

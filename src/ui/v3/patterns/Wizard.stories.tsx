@@ -162,7 +162,7 @@ function ImportRun() {
       ) : null}
       {step === 1 ? (
         <Card>
-          <CardHead title="Vorschau" sub="3 von 340 Zeilen" />
+          <CardHead title="Vorschau" sub="3 von 340 Zeilen" headingLevel={3} />
           <Table cols="110px 1fr 130px">
             <HeadRow>
               <span>Datum</span>

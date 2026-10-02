@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Status | in Arbeit — gebaut am 2026-10-01 (aae9d49), fremde Abnahme 2026-10-01 (schlanke Abnahme, Schnittstelle): nicht abgenommen, offen M1–M7 (siehe „Abnahme") |
+| Status | Abnahme — gebaut 2026-10-01 (aae9d49), nicht abgenommen (1d97638, M1–M7), Nacharbeit 2026-10-02; Nachprüfung steht aus |
 | Stufe | keine Komponente: Regel (`design-guidelines.md`, neuer Entscheid A14), sechs Rollenklassen in `tokens.css`, Erweiterung `scripts/check-type.mjs`, Typografie-Story; Anwendungsfall `Wizard` (Nachtrag 0079) |
 | Klassen-Test | „Ergäbe das auch in einer Versicherungs-App Sinn?" → ja, Schriftrollen und Überschriften-Ordnung sind fachfrei |
 | Quelle | Owner-Befund 2026-10-01 über lldev1 („das System soll die Schnitte genauer definieren, sub ist kein Fließtext"; „Typo und Typo-Verwendung festlegen, wo Überschriften verwendet werden, wie viele Ebenen, welche Ordnung, was sind Box-Header") |
@@ -324,3 +324,61 @@ Abgenommen von / am: Claude (fremde Abnahme, nicht der Bauende), 2026-10-01, Sta
 - **M7** `src/ui/v3/entities/bank-transaction/BankTransactionFacts.tsx:96`, `BankTransactionDrawer.tsx:179`, `src/ui/v3/entities/recurring-rule/RecurringRuleFacts.tsx:377` — Der „FieldList-Kopf von Hand" wurde nur von `div` zu `h3`, die innere Klasse `.v2fields__h` bleibt von Hand gesetzt. §6 verlangt `FieldList` oder `.lw-ui-group`, und der Nachtrag Bau nennt keine Ausnahme. Vorschlag: `.lw-ui-group` (die Trennlinie über eine Layout-Klasse) oder die Ausnahme mit Grund in den Nachtrag Bau.
 
 Hinweise ohne Mangel: Zeilenhöhe nicht überall die `--lh-ui-*` der Stufe, wie die Einleitung zu §1 sagt — Dialog-Titel 24,8 px (1,55), Kartenkopf 21,7 px (geerbt 1,55), Markdown-Überschrift 18,2 px (1,3) gegen 21,6 px bei `lw-ui-section`. Kein Kriterium, gehört zur gemessenen Prüfung (0119). `src/showcase/deck/DeckScreens.stories.tsx:90` setzt den Seitentitel des Decks als `h1.lw-h2` (lesend, 30 px) statt Rolle 1 (ui-xl 20). T-REG nimmt Stories aus, Wert unverändert gegenüber vorher.
+
+## Nacharbeit (2026-10-02, Bauender)
+
+Alle sieben Mängel behoben; Hinweis „Deck-Seitentitel" mitgenommen.
+
+- **M1** `tokens.css`: Jede der sechs Klassen trägt ihren Kontrast an der
+  eigenen `color`-Zeile, in nachrechenbarer Form
+  (`` `--color-text-muted`, 6.69:1 auf Weiss, 6.17:1 auf bg-soft, 6.45:1 auf surface-head ``).
+  Die Schwelle steht ohne „:1". `pnpm check:contrast` gibt Exit 0 und hat
+  49 Angaben nachgerechnet.
+- **M2** Story `Headings`: Ein Drawer steht als eigene Wurzel daneben. Er
+  ist beim Laden offen und lässt sich über einen Knopf wieder öffnen; Titel
+  `h2`, darin `FieldList` `h3` und `CardHead headingLevel={3}`. Es gibt zwei
+  getrennte Gliederungen, beide aus dem DOM gelesen. Die Gliederung des
+  Drawers wird per `MutationObserver` neu gelesen.
+- **M3** `headingLevel` reicht jetzt durch. Kette: `DataTable` (`head.headingLevel`),
+  dann `BankTransactionExcerpt`, `SourceDocumentPreview` und
+  `SourceDocumentCard` (Vorschau und Teilbelege). `PaymentAccountDrawer` und
+  `SourceDocumentDrawer` setzen 3. Gemessen: Alle acht Entitäts-Drawer
+  beginnen mit `h2`, darin `h3`, ohne Sprung. Im Laden-Zustand des
+  SourceDocumentDrawer war der Kopf leer; jetzt trägt er „Original" für die
+  Vorlesehilfe (`.v2vh`).
+  **Kein `HeadingLevel`-Context, entschieden:** `CardHead` und `FieldList`
+  sind Server-taugliche Primitives (`Table.tsx` ohne `"use client"`), und
+  Context ist nur im Client lesbar. Ein Context hätte beide zu
+  Client-Komponenten gemacht, nur damit eine Zahl nicht durchgereicht werden
+  muss. Der Auslöser in „Ausbau" ist damit geprüft und verworfen. Es bleibt
+  bei der optionalen Prop entlang der Kette (A12, additiv).
+- **M4** `EntityHeader` bekommt jetzt doch `headingLevel?: 1 | 2` (Vorgabe 1).
+  Den echten Einsatz zeigt `InUse` nach 0050: `PageHeader` trägt das `h1`,
+  die Akte steht als `h2`. Gemessen: ein `h1`. Der Satz im Nachtrag Bau
+  („ohne `headingLevel`") ist damit überholt.
+- **M5** Wizard `InUse`: Karte „Vorschau" mit `headingLevel={3}`, gemessen
+  `h2` „Vorschau prüfen" → `h3` „Vorschau".
+- **M6** `Interface` nennt je Stufe die Rollen aus §2a. Das Muster steht in
+  der Rollenklasse, wo es eine gibt (`lw-ui-section`, `lw-ui-text`,
+  `lw-ui-hint`, `.v2sub`). Inline steht der Token nur für Stufen, deren
+  Rollen ausschließlich ein Baustein trägt (Seitentitel, Kartenkopf,
+  Kleinstmaß); die Story sagt das. `Registers` produktiv `lw-ui-text`
+  13,5 px, lesend `lw-body` 16 px, Köpfe `lw-ui-overline` und `lw-ui-hint`.
+- **M7** Neuer Export `FieldListHead` (`FieldList.tsx`, im Barrel, mit
+  `@when`/`@instead`). Er ist der Kopf, den `FieldList` selbst setzt, für
+  eine Gruppe ohne Zeilen. `BankTransactionFacts`, `BankTransactionDrawer`,
+  `RecurringRuleFacts` und die Story `StateMachine` nutzen ihn. Die Story
+  `MasterDetail` hat Beschriftungen und nimmt `lw-ui-group`. `.v2fields__h`
+  steht nur noch in `FieldList.tsx`.
+- **Hinweis Deck:** `DeckScreens` setzt den Schrittkopf über `PageHeader`
+  (Overline, `h1` 20 px, Einleitung) statt `h1.lw-h2`.
+
+Wächter: `typecheck`, `check:type` (Selbsttest), `check:language`,
+`check:when`, `check:contrast` und `check:icons` mit Exit 0. Browser
+1280 px: die geänderten Stories ohne Konsolenfehler (bis auf `favicon.ico`).
+
+Beim Messen gesehen, ohne Bezug zu den Mängeln: Der SourceDocumentDrawer
+zeigt zweimal „Rechnung" als `h3`, einmal als Kopf der Vorschau und einmal
+als Kopf der Belegdaten (`SourceDocumentFacts`), obwohl dort `factsTitle={null}`
+steht. Das ist eine doppelte Überschrift im Sinn von §3. Vorschlag für die
+Entitätsarbeit Beleg: Der Faktenkopf fällt im Drawer weg.

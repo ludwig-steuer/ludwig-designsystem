@@ -126,7 +126,7 @@ export const DetailWide: Story = {
   render: () => (
     <div style={{ display: "grid", gap: "var(--space-6)" }}>
       <div style={{ maxWidth: 1100 }}>
-        <div className="v2fields__h">Vorgabe (620) — bei 1.100 px nebeneinander</div>
+        <h3 className="lw-ui-group">Vorgabe (620) — bei 1.100 px nebeneinander</h3>
         <MasterDetail
           detailWide
           list={<DetailPane title="Randspalte">Fakten, Zähler, Zustände.</DetailPane>}
@@ -134,7 +134,7 @@ export const DetailWide: Story = {
         />
       </div>
       <div style={{ maxWidth: 1000 }}>
-        <div className="v2fields__h">Vorgabe (620) — bei 1.000 px umgebrochen</div>
+        <h3 className="lw-ui-group">Vorgabe (620) — bei 1.000 px umgebrochen</h3>
         <MasterDetail
           detailWide
           list={<DetailPane title="Randspalte">Steht jetzt unten.</DetailPane>}
@@ -142,7 +142,7 @@ export const DetailWide: Story = {
         />
       </div>
       <div style={{ maxWidth: 1000 }}>
-        <div className="v2fields__h">minDetail 484 — bei 1.000 px nebeneinander</div>
+        <h3 className="lw-ui-group">minDetail 484 — bei 1.000 px nebeneinander</h3>
         <MasterDetail
           detailWide
           minDetail={484}

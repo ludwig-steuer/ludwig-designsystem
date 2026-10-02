@@ -17,7 +17,7 @@ import { formatAmount } from "../../format";
 import { StatusBadge } from "../../patterns/StatusBadge";
 import { AmountCell, MonoCell } from "../../primitives/Cells";
 import { Callout } from "../../primitives/Callout";
-import { FieldList } from "../../primitives/FieldList";
+import { FieldList, FieldListHead } from "../../primitives/FieldList";
 import { LongText } from "../../primitives/LongText";
 import { Time } from "../../primitives/Time";
 import { AccountCell } from "../account/Account";
@@ -374,7 +374,7 @@ function Group({
   if (rows.length === 0 && !lead && !children) return null;
   return (
     <section className="v2fields v2fields--bare v2rrfacts__group">
-      <h3 className="v2fields__h">{title}</h3>
+      <FieldListHead>{title}</FieldListHead>
       {lead ? <p className="v2rrfacts__sentence">{lead}</p> : null}
       {rows.length > 0 ? <FieldList tone="bare" rows={rows} /> : null}
       {children}

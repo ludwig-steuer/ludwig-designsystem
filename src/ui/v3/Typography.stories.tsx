@@ -1,5 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { useEffect, useRef, useState, type ReactNode, type RefObject } from "react";
+import { Button } from "./primitives/Button";
+import { Drawer } from "./primitives/Drawer";
 import { EmptyState } from "./primitives/EmptyState";
 import { FieldList } from "./primitives/FieldList";
 import { Field, Input } from "./primitives/Form";
@@ -115,52 +117,40 @@ export const Scale: Story = {
 
 /**
  * Die Leiter des **produktiven Registers** — die sieben Größen, aus denen jede
- * v3-Komponente wählt (`--fs-ui-*` in `tokens.css`). Vorher stand jede Zahl
- * einzeln in `v3.css`; wer eine Komponente baute, riet.
+ * v3-Komponente wählt (`--fs-ui-*` in `tokens.css`), je Stufe mit den Rollen
+ * aus §2a, die sie tragen. Wo es für freien Text eine Rollenklasse gibt, steht
+ * das Muster in ihr (`lw-ui-*`, `.v2sub`). Stufen, deren Rollen nur ein
+ * Baustein trägt (Seitentitel, Kartenkopf, Feldlabel, Taste), zeigen den
+ * Token direkt — eine Klasse dafür gibt es mit Absicht nicht (0220).
  */
 export const Interface: Story = {
   render: () => (
     <div style={{ maxWidth: 900 }}>
-      <Row name="Seitentitel" cls="--fs-ui-xl · 20 px" note="PageHeader, einmal je Seite">
+      <Row name="ui-xl · 20 px" cls="PageHeader, EntityHeader" note="Seitentitel — Baustein, keine Klasse">
         <span style={{ fontSize: "var(--fs-ui-xl)", lineHeight: "var(--lh-ui-xl)", fontWeight: 600 }}>
           Stapel 2026-08 · Bürobedarf
         </span>
       </Row>
-      <Row name="Flächentitel" cls="--fs-ui-lg · 16 px" note="Karte, Detail, Markdown-Überschrift">
-        <span style={{ fontSize: "var(--fs-ui-lg)", lineHeight: "var(--lh-ui-lg)", fontWeight: 600 }}>
-          Ungeprüfte Sätze
+      <Row name="ui-lg · 16 px" cls=".lw-ui-section · Drawer, Dialog" note="Abschnittstitel, Flächentitel">
+        <span className="lw-ui-section">Weitere Zahlungswege</span>
+      </Row>
+      <Row name="ui-md · 14 px" cls="CardHead, EmptyState, Button" note="Kartenkopf, Zustandstitel, Knopf — Baustein">
+        <span style={{ fontSize: "var(--fs-ui-md)", lineHeight: "var(--lh-ui-md)", fontWeight: 600 }}>
+          Offene Belege
         </span>
       </Row>
-      <Row name="Betont" cls="--fs-ui-md · 14 px" note="Knopf, hervorgehobene Zeile">
-        <span style={{ fontSize: "var(--fs-ui-md)", lineHeight: "var(--lh-ui-md)" }}>
-          Stapel abnehmen
-        </span>
+      <Row name="ui · 13,5 px" cls=".lw-ui-text · .lw-ui-lead" note="Fließtext, Einleitung, Zeile, Feld">
+        <span className="lw-ui-text">142 Sätze, davon 38 ungeprüft. Zwei über 1.000,00 € tragen einen Befund.</span>
       </Row>
-      <Row name="Standard" cls="--fs-ui · 13,5 px" note="Zeile, Feld, Fließtext der Arbeitsfläche">
-        <span style={{ fontSize: "var(--fs-ui)", lineHeight: "var(--lh-ui)" }}>
-          142 Sätze, davon 38 ungeprüft. Zwei über 1.000,00 € tragen einen Befund.
-        </span>
+      <Row name="ui-sm · 12,5 px" cls=".lw-ui-group · .lw-ui-hint" note="Gruppenkopf (700), Unterzeile, Hinweis, Feldlabel, Spaltenkopf">
+        <span className="lw-ui-hint">zuletzt geprüft am 31.08.2026</span>
       </Row>
-      <Row name="Unterzeile" cls="--fs-ui-sm · 12,5 px" note="Hinweis, zweite Zeile einer Zelle">
-        <span style={{ fontSize: "var(--fs-ui-sm)", lineHeight: "var(--lh-ui-sm)", color: "var(--color-text-muted)" }}>
-          zuletzt geprüft am 31.08.2026
-        </span>
+      <Row name="ui-xs · 11,5 px" cls=".v2sub · .lw-ui-overline" note="Beischrift (eine Zeile), Overline (600)">
+        <span className="v2sub">DE12 5001 0517 0648 4898 90</span>
       </Row>
-      <Row name="Beischrift" cls="--fs-ui-xs · 11,5 px" note="Taste, Achsenbeschriftung">
-        <span style={{ fontSize: "var(--fs-ui-xs)", lineHeight: "var(--lh-ui-xs)", color: "var(--color-text-subtle)" }}>
-          Sep · Okt · Nov · Dez
-        </span>
-      </Row>
-      <Row name="Feld-Label" cls="--fs-ui-sm · 12,5 px" note="Über dem Feld, ohne Versalien (0089)">
-        <span
-          style={{
-            fontSize: "var(--fs-ui-sm)",
-            lineHeight: "var(--lh-ui-sm)",
-            fontWeight: 600,
-            color: "var(--color-text-muted)",
-          }}
-        >
-          Steuerschlüssel
+      <Row name="ui-2xs · 11 px" cls="Kbd, Zähler" note="Kleinstmaß — Baustein, keine Klasse">
+        <span style={{ fontSize: "var(--fs-ui-2xs)", lineHeight: "var(--lh-ui-2xs)", color: "var(--color-text-subtle)" }}>
+          Strg K
         </span>
       </Row>
     </div>
@@ -168,29 +158,29 @@ export const Interface: Story = {
 };
 
 /**
- * Zwei Register, ein Token-Satz (A1): produktiv 13,5–14 px in `/clients/**`,
- * `/admin/**` und `/dashboard` — lesend 16 px in Login, Hilfe und Onboarding.
- * Derselbe Absatz, zweimal.
+ * Zwei Register, ein Token-Satz (A1): produktiv 13,5 px (`lw-ui-text`) in
+ * `/clients/**`, `/admin/**` und `/dashboard` — lesend 16 px in Login, Hilfe
+ * und Onboarding-Erklärseiten. Derselbe Absatz, zweimal.
  */
 export const Registers: Story = {
   render: () => (
     <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "var(--space-8)", maxWidth: 900 }}>
       <div>
-        <div className="lw-overline">Produktiv · 13,5–14 px</div>
-        <div className="lw-caption" style={{ marginBottom: "var(--space-3)" }}>
+        <div className="lw-ui-overline">Produktiv · 13,5 px</div>
+        <p className="lw-ui-hint" style={{ marginBottom: "var(--space-3)" }}>
           /clients/** · /admin/** · /dashboard — knapp in der Zeile, großzügig zwischen Blöcken
-        </div>
-        <div className="lw-body-sm">
+        </p>
+        <p className="lw-ui-text">
           Der Stapel 2026-08 enthält 142 Sätze. 38 sind ungeprüft, zwei davon über 1.000,00 €.
           Die Freigabe bleibt gesperrt, solange ein Befund offen ist.
-        </div>
+        </p>
       </div>
       <div>
-        <div className="lw-overline">Lesend · 16 px</div>
-        <div className="lw-caption" style={{ marginBottom: "var(--space-3)" }}>
-          (auth)/login · /hilfe/** · Onboarding — großzügiger Weißraum
-        </div>
-        <p style={{ margin: 0 }}>
+        <div className="lw-ui-overline">Lesend · 16 px</div>
+        <p className="lw-ui-hint" style={{ marginBottom: "var(--space-3)" }}>
+          (auth)/login · /hilfe/** · Onboarding-Erklärseiten — großzügiger Weißraum
+        </p>
+        <p className="lw-body" style={{ margin: 0 }}>
           Der Stapel 2026-08 enthält 142 Sätze. 38 sind ungeprüft, zwei davon über 1.000,00 €.
           Die Freigabe bleibt gesperrt, solange ein Befund offen ist.
         </p>
@@ -317,25 +307,40 @@ export const Roles: Story = {
 };
 
 /** Reads the outline the way a screen reader does: every `h1`–`h6`, in order. */
-function Outline({ of }: { of: RefObject<HTMLDivElement | null> }) {
+function Outline({ title, of, selector }: { title: string; of?: RefObject<HTMLDivElement | null>; selector?: string }) {
   const [items, setItems] = useState<[string, string][]>([]);
   useEffect(() => {
-    const hs = of.current?.querySelectorAll("h1, h2, h3, h4, h5, h6") ?? [];
-    setItems(Array.from(hs, (h) => [h.tagName.toLowerCase(), h.textContent ?? ""]));
-  }, [of]);
+    // Read again on every change below `body`: the drawer mounts after its
+    // first render and leaves on close.
+    const read = () => {
+      const root = of ? of.current : selector ? document.querySelector(selector) : null;
+      const hs = root?.querySelectorAll("h1, h2, h3, h4, h5, h6") ?? [];
+      setItems(Array.from(hs, (h) => [h.tagName.toLowerCase(), h.textContent ?? ""]));
+    };
+    read();
+    const watch = new MutationObserver(read);
+    watch.observe(document.body, { childList: true, subtree: true });
+    return () => watch.disconnect();
+  }, [of, selector]);
   return (
     <div style={{ marginTop: "var(--space-6)" }}>
-      <h2 className="lw-ui-section">Gliederung, aus dem DOM gelesen</h2>
-      <ol className="lw-ui-text" style={{ listStyle: "none", padding: 0, margin: "var(--space-2) 0 0" }}>
-        {items.map(([tag, text], i) => (
-          <li key={i} style={{ paddingLeft: `calc(${Number(tag[1]) - 1} * var(--space-5))` }}>
-            <span className="lw-mono" style={{ color: "var(--color-text-subtle)" }}>
-              {tag}
-            </span>{" "}
-            {text}
-          </li>
-        ))}
-      </ol>
+      <h2 className="lw-ui-section">{title}</h2>
+      {items.length === 0 ? (
+        <p className="lw-ui-hint" style={{ marginTop: "var(--space-2)" }}>
+          Nichts zu lesen — der Drawer ist geschlossen.
+        </p>
+      ) : (
+        <ol className="lw-ui-text" style={{ listStyle: "none", padding: 0, margin: "var(--space-2) 0 0" }}>
+          {items.map(([tag, text], i) => (
+            <li key={i} style={{ paddingLeft: `calc(${Number(tag[1]) - 1} * var(--space-5))` }}>
+              <span className="lw-mono" style={{ color: "var(--color-text-subtle)" }}>
+                {tag}
+              </span>{" "}
+              {text}
+            </li>
+          ))}
+        </ol>
+      )}
     </div>
   );
 }
@@ -345,12 +350,15 @@ function Outline({ of }: { of: RefObject<HTMLDivElement | null> }) {
  * höchstens `h1`–`h4`, genau ein `h1`, keine Sprünge. Das Element folgt der
  * Lage, die Gestalt der Rolle: der Kartenkopf „Girokonto" ist `h3` (unter
  * einem Abschnitt), sieht aber aus wie jeder Kartenkopf. Drawer und Dialog
- * beginnen mit eigenem `h2`. Die Gliederung darunter liest das DOM aus — sie
- * zeigt, was ein Screenreader hört.
+ * beginnen mit eigenem `h2`: der Drawer daneben (offen beim Laden, wieder zu
+ * öffnen über den Knopf) hat Titel `h2`, Gruppe und Karte `h3`, unabhängig von
+ * der Seite darunter. Die beiden Gliederungen lesen das DOM aus — sie zeigen,
+ * was ein Screenreader hört.
  */
 export const Headings: Story = {
   render: function Render() {
     const page = useRef<HTMLDivElement>(null);
+    const [open, setOpen] = useState(true);
     return (
       <div style={{ maxWidth: 900 }}>
         <div ref={page} style={{ display: "grid", gap: "var(--space-5)" }}>
@@ -382,7 +390,19 @@ export const Headings: Story = {
             </Card>
           </section>
         </div>
-        <Outline of={page} />
+        <Button variant="secondary" onClick={() => setOpen(true)} style={{ marginTop: "var(--space-5)" }}>
+          Girokonto im Drawer öffnen
+        </Button>
+        <Outline title="Gliederung der Seite, aus dem DOM gelesen" of={page} />
+        <Outline title="Gliederung des Drawers — eigene Wurzel" selector="[role=dialog]" />
+        <Drawer open={open} onClose={() => setOpen(false)} title="Girokonto Sparkasse" meta="DE12 5001 0517 0648 4898 90">
+          <div style={{ display: "grid", gap: "var(--space-4)" }}>
+            <FieldList title="Zahlung" rows={[["Konto", "1200"], ["Saldo", "12.480,00 €"]]} />
+            <Card>
+              <CardHead headingLevel={3} title="Letzte Zahlungen" sub="die letzten 3 nach Buchungstag" />
+            </Card>
+          </div>
+        </Drawer>
       </div>
     );
   },

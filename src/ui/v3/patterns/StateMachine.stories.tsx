@@ -1,4 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
+import { FieldListHead } from "../primitives/FieldList";
 import { Card, CardHead } from "../primitives/Table";
 import { ProcessStepper } from "./Process";
 import { STATE_MACHINES } from "@/ludwig/ui/status/status-registry";
@@ -171,7 +172,7 @@ export const InUse: Story = {
               diagram's minimum width pushes through — the card clipped the last
               state by 55 px instead of the container scrolling (0069). */}
           <div style={{ minWidth: 0 }}>
-            <div className="v2fields__h">Ablauf</div>
+            <FieldListHead>Ablauf</FieldListHead>
             <StateMachine
               axis="export_batch"
               states={CYCLE_STATES}

@@ -4,6 +4,7 @@ import { ActionIcon } from "../../Icons";
 import { Callout } from "../../primitives/Callout";
 import { Drawer, DrawerFullView } from "../../primitives/Drawer";
 import { EmptyState } from "../../primitives/EmptyState";
+import { FieldListHead } from "../../primitives/FieldList";
 import { Amount } from "../../primitives/Amount";
 import { Skeleton } from "../../primitives/Skeleton";
 import { Time } from "../../primitives/Time";
@@ -176,7 +177,7 @@ function Body({
       <div className="v2btxf">
         {LOADING_BLOCKS.map(([title, lines]) => (
           <section className="v2fields v2fields--bare" key={title}>
-            <h3 className="v2fields__h">{title}</h3>
+            <FieldListHead>{title}</FieldListHead>
             <div className="v2btxd__skel">
               <Skeleton lines={lines} label={`${title} wird geladen …`} />
             </div>

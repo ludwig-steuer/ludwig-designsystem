@@ -217,7 +217,8 @@ export const Editable: Story = {
  * Im Einsatz, wie 0050 es zusammensetzt: oben der `PageHeader` mit dem
  * `RecordPager` (Bereich, Rückweg, Vorrat), darunter die Karte mit der Akte.
  * Der Seitenkopf trägt kein `back` — das tut der Pager, und zwei Rückwege
- * nebeneinander sind einer zu viel.
+ * nebeneinander sind einer zu viel. Das `h1` trägt der Seitenkopf, der Titel
+ * der Akte steht deshalb als `h2` (`headingLevel={2}`, 0220).
  */
 export const InUse: Story = {
   render: () => (
@@ -237,6 +238,7 @@ export const InUse: Story = {
         }
       />
       <EntityHeader
+        headingLevel={2}
         icon={<Layers size={20} strokeWidth={1.5} />}
         overline="Sachverhalt · 2026-0815"
         title="Eingangsrechnung: DomainFactory GmbH"

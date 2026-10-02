@@ -104,7 +104,7 @@ export { ReasonDialog } from "./primitives/ReasonDialog";
 
 /* Fläche */
 export { KpiTile, KpiGrid } from "./primitives/KpiTile";
-export { FieldList, FieldProse } from "./primitives/FieldList";
+export { FieldList, FieldListHead, FieldProse } from "./primitives/FieldList";
 export { ProseCard } from "./primitives/ProseCard";
 export { StatusCallout } from "./primitives/StatusCallout";
 export { Badge, type BadgeTone, type BadgeProps } from "./primitives/Badge";

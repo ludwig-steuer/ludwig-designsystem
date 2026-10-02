@@ -35,6 +35,7 @@ export function EntityHeader({
   summary,
   facts,
   actions,
+  headingLevel = 1,
 }: {
   /**
    * The symbol tile. Comes from the caller, **not** from a status axis — this
@@ -84,7 +85,14 @@ export function EntityHeader({
   /** The facts line — goes through `FieldList layout="row"` (0049). */
   facts?: [ReactNode, ReactNode][];
   actions?: ReactNode;
+  /**
+   * The title's `h` level, by position (0220 §2): 1 when it heads the page
+   * (default), 2 under a `PageHeader` that already carries the page's `h1`
+   * — the task page with a record, as 0050 composes it.
+   */
+  headingLevel?: 1 | 2;
 }) {
+  const Title = headingLevel === 2 ? "h2" : "h1";
   return (
     <div className="v2ehead">
       <div className={`v2ehead__top${process && processPlacement === "end" ? " has-side" : ""}`}>
@@ -92,9 +100,9 @@ export function EntityHeader({
         <div className="v2ehead__id">
           {overline ? <div className="v2ehead__over">{overline}</div> : null}
           <div className="v2ehead__title">
-            {/* The page title (0220 role 1): the one `h1` of a detail page. The
-                status sits beside it, not inside it. */}
-            <h1 className="v2ehead__name">{title}</h1>
+            {/* The page title (0220 role 1): the one `h1` of a detail page,
+                `h2` under a PageHeader. The status sits beside it, not inside. */}
+            <Title className="v2ehead__name">{title}</Title>
             {status}
           </div>
           {meta ? <div className="v2ehead__meta">{meta}</div> : null}

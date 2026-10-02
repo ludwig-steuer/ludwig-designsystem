@@ -3,7 +3,7 @@ import { resolveEventBookingState, restOf } from "./derive";
 import { caseIdentifier } from "../accounting-case/case-title";
 import { StatusBadge } from "../../patterns/StatusBadge";
 import { Amount } from "../../primitives/Amount";
-import { FieldList, FieldProse } from "../../primitives/FieldList";
+import { FieldList, FieldListHead, FieldProse } from "../../primitives/FieldList";
 import { MonoCell } from "../../primitives/Cells";
 import { Disclosure } from "../../primitives/Disclosure";
 import { RawRecord } from "../../primitives/RawRecord";
@@ -93,7 +93,7 @@ export function BankTransactionFacts({
         // right-aligned prose is unreadable. It borrows the frame and the
         // heading, not the row.
         <section className={`v2fields${tone === "bare" ? " v2fields--bare" : ""}`}>
-          <h3 className="v2fields__h">Verwendungszweck</h3>
+          <FieldListHead>Verwendungszweck</FieldListHead>
           <div className="v2btxf__purpose">
             <BankTransactionPurpose purpose={t.purpose} tags={t.sepaTags} variant="block" />
           </div>

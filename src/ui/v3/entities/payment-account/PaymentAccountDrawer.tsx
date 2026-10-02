@@ -100,6 +100,7 @@ export function PaymentAccountDrawer({
             ]}
           />
           <BankTransactionExcerpt
+            headingLevel={3}
             title="Letzte Zahlungen"
             sub={
               lines.length > 0

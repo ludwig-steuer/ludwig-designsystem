@@ -8,6 +8,7 @@ import { AppShell, TopBar } from "@/ui/v3/primitives/AppShell";
 import { Banner } from "@/ui/v3/primitives/Banner";
 import { Button } from "@/ui/v3/primitives/Button";
 import { NavList, type NavSection } from "@/ui/v3/primitives/NavList";
+import { PageHeader } from "@/ui/v3/primitives/PageHeader";
 import { Card, CardHead } from "@/ui/v3/primitives/Table";
 import { ActionIcon, EntityIcon } from "@/ui/v3/Icons";
 
@@ -82,18 +83,15 @@ function Frame({ current, rail: items, children }: { current: string; rail: Rail
   );
 }
 
+/** The page head of a step (0220 role 1): PageHeader, not a heading of its own. */
 function StepHead({ step, title, sentence, next }: { step: number; title: string; sentence: string; next: string }) {
   return (
-    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: "var(--space-4)" }}>
-      <div>
-        <div className="lw-ui-overline">Schritt {step}</div>
-        <h1 className="lw-h2" style={{ margin: 0 }}>
-          {title}
-        </h1>
-        <p className="lw-ui-lead">{sentence}</p>
-      </div>
-      <Button variant="primary">{next}</Button>
-    </div>
+    <PageHeader
+      overline={`Schritt ${step}`}
+      title={title}
+      description={sentence}
+      actions={<Button variant="primary">{next}</Button>}
+    />
   );
 }
 

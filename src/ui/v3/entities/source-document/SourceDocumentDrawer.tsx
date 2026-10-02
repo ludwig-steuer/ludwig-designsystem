@@ -190,7 +190,16 @@ function DrawerBody({
     return (
       <>
         <Card>
-          <CardHead title={<span className="v2skel v2doc__headskel" aria-hidden="true" />} headingLevel={3} />
+          <CardHead
+            title={
+              <>
+                <span className="v2skel v2doc__headskel" aria-hidden="true" />
+                {/* The heading must not be empty for a screen reader (0220). */}
+                <span className="v2vh">Original</span>
+              </>
+            }
+            headingLevel={3}
+          />
           <span className="v2skel v2doc__origskel" aria-hidden="true" />
         </Card>
         <Skeleton lines={5} label="Beleg wird geladen …" />
@@ -214,6 +223,7 @@ function DrawerBody({
   // the `Drawer` already provides the surface.
   return (
     <SourceDocumentCard
+      headingLevel={3}
       document={record.document}
       // No heading over the facts here: the drawer title already says whose
       // facts these are, and „Belegdaten" under „Rechnung · Musterbau GmbH"

@@ -70,7 +70,13 @@ export function SourceDocumentPreview({
   fileName,
   pageCount,
   excerpt,
+  headingLevel,
 }: {
+  /**
+   * The card head's `h` level, by position (0220 §2): 2 on a page (default),
+   * 3 inside a drawer, a dialog or under a section title.
+   */
+  headingLevel?: 2 | 3;
   /** The original by kind (F285). Wins over `url`/`unavailableReason`. */
   original?: SourceDocumentOriginal | null;
   /**
@@ -137,6 +143,7 @@ export function SourceDocumentPreview({
     <Card>
       <CardHead
         title={title}
+        {...(headingLevel ? { headingLevel } : {})}
         sub={excerpt ? <ExcerptLine excerpt={excerpt} /> : undefined}
         meta={meta}
         actions={download}

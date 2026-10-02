@@ -365,6 +365,8 @@ interface DataTableBase<T> {
     icon?: ReactNode;
     meta?: ReactNode;
     actions?: ReactNode;
+    /** `h` level of the card head by position (0220 §2): 2 on a page, 3 in a drawer. */
+    headingLevel?: 2 | 3;
   };
   /** Row measure (E9) — the page decides, not the reader. */
   density?: TableDensity;
@@ -655,6 +657,7 @@ export function DataTable<T>(props: DataTableProps<T>) {
       <CardHead
         title={head.title}
         sub={head.sub}
+        {...(head.headingLevel ? { headingLevel: head.headingLevel } : {})}
         {...(selection?.sticky ? { sticky: true } : {})}
         icon={head.icon}
         meta={head.meta}
