@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Status | Abnahme — gebaut 2026-10-01 (aae9d49), nicht abgenommen (1d97638, M1–M7), Nacharbeit 2026-10-02; Nachprüfung steht aus |
+| Status | in Arbeit — gebaut 2026-10-01 (aae9d49), nicht abgenommen (1d97638, M1–M7), Nacharbeit 2026-10-02 (37dd5f0), Nachprüfung 2026-10-02: M1–M5 und M7 behoben, offen M6 (Rest), N1, N2 (siehe „Nachprüfung") |
 | Stufe | keine Komponente: Regel (`design-guidelines.md`, neuer Entscheid A14), sechs Rollenklassen in `tokens.css`, Erweiterung `scripts/check-type.mjs`, Typografie-Story; Anwendungsfall `Wizard` (Nachtrag 0079) |
 | Klassen-Test | „Ergäbe das auch in einer Versicherungs-App Sinn?" → ja, Schriftrollen und Überschriften-Ordnung sind fachfrei |
 | Quelle | Owner-Befund 2026-10-01 über lldev1 („das System soll die Schnitte genauer definieren, sub ist kein Fließtext"; „Typo und Typo-Verwendung festlegen, wo Überschriften verwendet werden, wie viele Ebenen, welche Ordnung, was sind Box-Header") |
@@ -382,3 +382,74 @@ zeigt zweimal „Rechnung" als `h3`, einmal als Kopf der Vorschau und einmal
 als Kopf der Belegdaten (`SourceDocumentFacts`), obwohl dort `factsTitle={null}`
 steht. Das ist eine doppelte Überschrift im Sinn von §3. Vorschlag für die
 Entitätsarbeit Beleg: Der Faktenkopf fällt im Drawer weg.
+
+## Nachprüfung (2026-10-02, Stand 37dd5f0)
+
+Fremde Nachprüfung, nicht der Bauende. Gleiche Tiefe wie die Abnahme:
+**schlanke Abnahme (Schnittstelle)** plus die gemessenen Kriterien der Spec.
+Playwright im laufenden Storybook (Port 6107), Fenster 1280 px,
+`getComputedStyle` und `getBoundingClientRect`; axe-core 4.13.0 in die Seite
+geladen. Storybook-Build mit `pnpm exec storybook build -o <Scratch>`, nicht
+im Arbeitsbaum.
+
+| Mangel | Nachweis (Story-ID · Befehl · Datei) | Ergebnis |
+|---|---|---|
+| **M1** Kontrast je Klasse, `check:contrast` | `pnpm check:contrast` Exit 0 („49 Angaben nachgerechnet"; die drei ungeprüften stehen in `v3.css:553` und `:4289`, nicht aus dieser Lieferung), Selbsttest 16 Fälle Exit 0. `tokens.css:342`, `:352`, `:362`, `:373`, `:384`, `:394`: je ein Kommentar an der `color`-Zeile mit Token und drei Gründen. Unabhängig nachgerechnet gegen `#FFFFFF`/`#F4F6F8`/`#FAFBFC`: text 13,77/12,71/13,29 · muted 6,69/6,17/6,45 · subtle 4,88/4,51/4,71 — stimmt; `surface-head` löst der Wächter über `--color-surface-head` auf. Die Kopfzeile `:331` nennt die Schwelle ohne „:1". Sprache der Kommentare: siehe N1 | ✓ |
+| **M2** `Headings` mit Drawer als eigener Wurzel | `v3-grundlagen-typografie--headings`: Drawer beim Laden offen (`role="dialog"`, `aria-modal`, Name „Girokonto Sparkasse", 625–1265 px), Titel `h2.v2drawer__title` 16/600, darin `h3` „Zahlung" (`FieldList`) und `h3` „Letzte Zahlungen" (`CardHead headingLevel={3}`). Zwei Gliederungen aus dem DOM: Seite h1 Zahlungswege → h2 → h3 → h4, h4 → h3 → h2 → h3, h3; Drawer h2 → h3, h3. `Esc` schließt, die Drawer-Gliederung zeigt dann „Nichts zu lesen — der Drawer ist geschlossen.", der Knopf „Girokonto im Drawer öffnen" öffnet wieder und die Gliederung wird neu gelesen. axe `heading-order`, `page-has-heading-one`, `empty-heading`, `aria-dialog-name`: 0 Verstöße offen und geschlossen; ein sichtbares `h1` | ✓ |
+| **M3** Karten im Drawer `h3`; kein `HeadingLevel`-Context | 15 Stories mit offenem Drawer, jeder beginnt mit `h2`, darunter nur `h3`, kein leeres `h`, axe `heading-order`/`empty-heading` 0: `…paymentaccountdrawer--filled`/`--empty` h2 → h3 „Letzte Zahlungen", `--loading` h2 · `…sourcedocumentdrawer--opened`/`--without-preview` h2 → h3, h3 · `--loading` h2 → h3 „Original" (`.v2vh`, nicht mehr leer) · `--error`/`--not-found` h2 · `…casedrawer--filled`/`--loading` h2 → h3 „Kernfakten" · `…businesspartnerdrawer--filled` h2 → 5 × h3 · `…banktransactiondrawer--filled`/`--loading` h2 → 4 × h3 · `…accountdrawer--opened` h2 · `…journalentrydrawer--open` h2 → 3 × h3. Kette `DataTable head.headingLevel` → `BankTransactionExcerpt`, `SourceDocumentPreview`, `SourceDocumentCard` je `headingLevel?: 2 \| 3` mit JSDoc, ohne Wert `h2`. Entscheid gegen den Context steht begründet in der Nacharbeit; geprüft: `Table.tsx` und `FieldList.tsx` tragen kein `"use client"` | ✓ |
+| **M4** ein `h1` in `EntityHeader InUse` | `v3-patterns-rahmen-entityheader--in-use`: `h1.v2phead__title` „Sachverhalt prüfen", `h2.v2ehead__name` „Eingangsrechnung: DomainFactory GmbH"; ein `h1`, axe `page-has-heading-one`/`heading-order` 0. `EntityHeader.tsx:93` `headingLevel?: 1 \| 2`, Vorgabe 1, JSDoc englisch; `InUse` zeigt 2, `--filled` die Vorgabe `h1`. Spec-Satz §2.4 noch alt: siehe N2 | ✓ |
+| **M5** Wizard `InUse` Karte `h3` | `v3-patterns-rahmen-wizard--in-use`: Schritt 1 `h2` „Kontoauszug hochladen"; nach „Weiter" `h2` „Vorschau prüfen" → `h3.title` „Vorschau" 14/600, Fortschritt „Schritt 2 von 3"; axe `heading-order` 0 | ✓ |
+| **M6** Typografie `Interface`/`Registers` nach den Rollen | `--registers`: `p.lw-ui-text` 13,5/400 `rgb(45,45,45)`, lesend `p.lw-body` 16; Köpfe `div.lw-ui-overline` 11,5/600 und `p.lw-ui-hint` 12,5/400 subtle. `--interface`: Muster in `lw-ui-section` 16/600, `lw-ui-text` 13,5, `lw-ui-hint` 12,5, `.v2sub` 11,5; Inline-Stil nur für ui-xl, ui-md, ui-2xs, in der Beschreibung begründet; Notizen ui-xl bis ui-xs wie §1. **Aber** die Zeile ui-2xs (`Typography.stories.tsx:151`) nennt „Kbd, Zähler" als 11-px-Stufe, gezeigt als „Strg K" in 11 px. §1 Rolle 9 (`design-guidelines.md:101`) setzt Taste und Zähler auf Beischrift ui-xs 11,5, und `.v2kbd` steht auf `--fs-ui-xs` (`v3.css:712`, gemessen 11,5 px in `v3-patterns-frame-hotkeylegend--open`). Die Notiz widerspricht §1 und dem Code | ✗ |
+| **M7** FieldList-Kopf nicht mehr von Hand | `.v2fields__h` in `*.tsx`/`*.ts` nur noch `FieldList.tsx:107`. `FieldListHead` (`FieldList.tsx:97–108`) mit `@when`/`@instead`, im Barrel (`index.ts:107`); genutzt in `BankTransactionFacts.tsx:96`, `BankTransactionDrawer.tsx:180`, `RecurringRuleFacts.tsx:377` und `StateMachine` `InUse`; `MasterDetail` `DetailWide` nimmt `h3.lw-ui-group`. `check:when` Exit 0. Eigene Story in `FieldList.stories` hat er nicht; gezeigt in `StateMachine` `InUse`, `headingLevel` 4 über `FieldList` in `Headings` | ✓ |
+
+**Regressionen:** `pnpm typecheck`, `pnpm check:type` („0 older findings"),
+`node scripts/check-type.mjs --test`, `pnpm check:language` (Selbsttest 14),
+`pnpm check:when` (Selbsttest 11), `pnpm check:icons`, `pnpm check:contrast`
+(Selbsttest 16) je Exit 0; `pnpm exec storybook build -o <Scratch>` Exit 0.
+129 Stories der berührten Bausteine bei 1280 px (Typografie 6, Wizard 5,
+EntityHeader 7, FieldList 9, DataTable 24, MasterDetail 5, StateMachine 7,
+BankTransactionDrawer/-Excerpt/-Facts 25, PaymentAccountDrawer 3,
+RecurringRuleFacts 7, SourceDocumentCard/-Drawer/-Preview/-View 28, Deck 3):
+alle mit Inhalt, keine Konsolenfehler oder -warnungen (nur `favicon.ico`
+404; eine `postMessage`-Warnung aus dem `data:`-Rahmen der Belegvorschau beim
+schnellen Story-Wechsel ließ sich in drei weiteren Läufen nicht wiederholen),
+kein `h` ohne Klasse, kein `h5`/`h6`, kein leeres `h`. `Roles` unverändert
+(17 Rollen wie §1), Wizard `Filled` unverändert (4 px, 20 px, 67,9ch). Eine
+Regression: Das Kriterium „Code englisch" war ✓ und ist es durch die
+Nacharbeit nicht mehr (N1).
+
+Abgenommen von / am: Claude (fremde Nachprüfung, nicht der Bauende),
+2026-10-02, Stand `37dd5f0` — **schlanke Abnahme (Schnittstelle)** plus die
+gemessenen Kriterien der Spec; Maße, Kontraste, Hover und Fokus an vier
+Breiten vertagt nach 0119 · **Nicht abgenommen.** Offene Punkte:
+
+- **M6 (Rest)** `src/ui/v3/Typography.stories.tsx:151` (dazu `:123`, `:148`) —
+  Die Zeile ui-2xs ordnet Taste und Zähler der 11-px-Stufe zu, §1 und `.v2kbd`
+  setzen sie auf Beischrift ui-xs 11,5 px. Vorschlag: „Taste, Zähler" in die
+  Notiz der Zeile ui-xs (Muster mit `Kbd` statt Inline-`span`), die Zeile
+  ui-2xs als „keine Rolle in §2a" kennzeichnen oder streichen, „Taste" in der
+  Beschreibung `:123` entsprechend nachziehen.
+- **N1** `src/styles/tokens.css:342`, `:352`, `:362`, `:373`, `:384`, `:394` —
+  Die sechs neuen Kontrastkommentare sind deutsch („auf Weiss", „auf bg-soft",
+  „auf surface-head"), gegen „Nie Deutsch im Quellcode" (CLAUDE.md §5, Owner
+  2026-09-10); die Kopfzeile `:331` ist englisch. `check:language` sieht das
+  nicht, weil es in CSS Kommentare hinter einer Deklaration überspringt
+  (`scripts/check-language.mjs:115`). Vorschlag: „on white, on bg-soft, on
+  surface-head" — `check:contrast` liest `on` und `white`
+  (`scripts/check-contrast.mjs:39–46`, `:92`) und bleibt grün.
+- **N2** `docs/backlog/0220-typography-roles.md:91–92` — §2.4 sagt weiter
+  „EntityHeader steht fest auf `h1` (siehe Nachtrag Bau)", der Code hat
+  `headingLevel?: 1 | 2` (`EntityHeader.tsx:93`). Vorschlag: die Klammer zu
+  „(CardHead 2\|3, FieldList 3\|4, EntityHeader 1\|2)" ergänzen und den
+  Verweis auf den Nachtrag Bau streichen; dieselbe Liste in
+  `design-guidelines.md:119` (§2a Ordnung 4) nachziehen.
+
+Hinweise ohne Mangel: In `…entityheader--in-use` stehen der Seitentitel
+(`h1`) und der Titel der Akte (`h2`) beide in ui-xl 20 px untereinander. Das
+folgt §2.4 (Gestalt nach Rolle), liest sich aber als zwei gleichrangige
+Titel — für die gemessene Prüfung (0119). Zwei `h1` zeigen nur
+Variantenschauen mit zwei Köpfen nebeneinander (`…entityheader--without-metric`,
+`--other-entity`, `--with-process`, `…sourcedocumentview--loading-and-error`),
+unverändert seit `aae9d49`, keine Seite. Das doppelte `h3` „Rechnung" im
+SourceDocumentDrawer hat der Bauende selbst vermerkt; es bestand schon vor
+der Nacharbeit und gehört zur Entitätsarbeit Beleg.
