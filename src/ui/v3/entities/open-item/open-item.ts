@@ -9,8 +9,9 @@ import {
 /**
  * A DATEV open item, as the row needs it (0029).
  *
- * The cut of the page view model `OposStichtagItem`
- * (`modules/datev-truth/application/opos-stichtag-core.ts`). It is **not**
+ * The cut of the page view model `OposCutoffItem`
+ * (`modules/datev-truth/application/opos-cutoff-core.ts`; until F384
+ * `OposStichtagItem` in `opos-stichtag-core.ts`). It is **not**
  * mirrored: the type lives in `application/`, and `datev-truth` has no
  * `domain/` at all — that is finding **L-73**, and the day the module gets
  * one, this interface is deleted and imported from there instead.

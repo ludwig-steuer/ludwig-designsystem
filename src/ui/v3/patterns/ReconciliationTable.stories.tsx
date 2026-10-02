@@ -34,7 +34,7 @@ const same = (n: number): ReconciliationPair[] =>
     return { key: `s-${i}`, kind: "same", left: side, right: side, state: match("matched_ludwig") };
   });
 
-/** A batch review, Ludwig's export against DATEV today — the case `StapelVergleich` builds by hand. */
+/** A batch review, Ludwig's export against DATEV today — the case `BatchComparison` (until F384 `StapelVergleich`) builds by hand. */
 const REVIEW: ReconciliationPair[] = [
   {
     key: "c-1",
@@ -242,7 +242,7 @@ export const Edges: Story = {
 };
 
 /**
- * Im Einsatz: die Nachlese eines Stapels, wie `StapelVergleich` sie heute baut —
+ * Im Einsatz: die Nachlese eines Stapels, wie `BatchComparison` sie heute baut —
  * die Zahlen oben, darunter die Paare. Die Kacheln zählen dieselben Paare, die
  * die Tabelle zeigt.
  */
