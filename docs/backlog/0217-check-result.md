@@ -397,3 +397,41 @@ Stories ohne Konsolenfehler.
 Gesehen, eigener Punkt für 0219: Der Blockkopf „Prüfpunkte“ in `BookingReview`
 ist fest `h4`. Unter dem Kartenkopf `h2` der Liste springt die Gliederung
 damit von `h2` auf `h4` (0220 §2.3).
+
+## Abnahme Rückbau (2026-10-02, Stand fe79fbb)
+
+Fremde Abnahme (nicht vom Erbauer), **schlanke Abnahme
+(Schnittstelle)**, Stand `fe79fbb`. Gelesen: Diff, `JournalEntryReviewList.tsx`,
+Stories, `BookingReview.tsx`, `befunde-app.md`. Playwright, ein Browser-Kontext
+1280 × 900 (`innerWidth` 1280), danach geschlossen; Story-IDs ohne Präfix
+`v3-entitäten-buchungssatz-journalentryreviewlist--`. Aufgeklappt per
+`element.click()` über `evaluate`.
+
+| Kriterium | Nachweis | Ergebnis |
+|---|---|---|
+| Abgebaut: `ProposalRow.checks`, `withChecks`, `.v3prop__checks`, Story `ChecksWithoutExpand` | `ProposalRow` (`JournalEntryReviewList.tsx:39–88`) endet bei `decided`, kein Import von `CheckItems`/`CheckItem` mehr; `fold`/`withChecks`/`rows` weg; Regel aus `v3.css` (zwischen `:4818` und `:4819`); Story-Export entfernt. `grep -rn "v3prop__checks\|ChecksWithoutExpand\|row.checks" src docs`: in `src` 0 Treffer; in `docs` nur ältere Abschnitte dieser Spec (Z. 54, 97, 172, 221, 231, 242–243, 259), der Rückbau-Abschnitt selbst und `0218-review-reason-in-row.md:90` (H1) | ✓ |
+| Sonst kein Verhalten geändert | `:423–428`: mit `expand` → `DataTable expand={expand}`, ohne → ohne Aufklapper. Vorher `fold = expand \|\| withChecks ? (row) => <>{…}{expand?.(row)}</> : undefined` — ohne Zeilen-`checks` gleichbedeutend mit `expand`. `compact` nicht berührt (`density`, `minWidth`, Spalten außerhalb des Diffs). Browser `compact`: 0 `button.v2rowbtn`; die 4 `button[aria-expanded]` sind `v2purp__info` „Prüfgründe und Berechnung" (0218) | ✓ |
+| JSDoc, `@when`/`@instead` stimmen | Familienkommentar `:27–33` nennt die Prüfpunkte je Satz in `BookingReview` (0219); `@when`/`@instead` `:365–368` unverändert und zutreffend („the proposal in the fold-out"); Kommentar `:420–422` englisch; `check:when` Exit 0 | ✓ |
+| Nichts geht verloren | Prüfpunkte je Satz in `BookingReview` (`BookingReview.tsx:149–152`, `entry.checks`); Story-Aufklapper `stories.tsx:162–182` gibt `checks: checksFor(…)` (`:176`) aus denselben Daten wie `reviewScore`/`reviewReasons` (`:147–148`). Prüfgrund-Spalte nicht im Diff; (i) im Browser: `flat` 6, `grouped` 29 | ✓ |
+| Aufklapper zeigt die Prüfpunkte einmal | `flat` Fälle 1, 4, 12 aufgeklappt: Fall 1 und 4 je 1 `.v3bkr`, 1 `.v2pp`, 1 `h4` „Prüfpunkte", 0 `.v3prop__checks`; Fall 12 (ohne Satz) nur „Zu diesem Sachverhalt liegt noch kein Satz vor."; `grouped` Fall 1 ebenso (1 / 1 / 1 / 0). Ganze Seite je 0 `.v3prop__checks` | ✓ |
+| Vier Stories ohne Konsolenfehler | `grouped`, `flat`, `compact`, `states` rendern (Tabellen, Text); 0 Fehler, 0 Warnungen außer `favicon.ico` 404 | ✓ |
+| Befund an die App | `befunde-app.md:378`: `toProposalRow` übergibt keine `checks` mehr, **vor** dem Zeigerhub (sonst unbekannte Eigenschaft im Typecheck) | ✓ |
+| Wächter über den Exit-Code | `pnpm typecheck`, `check:type`, `check:language`, `check:when`, `check:contrast` je Exit 0; Selbsttests `--test` von type, language, when, contrast, classes je Exit 0. `pnpm build` nicht gelaufen (Auftrag: nicht im Arbeitsbaum) | ✓ |
+| `check:classes` ohne neuen Fund | Exit 1 mit 4 Funden aus anderen Commits: `v3clt`, `v3clt__step` (`ClarificationThread.tsx`), `v2tbl__foot` (`Table.tsx`), `cy-page` (`ClientYearPage.tsx`); keiner aus den Dateien von `fe79fbb` — Klasse und Regel gingen zusammen | ✓ |
+| Story-Deckung | `expand` gesetzt: `Grouped`, `Flat`; ohne: `Compact` (kein Aufklapper); Zustände: `States`. Der Fall „Aufklapper nur der Prüfpunkte wegen" hat keinen Gegenstand mehr | ✓ |
+| Rückbau-Abschnitt = Code | „Abgebaut" = Diff; „`lines` kompakt" = Vorgabe `lines = "compact"` (`BookingReview.tsx:67`); „ohne Begründung, Judge und Belege" = `show={{ rationale: false, judge: false, evidence: false }}` (`stories.tsx:167`) | ✓ |
+
+**Ergebnis: abgenommen — schlanke Abnahme (Schnittstelle).** Kein Mangel;
+Status bleibt `fertig`.
+
+**Hinweise** (kein Mangel, blockieren nicht)
+
+- H1: `0218-review-reason-in-row.md:90` (§ Stories) zählt `ChecksWithoutExpand`
+  noch zu den T3-Stories. Älterer Abschnitt; beim nächsten Anfassen von 0218
+  streichen und auf diesen Rückbau verweisen.
+- H2: Der Story-Aufklapper setzt jede Soll-Zeile auf den vollen Betrag
+  (`stories.tsx:173`): Fall 1 zeigt 3 × 38,50 € Soll gegen 2 × 19,25 € Haben,
+  der Satz ist nicht ausgeglichen. Die Abbildung kam unverändert aus dem
+  früheren `JournalEntryCard`-Aufklapper, kein Mangel des Rückbaus; für 0119
+  (realistische Daten) Soll aufteilen wie Haben.
+- Der `h4`-Punkt des Erbauers bleibt bei 0219; hier nicht nachgemessen.
