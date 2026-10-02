@@ -359,3 +359,41 @@ bestanden"; die Prüfpunkte stehen weiter im Zeilen-Aufklapper (`CheckItems`).
 die die Zahl in der Zeile braucht, und für den Kopf des Prüfpunkte-Blocks der
 Buchungsprüfung (0219).
 
+## Rückbau 2026-10-02 — Zeilen-`checks` in T3 entfallen (Owner über llcto)
+
+Der Owner hat am 2026-10-02 in der App die Prüfpunkte doppelt gesehen:
+einmal aus dem Block, den `JournalEntryReviewList` über den Aufklapper
+setzt (`ProposalRow.checks`, `.v3prop__checks`), und einmal je Satz in
+`BookingReview` (0219) im Aufklapper. Er will nur den in der Satzkarte
+behalten. Der Satz oben „der Aufrufer legt die Prüfpunkte nicht noch einmal
+hinein“ gilt seit 0219 nicht mehr: Die Satzkarte bringt die Prüfpunkte je
+Satz mit, und mehrere Sätze je Fall haben je eigene.
+
+Abgebaut:
+
+- `ProposalRow.checks` mit JSDoc, dazu die Aufklapp-Logik `withChecks`. Der
+  Aufklapper ist wieder allein der `expand` des Aufrufers, ohne `expand`
+  gibt es keinen.
+- `.v3prop__checks` (v3.css).
+- Story `ChecksWithoutExpand`. In den Story-Daten bleiben die Prüfpunkte
+  erhalten: Aus ihnen rechnen Prüfbedarf (`reviewScore`) und Prüfgründe.
+  Der Aufklapper der Stories zeigt jetzt wie die App `BookingReview` mit den
+  Prüfpunkten des Satzes (`lines` kompakt, ohne Begründung, Judge und
+  Belege).
+
+Es geht nichts verloren, was die Daten hergeben: Die Prüfpunkte stehen
+weiter einmal je Satz in der Satzkarte, und der Prüfbedarf steht weiter in
+der Zeile (0218). `CheckResult` und `CheckItems` bleiben unverändert.
+
+**App:** ll-dev98 übergibt keine Zeilen-`checks` mehr. Der nächste
+Zeigerhub mit diesem Stand braucht dessen Commit davor, sonst meldet der
+Typecheck der App eine unbekannte Eigenschaft `checks`.
+
+Gemessen (Storybook, 1280 px): `Grouped` und `Flat` zeigen im ersten
+Aufklapper `BookingReview` mit genau einem Block „Prüfpunkte“. `.v3prop__checks`
+kommt nirgends mehr vor. `Compact` und `States` sind unverändert. Alle vier
+Stories ohne Konsolenfehler.
+
+Gesehen, eigener Punkt für 0219: Der Blockkopf „Prüfpunkte“ in `BookingReview`
+ist fest `h4`. Unter dem Kartenkopf `h2` der Liste springt die Gliederung
+damit von `h2` auf `h4` (0220 §2.3).

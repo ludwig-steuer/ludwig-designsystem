@@ -12,7 +12,6 @@ import {
   type ColumnDef,
   type TableGroup,
 } from "../../patterns/DataTable";
-import { CheckItems, type CheckItem } from "../../patterns/Review";
 import { Badge } from "../../primitives/Badge";
 import { Link } from "../../primitives/Link";
 import { AmountCell } from "../../primitives/Cells";
@@ -28,8 +27,9 @@ import { TaxKeyCell } from "./TaxKey";
  * T3 · proposals to review — one case with its proposal per row (0164, brief
  * F334). The third of the booking tables next to T1 (entries of a stock) and
  * T2 (movements of an account): here the reader decides, so the row carries
- * the strongest review reason (0218), the fold-out the proposal, its checks
- * and its rationale, and the selection the bulk release.
+ * the strongest review reason (0218), the fold-out the proposal with its
+ * checks and rationale per entry (`BookingReview`, 0219), and the selection
+ * the bulk release.
  *
  * **Computes nothing** (E2): order, groups, reasons and actions come from the
  * app. Not built yet (0164 Ausbau): sorting by attention (L-295) and the diff
@@ -85,13 +85,6 @@ export interface ProposalRow {
   reasons?: readonly string[];
   /** Released or rejected already — the review reason gives way to „entschieden". */
   decided?: boolean;
-  /**
-   * The checks of the entry, as the case view shows them (0217). They stand in
-   * the fold-out — no longer in the row (0218: one value there, the review
-   * reason). Once one row of the list has checks, a row without them says so
-   * in its fold-out instead of opening onto nothing.
-   */
-  checks?: readonly CheckItem[];
 }
 
 export type ProposalColumn =
@@ -424,31 +417,13 @@ export function JournalEntryReviewList(
     ...(loading ? { loading } : {}),
     ...(error ? { error } : {}),
   };
-  // The fold-out carries the checks above the caller's own content (0217) —
-  // the same block in every list, so the app does not put them in a second
-  // time. `CheckItems` directly, without a head line of its own. Not in
-  // `compact`: it has no column for them, so it shows none (acceptance M1).
-  const rows = props.groups ? props.groups.flatMap((g) => g.rows) : props.rows!;
-  const withChecks = options.variant !== "compact" && rows.some((r) => r.checks);
-  const fold =
-    expand || withChecks
-      ? (row: ProposalRow) => (
-          <>
-            {withChecks ? (
-              <div className="v3prop__checks">
-                {/* Every row unfolds once one can (DataTable): a row without
-                    checks says so, it does not open onto nothing (M2). */}
-                <CheckItems items={row.checks ? [...row.checks] : []} />
-              </div>
-            ) : null}
-            {expand?.(row)}
-          </>
-        )
-      : undefined;
-  const table = fold
+  // The checks stand once, per entry in the caller's fold-out (`BookingReview`,
+  // 0219) — the row-level block of 0217 is gone (owner 2026-10-02: they stood
+  // twice in the app).
+  const table = expand
     ? props.groups
-      ? <DataTable<ProposalRow> {...shared} expand={fold} groups={props.groups} />
-      : <DataTable<ProposalRow> {...shared} expand={fold} rows={[...props.rows!]} />
+      ? <DataTable<ProposalRow> {...shared} expand={expand} groups={props.groups} />
+      : <DataTable<ProposalRow> {...shared} expand={expand} rows={[...props.rows!]} />
     : props.groups
       ? <DataTable<ProposalRow> {...shared} groups={props.groups} />
       : <DataTable<ProposalRow> {...shared} rows={[...props.rows!]} />;

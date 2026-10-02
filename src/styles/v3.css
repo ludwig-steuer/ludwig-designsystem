@@ -4816,8 +4816,6 @@ a.v3bbr__val:hover { text-decoration-color: currentColor; }
   display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 3; line-clamp: 3; overflow: hidden;
 }
 .v3prop__reasons { display: grid; min-width: 0; color: var(--color-text-muted); }
-/* 0217: the checks above the caller's fold-out content. */
-.v3prop__checks { margin-bottom: var(--space-3); }
 /* 0219 · the booking review: entry on white, then rationale, checks, judge,
    actions; the evidence beside the entry. Entries of one case one under the
    other. Grid areas keep the actions last also when the evidence goes under

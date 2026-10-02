@@ -2,7 +2,7 @@ import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 
 import { reviewScore } from "@/ludwig/modules/accounting-cases/domain/review-score";
 import type { CheckItem } from "../../patterns/Review";
-import { JournalEntryCard } from "./JournalEntryCompact";
+import { BookingReview } from "./BookingReview";
 import { JournalEntryReviewList, type ProposalRow } from "./JournalEntryReviewList";
 
 const meta: Meta<typeof JournalEntryReviewList> = {
@@ -145,7 +145,7 @@ const ROWS: ProposalRow[] = Array.from({ length: 40 }, (_, i) => {
     decided: i < 3,
     // One case without an entry: no checks, no score — the app sends none.
     ...(checks
-      ? { checks, reviewScore: scoreFor(i, kind.key, taxKey, checks), reviewReasons: reasonsFor(i, kind.key, taxKey, checks) }
+      ? { reviewScore: scoreFor(i, kind.key, taxKey, checks), reviewReasons: reasonsFor(i, kind.key, taxKey, checks) }
       : {}),
   };
 });
@@ -156,15 +156,25 @@ const HREFS = {
   taxKeyHref: (k: string) => `#taxKey=${k}`,
 };
 
+// The fold-out as the app builds it (0219): the entry with its checks, once.
+// The row itself carries no checks any more (owner 2026-10-02, they stood
+// twice) — they come from the same story data the review score is built from.
 const expand = (p: ProposalRow) =>
   p.accounts ? (
-    <JournalEntryCard
-      caption={p.counterparty ?? p.title}
-      currency={p.currency}
+    <BookingReview
       accountHref={HREFS.accountHref}
-      lines={[
-        ...p.accounts.debit.map((a) => ({ side: "debit" as const, accountNumber: a.number, accountName: a.name ?? null, amount: p.amount ?? 0, taxKey: p.taxKey ?? null })),
-        ...p.accounts.credit.map((a) => ({ side: "credit" as const, accountNumber: a.number, accountName: a.name ?? null, amount: (p.amount ?? 0) / p.accounts!.credit.length })),
+      taxKeyHref={HREFS.taxKeyHref}
+      show={{ rationale: false, judge: false, evidence: false }}
+      entries={[
+        {
+          id: `${p.id}-entry`,
+          currency: p.currency,
+          lines: [
+            ...p.accounts.debit.map((a) => ({ side: "debit" as const, accountNumber: a.number, accountName: a.name ?? null, amount: p.amount ?? 0, taxKey: p.taxKey ?? null })),
+            ...p.accounts.credit.map((a) => ({ side: "credit" as const, accountNumber: a.number, accountName: a.name ?? null, amount: (p.amount ?? 0) / p.accounts!.credit.length })),
+          ],
+          checks: checksFor(Number(p.number) - 1),
+        },
       ]}
     />
   ) : (
@@ -233,15 +243,6 @@ export const Compact: Story = {
       <JournalEntryReviewList rows={ROWS.slice(5, 11)} variant="compact" head={{ title: "Zum Schließen" }} bulkActions={BULK} {...HREFS} />
     </div>
   ),
-};
-
-/**
- * Checks without a fold-out of the caller (0217): the list unfolds for the
- * checks alone. The row without checks (no entry yet) says so when opened —
- * it does not open onto nothing.
- */
-export const ChecksWithoutExpand: Story = {
-  render: () => <JournalEntryReviewList rows={ROWS.slice(9, 13)} head={{ title: "Prüfpunkte je Satz", sub: "4 Sachverhalte" }} {...HREFS} />,
 };
 
 /** Empty is a success, empty after a filter is not; loading and error keep the head. */
