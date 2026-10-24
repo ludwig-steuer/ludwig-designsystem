@@ -265,13 +265,44 @@ export const Answering: Story = {
 export const WithRecommendation: Story = {
   render: () => (
     <Card>
-      <CardHead title="Empfehlung" sub="wird zur Vorauswahl und bleibt lesbar" />
+      <CardHead title="Empfehlung (Altbestand)" sub="wörtlicher Treffer wird zur Vorauswahl, ohne Markierung" />
       <div style={{ padding: "var(--space-4)" }}>
         <ClarificationCard
           mode="answer"
           clarification={{ ...BASE, ...AGENT_DETAIL }}
           onAnswer={async () => {}}
         />
+      </div>
+    </Card>
+  ),
+};
+
+/** The app's shape since 2026-10-24: the option named apart, the recommendation only the why. */
+const RECOMMENDED: Pick<ClarificationDetailVM, "recommendedOption" | "recommendation"> = {
+  recommendedOption: "Reisekosten (4670)",
+  recommendation:
+    "Die Übernachtung macht 172,00 € der 240,40 € aus, und bei gemischten Belegen zählt der überwiegende Anteil.",
+};
+
+/** Answering (0214, owner 2026-10-24): the recommended option preselected and marked, the callout gives only the why. */
+export const WithRecommendedOption: Story = {
+  render: () => (
+    <Card>
+      <CardHead title="Empfohlene Option" sub="vorgewählt, in der Zeile markiert, Callout nur das Warum" />
+      <div style={{ padding: "var(--space-4)" }}>
+        <ClarificationCard mode="answer" clarification={{ ...BASE, ...AGENT_DETAIL, ...RECOMMENDED }} onAnswer={async () => {}} />
+      </div>
+    </Card>
+  ),
+};
+
+/** Reading: no row to mark, so the callout names the option before its why. */
+export const RecommendedOptionRead: Story = {
+  render: () => (
+    <Card>
+      <CardHead title="Empfohlene Option, gelesen" sub="der Callout nennt die Option" />
+      <div style={{ padding: "var(--space-4)" }}>
+        <ClarificationCard clarification={{ ...BASE, ...AGENT_DETAIL, ...RECOMMENDED }} />
       </div>
     </Card>
   ),

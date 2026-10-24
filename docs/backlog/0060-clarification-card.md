@@ -73,7 +73,8 @@ Getrennter Typ, damit die Zeile leicht bleibt:
 | `question` | `string \| null` | nein | die kompakte, eigenständige Frage (16 % gefüllt) | `Gefuellt` |
 | `context` | `string \| null` | nein | Beobachtung und Problemstellung (16 %) | `Gefuellt` |
 | `text` | `string` | ja | die volle Erläuterung — der Aufrufer wählt `professional_text` oder `client_text`; die Karte weiß nicht, welche (Regel: ins Portal geht nie ein professional-Text) | `Gefuellt`, `ImPortal` |
-| `recommendation` | `string \| null` | nein | Empfehlung des Fragestellers (10 %); benennt bei Choice-Fragen eine Option wörtlich → wird zu `defaultOptionId` | `MitEmpfehlung` |
+| `recommendation` | `string \| null` | nein | Empfehlung des Fragestellers (10 %); benennt bei Choice-Fragen eine Option wörtlich → wird zu `defaultOptionId`. Mit `recommendedOption` nur das Warum (Nachtrag 0214, 2026-10-24) | `MitEmpfehlung` |
+| `recommendedOption` | `string \| null` | nein | die empfohlene Option, wörtlich eine der `answerOptions`; vorgewählt und in der Zeile „empfohlen" (Nachtrag 0214, 2026-10-24) | `WithRecommendedOption` |
 | `facts` | `readonly { label: string; value: string }[]` | nein | `facts_json` — was zum Beantworten gebraucht wird (7 % nicht leer) | `Gefuellt` |
 | `sources` | `readonly { kind: RationaleSourceKind; label: string; href?: string }[]` | nein | `sources_json` (31 % nicht leer); die Karte rendert Verweise, löst aber keine IDs auf | `Gefuellt` |
 | `questionTypeLabel` | `string \| null` | nein | **deutsches Label als Prop**, weil es dafür keinen Katalog gibt (Befund B1). Keine lokale Map | `Gefuellt` |
@@ -128,7 +129,8 @@ die Erwartung kommt), keine Frage stellen (0061), keine Wiedervorlage setzen
 - **Empfehlung → Vorauswahl:** stimmt `recommendation` wörtlich mit einer
   Option überein, wird sie `defaultOptionId` von `ChoicePrompt`; der
   Empfehlungstext bleibt trotzdem sichtbar, damit die Vorauswahl begründet
-  ist.
+  ist. Seit 2026-10-24 nennt die App die Option in `recommendedOption`; dann
+  gilt der Nachtrag in 0214 (Markierung in der Zeile, Callout nur das Warum).
 - **Tastatur:** die von `ChoicePrompt` (Absenden mit ⌘/Ctrl+Enter im ganzen
   Block) und `ReasonDialog`. Kein eigener Weg.
 - **Zustände:** gefüllt (offen) · beantwortet · aufgelöst ohne Antwort ·

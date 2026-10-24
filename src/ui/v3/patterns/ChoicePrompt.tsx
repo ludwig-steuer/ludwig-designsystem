@@ -20,6 +20,8 @@ export interface ChoiceOption {
   label: string;
   /** One sentence under the option — what it would mean. */
   hint?: string;
+  /** Marked „empfohlen", and preselected when `defaultOptionId` is absent (0214). */
+  recommended?: boolean;
 }
 
 export interface ChoiceAnswer {
@@ -66,7 +68,9 @@ export function ChoicePrompt({
   /** The question stands above already (a card that shows it) — not twice. */
   hideQuestion?: boolean;
 }) {
-  const [choice, setChoice] = useState<string | null>(defaultOptionId);
+  const [choice, setChoice] = useState<string | null>(
+    defaultOptionId ?? options.find((o) => o.recommended)?.id ?? null,
+  );
   const [text, setText] = useState("");
   // Two questions on one page must not deselect each other — a fixed `name`
   // ties their radios into one group (0028).
@@ -123,7 +127,7 @@ export function ChoicePrompt({
         name={groupName}
         label={optionsLabel}
         variant={optionStyle === "rows" ? "rows" : "list"}
-        options={options.map<RadioOption>((o) => ({ value: o.id, label: o.label, hint: o.hint }))}
+        options={options.map<RadioOption>((o) => ({ value: o.id, label: o.label, hint: o.hint, recommended: o.recommended }))}
         value={choice}
         onChange={setChoice}
         disabled={pending}

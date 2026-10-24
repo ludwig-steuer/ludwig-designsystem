@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Status | fertig (abgenommen 2026-09-29, Nachprüfung 3) · Nachtrag 2026-10-01 (Zahlungen: Verwendungszweck) abgenommen 2026-10-01 (fremde Abnahme, ohne Mangel) |
+| Status | fertig (abgenommen 2026-09-29, Nachprüfung 3) · Nachtrag 2026-10-01 (Zahlungen: Verwendungszweck) abgenommen 2026-10-01 (fremde Abnahme, ohne Mangel) · Nachtrag 2026-10-24 (empfohlene Antwortoption) in Abnahme |
 | Stufe | erweitert `entities/clarification/ClarificationCard.tsx` · `patterns/ChoicePrompt` (Überschrift der Optionen, Zeilen-Optionen, Frage ausblendbar) · `primitives/RadioGroup` (`variant: "rows"`) |
 | Klassen-Test | Karte: nein (Klärung). RadioGroup-Zeilen, ChoicePrompt-Fußzeile: ja |
 | Quelle | Owner-Feedback 2026-09-29 über ll-dev4: Stapelabnahme Schritt 2 (`KlaerungDetail`) und Sachverhalt (`ClarificationCard`) sehen verschieden aus; die Struktur der Abnahme ist die Basis, die Teile der Karte kommen dazu |
@@ -325,3 +325,79 @@ Ellipse statt Umbruch, beide Zeilen gleich hoch ✓.
 am Nachtrag.
 
 Abgenommen von / am: Claude (Abnahme-Agent), 2026-10-01.
+
+## Nachtrag 2026-10-24 — die empfohlene Antwortoption
+
+Auftrag llcto 2026-10-24 (Owner-Entscheid vom selben Tag): Bei
+Antwortvorschlägen ist **genau eine** Option als empfohlen markierbar. Die
+Karte hebt sie leicht hervor und wählt sie vor; „empfohlen" steht nicht mehr
+im Optionstext. Die Form der Hervorhebung entscheidet das Design-System.
+
+Daten der App (staging 769c43e6b, `CaseClarificationEntry`):
+`recommendedOption: string | null` ist wörtlich eine der `answerOptions`,
+höchstens eine (der Server lehnt alles andere ab). `recommendation` trägt bei
+gesetzter Option nur noch das Warum, einen Satz; bei Freitextfragen bleibt sie
+die ganze Empfehlung.
+
+**Schnittstelle**
+
+| Feld / Prop | Typ | Bedeutung |
+|---|---|---|
+| `ClarificationDetailVM.recommendedOption` | `string \| null` (optional) | die empfohlene Option, wörtlich eine der `answerOptions` |
+| `ClarificationDetailVM.recommendation` | `string \| null` (optional, wie bisher) | mit `recommendedOption`: nur das Warum; ohne: die ganze Empfehlung, benennt sie eine Option wörtlich, wird sie zur Vorauswahl (Altbestand und Übergang) |
+| `ChoiceOption.recommended` | `boolean` (optional) | die Option trägt das Wort „empfohlen" und ist vorgewählt, wenn `defaultOptionId` fehlt |
+| `RadioOption.recommended` | `boolean` (optional) | das Wort „empfohlen" hinter der Beschriftung |
+
+**Form der Hervorhebung.** Das Wort **„empfohlen"** in der Zeile der Option,
+hinter ihrer Beschriftung, klein und grau (`--color-text-muted`, Gewicht 400,
+auch wenn die Zeile gewählt und fett ist). Kein eigener Rahmen, keine eigene
+Farbe: Farbe kodiert Kritikalität, und eine Empfehlung ist keine. Die
+Vorauswahl gibt der Zeile beim Öffnen ohnehin den Gewählt-Zustand (Rahmen
+Akzent, Grund `accent-50`) — das ist die Hervorhebung auf den ersten Blick;
+das Wort hält sie, wenn jemand eine andere Option wählt. Es steht im `<label>`
+und wird mit vorgelesen („Reisekosten (4670) empfohlen").
+
+**Callout.**
+
+- Mit `recommendedOption`, die Option steht als Zeile da (Antwortmodus):
+  „**Warum empfohlen:** {recommendation}" — dasselbe Wort wie in der Zeile,
+  die Option wird nicht wiederholt. Ohne `recommendation` kein Callout; das
+  Wort in der Zeile genügt.
+- Mit `recommendedOption`, aber keine Zeile sichtbar (Lesemodus, beantwortet,
+  Notiz): „**Empfehlung: {recommendedOption}** · {recommendation}" — sonst
+  stünde ein Warum ohne Was da.
+- Ohne `recommendedOption`: wie bisher „**Empfehlung:** {recommendation}",
+  Vorauswahl über den wörtlichen Treffer. Kein Wort „empfohlen" in der Zeile
+  — der Übergang und der Altbestand sehen aus wie heute.
+
+**Stories.** `WithRecommendedOption` (Antwortmodus: Option vorgewählt mit
+„empfohlen", Callout nur das Warum) · `RecommendedOptionRead` (Lesemodus:
+Callout nennt die Option) · `WithRecommendation` bleibt als Altbestand.
+`RadioGroup/Rows` und `ChoicePrompt/OptionRows` zeigen eine empfohlene
+Option.
+
+**Gebaut 2026-10-24.** `ClarificationCard.tsx` (Feld, Vorauswahl,
+Callout in drei Fällen), `ChoicePrompt.tsx` (`recommended` durchgereicht,
+Vorauswahl ohne `defaultOptionId`), `RadioGroup.tsx` (Wort im `<label>`, mit
+Leerzeichen davor — ohne war der zugängliche Name „…(4670)empfohlen", im
+Browser gefunden), `.v2radioline__rec` in `v3.css`. Spec-Zeilen nachgezogen
+in 0017, 0028, 0060. Gemessen (statischer Build, Playwright, 1280 × 900):
+`--with-recommended-option` — „Reisekosten (4670) empfohlen" gewählt, Callout
+„Warum empfohlen: Die Übernachtung …", kein „Empfehlung:" in der Karte; nach
+Klick auf „Bewirtung (4650)" trägt die empfohlene Zeile das Wort weiter, Gewicht
+400 in gewählter wie ungewählter Zeile, Kontrast 6,19:1 auf `accent-50` und
+6,69:1 auf Weiß, beide Zeilen 41 px wie vorher, kein Querlauf.
+`--recommended-option-read` — Callout „Empfehlung: Reisekosten (4670) · Die
+Übernachtung …", keine Zeile. `--with-recommendation` — unverändert
+„Empfehlung: Reisekosten (4670)", vorgewählt, kein Wort. `ChoicePrompt
+--option-rows` vorgewählt ohne `defaultOptionId`. Bild:
+`.playwright-mcp/0214-recommended-other-picked.png`.
+
+Status: **Abnahme**. Kriterien für die fremde Abnahme:
+
+- [ ] `recommendedOption` gesetzt, Antwortmodus: die Option ist gewählt, ihre Zeile trägt „empfohlen", der Callout lautet „Warum empfohlen: …" und nennt die Option nicht (`--with-recommended-option`)
+- [ ] Nach Wahl einer anderen Option bleibt „empfohlen" an der empfohlenen Zeile; das Wort bleibt Gewicht 400 auch in der gewählten Zeile (gemessen)
+- [ ] Lesemodus mit `recommendedOption`: Callout „Empfehlung: {Option} · {Warum}" (`--recommended-option-read`)
+- [ ] Ohne `recommendedOption` unverändert: Vorauswahl über wörtlichen Treffer, Callout „Empfehlung: …", kein „empfohlen" in der Zeile (`--with-recommendation`)
+- [ ] Kontrast des Worts ≥ 4,5:1 auf weißer und auf gewählter Zeile (gemessen); der zugängliche Name der Option enthält „empfohlen"
+- [ ] `pnpm typecheck`, `pnpm build`, `pnpm check:type` grün

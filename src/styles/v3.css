@@ -2190,6 +2190,9 @@ button.v2ibtn[aria-disabled="true"] > * { opacity: 0.5; }
   cursor: pointer;
 }
 .v2radioline__hint { display: block; font-size: var(--fs-ui-sm); color: var(--color-text-subtle); margin-top: 1px; }
+/* „empfohlen" (0214, 2026-10-24): quiet, and quiet in a checked row too.
+   `--color-text-muted` 6.69:1 on white, ≥ 6:1 on `accent-50`. */
+.v2radioline__rec { margin-left: var(--space-1); font-size: var(--fs-ui-sm); font-weight: 400; color: var(--color-text-muted); }
 
 /* --- AmountInput (0019) — Ziffern rechts, tabellarisch -------------------- */
 /* `sm` is the editor density — the same measures as the booking editor's row. */

@@ -160,7 +160,7 @@ export const InCase: Story = {
   ),
 };
 
-/** A clarification's answer (0214): „Antwortoptionen" as whole rows, the question above it in the card (`hideQuestion`), the free text beside the options. */
+/** A clarification's answer (0214): „Antwortoptionen" as whole rows, the question above it in the card (`hideQuestion`), the free text beside the options. The recommended option is marked and preselected without `defaultOptionId`. */
 export const OptionRows: Story = {
   render: () => (
     <div style={{ maxWidth: 560 }}>
@@ -171,9 +171,8 @@ export const OptionRows: Story = {
         optionStyle="rows"
         options={[
           { id: "a", label: "Bewirtung (4650)" },
-          { id: "b", label: "Reisekosten (4670)" },
+          { id: "b", label: "Reisekosten (4670)", recommended: true },
         ]}
-        defaultOptionId="b"
         freeText={{ label: "Oder selbst formulieren" }}
         submitLabel="Antwort speichern"
         onSubmit={async () => wait(600)}

@@ -38,7 +38,7 @@ mitliefert, landen im besten Fall als Satz im Fragetext.
 |---|---|---|---|---|
 | `question` | `string` | ja | Die Frage, ein Satz (T2) | `Filled` |
 | `context` | `ReactNode` | nein | Worum es geht — Beleg, Betrag, Zeile | `InCase` |
-| `options` | `ChoiceOption[]` | ja | `{ id, label, hint? }` — die vorgeschlagenen Antworten | `Filled` |
+| `options` | `ChoiceOption[]` | ja | `{ id, label, hint?, recommended? }` — die vorgeschlagenen Antworten; `recommended` markiert „empfohlen" und wählt vor, wenn `defaultOptionId` fehlt (Nachtrag 0214, 2026-10-24) | `Filled` |
 | `freeText` | `{ label: string; placeholder?: string; required?: boolean }` | nein | Zusatzfeld; ohne diese Prop gibt es keinen Freitext | `WithFreeText` |
 | `submitLabel` | `string` | nein | Imperativ mit Objekt (T3), Default „Antwort senden" | `Filled` |
 | `onSubmit` | `(answer: { optionId: string \| null; text?: string }) => Promise<void> \| void` | ja | Absenden | `Interactive` |

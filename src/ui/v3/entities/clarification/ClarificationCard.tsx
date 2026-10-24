@@ -174,8 +174,18 @@ export interface ClarificationDetailVM {
    * must never reach the portal.
    */
   text: string;
-  /** The asker's own suggestion (10 %); names an option verbatim. */
+  /**
+   * The asker's own suggestion (10 %). With `recommendedOption` set it is only
+   * the why, one sentence; without, it is the whole recommendation, and if it
+   * names an option verbatim that option is preselected (stock and transition).
+   */
   recommendation?: string | null;
+  /**
+   * The recommended answer, verbatim one of `answerOptions` — at most one, the
+   * server refuses anything else (0214, owner 2026-10-24). Preselected and
+   * marked „empfohlen" in its row.
+   */
+  recommendedOption?: string | null;
   facts?: readonly { label: string; value: string }[];
   sources?: readonly ClarificationSource[];
   /**
@@ -556,10 +566,18 @@ export function ClarificationCard({
         ? { kind: "answered" as const, at: c.answeredAt, by: c.answeredBy ?? null }
         : null,
     ].filter(Boolean) as ClarificationEvent[]);
-  const options = (c.answerOptions ?? []).map((label) => ({ id: label, label }));
-  // A recommendation that names an option verbatim becomes the preselection —
-  // and stays visible, so the preselection has a reason next to it.
-  const recommended = options.find((o) => o.label === c.recommendation?.trim())?.id ?? null;
+  // The recommended option is named by the app (0214, 2026-10-24) and marked
+  // in its row. Without it, a recommendation that names an option verbatim
+  // becomes the preselection, unmarked — stock and transition look as before.
+  const recommendedId =
+    c.recommendedOption && c.answerOptions?.includes(c.recommendedOption) ? c.recommendedOption : null;
+  const options = (c.answerOptions ?? []).map((label) => ({
+    id: label,
+    label,
+    recommended: label === recommendedId,
+  }));
+  const preselected =
+    recommendedId ?? options.find((o) => o.label === c.recommendation?.trim())?.id ?? null;
   // Since F125 a missing document is an expectation, not a clarification. The
   // eight remaining rows are legacy: show the question, offer no upload.
   const legacyUpload = c.answerKind === "document_upload";
@@ -571,6 +589,8 @@ export function ClarificationCard({
    * the exits hung on `canAnswer`.
    */
   const canExit = mode === "answer" && !isComment;
+  // Marked in its row, the option is not named again — the callout gives the why.
+  const markedInRow = canAnswer && recommendedId !== null;
 
   return (
     <article className="v2clc">
@@ -652,7 +672,19 @@ export function ClarificationCard({
       <Markdown text={c.text} className="v2clc__prose" />
 
       {/* Recommendation first, then what it rests on (owner 2026-09-29, 0214). */}
-      {c.recommendation ? (
+      {markedInRow ? (
+        c.recommendation ? (
+          <Callout tone="soft">
+            <strong>Warum empfohlen:</strong> {c.recommendation}
+          </Callout>
+        ) : null
+      ) : c.recommendedOption ? (
+        // No row to mark (read mode, answered): a why without its what says nothing.
+        <Callout tone="soft">
+          <strong>Empfehlung: {c.recommendedOption}</strong>
+          {c.recommendation ? <> · {c.recommendation}</> : null}
+        </Callout>
+      ) : c.recommendation ? (
         <Callout tone="soft">
           <strong>Empfehlung:</strong> {c.recommendation}
         </Callout>
@@ -703,7 +735,7 @@ export function ClarificationCard({
           <ChoicePrompt
             question={c.question ?? c.title}
             options={options}
-            defaultOptionId={recommended}
+            defaultOptionId={preselected}
             // With options: „Antwortoptionen" as whole rows, and the free text
             // always beside them (rule S13 — 0214, ll-cto); without: no heading,
             // only the field.

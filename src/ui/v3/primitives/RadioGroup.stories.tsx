@@ -113,7 +113,7 @@ export const InForm: Story = {
   },
 };
 
-/** `rows`: every option a framed row, the whole row the target — the proposed answers of rule S13 (0214). */
+/** `rows`: every option a framed row, the whole row the target — the proposed answers of rule S13 (0214); one marked „empfohlen". */
 export const Rows: Story = {
   render: () => {
     const [v, setV] = useState<string | null>("b");
@@ -125,7 +125,7 @@ export const Rows: Story = {
           variant="rows"
           options={[
             { value: "a", label: "Bewirtung (4650)" },
-            { value: "b", label: "Reisekosten (4670)" },
+            { value: "b", label: "Reisekosten (4670)", recommended: true },
             { value: "c", label: "Aufteilen: Speisen 4650, Übernachtung 4670" },
           ]}
           value={v}

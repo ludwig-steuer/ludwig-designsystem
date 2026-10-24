@@ -18,6 +18,12 @@ export interface RadioOption {
   /** One sentence under the option — why one would pick it. */
   hint?: string;
   disabled?: boolean;
+  /**
+   * The word „empfohlen" after the label (0214, owner 2026-10-24). A word, not
+   * a colour: a recommendation is no criticality. Inside the label, so it is
+   * read out with the option.
+   */
+  recommended?: boolean;
 }
 
 /**
@@ -79,6 +85,8 @@ export function RadioGroup({
               />
               <span>
                 {o.label}
+                {/* The space keeps the accessible name two words („… (4670) empfohlen"). */}
+                {o.recommended ? <> <span className="v2radioline__rec">empfohlen</span></> : null}
                 {o.hint ? <span className="v2radioline__hint">{o.hint}</span> : null}
               </span>
             </label>
