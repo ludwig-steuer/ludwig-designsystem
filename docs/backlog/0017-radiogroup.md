@@ -37,7 +37,7 @@ Antwortoptionen genau diese Form; ohne sie bleibt jede Frage ein Formular-Unfall
 |---|---|---|---|---|
 | `name` | `string` | ja | Gruppenname des Feldes | `Filled` |
 | `label` | `string` | ja | Die Frage, sichtbar (I8) | `Filled` |
-| `options` | `RadioOption[]` | ja | `{ value, label, hint?, disabled?, recommended? }` — `hint` ist der Satz unter der Option; `recommended` setzt das Wort „empfohlen" hinter die Beschriftung (Nachtrag 0214, 2026-10-24) | `Filled` |
+| `options` | `RadioOption[]` | ja | `{ value, label, hint?, disabled?, recommended? }` — `hint` ist der Satz unter der Option; `recommended` setzt das Wort „empfohlen" hinter die Beschriftung (Nachtrag 0214, 2026-10-24) | `Filled`, `Rows` |
 | `value` | `string \| null` | ja | Die gewählte Option; `null` = noch keine | `Interactive` |
 | `onChange` | `(value: string) => void` | ja | Auswahl; braucht einen Client-Aufrufer | `Interactive` |
 | `orientation` | `"vertical" \| "horizontal"` | nein | Untereinander (Default) oder in einer Zeile | `Orientations` |

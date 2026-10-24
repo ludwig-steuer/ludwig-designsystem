@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Status | fertig (abgenommen 2026-09-29, Nachprüfung 3) · Nachtrag 2026-10-01 (Zahlungen: Verwendungszweck) abgenommen 2026-10-01 (fremde Abnahme, ohne Mangel) · Nachtrag 2026-10-24 (empfohlene Antwortoption) in Abnahme |
+| Status | fertig (abgenommen 2026-09-29, Nachprüfung 3) · Nachtrag 2026-10-01 (Zahlungen: Verwendungszweck) abgenommen 2026-10-01 (fremde Abnahme, ohne Mangel) · Nachtrag 2026-10-24 (empfohlene Antwortoption) abgenommen 2026-10-24 (fremde Abnahme, mit Hinweis; Hinweise 1–3 erledigt) |
 | Stufe | erweitert `entities/clarification/ClarificationCard.tsx` · `patterns/ChoicePrompt` (Überschrift der Optionen, Zeilen-Optionen, Frage ausblendbar) · `primitives/RadioGroup` (`variant: "rows"`) |
 | Klassen-Test | Karte: nein (Klärung). RadioGroup-Zeilen, ChoicePrompt-Fußzeile: ja |
 | Quelle | Owner-Feedback 2026-09-29 über ll-dev4: Stapelabnahme Schritt 2 (`KlaerungDetail`) und Sachverhalt (`ClarificationCard`) sehen verschieden aus; die Struktur der Abnahme ist die Basis, die Teile der Karte kommen dazu |
@@ -393,11 +393,109 @@ Klick auf „Bewirtung (4650)" trägt die empfohlene Zeile das Wort weiter, Gewi
 --option-rows` vorgewählt ohne `defaultOptionId`. Bild:
 `.playwright-mcp/0214-recommended-other-picked.png`.
 
-Status: **Abnahme**. Kriterien für die fremde Abnahme:
+Status: **fertig** (abgenommen 2026-10-24). Kriterien für die fremde Abnahme:
 
-- [ ] `recommendedOption` gesetzt, Antwortmodus: die Option ist gewählt, ihre Zeile trägt „empfohlen", der Callout lautet „Warum empfohlen: …" und nennt die Option nicht (`--with-recommended-option`)
-- [ ] Nach Wahl einer anderen Option bleibt „empfohlen" an der empfohlenen Zeile; das Wort bleibt Gewicht 400 auch in der gewählten Zeile (gemessen)
-- [ ] Lesemodus mit `recommendedOption`: Callout „Empfehlung: {Option} · {Warum}" (`--recommended-option-read`)
-- [ ] Ohne `recommendedOption` unverändert: Vorauswahl über wörtlichen Treffer, Callout „Empfehlung: …", kein „empfohlen" in der Zeile (`--with-recommendation`)
-- [ ] Kontrast des Worts ≥ 4,5:1 auf weißer und auf gewählter Zeile (gemessen); der zugängliche Name der Option enthält „empfohlen"
-- [ ] `pnpm typecheck`, `pnpm build`, `pnpm check:type` grün
+- [x] `recommendedOption` gesetzt, Antwortmodus: die Option ist gewählt, ihre Zeile trägt „empfohlen", der Callout lautet „Warum empfohlen: …" und nennt die Option nicht (`--with-recommended-option`)
+- [x] Nach Wahl einer anderen Option bleibt „empfohlen" an der empfohlenen Zeile; das Wort bleibt Gewicht 400 auch in der gewählten Zeile (gemessen)
+- [x] Lesemodus mit `recommendedOption`: Callout „Empfehlung: {Option} · {Warum}" (`--recommended-option-read`)
+- [x] Ohne `recommendedOption` unverändert: Vorauswahl über wörtlichen Treffer, Callout „Empfehlung: …", kein „empfohlen" in der Zeile (`--with-recommendation`)
+- [x] Kontrast des Worts ≥ 4,5:1 auf weißer und auf gewählter Zeile (gemessen); der zugängliche Name der Option enthält „empfohlen"
+- [x] `pnpm typecheck`, `pnpm build`, `pnpm check:type` grün
+
+### Fremde Abnahme Nachtrag 2026-10-24
+
+Abnehmer: Claude (Abnahme-Agent, fremde Sitzung, nicht der Bauende). Stand
+da52e52, Arbeitsbaum sauber. Gelesen: `CLAUDE.md`, dieser Nachtrag, der ganze
+Bau (`git show da52e52`) — `ClarificationCard.tsx` (Feld `recommendedOption`,
+`recommendedId` · `preselected` · `markedInRow`, Callout in drei Zweigen),
+`ChoicePrompt.tsx`, `RadioGroup.tsx`, `.v2radioline__rec` in `v3.css`, die drei
+Story-Dateien und die nachgezogenen Zeilen in 0017, 0028, 0060. Gemessen mit
+Playwright am statischen Build auf 6199 in einem eigenen Browser-Kontext,
+1280 × 900, Farben aus `getComputedStyle`, Kontrast nach WCAG gerechnet.
+Gegenprobe „unverändert ohne Option": `ClarificationCard`, `ChoicePrompt` und
+`RadioGroup` aus `da52e52^` und aus `da52e52` mit denselben Daten serverseitig
+gerendert (`renderToStaticMarkup`, esbuild-Bündel außerhalb des Repos) und das
+HTML verglichen. Bildschirmfotos: `.playwright-mcp/0214-abnahme-initial.png`,
+`0214-abnahme-other-picked.png`, `0214-abnahme-keyboard.png`,
+`0214-abnahme-read.png`.
+
+| Kriterium | Nachweis | Ergebnis |
+|---|---|---|
+| `recommendedOption` gesetzt, Antwortmodus: die Option ist gewählt, ihre Zeile trägt „empfohlen", der Callout lautet „Warum empfohlen: …" und nennt die Option nicht (`--with-recommended-option`) | Radio „Reisekosten (4670)" `checked`, Zeilentext „Reisekosten (4670) empfohlen", Rahmen `rgb(59, 143, 196)` (Akzent), Grund `rgb(241, 247, 251)` (`accent-50`). Einziger Callout (`v2note--soft`): „Warum empfohlen: Die Übernachtung macht 172,00 € der 240,40 € aus, und bei gemischten Belegen zählt der überwiegende Anteil." — `strong` nur „Warum empfohlen:", „Empfehlung:" kommt in der Karte nicht vor, die Option steht nicht im Callout. Code `ClarificationCard.tsx:593` (`markedInRow = canAnswer && recommendedId !== null`), `:675–680`; Vorauswahl `:579–580` → `defaultOptionId={preselected}` `:738` | ✓ |
+| Nach Wahl einer anderen Option bleibt „empfohlen" an der empfohlenen Zeile; das Wort bleibt Gewicht 400 auch in der gewählten Zeile (gemessen) | Vorher: Zeile „Reisekosten" gewählt, Zeilengewicht 600, Wort 400. Klick auf „Bewirtung (4650)": diese Zeile `checked`, 600, `accent-50`; „empfohlen" bleibt an „Reisekosten (4670)" (jetzt ungewählt, Grund Weiß), Wort 400. Wort 12,5 px (`--fs-ui-sm`), Abstand 4 px (`--space-1`). Gegenprobe Tastatur: Pfeil hoch auf dem gewählten Radio wählt „Bewirtung", Fokusring 2 px `--color-focus` an der Zeile; Klick auf das Wort selbst wählt die empfohlene Zeile wieder (es liegt im `<label>`). Beide Zeilen 40,92 px vorher und nachher | ✓ |
+| Lesemodus mit `recommendedOption`: Callout „Empfehlung: {Option} · {Warum}" (`--recommended-option-read`) | Callout „Empfehlung: Reisekosten (4670) · Die Übernachtung macht …", `strong` „Empfehlung: Reisekosten (4670)", keine Antwortzeile, kein „empfohlen" in der Karte. Code `:681–686`. Serverseitig zusätzlich: beantwortet (`state: "answered"`), Altfall `document_upload` und `mode="answer"` ohne `onAnswer` nennen die Option ebenso; ohne `recommendation` steht „Empfehlung: Reisekosten (4670)" allein | ✓ |
+| Ohne `recommendedOption` unverändert: Vorauswahl über wörtlichen Treffer, Callout „Empfehlung: …", kein „empfohlen" in der Zeile (`--with-recommendation`) | Story: „Reisekosten (4670)" `checked` über den wörtlichen Treffer, Callout „Empfehlung: Reisekosten (4670)" (`strong` nur „Empfehlung:"), kein `.v2radioline__rec`, das Wort kommt in der Story nicht vor; Zeilen 40,92 px. `--in-batch-review` und `--filled` ebenso ohne das Wort. Gegenprobe gegen `da52e52^`: acht Kartenfälle (Antwort mit wörtlichem Treffer, ohne Treffer, ohne Empfehlung, `recommendedOption: null`, Lesen, Freitext, `document_upload`, Kommentar), `ChoicePrompt` mit und ohne `defaultOptionId`, `RadioGroup` `rows` — HTML Zeichen für Zeichen gleich. CSS: nur eine neue Klasse | ✓ |
+| Kontrast des Worts ≥ 4,5:1 auf weißer und auf gewählter Zeile (gemessen); der zugängliche Name der Option enthält „empfohlen" | Wort `rgb(92, 92, 92)` = `#5C5C5C` (`--color-text-muted`): 6,69:1 auf Weiß (ungewählt), 6,19:1 auf `#F1F7FB` (gewählt), 6,17:1 auf `#F4F6F8` (Hover der ungewählten Zeile). ARIA-Snapshot: `radio "Reisekosten (4670) empfohlen" [checked]`, `radio "Bewirtung (4650)"`; derselbe Name in `RadioGroup--rows` und `ChoicePrompt--option-rows` | ✓ |
+| `pnpm typecheck`, `pnpm build`, `pnpm check:type` grün | `pnpm typecheck` Exit 0; `pnpm check:type` Exit 0 („ok. 0 older findings left"); `pnpm build -o` in ein Verzeichnis außerhalb des Repos Exit 0 („Storybook build completed successfully", nur die bekannte Chunk-Größen-Warnung), der Index führt `--with-recommended-option` und `--recommended-option-read` | ✓ |
+| Zusatz: `ChoicePrompt` wählt ohne `defaultOptionId` vor (`ChoicePrompt--option-rows`) | „Reisekosten (4670) empfohlen" `checked`, der Satz „Wählen Sie eine Antwort …" fehlt; die Story setzt kein `defaultOptionId` mehr (`ChoicePrompt.tsx:71–73`) | ✓ |
+| Zusatz: Spec-Zeilen 0017, 0028, 0060, 0214 gegen Code | Typen Zeichen für Zeichen: 0017 `{ value, label, hint?, disabled?, recommended? }` = `RadioOption` (`RadioGroup.tsx:15–27`); 0028 `{ id, label, hint?, recommended? }` = `ChoiceOption` (`ChoicePrompt.tsx:18–25`); 0060 `recommendedOption` · `string \| null` · nein = `recommendedOption?: string \| null` (`ClarificationCard.tsx:188`); die vier Zeilen der Schnittstelle oben stimmen. Story-Spalten und ein Satz in 0060 unvollständig → Hinweise 2 und 3 | ✓ (mit Hinweis) |
+| Zusatz: kein Deutsch in Bezeichnern und Kommentaren | Bezeichner `recommendedOption`, `recommended`, `recommendedId`, `preselected`, `markedInRow`, `RECOMMENDED`, `WithRecommendedOption`, `RecommendedOptionRead`, Klasse `v2radioline__rec` (einmal im Repo); Kommentare englisch, Deutsch nur als zitiertes UI-Wort („empfohlen") und in Nutzer-Strings (`CardHead`-Titel, Fixture-Texte) | ✓ |
+| Zusatz: Konsole, Querlauf, Trefferfläche | keine Fehler und Warnungen in den gemessenen Stories; Seite bei 1280 px ohne Querlauf, bei 640 px (≈ 200 % Zoom) ebenso, Zeilen weiter 41 px; Zeile 1214 × 40,9 px, ganze Zeile Ziel, Hover `--color-bg-soft` | ✓ |
+
+### Hinweise (nicht blockierend)
+
+1. **Teilfall ohne Story.** `recommendedOption` ohne `recommendation` — im
+   Antwortmodus kein Callout, nur das Wort (Nachtrag, Abschnitt „Callout",
+   erster Punkt); im Lesemodus „Empfehlung: Reisekosten (4670)" allein. Der
+   Code tut beides richtig (serverseitig geprüft), keine Story zeigt es.
+   Vorschlag: in `ClarificationCard.stories.tsx` eine Story
+   `RecommendedOptionWithoutReason` (oder eine zweite Karte in
+   `WithRecommendedOption`) mit `recommendation: null`.
+2. **Story-Spalten der Spec.** 0017 Zeile `options` nennt nur `Filled`, das
+   Wort zeigt aber allein `Rows`; 0028 Zeile `options` nennt nur `Filled`,
+   das Wort zeigt allein `OptionRows`. Vorschlag: „`Filled`, `Rows`" bzw.
+   „`Filled`, `OptionRows`". In 0060 verweist die neue Zeile auf
+   `WithRecommendedOption`, die Stories-Tabelle (§ Stories, „Neun Stories")
+   führt sie nicht — die Tabelle steht ohnehin noch auf den deutschen
+   Altnamen (`MitEmpfehlung` ist heute `WithRecommendation`, vorbestehend).
+   Vorschlag: beim nächsten Anfassen die Tabelle auf die heutigen
+   Exportnamen ziehen und `WithRecommendedOption`, `RecommendedOptionRead`
+   aufnehmen.
+3. **Ein Satz in 0060 zu knapp.** Abschnitt Verhalten, „Empfehlung →
+   Vorauswahl": „(Markierung in der Zeile, Callout nur das Warum)" gilt nur
+   beim Antworten; im Lesen nennt der Callout die Option. Vorschlag:
+   „(beim Antworten Markierung in der Zeile und Callout nur das Warum; im
+   Lesen nennt der Callout die Option vor dem Warum)".
+4. **Zur Beobachtung, kein Mangel.** Der Callout „Warum empfohlen: …" steht
+   vor Grundlage und Quellen, die markierte Zeile darunter — in
+   `--with-recommended-option` 454 px auseinander (Callout-Oberkante 273,
+   Zeile 727), bei 900 px Höhe beide im ersten Bild. In der Stapelprüfung mit
+   vier Evidenz-Gruppen wächst der Abstand, und das Warum steht eine Weile
+   ohne sein Was. Das ist so entschieden (Reihenfolge Owner 2026-09-29, „die
+   Option wird nicht wiederholt"); ansehen, sobald die App die Karte mit
+   echter Evidenz zeigt.
+
+Vorbestehend, nicht aus diesem Nachtrag: `ChoicePrompt.stories.tsx:23–26`
+trägt einen deutschen JSDoc-Kommentar zur Story `Filled` (seit 64fbe27),
+gegen „Nie Deutsch im Quellcode" (Owner 2026-09-10).
+
+Vier Linsen: **Sprache** — ein Wort für die Sache, „empfohlen" in der Zeile
+und „Warum empfohlen:" im Callout, im Lesen „Empfehlung: {Option}"; klein
+geschrieben, kein Ausrufezeichen, keine interne Benennung ✓. **Bedienung** —
+das Wort liegt im `<label>` und wird mit vorgelesen, Klick darauf wählt die
+Zeile, Pfeiltasten und Fokusring wie vorher, Kontrast ≥ 6,17:1 in allen drei
+Zeilenzuständen ✓. **Logik** — die Empfehlung kommt aus einem Feld, die
+Vorauswahl wird abgeleitet; eine Option, die nicht unter den
+`answerOptions` steht, wird nicht markiert, der Callout nennt sie dann wie
+im Lesen; ohne das Feld ist das HTML gegenüber `da52e52^` gleich ✓.
+**Darstellung** — „leicht" gehalten: grau, 12,5 px, Gewicht 400, kein Rahmen,
+keine Farbe, kein Icon; die Hervorhebung auf den ersten Blick leistet die
+Vorauswahl, das Wort hält sie, und der Vier-Wochen-Test besteht ohne Farbe —
+„empfohlen" ist lesbar, wo die Zeile steht ✓.
+
+### Urteil
+
+**Abgenommen mit Hinweis.** Alle sechs Kriterien des Nachtrags sind erfüllt,
+gemessen und im Code nachgelesen; der Fall ohne `recommendedOption` rendert
+Zeichen für Zeichen wie vorher. Hinweise 1–3 betreffen Story-Deckung und
+Spec-Text, Hinweis 4 ist eine Beobachtung — keiner blockiert.
+
+Abgenommen von / am: Claude (Abnahme-Agent), 2026-10-24.
+
+**Nach der Abnahme (2026-10-24, Bauender).** Hinweis 1: Story
+`RecommendedOptionWithoutReason` (Antworten und Lesen untereinander). Hinweis
+2: Story-Spalten in 0017 (`Filled`, `Rows`) und 0028 (`Filled`,
+`OptionRows`); die Stories-Tabelle in 0060 auf die heutigen Exportnamen und um
+die drei neuen Stories ergänzt. Hinweis 3: Satz in 0060 wie vorgeschlagen.
+Hinweis 4 bleibt Beobachtung für die App mit echter Evidenz. Der deutsche
+JSDoc in `ChoicePrompt.stories.tsx` (Story `Filled`) ist übersetzt.

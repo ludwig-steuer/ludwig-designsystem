@@ -21,8 +21,8 @@ const OPTIONS = [
 ];
 
 /**
- * Drei Antworten, eine schon gewählt: `defaultOptionId` trägt den Vorschlag
- * von Ludwig hinein, damit die häufigste Antwort ein Klick weniger ist.
+ * Three answers, one already picked: `defaultOptionId` carries Ludwig's
+ * suggestion in, so the most common answer is one click less.
  */
 export const Filled: Story = {
   render: () => (

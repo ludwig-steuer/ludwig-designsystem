@@ -73,7 +73,7 @@ Getrennter Typ, damit die Zeile leicht bleibt:
 | `question` | `string \| null` | nein | die kompakte, eigenständige Frage (16 % gefüllt) | `Gefuellt` |
 | `context` | `string \| null` | nein | Beobachtung und Problemstellung (16 %) | `Gefuellt` |
 | `text` | `string` | ja | die volle Erläuterung — der Aufrufer wählt `professional_text` oder `client_text`; die Karte weiß nicht, welche (Regel: ins Portal geht nie ein professional-Text) | `Gefuellt`, `ImPortal` |
-| `recommendation` | `string \| null` | nein | Empfehlung des Fragestellers (10 %); benennt bei Choice-Fragen eine Option wörtlich → wird zu `defaultOptionId`. Mit `recommendedOption` nur das Warum (Nachtrag 0214, 2026-10-24) | `MitEmpfehlung` |
+| `recommendation` | `string \| null` | nein | Empfehlung des Fragestellers (10 %); benennt bei Choice-Fragen eine Option wörtlich → wird zu `defaultOptionId`. Mit `recommendedOption` nur das Warum (Nachtrag 0214, 2026-10-24) | `WithRecommendation` |
 | `recommendedOption` | `string \| null` | nein | die empfohlene Option, wörtlich eine der `answerOptions`; vorgewählt und in der Zeile „empfohlen" (Nachtrag 0214, 2026-10-24) | `WithRecommendedOption` |
 | `facts` | `readonly { label: string; value: string }[]` | nein | `facts_json` — was zum Beantworten gebraucht wird (7 % nicht leer) | `Gefuellt` |
 | `sources` | `readonly { kind: RationaleSourceKind; label: string; href?: string }[]` | nein | `sources_json` (31 % nicht leer); die Karte rendert Verweise, löst aber keine IDs auf | `Gefuellt` |
@@ -130,7 +130,8 @@ die Erwartung kommt), keine Frage stellen (0061), keine Wiedervorlage setzen
   Option überein, wird sie `defaultOptionId` von `ChoicePrompt`; der
   Empfehlungstext bleibt trotzdem sichtbar, damit die Vorauswahl begründet
   ist. Seit 2026-10-24 nennt die App die Option in `recommendedOption`; dann
-  gilt der Nachtrag in 0214 (Markierung in der Zeile, Callout nur das Warum).
+  gilt der Nachtrag in 0214 (beim Antworten Markierung in der Zeile und
+  Callout nur das Warum; im Lesen nennt der Callout die Option vor dem Warum).
 - **Tastatur:** die von `ChoicePrompt` (Absenden mit ⌘/Ctrl+Enter im ganzen
   Block) und `ReasonDialog`. Kein eigener Weg.
 - **Zustände:** gefüllt (offen) · beantwortet · aufgelöst ohne Antwort ·
@@ -143,17 +144,21 @@ Titel `v3/Entitäten/Klärung/ClarificationCard`.
 
 | Story | Beweist |
 |---|---|
-| `Gefuellt` | Agenten-Frage, `mode="read"`, mit Fakten, Quellen, Kontext |
-| `Antworten` | `mode="answer"` mit `single_choice`, `yes_no` und `free_text` nebeneinander; Rundlauf über `useState` |
-| `MitEmpfehlung` | Empfehlung wird zur Vorauswahl und bleibt lesbar |
-| `Personen` | `raisedBy` als `Actor` ohne Label, `answeredBy` als String — ohne `history` |
-| `Verlauf` | drei Einträge: gestellt vom Agenten, beantwortet von einer Person, aufgelöst mit Grund — je mit Datum |
-| `VonHand` | Frage aus der Kanzlei: nur Text, keine Fakten, keine Quellen, keine Optionen |
-| `ImPortal` | `client_text`, Zielgruppe Mandant, ohne Herkunft und ohne Schwere-Badge |
-| `Laedt` | `pending` am Antwortknopf |
-| `Fehler` | `error` am Knopf, Eingabe bleibt erhalten |
+| `Filled` | Agenten-Frage, `mode="read"`, mit Fakten, Quellen, Kontext |
+| `Answering` | `mode="answer"` mit `single_choice`, `yes_no` und `free_text` nebeneinander; Rundlauf über `useState` |
+| `WithRecommendation` | Empfehlung wird zur Vorauswahl und bleibt lesbar (Altbestand, ohne `recommendedOption`) |
+| `WithRecommendedOption` | `recommendedOption`: vorgewählt, Zeile „empfohlen", Callout „Warum empfohlen: …" (Nachtrag 0214, 2026-10-24) |
+| `RecommendedOptionRead` | dasselbe gelesen: Callout „Empfehlung: {Option} · {Warum}" (Nachtrag 0214) |
+| `RecommendedOptionWithoutReason` | `recommendedOption` ohne `recommendation`: beim Antworten kein Callout, gelesen „Empfehlung: {Option}" (Nachtrag 0214) |
+| `People` | `raisedBy` als `Actor` ohne Label, `answeredBy` als String — ohne `history` |
+| `History` | drei Einträge: gestellt vom Agenten, beantwortet von einer Person, aufgelöst mit Grund — je mit Datum |
+| `ByHand` | Frage aus der Kanzlei: nur Text, keine Fakten, keine Quellen, keine Optionen |
+| `InPortal` | `client_text`, Zielgruppe Mandant, ohne Herkunft und ohne Schwere-Badge |
+| `Loading` | `pending` am Antwortknopf |
+| `ErrorState` | `error` am Knopf, Eingabe bleibt erhalten |
 
-Neun Stories. Nicht anwendbar: `Leer` (oben begründet).
+Neun Stories, dazu drei aus dem Nachtrag 0214 (2026-10-24); Namen seit der
+Umstellung auf englische Exportnamen. Nicht anwendbar: `Leer` (oben begründet).
 
 ## Ausbau
 

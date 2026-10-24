@@ -308,6 +308,23 @@ export const RecommendedOptionRead: Story = {
   ),
 };
 
+/** The option without a why: answering, the word in the row says it all; reading, the callout names the option alone. */
+export const RecommendedOptionWithoutReason: Story = {
+  render: () => (
+    <Card>
+      <CardHead title="Empfohlene Option ohne Begründung" sub="oben beim Antworten, unten gelesen" />
+      <div style={{ padding: "var(--space-4)", display: "grid", gap: "var(--space-6)" }}>
+        <ClarificationCard
+          mode="answer"
+          clarification={{ ...BASE, ...AGENT_DETAIL, ...RECOMMENDED, recommendation: null }}
+          onAnswer={async () => {}}
+        />
+        <ClarificationCard clarification={{ ...BASE, ...AGENT_DETAIL, ...RECOMMENDED, recommendation: null }} />
+      </div>
+    </Card>
+  ),
+};
+
 /** Without an audit trail: asker and answerer alone already make the history. */
 export const People: Story = {
   render: () => (
