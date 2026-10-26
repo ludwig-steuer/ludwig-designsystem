@@ -13,6 +13,7 @@ import { StatusBadge } from "../../patterns/StatusBadge";
 import { resolveStatus } from "@/ludwig/ui/status/status-registry";
 import type { TodoItem } from "../../patterns/TodoList";
 import type { StateKind } from "../../patterns/Review";
+import { Link } from "../../primitives/Link";
 
 /**
  * The reading family of a clarification question (0059): preview, row, list.
@@ -135,9 +136,9 @@ export function ClarificationCell({
   );
   if (target) {
     return (
-      <a className="v2cl__cell v2link" href={target}>
+      <Link className="v2cl__cell v2link" href={target}>
         {body}
-      </a>
+      </Link>
     );
   }
   return <span className="v2cl__cell">{body}</span>;
@@ -188,9 +189,9 @@ export function ClarificationRow({
         <div className="v2cl__case">
           {c.caseNumber ? (
             c.href ? (
-              <a className="v2link" href={c.href}>
+              <Link className="v2link" href={c.href}>
                 {c.caseNumber}
-              </a>
+              </Link>
             ) : (
               <span className="v2main">{c.caseNumber}</span>
             )

@@ -193,3 +193,11 @@ können.
 **Abnahmekriterium.** `v3-primitives-rahmen-appshell--in-use`: zwischen
 Seitenkopf und Karte 16 px (Kopf endet bei 189, Karte beginnt bei 205), das
 erste Kind ohne Rand. **Stand:** gebaut und gemessen, fremde Abnahme steht aus.
+
+### Nachtrag 2026-10-27 (0226): `Link` importiert `next/link`
+
+Das Kriterium „Kein Import aus `next/*`" hat seit 0226 eine benannte Ausnahme:
+`primitives/Link.tsx` rendert Pfade der App über `next/link` (llcto, Staging-Analyse:
+volles Neuladen bei jedem Klick). Gemeint war und bleibt Router-**Zustand**: Kein
+Baustein liest `usePathname` oder `useRouter`, der aktive Pfad kommt weiter als
+Prop. Dieser Baustein selbst importiert weiter nur `./Link`.

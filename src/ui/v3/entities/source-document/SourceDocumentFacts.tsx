@@ -17,6 +17,7 @@ import {
 } from "./SourceDocument";
 import { resolveSourceDocumentDetail } from "./source-document-detail";
 import { PaymentAccountCell } from "../payment-account/PaymentAccount";
+import { Link } from "../../primitives/Link";
 
 /**
  * The facts of a document — the generic ones, and what the specialization adds
@@ -174,9 +175,9 @@ export function SourceDocumentFacts({
           // The partner is an entity of its own, and the name is the way to it
           // (0139–0143). Without the link the name is a dead end — one has to
           // search for the partner the document already names.
-          <a className="v2link" key="cp" href={counterpartyHref}>
+          <Link className="v2link" key="cp" href={counterpartyHref}>
             {document.counterparty}
-          </a>
+          </Link>
         ) : (
           document.counterparty
         )
@@ -396,9 +397,9 @@ function groupBlock(
           <>
             {" aus "}
             {group.parentHref ? (
-              <a className="v2link" href={group.parentHref}>
+              <Link className="v2link" href={group.parentHref}>
                 {group.parentTitle}
-              </a>
+              </Link>
             ) : (
               group.parentTitle
             )}

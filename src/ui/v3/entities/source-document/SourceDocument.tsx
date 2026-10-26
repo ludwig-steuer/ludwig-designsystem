@@ -255,9 +255,9 @@ export function SourceDocumentCompletion({
             the half of the answer one cannot check (acceptance 0070, M5). */}
         {state.done && document.doneAt ? <Time value={document.doneAt} format="date" /> : null}
         {state.done && href ? (
-          <a className="v2link" href={href}>
+          <Link className="v2link" href={href}>
             Zum Buchungsstapel
-          </a>
+          </Link>
         ) : null}
       </span>
       {explain ? <span className="v2doccompl__why">{state.sentence}</span> : null}
@@ -340,9 +340,9 @@ export function SourceDocumentCell({
   );
   if (target) {
     return (
-      <a className="v2doc__cell v2link" href={target}>
+      <Link className="v2doc__cell v2link" href={target}>
         {body}
-      </a>
+      </Link>
     );
   }
   return <span className="v2doc__cell">{body}</span>;
@@ -465,9 +465,9 @@ export function SourceDocumentRow({ document }: { document: SourceDocumentVM }) 
       <span className="v2doc__case">
         {document.caseNumber ? (
           document.caseHref ? (
-            <a className="v2link" href={document.caseHref}>
+            <Link className="v2link" href={document.caseHref}>
               {document.caseNumber}
-            </a>
+            </Link>
           ) : (
             document.caseNumber
           )

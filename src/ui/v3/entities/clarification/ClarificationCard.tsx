@@ -1042,9 +1042,9 @@ export function ClarificationCard({
             <p className="v2clc__deferby">
               Endet mit der Antwort auf{" "}
               {c.deferredBy.href ? (
-                <a className="v2link" href={c.deferredBy.href}>
+                <Link className="v2link" href={c.deferredBy.href}>
                   „{c.deferredBy.title}"
-                </a>
+                </Link>
               ) : (
                 <>„{c.deferredBy.title}"</>
               )}{" "}

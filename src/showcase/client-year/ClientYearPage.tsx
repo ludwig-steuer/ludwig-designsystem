@@ -143,12 +143,12 @@ function BatchHistory({ vm }: { vm: ClientYearVM }) {
           <p className="lw-ui-hint">Noch kein Stapel. Der erste entsteht, sobald die Einrichtung freigegeben ist.</p>
         ) : null}
         {pending.map((b) => (
-          <a key={b.key} href={b.href} className="cy-hist__row">
+          <Link key={b.key} href={b.href} className="cy-hist__row">
             <StateIcon state={b.state === "failed" ? "error" : "open"} />
             <span className="cy-hist__period">{b.period}</span>
             <span className="cy-hist__word">{b.word}</span>
             <ProcessMini phases={b.phases} />
-          </a>
+          </Link>
         ))}
         {done.length ? (
           <p className="cy-hist__done">

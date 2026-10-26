@@ -105,8 +105,10 @@ function RailRow({ item }: { item: RailItem }) {
       </span>
     );
   }
+  // A handful of fixed steps: prefetched down to their `loading.tsx`, so the
+  // click shows the next step at once (Link prefetches nothing by default).
   return (
-    <Link className={cls} href={item.href} aria-current={item.current ? "step" : undefined}>
+    <Link className={cls} href={item.href} prefetch="auto" aria-current={item.current ? "step" : undefined}>
       {inner}
     </Link>
   );
@@ -146,7 +148,7 @@ function BarStep({ item }: { item: RailItem }) {
     );
   }
   return (
-    <Link className={cls} href={item.href} aria-current={item.current ? "step" : undefined}>
+    <Link className={cls} href={item.href} prefetch="auto" aria-current={item.current ? "step" : undefined}>
       {inner}
     </Link>
   );
@@ -263,7 +265,7 @@ function StepNav({
   const cls = `v2btn v2btn--${variant} v2btn--sm`;
   if (href) {
     return (
-      <Link className={cls} href={href}>
+      <Link className={cls} href={href} prefetch="auto">
         {children}
       </Link>
     );

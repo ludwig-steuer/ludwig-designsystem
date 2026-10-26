@@ -30,6 +30,7 @@ import type {
   ReconciliationVerdict,
   SourcedAmount,
 } from "./types";
+import { Link } from "@/ui/v3/primitives/Link";
 
 /**
  * Step 4 of the batch review, card „Bankkonten" (0202, F298). A page
@@ -193,9 +194,9 @@ function Val({
       {hint ? <ValueHint hint={hint} /> : null}
       <Tooltip label={tip}>
         {href ? (
-          <a className={cls} href={href}>
+          <Link className={cls} href={href}>
             {text}
-          </a>
+          </Link>
         ) : (
           <span className={cls} tabIndex={0}>
             {text}

@@ -186,3 +186,11 @@ Zwei Beobachtungen ohne eigenen Punkt, für den nächsten, der die Datei anfasst
   `app-chrome.css`).
 
 Abgenommen von / am: Claude (Abnahme-Agent), 2026-09-05 · Offene Punkte: nur „offen (App)" — die Ablösung des Navigations-Renderings in `Sidebar.tsx` gehört nach `ludwig/app`.
+
+### Nachtrag 2026-10-27 (0226): `Link` importiert `next/link`
+
+Das Kriterium „Kein Import aus `next/*`" hat seit 0226 eine benannte Ausnahme:
+`primitives/Link.tsx` rendert Pfade der App über `next/link` (llcto, Staging-Analyse:
+volles Neuladen bei jedem Klick). Gemeint war und bleibt Router-**Zustand**: Kein
+Baustein liest `usePathname` oder `useRouter`, der aktive Pfad kommt weiter als
+Prop. Dieser Baustein selbst importiert weiter nur `./Link`.

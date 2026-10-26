@@ -1,6 +1,7 @@
 import { formatCount } from "../format";
 import { Button } from "./Button";
 import { Field, Input } from "./Form";
+import { Link } from "./Link";
 
 /**
  * Months of a long list as columns, each one a link to the page on which the
@@ -137,9 +138,9 @@ export function PeriodJump({
               {/* A month without rows has nothing to find — it stands on the
                   axis, but it is no link. */}
               {count > 0 ? (
-                <a className="v3jump__hit" href={href(month)} title={name} aria-current={now || undefined}>
+                <Link className="v3jump__hit" href={href(month)} title={name} aria-current={now || undefined}>
                   {body}
-                </a>
+                </Link>
               ) : (
                 <span className="v3jump__hit" title={name}>
                   {body}

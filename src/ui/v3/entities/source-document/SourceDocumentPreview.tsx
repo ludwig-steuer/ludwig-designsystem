@@ -3,6 +3,7 @@ import { Card, CardHead, HeadRow, Row, Table } from "../../primitives/Table";
 import { EmptyState } from "../../primitives/EmptyState";
 import { formatCount } from "../../format";
 import { pageRangeLabel } from "./SourceDocument";
+import { Link } from "../../primitives/Link";
 
 /**
  * The original, as Ludwig reads it (F285). The loader in the app decides the
@@ -254,9 +255,9 @@ function ExcerptLine({
         <>
           {" aus "}
           {excerpt.parentHref ? (
-            <a className="v2link" href={excerpt.parentHref}>
+            <Link className="v2link" href={excerpt.parentHref}>
               {excerpt.parentTitle}
-            </a>
+            </Link>
           ) : (
             excerpt.parentTitle
           )}
