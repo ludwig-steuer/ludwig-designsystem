@@ -117,7 +117,11 @@ export function RecordPager(props: PagerLinkProps | PagerButtonProps) {
     <div className="v2pager">
       {backLink}
       <Step dir="prev" target={prev} hotkey={hotkeys ? "J" : undefined} />
-      <span className="v2pager__count">
+      {/* Announced on every change („Frage 3 von 12"): the next record came,
+          and the focus may have moved to its heading (rule for single reviews
+          under RecordPager, 2026-10-26). Not on mount — polite regions speak
+          on change only. */}
+      <span className="v2pager__count" aria-live="polite" aria-atomic="true">
         {label ? `${label} ` : ""}
         {formatCount(position)} von {formatCount(total)}
       </span>

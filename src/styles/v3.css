@@ -5029,6 +5029,9 @@ a.v3bbr__val:hover { text-decoration-color: currentColor; }
   position: absolute; width: 1px; height: 1px; margin: -1px; overflow: hidden;
   clip-path: inset(50%); white-space: nowrap;
 }
+/* The heading takes the focus when the next question comes (rule for single
+   reviews under RecordPager): a target, not a control — no ring around it. */
+.v2clc__q:focus, .v3docreview__q:focus { outline: none; }
 .v2clc__topic { margin: 0; font-size: var(--fs-ui-sm); line-height: var(--lh-ui-sm); color: var(--color-text-muted); }
 /* „Kontext": a card with a head; each group a fold-out whose head is a group
    head (0220 role 5), a full line between the groups; the entries are rows

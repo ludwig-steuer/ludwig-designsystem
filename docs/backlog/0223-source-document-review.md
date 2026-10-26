@@ -401,3 +401,12 @@ Abgenommen von / am: Claude (fremde Nachprüfung), 2026-10-26, Stand
 außer „offen (App)" nachgewiesen. Offen: Hinweise 3–6 (nicht blockierend);
 die Ablösung von `DocumentReviewSingle` und der Tabelle in
 `StepDocumentReview` ist offen (App).
+
+## Nachbesserung 2026-10-26 (Hinweise der Nachprüfung)
+
+| Hinweis | Stand |
+|---|---|
+| H6 Fokus auf `BODY` nach dem Entscheiden | Regel I13: `useFocusOnNewRecord` — der Fokus geht auf „Wohin gehört dieser Beleg?" des nächsten Belegs (`h2.v3docreview__q`, `tabIndex={-1}`), der Pager sagt „Beleg 2 von 5". Gemessen in `--interactive`: Kommentar getippt, `Strg+Enter` → „Beleg 2 von 5", Fokus `H2`, `Tab` → erste Option |
+| H3 Leerzustand der Übersicht ohne Story | kommt mit dem Nachtrag „Übersicht statt Liste" |
+| H5 Minus als U+002D | vorbestehend im ganzen Set, eigene Aufgabe |
+

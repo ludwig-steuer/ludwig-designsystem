@@ -184,11 +184,11 @@ export const Answering: Story = {
                 context: null,
                 text: "Auf dem Konto ist kein Abgang zu finden.",
                 answerKind: "yes_no",
-                answerOptions: ["Ja", "Nein"],
+                // No options passed: yes_no brings its own two (0222 Nachtrag).
                 questionType: "opos_clearing_mismatch",
                 sourceModule: "datev-mirror",
               }}
-              onAnswer={(a) => answer(`Ja/Nein: ${a.optionId ?? "—"}`)}
+              onAnswer={(a) => answer(`Ja/Nein: optionId ${a.optionId ?? "—"}`)}
             />
           </div>
         </Card>
@@ -675,25 +675,44 @@ export const StepFreeText: Story = {
   ),
 };
 
-/** „Beim Mandanten klären": the note replaces the answer; saved, the card says so and keeps the note. */
+/**
+ * „Beim Mandanten klären": the note replaces the answer; saved, the card says
+ * so and keeps the note. Below, a question already marked: the callout from
+ * the start, and the note field filled with it (`freeText.defaultValue`,
+ * acceptance 0222 H1). Esc in the note goes back without saving.
+ */
 export const StepAskClient: Story = {
   render: () => {
     const [note, setNote] = useState<string | null>(null);
+    const [marked, setMarked] = useState<string | null>("Bitte die Rechnung von Wolkenhaus mit dem Leistungszeitraum nachreichen.");
+    const ask = (set: (t: string) => void) => async (text: string) => {
+      await new Promise((r) => setTimeout(r, 400));
+      set(text);
+    };
     return (
       <StepFrame>
-        <ClarificationCard
-          variant="step"
-          mode="answer"
-          clarification={{ ...STEP_QUESTION, clientNote: note }}
-          submitLabel="Speichern und weiter"
-          onAnswer={async () => {}}
-          onAskClient={async (text) => {
-            await new Promise((r) => setTimeout(r, 400));
-            setNote(text);
-          }}
-          onResolve={async () => {}}
-          onDefer={async () => {}}
-        />
+        <div style={{ display: "grid", gap: "var(--space-6)" }}>
+          <ClarificationCard
+            variant="step"
+            mode="answer"
+            clarification={{ ...STEP_QUESTION, clientNote: note }}
+            submitLabel="Speichern und weiter"
+            onAnswer={async () => {}}
+            onAskClient={ask(setNote)}
+            onResolve={async () => {}}
+            onDefer={async () => {}}
+          />
+          <ClarificationCard
+            variant="step"
+            mode="answer"
+            clarification={{ ...STEP_QUESTION, id: "q-0412-marked", clientNote: marked }}
+            submitLabel="Speichern und weiter"
+            onAnswer={async () => {}}
+            onAskClient={ask(setMarked)}
+            onResolve={async () => {}}
+            onDefer={async () => {}}
+          />
+        </div>
       </StepFrame>
     );
   },
@@ -745,6 +764,65 @@ export const StepLoadingAndError: Story = {
       </div>
     </StepFrame>
   ),
+};
+
+/**
+ * A yes/no question in the step form (0222 Nachtrag, finding in the app
+ * 2026-10-26): two rows „Ja" and „Nein", the recommended one marked; the
+ * answer goes out as `optionId: "yes" | "no"` — the app maps it to its
+ * boolean. The free text and the ways as with any choice.
+ */
+export const StepYesNo: Story = {
+  render: () => {
+    const [sent, setSent] = useState<string | null>(null);
+    return (
+      <StepFrame>
+        <ClarificationCard
+          variant="step"
+          mode="answer"
+          clarification={{
+            ...STEP_QUESTION,
+            id: "q-0421",
+            title: "Druckerei-Hansen-Rechnung vom 30.01.2026, bezahlt am 03.02.2026",
+            question: "Soll die Rechnung im Rechnungsmonat Januar gebucht werden?",
+            context:
+              "Die Rechnung der **Druckerei Hansen** über 238,00 € ist auf den 30.01.2026 datiert, die Leistung lag im Januar. " +
+              "Bezahlt wurde am 03.02.2026 vom Geschäftskonto.",
+            facts: [
+              { label: "Rechnungsdatum", value: "30.01.2026" },
+              { label: "Zahlung", value: "238,00 € am 03.02.2026" },
+            ],
+            answerKind: "yes_no",
+            answerOptions: [],
+            recommendedOption: "yes",
+            recommendation: "Leistung und Rechnung liegen im Januar; die Zahlung im Februar ändert den Monat der Buchung nicht.",
+            evidence: {
+              documents: [
+                { id: "doc-0421", cited: true, date: "2026-01-30", issuer: "Druckerei Hansen", number: "DH-2026-0117", amount: 238, currency: "EUR" },
+              ],
+              payments: [
+                {
+                  id: "bt-0314",
+                  date: "2026-02-03",
+                  amount: -238,
+                  currency: "EUR",
+                  counterparty: "Druckerei Hansen",
+                  purpose: "RE DH-2026-0117",
+                  paymentAccount: "1802 Geschäftskonto",
+                },
+              ],
+            },
+          }}
+          submitLabel="Speichern und weiter"
+          onAnswer={async (a) => setSent(`optionId: ${a.optionId ?? "—"}${a.text ? ` · Text: ${a.text}` : ""}`)}
+          onAskClient={async () => {}}
+          onResolve={async () => {}}
+          onDefer={async () => {}}
+        />
+        {sent ? <p className="lw-ui-hint">Gesendet: {sent}</p> : null}
+      </StepFrame>
+    );
+  },
 };
 
 /**

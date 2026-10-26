@@ -23,6 +23,7 @@ import { FieldList } from "../../primitives/FieldList";
 import { Markdown } from "../../primitives/Markdown";
 import { ReasonDialog } from "../../primitives/ReasonDialog";
 import { TextButton } from "../../primitives/TextButton";
+import { useFocusOnNewRecord } from "../../primitives/focus";
 import { DateRange, Time } from "../../primitives/Time";
 import { ActionIcon, EntityIcon, type EntityKey } from "../../Icons";
 import { StatusBadge } from "../../patterns/StatusBadge";
@@ -199,7 +200,8 @@ export interface ClarificationDetailVM {
   /**
    * The recommended answer, verbatim one of `answerOptions` — at most one, the
    * server refuses anything else (0214, owner 2026-10-24). Preselected and
-   * marked „empfohlen" in its row.
+   * marked „empfohlen" in its row. For `yes_no` it is the key, `"yes"` or
+   * `"no"` (0222 Nachtrag; the server check follows with L-368).
    */
   recommendedOption?: string | null;
   facts?: readonly { label: string; value: string }[];
@@ -376,6 +378,12 @@ function EvidenceTable({ cols, head, children }: { cols: string; head: string[];
     </Table>
   );
 }
+
+/** The two answers of a yes/no question: keys for the app, words for the reader (0222 Nachtrag). */
+const YES_NO: readonly { id: "yes" | "no"; label: string }[] = [
+  { id: "yes", label: "Ja" },
+  { id: "no", label: "Nein" },
+];
 
 /** The groups in the order of the step form (owner wireframe 2026-10-24) — one order for both forms. */
 function evidenceGroups(e: ClarificationEvidence) {
@@ -777,12 +785,22 @@ export function ClarificationCard({
   // back to the way that opened it when it closes — never onto the body.
   const articleRef = useRef<HTMLElement>(null);
   const askId = useId();
-  const wasAsking = useRef(false);
+  // Which question had its note open on the last render — an id, not a flag:
+  // paging away must neither keep the mode for the way back nor hand the focus
+  // to the next question's button (acceptance 0222, M6).
+  const wasAskingFor = useRef<string | null>(null);
   useEffect(() => {
     if (asking) articleRef.current?.querySelector<HTMLTextAreaElement>("[data-client-note] textarea")?.focus();
-    else if (wasAsking.current) document.getElementById(askId)?.focus();
-    wasAsking.current = asking;
-  }, [asking, askId]);
+    else if (wasAskingFor.current === c.id) document.getElementById(askId)?.focus();
+    wasAskingFor.current = asking ? c.id : null;
+  }, [asking, askId, c.id]);
+  // A new question under the same card (a pager paged, an answer was saved):
+  // the note mode ends, and if the focus was in the card or lost, it goes to
+  // the new question's heading — read aloud, one Tab to its first option. A
+  // focus on the pager stays there, so paging by keyboard keeps its place
+  // (rule for single reviews under RecordPager, llcto 2026-10-26).
+  const headingRef = useRef<HTMLHeadingElement>(null);
+  useFocusOnNewRecord(c.id, articleRef, headingRef, () => setAskingFor(null));
   const [deferring, setDeferring] = useState(false);
   const [until, setUntil] = useState<string | null>(defaultDeferralDay());
   // Generated, not hard-coded: several cards stand in one list, and two
@@ -825,13 +843,17 @@ export function ClarificationCard({
   // The recommended option is named by the app (0214, 2026-10-24) and marked
   // in its row. Without it, a recommendation that names an option verbatim
   // becomes the preselection, unmarked — stock and transition look as before.
+  // yes_no is a choice of two (0222 Nachtrag, llcto 2026-10-26): English keys,
+  // German words — the app stores `answerPayload: { value: boolean }` and maps
+  // `"yes"`/`"no"` itself. Always these two, whatever `answerOptions` says: one
+  // question, one set of keys. No registry axis carries the words (L-368).
+  const choices: readonly { id: string; label: string }[] =
+    c.answerKind === "yes_no" ? YES_NO : (c.answerOptions ?? []).map((label) => ({ id: label, label }));
   const recommendedId =
-    c.recommendedOption && c.answerOptions?.includes(c.recommendedOption) ? c.recommendedOption : null;
-  const options = (c.answerOptions ?? []).map((label) => ({
-    id: label,
-    label,
-    recommended: label === recommendedId,
-  }));
+    c.recommendedOption && choices.some((o) => o.id === c.recommendedOption) ? c.recommendedOption : null;
+  const options = choices.map((o) => ({ ...o, recommended: o.id === recommendedId }));
+  // The word of the recommendation where no row can carry the mark (read mode).
+  const recommendedWord = choices.find((o) => o.id === c.recommendedOption)?.label ?? c.recommendedOption;
   const preselected =
     recommendedId ?? options.find((o) => o.label === c.recommendation?.trim())?.id ?? null;
   // Since F125 a missing document is an expectation, not a clarification. The
@@ -861,7 +883,7 @@ export function ClarificationCard({
   ) : c.recommendedOption ? (
     // No row to mark (read mode, answered): a why without its what says nothing.
     <Callout tone="soft">
-      <strong>Empfehlung: {c.recommendedOption}</strong>
+      <strong>Empfehlung: {recommendedWord}</strong>
       {c.recommendation ? <> · {c.recommendation}</> : null}
     </Callout>
   ) : c.recommendation ? (
@@ -876,12 +898,16 @@ export function ClarificationCard({
   // The ways out, as text buttons — in the step form one row under the
   // options, in the card each on its own small line.
   const askButton = canExit && onAskClient ? (
-    <TextButton id={askId} onClick={() => setAsking(true)}>
+    // Locked while an answer is on its way (acceptance 0222, H3): a way out
+    // must not start while the save runs.
+    <TextButton id={askId} onClick={() => setAsking(true)} disabled={pending}>
       Beim Mandanten klären
     </TextButton>
   ) : null;
   const resolveButton = canExit && onResolve ? (
-    <TextButton onClick={() => setResolving(true)}>Anderweitig geklärt</TextButton>
+    <TextButton onClick={() => setResolving(true)} disabled={pending}>
+      Anderweitig geklärt
+    </TextButton>
   ) : null;
   // A fragment, as before: in the card's line the gap of the line spaces the
   // reason (acceptance 0222, M1); the step row wraps it in one item.
@@ -889,7 +915,7 @@ export function ClarificationCard({
     <>
       <TextButton
         onClick={() => setDeferring(true)}
-        disabled={Boolean(deferLockedReason)}
+        disabled={Boolean(deferLockedReason) || pending}
         {...(deferLockedReason ? { "aria-describedby": whyId } : {})}
       >
         Zurückstellen
@@ -923,7 +949,9 @@ export function ClarificationCard({
   const head = step ? (
     <header className="v2clc__head">
       {c.question && c.question.trim() !== c.title.trim() ? <p className="v2clc__topic">{c.title}</p> : null}
-      <h2 className="lw-ui-section">{c.question ?? c.title}</h2>
+      <h2 className="lw-ui-section v2clc__q" ref={headingRef} tabIndex={-1}>
+        {c.question ?? c.title}
+      </h2>
       {/* No badge in the step form (owner 2026-10-26): every question here is
           open, nearly all block. One that need not be answered says so in a
           sentence from the registry. */}
@@ -983,7 +1011,7 @@ export function ClarificationCard({
   const evidence = c.evidence ?? (c.sources && c.sources.length > 0 ? { other: c.sources } : null);
   // Groups given but all empty are no evidence: no box, no empty column (acceptance 0222, M4).
   const evidenceCount = evidence
-    ? Object.values(evidence).reduce<number>((n, rows) => n + ((rows as readonly unknown[] | undefined)?.length ?? 0), 0)
+    ? Object.values(evidenceGroups(evidence)).reduce((n, rows) => n + rows.length, 0)
     : 0;
   const side = step && evidence && evidenceCount > 0 ? <EvidencePanel e={evidence} select={onSelect} /> : null;
 
@@ -1105,7 +1133,20 @@ export function ClarificationCard({
       ) : null}
 
       {canExit && onAskClient ? (
-        <div className="v2clc__answer" data-client-note hidden={!asking}>
+        <div
+          className="v2clc__answer"
+          data-client-note
+          hidden={!asking}
+          // Esc leaves the note without saving, like „Doch selbst beantworten";
+          // what was typed stays (acceptance 0222, H8). Stopped here, so a
+          // drawer around the card does not close with it.
+          onKeyDown={(e) => {
+            if (e.key === "Escape") {
+              e.stopPropagation();
+              setAsking(false);
+            }
+          }}
+        >
           <ChoicePrompt
             key={c.id}
             question="Notiz für den Mandanten"

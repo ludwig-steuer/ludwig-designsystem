@@ -173,7 +173,10 @@ export function ChoicePrompt({
       {(freeText?.toggle && !freeOpen) || links ? (
         <div className="v2ask__links">
           {freeText?.toggle && !freeOpen ? (
-            <TextButton onClick={() => setFreeOpen(true)}>{freeText.toggle}</TextButton>
+            // Locked while saving: it would open a field that is locked too (acceptance 0222, H3).
+            <TextButton onClick={() => setFreeOpen(true)} disabled={pending}>
+              {freeText.toggle}
+            </TextButton>
           ) : null}
           {links}
         </div>

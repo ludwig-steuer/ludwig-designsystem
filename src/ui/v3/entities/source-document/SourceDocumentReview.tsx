@@ -1,12 +1,13 @@
 "use client";
 
-import { useId, type ReactNode } from "react";
+import { useId, useRef, type ReactNode } from "react";
 
 import { ChoicePrompt, type ChoiceAnswer, type ChoiceOption } from "../../patterns/ChoicePrompt";
 import { StatusBadge } from "../../patterns/StatusBadge";
 import { Amount } from "../../primitives/Amount";
 import { Callout } from "../../primitives/Callout";
 import { Time } from "../../primitives/Time";
+import { useFocusOnNewRecord } from "../../primitives/focus";
 import type { SourceDocumentVM } from "./SourceDocument";
 import { resolveSourceDocumentDetail } from "./source-document-detail";
 
@@ -55,6 +56,9 @@ export function SourceDocumentReview({
   error?: string;
 }) {
   const headId = useId();
+  const rootRef = useRef<HTMLDivElement>(null);
+  const headingRef = useRef<HTMLHeadingElement>(null);
+  useFocusOnNewRecord(d.id, rootRef, headingRef);
   const measure = resolveSourceDocumentDetail(d.sourceDocType, d.detail)?.measure;
   const topic = [
     d.counterparty ? <span key="who">{d.counterparty}</span> : null,
@@ -64,7 +68,7 @@ export function SourceDocumentReview({
   const recommended = options.some((o) => o.recommended);
 
   return (
-    <div className="v3docreview">
+    <div className="v3docreview" ref={rootRef}>
       <div className="v3docreview__original">{preview}</div>
       <section className="v3docreview__decide" aria-labelledby={headId}>
         {topic.length > 0 ? (
@@ -77,7 +81,7 @@ export function SourceDocumentReview({
             ))}
           </p>
         ) : null}
-        <h2 className="lw-ui-section" id={headId}>
+        <h2 className="lw-ui-section v3docreview__q" id={headId} ref={headingRef} tabIndex={-1}>
           Wohin gehört dieser Beleg?
         </h2>
         {d.reviewReason || reasonNote ? (

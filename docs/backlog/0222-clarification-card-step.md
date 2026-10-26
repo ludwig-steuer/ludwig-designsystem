@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Status | in Arbeit — nicht abgenommen 2026-10-26 (fremde Nachprüfung, Stand `c848b6d`: Mängel 1–5 behoben, Nachtrag Zonen erfüllt, volle Karte unverändert; offen: neuer Mangel 6) · davor: nicht abgenommen 2026-10-24 (fremde Abnahme, Stand `51db640`; Mängel 1–5) · Hashes: `51db640` (Bau) und `b2b84e5` (Nachbesserung) waren lokal und sind vor dem Push in `c848b6d` zusammengefasst (Stories mit fiktiven Daten); `51db640^` = `d3e91ff` |
+| Status | Abnahme (Nachprüfung M6 + Nachtrag yes_no) · vorher: in Arbeit — nicht abgenommen 2026-10-26 (fremde Nachprüfung, Stand `c848b6d`: Mängel 1–5 behoben, Nachtrag Zonen erfüllt, volle Karte unverändert; offen: neuer Mangel 6) · davor: nicht abgenommen 2026-10-24 (fremde Abnahme, Stand `51db640`; Mängel 1–5) · Hashes: `51db640` (Bau) und `b2b84e5` (Nachbesserung) waren lokal und sind vor dem Push in `c848b6d` zusammengefasst (Stories mit fiktiven Daten); `51db640^` = `d3e91ff` |
 | Stufe | erweitert `entities/clarification/ClarificationCard.tsx` · `patterns/ChoicePrompt` (Freitext hinter einem Textknopf, Zeile weiterer Wege) |
 | Klassen-Test | Karte: nein (Klärung). ChoicePrompt-Zeile: ja (jede Frage mit Antwortvorschlägen kennt „selbst schreiben" und Auswege) |
 | Quelle | Auftrag llcto 2026-10-24 (Owner), Paket 2 · Wireframe `ludwig/app/reports/2026-10-24_abnahme-wizard-wireframe.html` (Schritt Rückfragen, echte Fragen eines Stapels; in Stories fiktiv) · Konzept `simple-batch-review.md` §12 „Question screen", Jobs „Rückfragen" |
@@ -631,4 +631,50 @@ Nachtrags Zonen erfüllt, die volle Karte unverändert. Offen: Mangel 6 (klein:
 Notizmodus beim Id-Wechsel zurücksetzen, Fokus nur bei derselben Frage
 zurückgeben, Rundlauf in `StepPaging`); Hinweise 1, 3, 5–8 (4 vorbestehend);
 die Ablösung von `ClarificationDetail` ist offen (App).
+
+## Nachbesserung 2026-10-26 (nach der Nachprüfung)
+
+| Punkt | Behoben |
+|---|---|
+| M6 Notizmodus beim Blättern halb an die Frage gebunden, Fokus springt | `wasAskingFor` hält die **Kennung** der Frage, deren Notiz offen war, nicht ein Flag: der Fokus kehrt nur auf „Beim Mandanten klären" zurück, wenn dieselbe Frage ihre Notiz schließt. Kommt eine neue Frage unter die Karte, endet der Notizmodus (`useFocusOnNewRecord(…, onNew)`). Gemessen in `--step-paging`: Notiz auf Frage 1 → weiter → Frage 2 ohne Notiz → zurück → Frage 1 **ohne** Notizmodus |
+| H7 Fokus auf `BODY` nach „Speichern und weiter" | Regel **I13** (Guideline, llcto 2026-10-26): lag der Fokus in der Karte oder ist er verloren, geht er auf die Überschrift der neuen Frage (`h2.v2clc__q`, `tabIndex={-1}`, ohne Ring); der Pager sagt „Frage 2 von 2" (Live-Region). Gemessen: `Strg+Enter` auf einer Option → Fokus `H2` der nächsten Frage, `Tab` → erste Option. Ein Fokus auf dem Pager-Pfeil bleibt dort; wird der Pfeil am Ende der Reihe zum gesperrten Platz, ist der Fokus verloren und geht auf die Überschrift |
+| H8 Esc im Notizmodus tat nichts | Esc schließt die Notiz ohne zu speichern, wie „Doch selbst beantworten"; das Getippte bleibt; das Ereignis endet an der Notiz, ein Drawer um die Karte schließt nicht mit. Gemessen: Fokus zurück auf „Beim Mandanten klären", Text beim Wiederöffnen da |
+| H3 Wege während des Speicherns bedienbar | „Eigene Antwort schreiben", „Beim Mandanten klären", „Anderweitig geklärt", „Zurückstellen" gesperrt, solange `pending` (gemessen in `--step-loading-and-error`: oben gesperrt, unten mit Fehler offen) — auch in der vollen Karte |
+| H1 Vorbelegung ohne Story | `StepAskClient` zeigt darunter eine schon markierte Frage: Callout von Anfang an, Notizfeld mit der Notiz gefüllt |
+| H5 `as` in der Zählung | gezählt über `evidenceGroups()`, ohne Zusicherung |
+| H6 640 px schneidet die Antwortzone | nicht behoben, mit Grund: unter 1280 px Innenbreite greift die Sperre (L1); bei 700 px nicht mehr. Ausbau, falls ein schmaler Ort kommt: Container-Query an `.v2clc--step`, „Kontext" unter die Frage |
+| H4 Minus als U+002D | vorbestehend im ganzen Set (`AmountCell`), eigene Aufgabe auf der Liste |
+
+## Nachtrag 2026-10-26 — `yes_no` (Befund am Einbau, llcto)
+
+Befund in der App (Demo-Mandant): eine Frage mit `answerKind: "yes_no"`
+(„Im Rechnungsmonat buchen?") zeigte nur das Freitextfeld. Die Karte baute
+ihre Optionen allein aus `answerOptions`, und die App füllt
+`answer_options_json` nur bei Auswahlfragen; die Story „Ja/Nein" gab
+`["Ja", "Nein"]` von Hand mit.
+
+| Was | Entscheid |
+|---|---|
+| Optionen | bei `yes_no` immer zwei: Kennung `"yes"` / `"no"`, Wort „Ja" / „Nein" — Maschinenwerte englisch (CLAUDE.md). `answerOptions` gilt bei `yes_no` nicht: eine Frage, ein Satz Kennungen |
+| Antwort | `onAnswer({ optionId: "yes" \| "no", text? })`; die App setzt auf ihr `answerPayload: { value: boolean }` um |
+| Empfehlung | `recommendedOption` `"yes"`/`"no"` markiert und wählt vor; im Lesemodus heißt es „Empfehlung: Ja" (das Wort, nicht die Kennung) |
+| Wege, Freitext | wie bei `single_choice`: „Eigene Antwort schreiben" hinter dem Textknopf, die Zeile der Wege |
+| Wörter | keine Registry-Achse trägt sie (`input_tax_fact` hat Ja/Nein für einen Vorsteuer-Fakt, mit Grün/Rot — ein fremdes Wort mit fremder Farbe). „Ja"/„Nein" stehen einmal in der Karte (`YES_NO`); Befund L-368 an die App |
+| Beide Varianten | auch die volle Karte zeigte bei `yes_no` ohne Optionen nur Freitext; sie bekommt dieselben zwei |
+
+Story `StepYesNo` (fiktiv: „Soll die Rechnung im Rechnungsmonat Januar
+gebucht werden?", empfohlen „Ja"); in `Answering` gibt die Ja/Nein-Karte keine
+`answerOptions` mehr mit und meldet `optionId: yes`. Gemessen: Zeilen
+„Ja empfohlen" · „Nein", vorgewählt `yes`, gesendet `optionId: yes`; volle
+Karte `Ja=yes`, `Nein=no`.
+
+Abnahmekriterien dazu (offen, fremde Abnahme):
+
+- [ ] `yes_no` ohne `answerOptions`: zwei Optionen „Ja"/„Nein", `optionId` `"yes"`/`"no"`, „empfohlen" und Vorauswahl bei `recommendedOption` `"yes"`/`"no"`, Wege und „Eigene Antwort schreiben" wie bei single_choice (Story `StepYesNo`)
+- [ ] M6: Notizmodus wandert beim Blättern weder vor noch zurück; Fokus springt nicht auf den Weg einer anderen Frage (Story `StepPaging`)
+- [ ] I13: nach „Speichern und weiter" Fokus auf der Überschrift der neuen Frage, Pager-Zählung als Live-Region (Story `StepPaging`)
+- [ ] Esc im Notizmodus schließt ohne zu speichern, Text bleibt (Story `StepAskClient`)
+- [ ] Wege während `pending` gesperrt (Story `StepLoadingAndError`)
+
+Status: zurück auf Abnahme (Nachprüfung von M6 und den zwei Nachträgen).
 
