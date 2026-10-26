@@ -653,3 +653,8 @@ die Owner-Hinweise; Knopf und Drawer im Rückfragen-Schritt sowie L-367 (App).
 | Hinweise 2–5 | bleiben offen wie begründet: 2 ist Wortlaut der App-Registry (an llcto), 3 darf die Entität nicht importieren, 4 und 5 beim ersten Einsatz beobachten | — |
 
 Damit ist die Auflage erfüllt; Status `fertig`. Offen bleiben die App-Punkte (Knopf und Drawer im Rückfragen-Schritt, L-367).
+
+### Nachtrag 2026-10-27 (llcto): Hinweise 2 und 5 entschieden
+
+- **Hinweis 2:** Befund **L-370**. Die Registry-Beschreibung von `clarification.answered` soll „Beantwortet oder anderweitig geklärt." lauten; die App zieht nach.
+- **Hinweis 5:** Die Chips im Dialog „Anderweitig geklärt" heißen „telefonisch", „per Mail" und „hat sich erledigt". Der Platzhalter lautet „z. B. telefonisch mit dem Mandanten". Der Grund steht in der Zeile hinter „Anderweitig geklärt:" und wiederholt „geklärt" nicht. Die Gründe in den Fixtures sind angeglichen (`Clarification.stories.tsx` b6, `ClarificationCard.stories.tsx` History).

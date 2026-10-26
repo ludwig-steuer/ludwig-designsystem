@@ -1293,10 +1293,12 @@ export function ClarificationCard({
           title={RESOLVED_WORD}
           kicker="Die Frage zählt danach als beantwortet"
           label="Wie wurde das geklärt?"
-          placeholder="z. B. telefonisch mit dem Mandanten geklärt"
+          placeholder="z. B. telefonisch mit dem Mandanten"
           confirmLabel="Als geklärt vermerken"
           required
-          chips={["telefonisch geklärt", "per Mail geklärt", "hat sich erledigt"]}
+          // The reason follows the word „Anderweitig geklärt:" in the row — it does
+          // not repeat „geklärt" (llcto 2026-10-27).
+          chips={["telefonisch", "per Mail", "hat sich erledigt"]}
           pending={pending}
         />
       ) : null}

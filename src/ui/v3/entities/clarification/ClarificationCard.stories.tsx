@@ -372,7 +372,7 @@ export const History: Story = {
                 kind: "resolved",
                 at: "2026-08-27T08:30:00+02:00",
                 by: "S. Vogt",
-                text: "Rest telefonisch mit dem Mandanten geklärt.",
+                text: "Rest telefonisch mit dem Mandanten.",
               },
             ],
           }}

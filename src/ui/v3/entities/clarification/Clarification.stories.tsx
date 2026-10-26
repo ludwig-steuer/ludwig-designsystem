@@ -325,7 +325,7 @@ const BATCH: ClarificationVM[] = [
     audience: "accounting",
     raisedAt: "2026-10-09T18:40:00+02:00",
     answeredAt: "2026-10-26T10:03:00+01:00",
-    resolutionReason: "telefonisch mit dem Mandanten geklärt",
+    resolutionReason: "telefonisch mit dem Mandanten",
     caseNumber: "2026-0122",
     caseTitle: "Serverhaus Nord GmbH, Gutschrift Januar",
   },
