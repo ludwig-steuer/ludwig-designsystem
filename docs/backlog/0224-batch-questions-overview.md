@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Status | Abnahme · gebaut 2026-10-26 (s. „Gebaut") |
+| Status | in Arbeit — nicht abgenommen 2026-10-26 (fremde Abnahme, Stand `8280d42`; Mängel 1–2, s. „Abnahme 2026-10-26") · gebaut 2026-10-26 (s. „Gebaut") |
 | Stufe | erweitert `entities/clarification/Clarification.tsx` (`ClarificationList`, `ClarificationRow`, `ClarificationVM`) · `primitives/RecordPager.tsx` (ein Platz für Nebenwege) |
 | Klassen-Test | Liste: nein (Rückfrage, ihre Stände). Pager-Platz: ja („Datensatz 3 von 12" und daneben ein Weg zur ganzen Menge gibt es in jeder App mit einer Warteschlange) |
 | Quelle | Owner-Wunsch 2026-10-26 über llcto (Rückfragen-Schritt der Abnahme, `batches/[id]/close`); Props-Vorschlag des DS an llcto vom selben Tag, vom Owner bestätigt: `RecordPager.actions`, `ClarificationList groupBy="state"`, `onOpen`, `activeId`, `ClarificationVM.answer`; Gruppe „Beantwortet" (Registry), Knopf „n Fragen bei Ludwig", bei n = 0 kein Knopf |
@@ -168,23 +168,23 @@ Fehler (s. Verhalten).
 
 Fest (gilt immer):
 
-- [ ] `pnpm typecheck`, `pnpm build`, `pnpm check:type` grün
-- [ ] Datei nach der Familie benannt, Story daneben, Titel in der richtigen Gruppe
-- [ ] Code englisch; `@when`/`@instead` an jedem Export
-- [ ] Kein Hex, kein px in TSX, keine lokale Label-Map; Status nur über Registry
-- [ ] Alle Stories oben vorhanden; ausgeschlossene Zustände begründet
+- [x] `pnpm typecheck`, `pnpm build`, `pnpm check:type` grün
+- [x] Datei nach der Familie benannt, Story daneben, Titel in der richtigen Gruppe
+- [x] Code englisch; `@when`/`@instead` an jedem Export
+- [x] Kein Hex, kein px in TSX, keine lokale Label-Map; Status nur über Registry
+- [x] Alle Stories oben vorhanden; ausgeschlossene Zustände begründet
 - [ ] Prüfliste `design-guidelines.md` §9 durchgegangen
-- [ ] Im Browser angesehen (Storybook), nicht nur gebaut
+- [x] Im Browser angesehen (Storybook), nicht nur gebaut
 
 Variabel (aus dieser Spec):
 
-- [ ] `groupBy="state"`: Gruppen Offen · Zurückgestellt · Beantwortet · Notiz in dieser Reihenfolge, Wörter aus der Registry, leere Gruppen fehlen, Zähler im Kopf, **kein Badge** in den Zeilen, optionale offene/zurückgestellte Frage mit „optional" in der Meta-Zeile (Story `ByState`; Nachtrag 2026-10-26)
-- [ ] `onOpen` nur an offenen und zurückgestellten Fragen; ganze Zeile klickbar mit Hover, `Enter` löst aus; beantwortete und Notizen ohne Sprung (Story `ByState`, Tastatur gemessen)
-- [ ] `activeId` markiert genau eine Zeile mit `aria-current` (Story `ByState`)
-- [ ] `answer`: Zeile „Antwort: …" einzeilig gekürzt, ganz im Hover; ohne `answer` keine Zeile (Story `ByState`, Rand)
-- [ ] `RecordPager.actions` rechts nach dem Pfeil, mit und ohne Warteschlange; Trefferfläche ≥ 24 × 24 px (Story `WithActions`, gemessen)
+- [x] `groupBy="state"`: Gruppen Offen · Zurückgestellt · Beantwortet · Notiz in dieser Reihenfolge, Wörter aus der Registry, leere Gruppen fehlen, Zähler im Kopf, **kein Badge** in den Zeilen, optionale offene/zurückgestellte Frage mit „optional" in der Meta-Zeile (Story `ByState`; Nachtrag 2026-10-26)
+- [x] `onOpen` nur an offenen und zurückgestellten Fragen; ganze Zeile klickbar mit Hover, `Enter` löst aus; beantwortete und Notizen ohne Sprung (Story `ByState`, Tastatur gemessen)
+- [x] `activeId` markiert genau eine Zeile mit `aria-current` (Story `ByState`)
+- [x] `answer`: Zeile „Antwort: …" einzeilig gekürzt, ganz im Hover; ohne `answer` keine Zeile (Story `ByState`, Rand)
+- [x] `RecordPager.actions` rechts nach dem Pfeil, mit und ohne Warteschlange; Trefferfläche ≥ 24 × 24 px (Story `WithActions`, gemessen)
 - [ ] Im Einsatz: Knopf öffnet den Drawer, offene Zeile springt und schließt ihn, beantwortete klappt lesend auf, `Esc` schließt (Story `InBatchReviewDrawer`)
-- [ ] Vorhandene Stories von `ClarificationList`/`ClarificationRow`/`RecordPager` ohne die neuen Props unverändert
+- [x] Vorhandene Stories von `ClarificationList`/`ClarificationRow`/`RecordPager` ohne die neuen Props unverändert
 - [ ] offen (App): Knopf und Drawer im Rückfragen-Schritt, n aus den beantworteten Fragen des Stapels, `answer` aus `answer_payload` (L-367)
 
 ## Gebaut 2026-10-26
@@ -239,4 +239,146 @@ den kurzen Registry-Hinweis, kein Tag.
 | Zeile | ohne `.v2cl__state`; der Titel nimmt die ganze Breite |
 | Optional | in der Meta-Zeile „· optional" — das Registry-Wort (`clarification_severity.optional.label`) klein im laufenden Text wie „zurückgestellt bis …"; nur bei offenen und zurückgestellten Fragen. Der lange Registry-Satz der Karte („Hilfreich, aber …") passt in keine einzeilige Meta-Zeile |
 | Andere Gruppierungen | unverändert: `audience`/`none` zeigen Stand und „Blockierend" wie bisher |
+
+### Abnahme 2026-10-26
+
+Abnehmer: Claude (Abnahme-Agent, fremde Sitzung, nicht der Bauende). Stand
+`8280d42` (Bau `2b54bb6`, Nachtrag `3fdf788`; danach hat `137fc01` die
+Zählung des Pagers zur Live-Region gemacht, Regel I13), Arbeitsbaum zu
+Beginn sauber. Gelesen: `CLAUDE.md`, Skill `v3-komponente` (Abnahme), §9 der
+Guideline, diese Spec ganz samt Nachtrag, `git diff d3e91ff 3fdf788` für
+`Clarification.tsx`, `Clarification.stories.tsx`, `RecordPager.tsx`,
+`RecordPager.stories.tsx` und `v3.css` (`.v2cl__item:has(.v2rowlink)`,
+`.v2cl__open`, `.v2cl__answer*`, `.v2pager__actions`), dazu
+`primitives/Drawer.tsx` und `primitives/focus.ts` (Fokusführung des
+Drawers), die Achsen `clarification`, `clarification_type` und
+`clarification_severity` im Spiegel, `docs/entitaeten/clarification.md`
+(Auflösung ohne Antwort) und L-367. Gemessen mit `scripts/cdp.mjs`
+(chrome-headless-shell 155) am Dev-Server 6107, ein Browser für alle
+Messungen, Fenster 1042 × 1000 (= 1280 px mit Seitenleiste), Querlauf auch bei
+1480 und 1920; Maße mit `getBoundingClientRect`, Farben aus
+`getComputedStyle`, Kontrast nach WCAG gerechnet, Tastatur mit echten
+Tastendrücken (Tab, Umschalt+Tab, Enter, Leertaste, Esc), Klicks und Hover
+mit echten Mausereignissen. Gegenprobe „unverändert": `d3e91ff` in einem
+Worktree im Scratchpad und `8280d42` je statisch gebaut, jede Story beider
+Stände in derselben Sitzung geladen, `innerHTML` (nach Angleichung der
+`useId`-Kennungen) und die Geometrie jedes Elements verglichen. Befehle selbst
+gelaufen. Bildschirmfotos `.playwright-mcp/0224-abnahme-by-state-1042.png`,
+`…-drawer-open.png`, `…-drawer-answered-open.png`, `…-drawer-focus-row.png`,
+`…-drawer-after-jump.png`, `…-recordpager-with-actions.png`.
+
+| Kriterium | Nachweis (Story-ID · Befehl · Messwert · Datei:Zeile) | Ergebnis |
+|---|---|---|
+| `pnpm typecheck`, `pnpm build`, `pnpm check:type` grün | `typecheck` Exit 0; `check:type` Exit 0, `--test` Exit 0; `pnpm build -o` ins Scratchpad Exit 0 (nur die bekannte Chunk-Warnung), Index führt `clarificationrow--by-state`, `--in-batch-review-drawer`, `recordpager--with-actions`. `check:language`, `check:when`, `check:icons`, `check:contrast` Exit 0, je `--test` Exit 0; `check:classes` Exit 1 nur mit den vier Altfällen (`v3clt__step`, `v3clt`, `v2tbl__foot`, `cy-page`), `--test` Exit 0 | ✓ |
+| Datei nach der Familie benannt, Story daneben, Titel in der richtigen Gruppe | Erweiterung in `entities/clarification/Clarification.tsx` und `primitives/RecordPager.tsx`, kein neuer Export; Stories in `Clarification.stories.tsx` (`v3/Entitäten/Klärung/ClarificationRow`) und `RecordPager.stories.tsx` (`v3/Primitives/Navigation/RecordPager`) | ✓ |
+| Code englisch; `@when`/`@instead` an jedem Export | `@when` von `ClarificationRow` und `ClarificationList` um `onOpen` bzw. „by state" ergänzt; JSDoc der neuen Props englisch; Klassen `v2cl__open`, `v2cl__answer`, `v2cl__answerlabel`, `v2pager__actions`; Deutsch nur in Nutzer-Strings | ✓ |
+| Kein Hex, kein px in TSX, keine lokale Label-Map; Status nur über Registry | Gruppenwörter aus `resolveStatus("clarification", …)` und `resolveStatus("clarification_type", "comment")` (`Clarification.tsx:360`, `:365`), „optional" aus `clarification_severity.optional.label` (`:252`); kein Hex, kein px im Baustein (`maxWidth: 521` nur im Story-Rahmen) | ✓ |
+| Alle Stories oben vorhanden; ausgeschlossene Zustände begründet | `ByState`, `InBatchReviewDrawer`, `WithActions` im Index und im Browser, Konsole ohne Meldung (nur Vite- und DevTools-Info); leer = vorhandene `Empty`; leer nach Filter, lädt, Fehler begründet (Verhalten). Die Story-Tabelle nennt für `InBatchReviewDrawer` „Frage 4 von 9", die Story zeigt „Frage 1 von 3" (Hinweis 3) | ✓ (mit Hinweis) |
+| Prüfliste `design-guidelines.md` §9 durchgegangen | Importe abwärts (Entität → Primitives, Patterns, Registry; `RecordPager` nimmt nur `ReactNode`); Text links (`.v2cl__open { text-align: left }`), nichts zentriert; Farbe nur Link und Auswahl (Fläche nur für die aktive Zeile); Kontrast und Fokus s. u.; Hover an jedem Weg, an keiner Lesezeile; Trefferflächen ≥ 24 px; Schrift 13,5/12,5 px, 600/700 aus der Skala; Drawer `h2` → Gruppen `h3`. Offen: Tastaturweg zu den beantworteten Zeilen (M1), Auflösung als Antwort benannt (M2) | ✗ |
+| Im Browser angesehen (Storybook), nicht nur gebaut | die drei neuen Stories bei 1042, 1480, 1920 px, `scrollWidth` = Fensterbreite | ✓ |
+| `groupBy="state"`: Gruppen, Reihenfolge, Registry, leere fehlen, Zähler, kein Badge, „optional" (Story `ByState`) | Köpfe `h3` „Offen 2 · Zurückgestellt 1 · Beantwortet 3 · Notiz 1" in dieser Reihenfolge, Wörter = Registry; in allen sieben Zeilen 0 Badges, kein `.v2cl__state`; zurückgestellte optionale Frage: Meta „Kanzlei · Gefragt vor 17 Tagen · zurückgestellt bis 05.11.2026 · optional", die beantwortete optionale ohne „optional"; leere Gruppen fallen weg (`Clarification.tsx:373`) | ✓ |
+| `onOpen` nur an offenen und zurückgestellten Fragen; ganze Zeile klickbar mit Hover, `Enter`; beantwortete und Notizen ohne Sprung (Story `ByState`) | Titel der drei offenen/zurückgestellten Fragen ist `button.v2link.v2rowlink`, die übrigen vier ein `span`. Maus über der Meta-Zeile einer offenen Frage (Ziel = Überzug des Knopfs): Zeile `rgb(244, 246, 248)`, Zeiger, Titel unterstrichen; aktive Zeile bleibt `rgb(241, 247, 251)`, Titel unterstrichen; beantwortete Zeile ohne Hover, Zeiger `auto`, ein Klick tut nichts. Klick auf die Meta-Zeile → „Springt zu: Welche Gegenpartei …"; Enter auf dem Titel ebenso, Leertaste auf der zurückgestellten → „Springt zu: Zu welchem Projekt …". Tab läuft nur über die drei Wege. Fokusring 2 px `#3B8FC4`, 3,55:1 auf Weiß, 3,29:1 auf der aktiven Zeile, im Drawer ganz innerhalb von `.v2drawer__b`. Linkfarbe 5,45:1 (Weiß), 5,03:1 (Hover), 5,04:1 (aktiv) | ✓ |
+| `activeId` markiert genau eine Zeile mit `aria-current` (Story `ByState`) | genau ein `[aria-current="true"]` mit `is-active`, Fläche `accent-50` und Balken 3 px innen links (Form, nicht nur Farbe); im Drawer nach dem Sprung auf die dritte Frage steht die Markierung dort | ✓ |
+| `answer`: „Antwort: …" einzeilig gekürzt, ganz im Hover; ohne `answer` keine Zeile (Story `ByState`) | nur die drei beantworteten Fragen tragen die Zeile, je 20,9 px hoch (eine Zeile), 13,5 px in Textfarbe (13,77:1), „Antwort:" `#5C5C5C` 6,69:1; nur die lange Antwort ist gekürzt (`scrollWidth > clientWidth`), `title` trägt den ganzen Text; ohne `answer` keine Zeile. Zur dritten Antwort s. M2 | ✓ |
+| `RecordPager.actions` rechts nach dem Pfeil, mit und ohne Warteschlange; Trefferfläche ≥ 24 × 24 px (Story `WithActions`) | mit Warteschlange „Frage 1 von 3" und Pfeile, danach der Knopf 24 px nach dem Pfeil (x 169,7 → 193,7); nur mit Rückweg: der Knopf 32 px nach „Sachverhalte" (Hinweis 4). Knopf 121,9 × 24 px, 12,5 px, Linkfarbe 5,03:1 auf dem Seitengrund, Hover unterstrichen, Fokusring 3,28:1; Tab: Pfeil → Knopf → Rückweg → Knopf | ✓ |
+| Im Einsatz: Knopf öffnet den Drawer, offene Zeile springt und schließt ihn, beantwortete klappt lesend auf, `Esc` schließt (Story `InBatchReviewDrawer`) | Klick und Enter auf „3 Fragen bei Ludwig" öffnen den Drawer (`md`, 521 px, `h2` „Fragen dieses Stapels", Meta „2 offen · 1 zurückgestellt · 3 beantwortet"), Fokus auf dem Panel. Klick auf eine offene Zeile → „Frage 2 von 3", Drawer zu, Fokus auf „3 Fragen bei Ludwig", der nächste Tab ins Antwortfeld; Enter auf der dritten offenen Zeile → „Frage 3 von 3", ebenso. Klick auf eine beantwortete klappt zur Karte `mode="read"` mit Verlauf auf, Enter und Leertaste auf dem fokussierten Kopf schalten. Esc schließt, Fokus zurück auf den Knopf. **Aber** die Tastatur erreicht die beantworteten Zeilen nicht: Tab und Umschalt+Tab kreisen „Schließen → drei offene Zeilen → Schließen"; und von einer per Klick fokussierten beantworteten Zeile führt Tab aus dem Drawer auf `body` und dann auf den Pfeil hinter dem Schleier (M1) | ✗ |
+| Vorhandene Stories von `ClarificationList`/`ClarificationRow`/`RecordPager` ohne die neuen Props unverändert | `d3e91ff` gegen `8280d42`: die neun Stories `clarificationrow--filled`, `--states`, `--comment`, `--in-stack`, `--with-card`, `--preview`, `--in-frame`, `--long-question`, `--empty` in HTML und Geometrie gleich. `RecordPager`: `--back-only` gleich; die sechs mit Zählung unterscheiden sich nur um `aria-live="polite" aria-atomic="true"` an `.v2pager__count` (aus `137fc01`, I13, nicht aus 0224), Geometrie gleich | ✓ |
+| offen (App): Knopf und Drawer im Rückfragen-Schritt, n, `answer` aus `answer_payload` (L-367) | `befunde-app.md` L-367 | offen (App) |
+| Zusatz: Auflösung ohne Antwort benannt (Befunde an die App, Entitätsprofil) | s. M2 | ✗ |
+| Zusatz: Schnittstelle Zeichen für Zeichen | `actions?: ReactNode` in `Common` (beide Pager-Formen); `answer?: string \| null`; `groupBy?: "audience" \| "none" \| "state"` Vorgabe `"none"`; `onOpen?: (c: ClarificationVM) => void`; `activeId?: string \| null` Vorgabe `null`; `ClarificationRow.onOpen?: () => void`, `hideBadges?: boolean` Vorgabe `false`; mit `onOpen` klappt die Zeile nicht (`:259`), die Liste reicht `onOpen` nur an Fragen außer beantworteten (`:335`) — alle wie die Tabellen | ✓ |
+| Zusatz: keine echten Daten | Datenprobe über die Diffs (`d3e91ff..3fdf788`, `9901556..HEAD`): leer | ✓ |
+
+#### Mängel
+
+1. **Beantwortete Zeilen im Drawer per Tastatur nicht erreichbar; der Fokus
+   verlässt den Drawer.** `primitives/focus.ts:18–19`: `TABBABLE` kennt
+   `summary` nicht. `trapTab` (`:32–48`) nimmt deshalb die dritte offene
+   Zeile als letzten Halt und springt von dort auf „Schließen" zurück — die
+   drei Köpfe der beantworteten Fragen liegen dahinter und werden in beiden
+   Richtungen übersprungen. Steht der Fokus (nach einem Klick) auf einem
+   dieser Köpfe, läuft Tab nativ weiter und vom letzten aus dem Panel hinaus
+   (`body`, dann der Pfeil des Pagers hinter dem Schleier). Gemessen in
+   `InBatchReviewDrawer`. Dazu: der Filter `el.offsetParent !== null`
+   (`:34–36`) hält in Chrome 155 Elemente in einem zugeklappten `<details>`
+   für sichtbar (Knopf in der zugeklappten Tabelle von
+   `SourceDocumentReview/Overview`: `offsetParent` gesetzt,
+   `checkVisibility()` false). Die Ursache liegt im Primitive (seit 0092);
+   sichtbar wird sie hier, mit der ersten Drawer-Liste, deren Aufklapper
+   hinter dem letzten Knopf stehen. Verletzt „Tab durch die Zeilen … auf einer
+   beantworteten klappt sie auf und zu" (Verhalten) und „keine
+   Tastaturfalle". Vorschlag: `summary` in `TABBABLE` aufnehmen und mit
+   `el.checkVisibility()` statt `offsetParent` filtern — mit dieser Abfrage
+   gemessen ergeben sich im Drawer die Halte „Schließen · drei offene Zeilen ·
+   drei beantwortete" in Lesefolge. Gilt für Drawer und Dialog; nachmessen in
+   `InBatchReviewDrawer` und an einem Dialog mit Aufklapper.
+2. **„Anderweitig geklärt" steht als Antwort da.** `Clarification.tsx:207–211`
+   setzt vor jedes `answer` das Wort „Antwort:". Die App soll laut L-367 bei
+   einer Auflösung ohne Antwort „Anderweitig geklärt: {Grund}" liefern, die
+   Story tut es (`Clarification.stories.tsx:327`), gerendert steht da
+   „Antwort: Anderweitig geklärt: telefonisch mit dem Mandanten geklärt" —
+   zwei Etiketten, das erste falsch. Die Spec sagt selbst „die Zeile sagt dann
+   „Anderweitig geklärt: …"" (Befunde an die App), das Entitätsprofil „die
+   Karte muss den Fall benennen, statt ihn wie eine Antwort zu zeigen"
+   (`docs/entitaeten/clarification.md:50–57`). Linsen Sprache und Logik.
+   Vorschlag: das Etikett nicht aus dem Text erraten, sondern im VM tragen —
+   etwa `ClarificationVM.resolution?: string | null` (Grund einer Auflösung
+   ohne Antwort) neben `answer`; die Zeile sagt dann „Anderweitig geklärt:
+   {resolution}" mit dem Wort in Grau wie „Antwort:", L-367 wird geteilt, die
+   Story-Frage `b6` trägt den Grund ohne Vorsatz.
+
+#### Hinweise (nicht blockierend)
+
+1. **Zwei Fluchten in einer Liste.** Im Drawer beginnen Zeilen mit Aufklapper
+   (beantwortet) ihren Text 14 px weiter rechts als Zeilen ohne
+   (Sachverhaltsnummer x 571 gegen 557, `…-drawer-answered-open.png`): der
+   Chevron von `Disclosure` nimmt eine Spalte, die die übrigen Zeilen nicht
+   haben. Vorschlag: in einer Liste mit `renderDetail` hält jede Zeile die
+   Spalte frei.
+2. **Die Lesekarte wiederholt die Zeile.** Im Aufklapper stehen die Frage noch
+   einmal als Überschrift, das Badge „Beantwortet" und „Gefragt ist: Kanzlei
+   …" — Markup der App (`renderDetail`), aber die Story macht es vor. Ansehen,
+   ob dort Verlauf und Antwort genügen.
+3. **Story-Tabelle und Story zählen verschieden.** `:134` sagt „Frage 4 von
+   9", die Story zeigt „Frage 1 von 3". Angleichen und festhalten, was der
+   Pager zählt: die Story zählt die verbliebenen Fragen (beantwortete sind aus
+   dem Ablauf verschwunden, s. Ziel), der Knopf die beantworteten — die App
+   braucht das beim Einbau.
+4. **Abstand nach dem Rückweg.** „Gebaut" sagt „24 px nach dem Pfeil bzw.
+   nach dem Rückweg"; nach dem Rückweg sind es 32 px (`.v2pager__back`
+   `margin-right` 8 + `gap` 8 + `margin-left` 16, `v3.css:2819–2831`). Satz
+   oder Maß angleichen.
+5. **Zählung als Literal.** Die Meta des Drawers und die Unterzeile in
+   `ByState` stehen als Text in der Story („2 offen · …"); die Spec verlangt
+   die Registry-Wörter — beim Einbau aus `resolveStatus("clarification",
+   …).label`, klein gesetzt wie „optional".
+6. **Nicht messbar:** „Sachverhaltsnummer mit `href` liegt über dem Überzug"
+   — keine Story hat `href` und `onOpen` zugleich; nur der Code sagt es
+   (`v3.css:3105`).
+7. **Vier-Wochen-Test des Knopfs.** „3 Fragen bei Ludwig" lässt sich in einem
+   Schritt, in dem jede Frage von Ludwig kommt, auch als „Ludwig hat 3
+   Fragen" lesen. Owner-Wort (bestätigt 2026-10-26) — beim ersten Einsatz
+   beobachten; ein anderes Wort entscheidet der Owner.
+
+Vier Linsen: **Sprache** — Gruppenwörter aus der Registry, „optional" klein
+wie „zurückgestellt bis", „Fragen dieses Stapels", Knopf mit Zahl und
+Singular; aber „Antwort: Anderweitig geklärt: …" nennt eine Auflösung eine
+Antwort (M2) ✗. **Bedienung** — die ganze Zeile ist Ziel mit Hover, Enter
+und Leertaste auf dem Titel, Fokusring ≥ 3,29:1 und nicht beschnitten, Esc
+schließt, der Fokus kommt auf den Knopf zurück und der nächste Tab führt in
+die Frage, Knopf 24 px hoch; die beantworteten Zeilen erreicht die Tastatur
+nicht, und von dort läuft der Fokus hinter den Schleier (M1) ✗. **Logik** —
+die Gruppe folgt aus `state` und `type`, gesprungen wird nur, wo es einen
+Ort im Ablauf gibt, gelesen, wo nichts mehr zu tun ist, die Liste sortiert
+nicht; die Auflösung ohne Antwort hat im VM keinen eigenen Ort (M2) ✗.
+**Darstellung** — keine Badges, der Stand im Gruppenkopf, die aktive Zeile
+mit Fläche und Balken, Linkfarbe nur am Titel, der ein Weg ist, die Antwort
+eine Zeile; zwei Fluchten im Drawer (Hinweis 1) ✓.
+
+Vier-Wochen-Test: die Liste besteht ihn — Gruppen in Worten, der Weg ist
+der blaue Titel, die Antwort steht ausgeschrieben; offen ist das Wort des
+Knopfs (Hinweis 7).
+
+Abgenommen von / am: Claude (fremde Abnahme, nicht der Bauende), 2026-10-26,
+Stand `8280d42` · **Nicht abgenommen.** Offen: Mängel 1–2, Hinweise 1–7;
+Knopf und Drawer im Rückfragen-Schritt sowie L-367 offen (App).
 

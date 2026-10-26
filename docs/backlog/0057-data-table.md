@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Status | fertig |
+| Status | fertig · Nachtrag `head.collapsed` (2026-10-26) abgenommen mit Hinweis (fremde Abnahme, Stand `8280d42`) |
 | Stufe | `patterns/` — Gruppe Arbeitsfläche, neben `MasterDetail` |
 | Klassen-Test | „Ergäbe das auch in einer Versicherungs-App Sinn?" → ja, jede Anwendung mit Listenseiten: Spalten, Seite, Sortierung, Auswahl |
 | Quelle | Anfrage Owner 2026-09-04 („Datatable mit Sortierung, Filter, Pagination, Checkliste, Bulk-Aktionen, Seitengröße, drei Dichten") · `design-guidelines.md` V1 V5 V9 V11 · I4 I5 I7 I10 I11 · §11 Tabelle (`SelectionBar`/`SelectCell`, `ClickRow`, `TableLoading`/`ErrorRow`) · Zählung `ludwig/app` 2026-09-04: **13** Listenseiten mit `Pagination` (`cases`, `entries`, `accounts`, `accounts/[n]`, `partners`, `documents`, `opos`, `datev`, `datev/stapel`, `cycles`, `reporting`, `configuration/logs`, `settings/components`), **0** Seiten mit Spaltensortierung, **2** Stellen mit `SelectionBar` (v2), **8** Module mit lokalem Auf-/Zuklappen (`AuditLogTable`, `KontoauszugView`, `FindingsList`, `Schritt6Liste`, `PositionenTab`, `GlanceCard`, `ClarificationsBanner`, `OpenExportOverview`) |
@@ -423,4 +423,69 @@ hat 24 Stories, eine weitere kommt nicht dazu. Gemessen: zu nur der Kopf
 Hover `rgb(244, 246, 248)`, offen Unterlinie 1 px und die Tabelle darunter;
 die Stories ohne die Prop rendern ohne `<details>` (`Filled`, `Empty`,
 `Selection`, `StickySelection`, `Expand` geprüft). Fremde Abnahme steht aus.
+
+### Abnahme Nachtrag 2026-10-26
+
+Abnehmer: Claude (Abnahme-Agent, fremde Sitzung, nicht der Bauende). Stand
+`8280d42` (Basis `137fc01`), Arbeitsbaum zu Beginn sauber. Gelesen:
+`CLAUDE.md`, Skill `v3-komponente` (Abnahme), §9 der Guideline, diesen
+Nachtrag, `git show 8280d42` für `DataTable.tsx` und `v3.css` (`.v2dt__*`),
+die Story `SourceDocumentReview/Overview` (Nachweis im Einsatz) und den
+Nachtrag „Übersicht statt Liste" in 0223, zum Vergleich `TodoGroup.collapsed`
+(0187). Gemessen mit `scripts/cdp.mjs` (chrome-headless-shell 155) am
+Dev-Server 6107, ein Browser für alle Messungen (zusammen mit 0222–0224),
+Fenster 1042 × 1000 (= 1280 px mit Seitenleiste), Querlauf auch bei 1480 und
+1920; Maße mit `getBoundingClientRect`, Farben aus `getComputedStyle`,
+Kontrast gerechnet, Tastatur mit echten Tastendrücken, Hover und Klick mit
+echten Mausereignissen, Rolle und Zustand aus dem Zugänglichkeitsbaum (CDP
+`Accessibility`), reduzierte Bewegung über `Emulation.setEmulatedMedia`.
+Gegenprobe „ohne die Prop unverändert": `137fc01` (Worktree im Scratchpad)
+und `8280d42` je statisch gebaut, `innerHTML` (nach Angleichung der
+`useId`-Kennungen) und die Geometrie jedes Elements verglichen. Befehle
+selbst gelaufen (s. 0222). Bildschirmfotos
+`.playwright-mcp/0057-collapsed-focus.png`, `0057-collapsed-open-1042.png`.
+
+| Kriterium (aus dem Nachtrag) | Nachweis (Story-ID · Befehl · Messwert · Datei:Zeile) | Ergebnis |
+|---|---|---|
+| Schnittstelle `head.collapsed?: boolean`, natives `<details>`, Kopf ist der Schalter | `DataTable.tsx:377` mit englischem JSDoc; `details.v2dt__fold > summary.v2dt__foldsum` um den `CardHead` (`:733–734`); mit `selection` übergangen (`:663`), im zuklappenden Kopf keine `actions` (`:682`). Die Schnittstellentabelle oben (`head`, Zeile „`CardHead`-Props …") nennt `collapsed` nicht (Hinweis 1) | ✓ (mit Hinweis) |
+| zu nur der Kopf, Unterlinie 0 (keine doppelte Kante) | `sourcedocumentreview--overview`: Karte 1010 × 72,1 px, Kopf 70,1 px, `border-bottom` des Kopfes 0, die Karte 1 px rundum, kein Schatten | ✓ |
+| Klick und `Enter` auf dem Kopf öffnen | Klick → offen, Karte 405,2 px; Klick → zu, 72,1 px. Tab auf den Kopf, Enter → offen, Leertaste → zu; offen führt Tab in die Tabelle ((i) des Prüfgrunds) | ✓ |
+| Fokusring 2 px | `:focus-visible`, 2 px `#3B8FC4`, Versatz −2 px (innen, von `overflow: clip` der Karte nicht beschnitten), 3,43:1 auf `surface-head` | ✓ |
+| Kopf antwortet auf Hover | Fläche `rgb(250, 251, 252)` → `rgb(244, 246, 248)`, Zeiger, offen wie zu | ✓ |
+| offen Unterlinie 1 px und die Tabelle darunter | Unterlinie 1 px `#DDE2E8`, Tabelle 1008 px ohne Querlauf, Köpfe in Katalogordnung | ✓ |
+| Chevron im Zeichen-Platz | `ActionIcon action="collapse"` 14 × 14 px, Strich 1,5, `#5C5C5C` 6,45:1, zu 0°, offen 90° (`matrix(0, 1, -1, 0, 0, 0)`); mit `prefers-reduced-motion: reduce` keine Übergangszeit (`v3.css:51`) | ✓ |
+| Zusatz: Zugänglichkeit | `summary` als DisclosureTriangle „Alle zu prüfenden Belege als Liste 3 von 5 offen", `expanded=false` bzw. `true`; das `h2` bleibt Überschrift der Ebene 2 | ✓ |
+| Stories ohne die Prop unverändert, ohne `<details>` | alle 24 DataTable-Stories `137fc01` gegen `8280d42`: HTML und Geometrie jedes Elements gleich; dazu 124 Stories aus 17 weiteren Story-Dateien, die `DataTable` nutzen: gleich | ✓ |
+| Zusatz: Befehle | `typecheck` Exit 0; `check:type`, `check:language`, `check:when`, `check:icons`, `check:contrast` Exit 0 samt `--test`; `check:classes` kennt `.v2dt__fold`, `.v2dt__foldsum`, `.v2dt__chev` (nur die vier Altfälle offen); `pnpm build -o` ins Scratchpad Exit 0 | ✓ |
+| Zusatz: Querlauf | `--overview` bei 1042, 1480, 1920 px ohne Querlauf | ✓ |
+
+Neue Mängel: keine.
+
+#### Hinweise (nicht blockierend)
+
+1. **Schnittstellentabelle nachziehen.** Die Zeile `head` („`CardHead`-Props
+   (`title`, `sub?`, `icon?`, `meta?`, `actions?`)") nennt weder `collapsed?`
+   noch das ältere `headingLevel?`.
+2. **Zone 6 bleibt sichtbar.** `next` (`CardFoot`, `DataTable.tsx:743`) steht
+   außerhalb von `<details>` und damit unter einem zugeklappten Kopf. Für I10
+   vielleicht richtig (der nächste Schritt bleibt benannt) — festhalten; keine
+   Story nutzt beides.
+3. **Kein Beispiel im eigenen Baum.** Der Nachweis steht nur im Einsatz
+   (`SourceDocumentReview/Overview`); wer unter `DataTable` nach „zuklappen"
+   sucht, findet es nicht. Begründet (24 Stories); ein Satz in der
+   Story-Beschreibung der Datei mit Verweis genügte.
+
+Vier Linsen: **Sprache** — der Kopf benennt den Inhalt mit Zähler, der
+Schalter braucht kein eigenes Wort ✓. **Bedienung** — Klick, Enter und
+Leertaste, Ring 3,43:1 innen, Hover, Zustand im Zugänglichkeitsbaum,
+reduzierte Bewegung ohne Übergang ✓. **Logik** — den Zustand hält der Browser
+(natives `details`), kein Knopf im Schalter, `selection` hebt das Falten auf
+✓. **Darstellung** — Tabelle in einer Karte mit Kopf, Chevron im
+Zeichen-Platz, 1-px-Ränder ohne doppelte Kante ✓.
+
+Vier-Wochen-Test: bestanden — der Kopf sagt, was darin ist, und der Chevron,
+dass er aufgeht.
+
+Abgenommen von / am: Claude (fremde Abnahme, nicht der Bauende), 2026-10-26,
+Stand `8280d42` · **Abgenommen mit Hinweis.** Offen: Hinweise 1–3.
 

@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Status | Abnahme (Nachprüfung M6 + Nachtrag yes_no) · vorher: in Arbeit — nicht abgenommen 2026-10-26 (fremde Nachprüfung, Stand `c848b6d`: Mängel 1–5 behoben, Nachtrag Zonen erfüllt, volle Karte unverändert; offen: neuer Mangel 6) · davor: nicht abgenommen 2026-10-24 (fremde Abnahme, Stand `51db640`; Mängel 1–5) · Hashes: `51db640` (Bau) und `b2b84e5` (Nachbesserung) waren lokal und sind vor dem Push in `c848b6d` zusammengefasst (Stories mit fiktiven Daten); `51db640^` = `d3e91ff` |
+| Status | fertig — abgenommen mit Hinweis 2026-10-26 (Nachprüfung 2, Stand `8280d42`, Code `137fc01`: M6 behoben, Nachtrag yes_no und Fokusregel I13 erfüllt); offen (App): Ablösung von `ClarificationDetail`, L-363, L-364, L-368 · davor: Abnahme (Nachprüfung M6 + Nachtrag yes_no) · vorher: in Arbeit — nicht abgenommen 2026-10-26 (fremde Nachprüfung, Stand `c848b6d`: Mängel 1–5 behoben, Nachtrag Zonen erfüllt, volle Karte unverändert; offen: neuer Mangel 6) · davor: nicht abgenommen 2026-10-24 (fremde Abnahme, Stand `51db640`; Mängel 1–5) · Hashes: `51db640` (Bau) und `b2b84e5` (Nachbesserung) waren lokal und sind vor dem Push in `c848b6d` zusammengefasst (Stories mit fiktiven Daten); `51db640^` = `d3e91ff` |
 | Stufe | erweitert `entities/clarification/ClarificationCard.tsx` · `patterns/ChoicePrompt` (Freitext hinter einem Textknopf, Zeile weiterer Wege) |
 | Klassen-Test | Karte: nein (Klärung). ChoicePrompt-Zeile: ja (jede Frage mit Antwortvorschlägen kennt „selbst schreiben" und Auswege) |
 | Quelle | Auftrag llcto 2026-10-24 (Owner), Paket 2 · Wireframe `ludwig/app/reports/2026-10-24_abnahme-wizard-wireframe.html` (Schritt Rückfragen, echte Fragen eines Stapels; in Stories fiktiv) · Konzept `simple-batch-review.md` §12 „Question screen", Jobs „Rückfragen" |
@@ -670,11 +670,101 @@ Karte `Ja=yes`, `Nein=no`.
 
 Abnahmekriterien dazu (offen, fremde Abnahme):
 
-- [ ] `yes_no` ohne `answerOptions`: zwei Optionen „Ja"/„Nein", `optionId` `"yes"`/`"no"`, „empfohlen" und Vorauswahl bei `recommendedOption` `"yes"`/`"no"`, Wege und „Eigene Antwort schreiben" wie bei single_choice (Story `StepYesNo`)
-- [ ] M6: Notizmodus wandert beim Blättern weder vor noch zurück; Fokus springt nicht auf den Weg einer anderen Frage (Story `StepPaging`)
-- [ ] I13: nach „Speichern und weiter" Fokus auf der Überschrift der neuen Frage, Pager-Zählung als Live-Region (Story `StepPaging`)
-- [ ] Esc im Notizmodus schließt ohne zu speichern, Text bleibt (Story `StepAskClient`)
-- [ ] Wege während `pending` gesperrt (Story `StepLoadingAndError`)
+- [x] `yes_no` ohne `answerOptions`: zwei Optionen „Ja"/„Nein", `optionId` `"yes"`/`"no"`, „empfohlen" und Vorauswahl bei `recommendedOption` `"yes"`/`"no"`, Wege und „Eigene Antwort schreiben" wie bei single_choice (Story `StepYesNo`)
+- [x] M6: Notizmodus wandert beim Blättern weder vor noch zurück; Fokus springt nicht auf den Weg einer anderen Frage (Story `StepPaging`)
+- [x] I13: nach „Speichern und weiter" Fokus auf der Überschrift der neuen Frage, Pager-Zählung als Live-Region (Story `StepPaging`)
+- [x] Esc im Notizmodus schließt ohne zu speichern, Text bleibt (Story `StepAskClient`)
+- [x] Wege während `pending` gesperrt (Story `StepLoadingAndError`)
 
 Status: zurück auf Abnahme (Nachprüfung von M6 und den zwei Nachträgen).
+
+### Nachprüfung 2 2026-10-26
+
+Abnehmer: Claude (Abnahme-Agent, fremde Sitzung; weder Bauender noch Prüfer
+der Abnahme vom 2026-10-24 oder der ersten Nachprüfung). Stand `8280d42`, der
+Code dieser Nachbesserung in `137fc01` (Basis `9901556` = origin/main),
+Arbeitsbaum zu Beginn sauber. Gelesen: `CLAUDE.md`, Skill `v3-komponente`
+(Abnahme), §9 und die neue Regel I13 der Guideline (`design-guidelines.md:270`,
+Stand-Zeile `:30`), diese Spec ab „Nachprüfung 2026-10-26" (Mangel 6,
+Hinweise 1–8) mit „Nachbesserung 2026-10-26" und „Nachtrag — `yes_no`",
+`git show 137fc01` für `ClarificationCard.tsx`,
+`ClarificationCard.stories.tsx`, `ChoicePrompt.tsx`, `primitives/focus.ts`
+(`useFocusOnNewRecord`), `RecordPager.tsx` (Live-Region), `v3.css`, dazu
+L-368. Gemessen mit `scripts/cdp.mjs` (chrome-headless-shell 155) am
+Dev-Server 6107, ein Browser für alle Messungen (zusammen mit 0223, 0224,
+0057), Fenster 1042 × 1000 (= 1280 px mit Seitenleiste), Querlauf auch bei
+1480 und 1920; Tastatur mit echten Tastendrücken (Tab, Pfeil, Enter,
+`Strg+Enter`, Esc), Klicks mit echten Mausereignissen. Gegenprobe der übrigen
+Stories: `9901556` in einem Worktree im Scratchpad und `8280d42` je statisch
+gebaut, alle 22 Card- und 10 ChoicePrompt-Stories beider Stände in derselben
+Sitzung geladen, `innerHTML` (nach Angleichung der `useId`-Kennungen) und die
+Geometrie jedes Elements verglichen — einmal roh, einmal nach Abzug der
+gewollten I13-Merkmale (`v2clc__q`, `tabindex="-1"` am `h2`, `aria-live` am
+Pager). Befehle selbst gelaufen (dieselben Läufe wie 0224, am selben Stand).
+Bildschirmfotos `.playwright-mcp/0222-nachpruefung2-step-yes-no-1042.png`,
+`…-step-paging-q2.png`, `…-ask-client-prefilled.png`,
+`…-step-loading-and-error.png`.
+
+| Mangel · Kriterium | Nachweis (Story-ID · Befehl · Messwert · Datei:Zeile) | Ergebnis |
+|---|---|---|
+| M6 Notizmodus wandert beim Blättern weder vor noch zurück; Fokus nicht auf dem Weg einer anderen Frage (Story `StepPaging`) | `--step-paging`: Klick auf „Beim Mandanten klären" → Notizfläche offen, Fokus im Notizfeld; „Notiz zu Frage 1" getippt; Klick auf „Nächster Datensatz" → „Frage 2 von 2", Notizfläche `hidden`, Antwortfläche sichtbar mit **ihrer** Vorauswahl, Fokus auf der Überschrift von Frage 2 (der Pfeil wurde zum gesperrten Platz) — nicht auf „Beim Mandanten klären". Enter auf „Vorheriger Datensatz" → Frage 1 **ohne** Notizmodus, mit ihrer Empfehlung. Zweiter Rundlauf mit Enter auf dem Pfeil: gleich. Code `ClarificationCard.tsx:791–803` (`wasAskingFor` als Kennung, `onNew` beendet den Notizmodus) | ✓ behoben |
+| I13: nach „Speichern und weiter" Fokus auf der Überschrift der neuen Frage, Pager-Zählung als Live-Region (Story `StepPaging`) | `--step-paging`: Pfeil ↓ wählt auf Frage 1 die zweite Option, `Strg+Enter` am Radio → „Frage 2 von 2", Fokus `h2.v2clc__q` (`tabindex="-1"`, `outline: none`), `.v2pager__count` mit `aria-live="polite" aria-atomic="true"` (`RecordPager.tsx:124`); `Tab` → die vorgewählte erste Option. Die andere Hälfte der Regel („Fokus auf dem Pfeil bleibt") an drei Fragen gemessen, in `clarificationrow--in-batch-review-drawer`: Enter auf „Nächster Datensatz" → „Frage 2 von 3", Fokus bleibt auf dem Pfeil; noch einmal → „Frage 3 von 3", der Pfeil wird gesperrter Platz, Fokus auf `h2`; Fokus im Antwortfeld und geblättert → `h2`. Umsetzung `focus.ts:66–82` | ✓ |
+| Esc im Notizmodus schließt ohne zu speichern, Text bleibt (Story `StepAskClient`) | `--step-ask-client`, obere Karte: Enter auf „Beim Mandanten klären" → Fokus im Notizfeld; „Bitte Beleg nachreichen" getippt; Esc → Notizfläche zu, kein Callout (nichts gespeichert), Fokus auf „Beim Mandanten klären"; Enter → Feld wieder mit dem Text. Code `:1143–1148` (`stopPropagation`, damit ein Drawer um die Karte offen bleibt — nur im Code, keine Story mit Karte im Drawer) | ✓ |
+| Wege während `pending` gesperrt (Story `StepLoadingAndError`) | `--step-loading-and-error` oben (`pending`): „Sende …", drei Radios gesperrt, „Eigene Antwort schreiben" und „Anderweitig geklärt" `disabled`; unten (Fehler) beide bedienbar. Die Story hat nur diese zwei Wege; „Beim Mandanten klären", „Zurückstellen" und „Zurückstellung aufheben" sperren laut Code ebenso (`ClarificationCard.tsx:903`, `:918`, `:931`; `ChoicePrompt.tsx:177`) | ✓ |
+| `yes_no` ohne `answerOptions` (Story `StepYesNo`) | `--step-yes-no`: zwei Zeilen „Ja empfohlen" · „Nein" (je 604 × 40,9 px), Werte `yes`/`no`, `yes` vorgewählt, „Warum empfohlen: …" direkt darunter, Wege „Eigene Antwort schreiben · Beim Mandanten klären · Anderweitig geklärt · Zurückstellen"; `Strg+Enter` → „Gesendet: optionId: yes"; Pfeil ↓ und `Strg+Enter` → „optionId: no"; „Eigene Antwort schreiben" → Fokus im Feld, Text und `Strg+Enter` → „optionId: no · Text: …". Volle Karte `--answering` (Ja/Nein ohne `answerOptions`): Radios `yes`=Ja, `no`=Nein, gesendet „Ja/Nein: optionId yes". Code `:383` (`YES_NO`), `:851`. Lesemodus „Empfehlung: Ja" nur im Code (`:856`, `:886`, Hinweis 10) | ✓ |
+| Hinweis 1 (Vorbelegung ohne Story) | `--step-ask-client`, untere Karte: Callout „Beim Mandanten zu klären: Bitte die Rechnung von Wolkenhaus …" von Anfang an in der oberen Zone; „Beim Mandanten klären" → Feld mit der Notiz gefüllt, Fokus darin | erledigt |
+| Hinweis 3 (Wege während `pending`) | s. oben | erledigt |
+| Hinweis 5 (`as` in der Zählung) | `:1014` zählt über `evidenceGroups(evidence)`, ohne Zusicherung | erledigt |
+| Hinweis 6 (640 px) | nicht behoben, begründet mit L1 (ab 700 px kein Überstand); als Ausbau benannt | angenommen |
+| Hinweis 7 (Fokus nach „Speichern und weiter") | Regel I13, s. oben | erledigt |
+| Hinweis 8 (Esc im Notizmodus) | s. oben | erledigt |
+| Hinweis 4 (Minus) | vorbestehend, eigene Aufgabe | vorbestehend |
+| Zusatz: übrige Stories unverändert | `9901556` gegen `8280d42`: 15 von 22 Card-Stories und alle 10 ChoicePrompt-Stories in HTML und Geometrie gleich. Unterschiede nur gewollt: `--step`, `--step-free-text`, `--step-deferred-with-history`, `--step-paging` allein `v2clc__q` und `tabindex="-1"` am `h2` (I13); `--step-loading-and-error` dazu `disabled` an zwei Wegen (H3); `--answering` allein die Werte `Ja`/`Nein` → `yes`/`no` (Nachtrag); `--step-ask-client` die zweite Karte (H1). Geometrie überall gleich außer `--step-ask-client` | ✓ |
+| Zusatz: Befehle | `typecheck` Exit 0; `check:type`, `check:language`, `check:when`, `check:icons`, `check:contrast` Exit 0, je `--test` Exit 0; `check:classes` nur die vier Altfälle, `--test` Exit 0; `pnpm build -o` ins Scratchpad Exit 0, Index führt `--step-yes-no` und `--step-paging` | ✓ |
+| Zusatz: Spec = Code | `recommendedOption`-JSDoc nennt `"yes"`/`"no"` und L-368; die Nachbesserungs- und Nachtrag-Tabellen wie gebaut; I13 in der Guideline mit Quelle und Datum | ✓ |
+| Zusatz: Querlauf | `--step-yes-no`, `--step-paging` bei 1042, 1480, 1920 px: `scrollWidth` = Fensterbreite; Konsole ohne Meldung | ✓ |
+| Zusatz: keine echten Daten | Datenprobe über die Diffs (`9901556..HEAD`): leer | ✓ |
+| offen (App): ersetzt `ClarificationDetail` in `close/CloseQuestions.tsx` | `befunde-app.md` E, L-363, L-364, L-368 | offen (App) |
+
+Neue Mängel: keine.
+
+#### Hinweise (nicht blockierend)
+
+Nummern fortlaufend (1, 3, 5, 7, 8 erledigt; 4 vorbestehend; 6 angenommen):
+
+- **Hinweis 9 · `StepPaging` zeigt I13 nur halb.** Mit zwei Fragen wird der
+  Pfeil an beiden Enden zum gesperrten Platz; die Story zeigt deshalb nur
+  „Fokus verloren → Überschrift", nie „Fokus bleibt auf dem Pfeil" (gemessen
+  in 0224, `InBatchReviewDrawer`). Eine dritte Frage in `StepPaging` zeigt die
+  Regel ganz an ihrem eigenen Baustein.
+- **Hinweis 10 · „Empfehlung: Ja" im Lesemodus ohne Story.** Nur der Code
+  (`ClarificationCard.tsx:856`, `:886`) belegt, dass der Lesemodus das Wort
+  statt der Kennung zeigt.
+- **Hinweis 11 · `YES_NO` als benannte Ausnahme.** Die zwei Wörter stehen als
+  lokale Liste in der Karte (`:383`), begründet im Nachtrag und in L-368. Nach
+  `CLAUDE.md` §3 gehört eine Ausnahme mit Owner und Datum auch in die
+  Guideline — bis L-368 (a) die Wörter ins Datenmodell holt.
+
+Vier Linsen: **Sprache** — „Ja"/„Nein" als Wörter, `yes`/`no` nur als
+Kennungen, „empfohlen" an der Zeile, „Warum empfohlen" darunter, die Wege im
+Imperativ mit Objekt ✓. **Bedienung** — der Fokus geht nach dem Speichern auf
+die Überschrift der neuen Frage, ein Tab führt zur Option, ein Fokus auf dem
+Pfeil bleibt dort, die Zählung ist Live-Region, Esc verlässt die Notiz ohne
+zu speichern und gibt den Fokus an den Weg zurück, während des Speicherns
+ist kein Ausweg bedienbar ✓. **Logik** — Notizmodus und Antwort leben jetzt
+gleich lang (an die Kennung der Frage gebunden), eine Ja/Nein-Frage hat genau
+einen Satz Kennungen, die Regel steht einmal (`useFocusOnNewRecord`) und gilt
+für beide Einzelprüfungen ✓. **Darstellung** — Ja/Nein als dieselben
+Zeilen-Optionen wie jede Auswahl (40,9 px), die Überschrift trägt den Fokus
+ohne Ring, sonst unverändert (Geometrie aller übrigen Stories gleich) ✓.
+
+Vier-Wochen-Test: bestanden — wer nach einer Pause „Speichern und weiter"
+drückt, landet auf der nächsten Frage und hört sie; eine Ja/Nein-Frage sieht
+aus wie jede andere Auswahl, mit „empfohlen" an der vorgewählten Zeile.
+
+Abgenommen von / am: Claude (fremde Nachprüfung), 2026-10-26, Stand `8280d42`
+(Code `137fc01`) · **Abgenommen mit Hinweis.** Mangel 6 behoben, die fünf
+Kriterien der Nachbesserung und des Nachtrags `yes_no` nachgewiesen. Offen:
+Hinweise 6 (angenommen), 9–11 (nicht blockierend), 4 vorbestehend; die
+Ablösung von `ClarificationDetail` sowie L-363, L-364, L-368 sind offen (App).
 

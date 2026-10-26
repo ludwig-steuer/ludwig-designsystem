@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Status | fertig — abgenommen mit Hinweis 2026-10-26 (fremde Nachprüfung), Stand `c848b6d`; offen (App): Ablösung von `DocumentReviewSingle` und der Tabelle in `StepDocumentReview` · davor: nicht abgenommen 2026-10-24 (fremde Abnahme, Stand `51db640`; Mängel 1–2) · Hashes: `51db640` (Bau) und `b2b84e5` (Nachbesserung) waren lokal und sind vor dem Push in `c848b6d` zusammengefasst (Stories mit fiktiven Daten); `51db640^` = `d3e91ff` |
+| Status | fertig — abgenommen mit Hinweis 2026-10-26 (Nachprüfung 2, Stand `8280d42`: Nachtrag „Übersicht statt Liste" und Fokusregel I13 erfüllt) · davor: abgenommen mit Hinweis 2026-10-26 (fremde Nachprüfung), Stand `c848b6d`; offen (App): Ablösung von `DocumentReviewSingle` und der Tabelle in `StepDocumentReview` · davor: nicht abgenommen 2026-10-24 (fremde Abnahme, Stand `51db640`; Mängel 1–2) · Hashes: `51db640` (Bau) und `b2b84e5` (Nachbesserung) waren lokal und sind vor dem Push in `c848b6d` zusammengefasst (Stories mit fiktiven Daten); `51db640^` = `d3e91ff` |
 | Stufe | neu `entities/source-document/SourceDocumentReview.tsx` · erweitert `patterns/ChoicePrompt` (Notizfeld je Option) · erweitert `entities/source-document/source-document-columns.tsx` (drei Spalten, ein Satz) |
 | Klassen-Test | Ansicht: nein (Beleg, Prüfgrund). Notizfeld je Option: ja (jede Auswahl, deren eine Antwort einen Satz braucht) |
 | Quelle | Auftrag llcto 2026-10-24 (Owner), Paket 3 · Wireframe `ludwig/app/reports/2026-10-24_abnahme-wizard-wireframe.html` (Schritt Belege: Übersicht und „Beleg 1 von 5") · Konzept `simple-batch-review.md` §12 „Belege", Owner-Entscheide 1 und 2 der zweiten Runde |
@@ -431,7 +431,77 @@ Konten".
 
 Abnahmekriterien dazu (offen, fremde Abnahme):
 
-- [ ] Übersicht: Satz + Zählung in Lesebreite, Hauptknopf „n Belege durchgehen", Zweitknopf „Überspringen: Konten"; alles entschieden → „Weiter: Konten" (Story `Overview`)
-- [ ] Liste zugeklappt mit Kopf „Alle zu prüfenden Belege als Liste", Kopf schaltet per Klick und Tastatur, keine doppelte Kante (Story `Overview`)
-- [ ] I13: nach dem Entscheiden Fokus auf der Überschrift des nächsten Belegs (Story `Interactive`)
+- [x] Übersicht: Satz + Zählung in Lesebreite, Hauptknopf „n Belege durchgehen", Zweitknopf „Überspringen: Konten"; alles entschieden → „Weiter: Konten" (Story `Overview`)
+- [x] Liste zugeklappt mit Kopf „Alle zu prüfenden Belege als Liste", Kopf schaltet per Klick und Tastatur, keine doppelte Kante (Story `Overview`)
+- [x] I13: nach dem Entscheiden Fokus auf der Überschrift des nächsten Belegs (Story `Interactive`)
+
+### Nachprüfung 2 2026-10-26
+
+Abnehmer: Claude (Abnahme-Agent, fremde Sitzung; weder Bauender noch Prüfer
+der Abnahme vom 2026-10-24 oder der ersten Nachprüfung). Stand `8280d42` —
+Fokus in `137fc01` (`SourceDocumentReview.tsx`, `primitives/focus.ts`,
+`RecordPager.tsx`), Übersicht und `head.collapsed` in `8280d42` (Story
+`Overview`, `DataTable.tsx`, `v3.css` `.v2dt__*`); Basis `9901556`,
+Arbeitsbaum zu Beginn sauber. Gelesen: `CLAUDE.md`, Skill `v3-komponente`
+(Abnahme), §9 und I13 der Guideline, diese Spec ab „Nachprüfung 2026-10-26"
+mit „Nachbesserung (Hinweise der Nachprüfung)" und „Nachtrag — Übersicht
+statt Liste", die Diffs beider Commits für diese Dateien, den Nachtrag in 0057.
+Gemessen mit `scripts/cdp.mjs` (chrome-headless-shell 155) am Dev-Server
+6107, ein Browser für alle Messungen (zusammen mit 0222, 0224, 0057), Fenster
+1042 × 1000 (= 1280 px mit Seitenleiste), Querlauf auch bei 1480 und 1920;
+Tastatur mit echten Tastendrücken (Tab, Enter, Leertaste, `Strg+Enter`, J/K),
+Klicks und Hover mit echten Mausereignissen; Zugänglichkeitsbaum über CDP.
+Gegenprobe der übrigen fünf Stories: `9901556` (Worktree im Scratchpad) und
+`8280d42` je statisch gebaut, `innerHTML` und Geometrie verglichen (s. 0222).
+Befehle s. 0222 (dieselben Läufe). Bildschirmfotos
+`.playwright-mcp/0223-nachpruefung2-overview-1042.png`,
+`…-overview-closed-1042.png`, `…-interactive-focus.png`; Kopf der Liste:
+`0057-collapsed-focus.png`, `0057-collapsed-open-1042.png`.
+
+| Hinweis · Kriterium | Nachweis (Story-ID · Befehl · Messwert · Datei:Zeile) | Ergebnis |
+|---|---|---|
+| I13: nach dem Entscheiden Fokus auf der Überschrift des nächsten Belegs (Story `Interactive`) — Hinweis 6 | `--interactive`, Beleg 1: Kommentar ins Pflichtfeld, `Strg+Enter` → nach „Sende …" „Beleg 2 von 5", Fokus `h2.v3docreview__q` „Wohin gehört dieser Beleg?" (`tabindex="-1"`, `outline: none`), Zählung `aria-live="polite"`; `Tab` → die vorgewählte Option. K auf der Option → „Beleg 3 von 5", Fokus `h2`; Enter auf „Nächster Datensatz" → „Beleg 4 von 5", der Fokus bleibt auf dem Pfeil; J ohne Fokus (`body`) → „Beleg 3 von 5", Fokus `h2`. Code `SourceDocumentReview.tsx:59–61`, `:84` | ✓ |
+| Übersicht: Satz + Zählung in Lesebreite, „n Belege durchgehen", „Überspringen: Konten"; alles entschieden → „Weiter: Konten" (Story `Overview`) | oben: Karte „Belege" (`h2`, Unterzeile „01.–31.01.2026"), Satz `lw-ui-lead` „Im Zeitraum sind 61 Belege eingegangen, Ludwig hat die meisten gebucht. 3 brauchen Ihre Entscheidung." (13,5 px, 579 px breit), Zählung `v2fields--soft` 686 px = `--content-measure` (68ch), Zahlen rechts mit `tabular-nums`; Hauptknopf „3 Belege durchgehen" (x 33) vor dem Zweitknopf „Überspringen: Konten" (x 238), je 34,8 px hoch; Klick → „Einzelprüfung beginnt bei Beleg 1 von 5."; Tab: Hauptknopf → Zweitknopf → Kopf der Liste. Unten: „… Alle sind entschieden.", nur „Weiter: Konten" → „Weiter zu Konten.", kein Zweitknopf | ✓ |
+| Liste zugeklappt mit Kopf „Alle zu prüfenden Belege als Liste", schaltet per Klick und Tastatur, keine doppelte Kante (Story `Overview`) | Karte 1010 × 72,1 px, nur der Kopf (`h2`, Unterzeile „3 von 5 offen"); Unterlinie des Kopfes 0, die Karte 1 px rundum ohne Schatten — keine doppelte Kante; Hover `rgb(244, 246, 248)`; Klick öffnet (Karte 405,2 px, Unterlinie 1 px `#DDE2E8`, Köpfe „Beleg · Betrag · Belegdatum · Prüfgrund · Empfehlung · Entscheidung", „offen" 6,69:1 in drei Zeilen, kein Querlauf in der Tabelle) und schließt; Tab auf den Kopf: Ring 2 px innen, 3,43:1 auf `surface-head`, Enter öffnet, Leertaste schließt, nach dem Öffnen führt Tab in die Tabelle. Unter der Liste steht nichts | ✓ |
+| Hinweis 3 (Leerzustand der Übersicht ohne Story) | teilweise: der Zustand „alles entschieden" hat jetzt eine Story; die leere Liste (kein Beleg zu prüfen) weiter nicht — `empty` ohne Zahl und ohne `done` (`SourceDocumentReview.stories.tsx:401`) | offen (Hinweis 3) |
+| Hinweis 4 (Unterzeile im Hover knapp) | unverändert | offen (besteht) |
+| Hinweis 5 (Minus) | vorbestehend, eigene Aufgabe | vorbestehend |
+| Zusatz: übrige Stories unverändert | `--filled`, `--interactive`, `--states`, `--preview-loading`, `--without-recommendation`: `9901556` gegen `8280d42` HTML gleich bis auf `v3docreview__q` und `tabindex="-1"` am `h2` sowie `aria-live` am Pager, Geometrie gleich | ✓ |
+| Zusatz: Befehle | s. 0222 (`typecheck`, sechs Wächter samt `--test`, `pnpm build -o` Exit 0; Index führt `sourcedocumentreview--overview`) | ✓ |
+| Zusatz: Querlauf | `--overview` bei 1042, 1480, 1920 px: `scrollWidth` = Fensterbreite; Konsole ohne Meldung | ✓ |
+| Zusatz: keine echten Daten | Datenprobe über die Diffs (`9901556..HEAD`): leer | ✓ |
+| offen (App): ersetzt `DocumentReviewSingle` und die Tabelle in `StepDocumentReview` | `befunde-app.md` E, L-365, L-366 | offen (App) |
+
+Neue Mängel: keine.
+
+#### Hinweise (nicht blockierend)
+
+- **Hinweis 3** (offen seit 2026-10-24, teilweise erledigt): eine Story für
+  die leere Liste mit Zahl („Jeder Beleg ist verarbeitet, zugeordnet oder
+  gesichtet.", Leertext „erledigt", `empty.done`).
+- **Hinweis 4** (offen seit 2026-10-24): Unterzeile im Hover 4,51:1.
+- **Hinweis 5** (vorbestehend): Minus als U+002D.
+- **Hinweis 7 · „0 von 5 offen".** Ist alles entschieden, zählt die
+  Unterzeile der Liste das Fehlende; ein Leertext „erledigt" sagt mit Zahl,
+  was getan ist. Markup der App (Story) — beim Einbau ansehen.
+
+Vier Linsen: **Sprache** — ein Satz sagt, worum es geht, die Knöpfe nennen
+die Folge („3 Belege durchgehen", „Weiter: Konten"), der Kopf der Liste sagt,
+was darin ist ✓. **Bedienung** — Hauptknopf zuerst in der Tab-Folge, der
+Kopf der Liste schaltet mit Klick, Enter und Leertaste, Ring 3,43:1, nach dem
+Entscheiden steht der Fokus auf der Frage des nächsten Belegs, ein Fokus auf
+dem Pfeil bleibt dort ✓. **Logik** — eine Übersicht statt einer Liste als
+Einstieg, die Liste bleibt erreichbar, der nächste Schritt ist benannt, wenn
+nichts mehr offen ist (I10) ✓. **Darstellung** — zwei Karten, keine in der
+anderen, die Zählung in Lesebreite mit Zahlen rechts, zugeklappt nur der Kopf
+ohne doppelte Kante ✓.
+
+Vier-Wochen-Test: bestanden — der Satz sagt die Lage, der dunkle Knopf mit
+der Zahl ist der Weg, ohne Taste, Farbe oder Zeichen.
+
+Abgenommen von / am: Claude (fremde Nachprüfung 2), 2026-10-26, Stand
+`8280d42` · **Abgenommen mit Hinweis.** Die drei Kriterien des Nachtrags
+nachgewiesen. Offen: Hinweise 3 (teilweise), 4, 7; 5 vorbestehend; die
+Ablösung von `DocumentReviewSingle` und der Tabelle in `StepDocumentReview`
+ist offen (App).
 
