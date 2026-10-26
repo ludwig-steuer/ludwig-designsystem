@@ -906,7 +906,7 @@ export function ClarificationCard({
   ) : null;
   const resolveButton = canExit && onResolve ? (
     <TextButton onClick={() => setResolving(true)} disabled={pending}>
-      Anderweitig geklärt
+      {RESOLVED_WORD}
     </TextButton>
   ) : null;
   // A fragment, as before: in the card's line the gap of the line spaces the

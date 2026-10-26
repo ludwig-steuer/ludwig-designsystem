@@ -78,7 +78,7 @@ gegebenen Antwort, nur zum Lesen.
 | `hideBadges` | `boolean` | nein | ohne Badges (`groupBy="state"` setzt es): den Stand sagt die Gruppe, „Blockierend" trägt nichts, weil fast jede Frage blockiert (Owner 2026-10-26, Nachtrag); eine offene oder zurückgestellte **optionale** Frage trägt in der Meta-Zeile das Registry-Wort „optional" | `ClarificationRow/ByState` |
 
 **Die Zeile mit Antwort:** Ist `resolutionReason` gesetzt, steht unter dem
-Titel „Ohne Antwort aufgelöst: {resolutionReason}" — dasselbe Wort wie im
+Titel „Anderweitig geklärt: {resolutionReason}" — dasselbe Wort wie im
 Verlauf der Karte (`RESOLVED_WORD`). Sonst, ist `answer` gesetzt, „Antwort:
 {answer}". Einzeilig gekürzt, ganz im `title`-Hover und im Aufklapper; das
 Wort vor dem Doppelpunkt grau. Ohne beide keine Zeile.
@@ -158,7 +158,7 @@ Fehler (s. Verhalten).
   Bei einer Auflösung ohne Antwort **nicht** dort, sondern der Grund als
   `ClarificationVM.resolutionReason` (Entitätsprofil: „`resolution` …
   benennen, statt ihn wie eine Antwort zu zeigen") — die Zeile sagt dann
-  „Ohne Antwort aufgelöst: …".
+  „Anderweitig geklärt: …".
 
 ## Offene Fragen
 
@@ -550,4 +550,15 @@ Hinweise 2, 6 und 7; Knopf und Drawer im Rückfragen-Schritt sowie L-367 offen
 | Hinweise 4, 6, 7 | 4 Owner-Wort (Gruppe „Beantwortet" folgt der Registry); 6 vorbestehend, bei 1280 px eine Zeile; 7 `iframe`/`contenteditable` in `TABBABLE`: bewusst nicht — in ein `iframe` hinein lässt sich Tab nicht fangen, der Fokus käme nicht zurück; heute kein Fall |
 
 Status: Abnahme — Nachprüfung nur noch für M3 (Text) und die Umbenennung.
+
+## Nachtrag 2026-10-26 — ein Wort für die Auflösung (llcto, Owner-Linie)
+
+Entschieden (llcto, „ein Wort für eine Sache"): das Ereignis heißt überall
+**„Anderweitig geklärt"** — Knopf, Kartenverlauf, Listenzeile, Faden.
+„Ohne Antwort aufgelöst" entfällt. `RESOLVED_WORD` (`Clarification.tsx`)
+trägt jetzt dieses Wort und ist die eine Quelle für den Knopf der Karte, den
+Verlauf der Karte, die Zeile der Liste und den Faden (`ClarificationThread`).
+Die Zeile lautet „Anderweitig geklärt: {Grund}". Unverändert, weil es die
+Handlung ist und nicht das Ereignis: der Dialog dazu („Ohne Antwort
+auflösen", Knopf „Auflösen").
 

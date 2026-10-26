@@ -1,7 +1,7 @@
 import { Disclosure } from "../../primitives/Disclosure";
 import { Time } from "../../primitives/Time";
 import { StatusBadge } from "../../patterns/StatusBadge";
-import { AUDIENCE_LABEL, type ClarificationVM } from "./Clarification";
+import { AUDIENCE_LABEL, RESOLVED_WORD, type ClarificationVM } from "./Clarification";
 import { actorName, type ClarificationDetailVM, type ClarificationEvent } from "./ClarificationCard";
 
 /**
@@ -37,7 +37,7 @@ function Line({ c, current }: { c: ThreadItem; current: boolean }) {
 
 const STEP: Record<Exclude<ClarificationEvent["kind"], "raised">, string> = {
   answered: "Antwort",
-  resolved: "Anderweitig geklärt",
+  resolved: RESOLVED_WORD,
   deferred: "Zurückgestellt",
 };
 

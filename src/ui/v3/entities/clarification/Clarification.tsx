@@ -80,8 +80,8 @@ export interface ClarificationVM {
   /**
    * Why it was resolved without an answer, as text (0224, acceptance M2): a
    * resolution is no answer and must not read like one (entity profile
-   * „Eine Antwort, nicht mehrere"). With it the row says „Ohne Antwort
-   * aufgelöst: …" instead of „Antwort: …" and it wins over `answer`.
+   * „Eine Antwort, nicht mehrere"). With it the row says „Anderweitig
+   * geklärt: …" instead of „Antwort: …" and it wins over `answer`.
    * `…Reason`, because the column `resolution` holds the **kind**
    * (`answered`/`obsolete`), not the reason (second check of 0224, hint 3).
    */
@@ -89,10 +89,11 @@ export interface ClarificationVM {
 }
 
 /**
- * The word for a question closed without an answer — once, for the row and for
- * the history of the card (0224, acceptance M2).
+ * The word for a question closed without an answer — once, for the way out of
+ * the card, its history, the row and the thread (0224, acceptance M2; one
+ * word for one thing, llcto 2026-10-26: „Ohne Antwort aufgelöst" is gone).
  */
-export const RESOLVED_WORD = "Ohne Antwort aufgelöst";
+export const RESOLVED_WORD = "Anderweitig geklärt";
 
 function stateBadges(c: ClarificationVM) {
   if (c.type === "comment") {
