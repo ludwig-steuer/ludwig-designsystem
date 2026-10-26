@@ -5180,6 +5180,9 @@ a.v3bbr__val:hover { text-decoration-color: currentColor; }
    options stand under it, indented to the group's text, in a fieldset of
    their own whose legend is only for the screen reader. */
 .v2radiogrp__group, .v2radiogrp__sub { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+/* `relative`: the count for the screen reader (`.v2vh`, absolute) stays
+   inside the group, not somewhere a scroller would widen for it. */
+.v2radiogrp__group { position: relative; }
 /* Radio width (14, `.v2radio`) plus the gap of the line (8): the sub radio
    stands under the group's text, in `list` and in `rows` alike (H7). */
 .v2radiogrp__sub { border: none; margin: 0; padding: 0 0 0 calc(14px + var(--space-2)); }

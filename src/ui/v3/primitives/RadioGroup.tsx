@@ -87,7 +87,7 @@ export function RadioGroup({
           const recommended = !open && o.options.some((c) => c.recommended);
           return (
             <div key={o.value} className={`v2radiogrp__group${open ? " is-open" : ""}`}>
-              <Line o={{ ...o, recommended }} name={name} value={value} onChange={onChange} disabled={disabled} chevron />
+              <Line o={{ ...o, recommended }} name={name} value={value} onChange={onChange} disabled={disabled} chevron folded={open ? undefined : o.options.length} />
               {open ? (
                 <fieldset className="v2radiogrp__sub">
                   <legend className="v2vh">{o.label}</legend>
@@ -112,6 +112,7 @@ function Line({
   onChange,
   disabled,
   chevron,
+  folded,
 }: {
   o: RadioOption;
   name: string;
@@ -120,6 +121,13 @@ function Line({
   disabled?: boolean;
   /** The group row: the sign that more lies under it, turned when open. */
   chevron?: boolean;
+  /**
+   * Folded group: how many options wait in it. Only for the screen reader
+   * („Ablegen ohne Buchung, 5 Möglichkeiten") — the chevron says it to the eye,
+   * and a radio has no `aria-expanded` (llcto 2026-10-27). Open, the nested
+   * group names itself.
+   */
+  folded?: number;
 }) {
   const off = disabled || o.disabled;
   return (
@@ -135,6 +143,7 @@ function Line({
       />
       <span>
         {o.label}
+        {folded ? <span className="v2vh">{`, ${folded} ${folded === 1 ? "Möglichkeit" : "Möglichkeiten"}`}</span> : null}
         {/* The space keeps the accessible name two words („… (4670) empfohlen"). */}
         {o.recommended ? <> <span className="v2radioline__rec">empfohlen</span></> : null}
         {o.hint ? <span className="v2radioline__hint">{o.hint}</span> : null}
