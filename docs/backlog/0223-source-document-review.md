@@ -410,3 +410,28 @@ die Ablösung von `DocumentReviewSingle` und der Tabelle in
 | H3 Leerzustand der Übersicht ohne Story | kommt mit dem Nachtrag „Übersicht statt Liste" |
 | H5 Minus als U+002D | vorbestehend im ganzen Set, eigene Aufgabe |
 
+## Nachtrag 2026-10-26 — Übersicht statt Liste (Owner über llcto)
+
+Der Einstieg in den Beleg-Schritt ist keine Liste, sondern eine Übersicht
+(Wireframe angepasst):
+
+| Was | Entscheid |
+|---|---|
+| Karte „Belege" | Kopf „Belege", Unterzeile der Zeitraum (`DateRange`); darunter **ein Satz**, worum es geht (`lw-ui-lead`: „Im Zeitraum sind 61 Belege eingegangen, Ludwig hat die meisten gebucht. 3 brauchen Ihre Entscheidung."), die Zählung als `FieldList` in Lesebreite (`--content-measure` — eine Zahl steht nicht eine Seite weit von ihrem Wort) |
+| Wege | `ActionBar` unter der Zählung, linksbündig in Lesefolge: Hauptknopf **„3 Belege durchgehen"** (startet die Einzelprüfung bei Beleg 1; „1 Beleg durchgehen" bei einem), Zweitknopf **„Überspringen: Konten"**. Ist alles entschieden, steht nur „Weiter: Konten" (I10: der nächste Schritt ist benannt) |
+| Liste | bleibt, zugeklappt: `DataTable` mit Kopf „Alle zu prüfenden Belege als Liste", Unterzeile „3 von 5 offen", `head.collapsed` (neu, Nachtrag 0057) — Tabelle in Karte mit Kopf, keine Karte in der Karte, keine lose Zeile (D14). Spalten wie bisher (`DOCUMENT_REVIEW_VIEW`) |
+| Kein „Weiter" | unter der Liste steht nichts mehr |
+
+Story `Overview` zeigt beide Zustände untereinander: drei offen und alles
+entschieden (Hinweis H3 der Nachprüfung, Leerzustand „erledigt").
+Gemessen (1042 px): kein Querlauf; zu nur der Kopf der Liste (72 px), Enter
+öffnet, Fokusring sichtbar; Knöpfe 35 px hoch, Hauptknopf zuerst; Klick →
+„Einzelprüfung beginnt bei Beleg 1 von 5."; entschieden → nur „Weiter:
+Konten".
+
+Abnahmekriterien dazu (offen, fremde Abnahme):
+
+- [ ] Übersicht: Satz + Zählung in Lesebreite, Hauptknopf „n Belege durchgehen", Zweitknopf „Überspringen: Konten"; alles entschieden → „Weiter: Konten" (Story `Overview`)
+- [ ] Liste zugeklappt mit Kopf „Alle zu prüfenden Belege als Liste", Kopf schaltet per Klick und Tastatur, keine doppelte Kante (Story `Overview`)
+- [ ] I13: nach dem Entscheiden Fokus auf der Überschrift des nächsten Belegs (Story `Interactive`)
+

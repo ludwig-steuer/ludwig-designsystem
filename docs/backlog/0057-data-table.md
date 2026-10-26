@@ -406,3 +406,21 @@ Rahmen scrollt (930 > 798), die Aktionsspalte ist erreichbar statt
 abgeschnitten. **Stand:** gebaut und gemessen, fremde Abnahme steht aus.
 Der Override in der App (`batch-review/ui/Step3Single.tsx`, `ponytail:`) kann
 mit dem nächsten Zeigerhub weg.
+
+## Nachtrag 2026-10-26 — zugeklappter Kopf (`head.collapsed`, aus 0223)
+
+`head.collapsed?: boolean`: die Tabelle beginnt zugeklappt, ihr Kartenkopf
+ist der Schalter (natives `<details>`, wie `TodoGroup.collapsed` in 0187) —
+für eine Liste, die erreichbar bleiben muss, aber nicht im Weg stehen soll
+(Owner 2026-10-26: die Belege hinter der Übersicht des Beleg-Schritts). Der
+Chevron steht im Zeichen-Platz des Kopfes, der Kopf antwortet auf Hover,
+zugeklappt fällt seine Unterlinie weg (sonst doppelte Kante).
+Bewusst nicht: Aktionen oder Auswahlleiste im zuklappenden Kopf — ein Knopf
+im Schalter schaltete mit; mit `selection` wird `collapsed` übergangen.
+Nachweis: Story `SourceDocumentReview/Overview` (im Einsatz) — die Datei hier
+hat 24 Stories, eine weitere kommt nicht dazu. Gemessen: zu nur der Kopf
+(Karte 72 px, Unterlinie 0), `Enter` auf dem Kopf öffnet, Fokusring 2 px,
+Hover `rgb(244, 246, 248)`, offen Unterlinie 1 px und die Tabelle darunter;
+die Stories ohne die Prop rendern ohne `<details>` (`Filled`, `Empty`,
+`Selection`, `StickySelection`, `Expand` geprüft). Fremde Abnahme steht aus.
+

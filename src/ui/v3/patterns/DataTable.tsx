@@ -367,6 +367,14 @@ interface DataTableBase<T> {
     actions?: ReactNode;
     /** `h` level of the card head by position (0220 §2): 2 on a page, 3 in a drawer. */
     headingLevel?: 2 | 3;
+    /**
+     * Starts folded; the head opens it (native `<details>`, like
+     * `TodoGroup.collapsed`, 0187) — for a table that must stay reachable but
+     * not in the way, the list behind an overview (0223, owner 2026-10-26).
+     * A folding head carries no actions and no selection bar: a button inside
+     * the toggle would toggle too. With `selection` it is ignored.
+     */
+    collapsed?: boolean;
   };
   /** Row measure (E9) — the page decides, not the reader. */
   density?: TableDensity;
@@ -652,27 +660,40 @@ export function DataTable<T>(props: DataTableProps<T>) {
       </Row>
     ) : null;
 
-  const card = (
-    <Card>
-      <CardHead
-        title={head.title}
-        sub={head.sub}
-        {...(head.headingLevel ? { headingLevel: head.headingLevel } : {})}
-        {...(selection?.sticky ? { sticky: true } : {})}
-        icon={head.icon}
-        meta={head.meta}
-        actions={
-          selection ? (
-            <SelectionScopeBar
-              actions={selection.actions}
-              fallback={head.actions}
-              {...(selection.sticky ? { sticky: true } : {})}
-            />
-          ) : (
-            head.actions
-          )
-        }
-      />
+  const folds = Boolean(head.collapsed) && !selection;
+  const cardHead = (
+    <CardHead
+      title={head.title}
+      sub={head.sub}
+      {...(head.headingLevel ? { headingLevel: head.headingLevel } : {})}
+      {...(selection?.sticky ? { sticky: true } : {})}
+      icon={
+        folds ? (
+          <>
+            <ActionIcon action="collapse" size={14} className="v2dt__chev" />
+            {head.icon}
+          </>
+        ) : (
+          head.icon
+        )
+      }
+      meta={head.meta}
+      actions={
+        folds ? undefined : selection ? (
+          <SelectionScopeBar
+            actions={selection.actions}
+            fallback={head.actions}
+            {...(selection.sticky ? { sticky: true } : {})}
+          />
+        ) : (
+          head.actions
+        )
+      }
+    />
+  );
+
+  const tableBody = (
+    <>
       <Table
         cols={cols}
         minWidth={
@@ -703,6 +724,22 @@ export function DataTable<T>(props: DataTableProps<T>) {
           }
         />
       ) : null}
+    </>
+  );
+
+  const card = (
+    <Card>
+      {folds ? (
+        <details className="v2dt__fold">
+          <summary className="v2dt__foldsum">{cardHead}</summary>
+          {tableBody}
+        </details>
+      ) : (
+        <>
+          {cardHead}
+          {tableBody}
+        </>
+      )}
       {next ? <CardFoot>{next}</CardFoot> : null}
     </Card>
   );

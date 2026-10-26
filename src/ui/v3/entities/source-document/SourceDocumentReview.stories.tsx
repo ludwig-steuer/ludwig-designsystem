@@ -3,9 +3,13 @@ import { useState } from "react";
 
 import type { ChoiceOption } from "../../patterns/ChoicePrompt";
 import { DataTable } from "../../patterns/DataTable";
+import { ActionIcon } from "../../Icons";
+import { ActionBar } from "../../primitives/ActionBar";
+import { Button } from "../../primitives/Button";
 import { FieldList } from "../../primitives/FieldList";
 import { RecordPager } from "../../primitives/RecordPager";
 import { Card, CardHead } from "../../primitives/Table";
+import { DateRange } from "../../primitives/Time";
 import type { SourceDocumentVM } from "./SourceDocument";
 import { SourceDocumentPreview } from "./SourceDocumentPreview";
 import { SourceDocumentReview } from "./SourceDocumentReview";
@@ -314,48 +318,96 @@ export const PreviewLoading: Story = {
 };
 
 /**
- * The overview before the check (0223): the counts as a list, then every
- * document to check as a table — reason, recommendation, decision. Lists and
- * tables, never tiles (owner rule).
+ * The way into the step (0223, owner 2026-10-26): an overview, not a list.
+ * One sentence and the counts; under them the main way, „3 Belege
+ * durchgehen" — it starts the single review at document 1 — and the side
+ * way „Überspringen: Konten". The table of every document to check stays,
+ * folded (`DataTable` `head.collapsed`); no „Weiter" under it. Below: the
+ * same step once everything is decided — the main way names the next step.
  */
 export const Overview: Story = {
-  render: () => {
+  render: function OverviewStory() {
+    const [went, setWent] = useState<string | null>(null);
     const decidedOf: Record<string, string> = { "doc-statement": "archive", "doc-newsletter": "delete" };
-    const cols = sourceDocumentColumns({
-      columns: DOCUMENT_REVIEW_VIEW,
-      href: (d) => `#review=${d.id}`,
-      review: (d) => {
-        const item = ITEMS.find((i) => i.document.id === d.id);
-        return {
-          recommended: item?.recommended ? (LABEL[item.recommended] ?? null) : null,
-          decided: decidedOf[d.id] ? (LABEL[decidedOf[d.id]!] ?? null) : null,
-        };
-      },
-    });
+    const cols = (decided: Record<string, string>) =>
+      sourceDocumentColumns({
+        columns: DOCUMENT_REVIEW_VIEW,
+        href: (d) => `#review=${d.id}`,
+        review: (d) => {
+          const item = ITEMS.find((i) => i.document.id === d.id);
+          return {
+            recommended: item?.recommended ? (LABEL[item.recommended] ?? null) : null,
+            decided: decided[d.id] ? (LABEL[decided[d.id]!] ?? null) : null,
+          };
+        },
+      });
+    const allDecided = Object.fromEntries(ITEMS.map((i) => [i.document.id, i.recommended ?? "archive"]));
+    const step = (decided: Record<string, string>) => {
+      const open = ITEMS.filter((i) => !decided[i.document.id]).length;
+      const columns = cols(decided);
+      return (
+        <div style={{ display: "grid", gap: "var(--space-4)" }}>
+          <Card>
+            <CardHead title="Belege" sub={<DateRange from="2026-01-01" to="2026-01-31" size="sm" />} />
+            <div style={{ padding: "var(--space-4)", display: "grid", gap: "var(--space-4)" }}>
+              <p className="lw-ui-lead">
+                Im Zeitraum sind 61 Belege eingegangen, Ludwig hat die meisten gebucht.{" "}
+                {open > 0 ? `${open} brauchen Ihre Entscheidung.` : "Alle sind entschieden."}
+              </p>
+              {/* At reading width: a count must not stand a page away from its word. */}
+              <div style={{ maxWidth: "var(--content-measure)" }}>
+                <FieldList
+                  tone="soft"
+                  rows={[
+                    ["Eingegangen", "61"],
+                    ["Gebucht", "53"],
+                    ["Warten auf eine Rückfrage", "3"],
+                    ["Ohne Buchung oder von Ludwig als nicht buchungsrelevant eingestuft", String(ITEMS.length)],
+                  ]}
+                />
+              </div>
+              <ActionBar
+                primary={
+                  open > 0 ? (
+                    <Button
+                      variant="primary"
+                      iconEnd={<ActionIcon action="forward" size={14} />}
+                      onClick={() => setWent(`Einzelprüfung beginnt bei Beleg 1 von ${ITEMS.length}.`)}
+                    >
+                      {open === 1 ? "1 Beleg durchgehen" : `${open} Belege durchgehen`}
+                    </Button>
+                  ) : (
+                    <Button variant="primary" iconEnd={<ActionIcon action="forward" size={14} />} onClick={() => setWent("Weiter zu Konten.")}>
+                      Weiter: Konten
+                    </Button>
+                  )
+                }
+                secondary={
+                  open > 0 ? (
+                    <Button variant="secondary" iconEnd={<ActionIcon action="forward" size={14} />} onClick={() => setWent("Übersprungen, weiter zu Konten.")}>
+                      Überspringen: Konten
+                    </Button>
+                  ) : null
+                }
+              />
+            </div>
+          </Card>
+          <DataTable<SourceDocumentVM>
+            rows={ITEMS.map((i) => i.document)}
+            columns={columns}
+            rowKey={(d) => d.id}
+            head={{ title: "Alle zu prüfenden Belege als Liste", sub: `${open} von ${ITEMS.length} offen`, collapsed: true }}
+            minWidth={sourceDocumentMinWidth(columns)}
+            empty={{ title: "Jeder Beleg ist verarbeitet, zugeordnet oder gesichtet." }}
+          />
+        </div>
+      );
+    };
     return (
-      <div style={{ maxWidth: 1180, display: "grid", gap: "var(--space-4)" }}>
-        <Card>
-          <CardHead title="Belege im Zeitraum 01.01.2026 – 31.01.2026" />
-          <div style={{ padding: "var(--space-3) var(--space-4)" }}>
-            <FieldList
-              tone="soft"
-              rows={[
-                ["Eingegangen", "61"],
-                ["Gebucht", "53"],
-                ["Warten auf eine Rückfrage", "3"],
-                ["Ohne Buchung oder von Ludwig als nicht buchungsrelevant eingestuft", "5"],
-              ]}
-            />
-          </div>
-        </Card>
-        <DataTable<SourceDocumentVM>
-          rows={ITEMS.map((i) => i.document)}
-          columns={cols}
-          rowKey={(d) => d.id}
-          head={{ title: "Zu prüfen", sub: "3 von 5 offen" }}
-          minWidth={sourceDocumentMinWidth(cols)}
-          empty={{ title: "Jeder Beleg ist verarbeitet, zugeordnet oder gesichtet." }}
-        />
+      <div style={{ maxWidth: 1180, display: "grid", gap: "var(--space-8)" }}>
+        {step(decidedOf)}
+        <p className="lw-ui-hint">{went ?? "Der Hauptknopf startet die Einzelprüfung; die Liste klappt mit ihrem Kopf auf."}</p>
+        {step(allDecided)}
       </div>
     );
   },
