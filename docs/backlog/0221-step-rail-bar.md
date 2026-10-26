@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Status | fertig — abgenommen 2026-10-24 (fremde Abnahme, mit Hinweis), Stand `51db640` |
+| Status | fertig — abgenommen 2026-10-24 (fremde Abnahme, mit Hinweis), Stand `51db640` · Hashes: `51db640` (Bau) und `b2b84e5` (Nachbesserung) waren lokal und sind vor dem Push in `c848b6d` zusammengefasst (Stories mit fiktiven Daten); `51db640^` = `d3e91ff` |
 | Stufe | `patterns/` (erweitert `patterns/StepRail.tsx`) |
 | Klassen-Test | „Ergäbe das auch in einer Versicherungs-App Sinn?" → ja, sobald es dort eine Prüfung in Schritten gibt (Schadenprüfung: Start · Unterlagen · Gutachten · Freigabe) |
 | Quelle | Auftrag llcto 2026-10-24 (Owner), Paket 1 · Wireframe `ludwig/app/reports/2026-10-24_abnahme-wizard-wireframe.html` (Kopf `#stepper`) · Konzept `ludwig/app docs/concepts/simple-batch-review.md` §12 „Header bar", Stand e02bfcae2 |

@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Status | Abnahme (Nachprüfung) · vorher: in Arbeit — nicht abgenommen 2026-10-24 (fremde Abnahme, Stand `51db640`; Mängel 1–2) |
+| Status | Abnahme (Nachprüfung) · vorher: in Arbeit — nicht abgenommen 2026-10-24 (fremde Abnahme, Stand `51db640`; Mängel 1–2) · Hashes: `51db640` (Bau) und `b2b84e5` (Nachbesserung) waren lokal und sind vor dem Push in `c848b6d` zusammengefasst (Stories mit fiktiven Daten); `51db640^` = `d3e91ff` |
 | Stufe | neu `entities/source-document/SourceDocumentReview.tsx` · erweitert `patterns/ChoicePrompt` (Notizfeld je Option) · erweitert `entities/source-document/source-document-columns.tsx` (drei Spalten, ein Satz) |
 | Klassen-Test | Ansicht: nein (Beleg, Prüfgrund). Notizfeld je Option: ja (jede Auswahl, deren eine Antwort einen Satz braucht) |
 | Quelle | Auftrag llcto 2026-10-24 (Owner), Paket 3 · Wireframe `ludwig/app/reports/2026-10-24_abnahme-wizard-wireframe.html` (Schritt Belege: Übersicht und „Beleg 1 von 5") · Konzept `simple-batch-review.md` §12 „Belege", Owner-Entscheide 1 und 2 der zweiten Runde |

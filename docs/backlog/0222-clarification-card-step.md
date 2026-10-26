@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Status | Abnahme (Nachprüfung) · vorher: in Arbeit — nicht abgenommen 2026-10-24 (fremde Abnahme, Stand `51db640`; Mängel 1–5) |
+| Status | Abnahme (Nachprüfung) · vorher: in Arbeit — nicht abgenommen 2026-10-24 (fremde Abnahme, Stand `51db640`; Mängel 1–5) · Hashes: `51db640` (Bau) und `b2b84e5` (Nachbesserung) waren lokal und sind vor dem Push in `c848b6d` zusammengefasst (Stories mit fiktiven Daten); `51db640^` = `d3e91ff` |
 | Stufe | erweitert `entities/clarification/ClarificationCard.tsx` · `patterns/ChoicePrompt` (Freitext hinter einem Textknopf, Zeile weiterer Wege) |
 | Klassen-Test | Karte: nein (Klärung). ChoicePrompt-Zeile: ja (jede Frage mit Antwortvorschlägen kennt „selbst schreiben" und Auswege) |
 | Quelle | Auftrag llcto 2026-10-24 (Owner), Paket 2 · Wireframe `ludwig/app/reports/2026-10-24_abnahme-wizard-wireframe.html` (Schritt Rückfragen, echte Fragen eines Stapels; in Stories fiktiv) · Konzept `simple-batch-review.md` §12 „Question screen", Jobs „Rückfragen" |
@@ -482,6 +482,6 @@ Abnahmekriterien dazu (offen, fremde Abnahme):
 - [ ] Wege-Zeile umbrechend ohne Strich am Zeilenanfang, Fokusring ganz (Story `StepDeferredWithHistory`, gemessen)
 - [ ] Stories und Specs ohne echte Mandantendaten
 
-Status: zurück auf Abnahme; die Nachprüfung der Mängel 1–5 und dieser
-Nachtrag gehen zusammen an den Abnehmenden.
+Status: zurück auf Abnahme, Stand `c848b6d`; die Nachprüfung der Mängel 1–5
+und dieser Nachtrag gehen zusammen an den Abnehmenden.
 
