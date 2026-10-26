@@ -74,7 +74,7 @@ gegebenen Antwort, nur zum Lesen.
 | Prop | Typ | Pflicht | Bedeutung | Nachweis |
 |---|---|---|---|---|
 | `onOpen` | `() => void` | nein | wie oben, für die einzelne Zeile; die Liste reicht ihn nur bei offenen und zurückgestellten Fragen durch | `ClarificationRow/ByState` |
-| `hideState` | `boolean` | nein | ohne Stand-Badge — die Gruppe sagt ihn schon (`groupBy="state"` setzt es); „Blockierend" bleibt | `ClarificationRow/ByState` |
+| `hideBadges` | `boolean` | nein | ohne Badges (`groupBy="state"` setzt es): den Stand sagt die Gruppe, „Blockierend" trägt nichts, weil fast jede Frage blockiert (Owner 2026-10-26, Nachtrag); eine offene oder zurückgestellte **optionale** Frage trägt in der Meta-Zeile das Registry-Wort „optional" | `ClarificationRow/ByState` |
 
 **Die Zeile mit Antwort:** Ist `answer` gesetzt, steht unter dem Titel eine
 Zeile „Antwort: {answer}", einzeilig gekürzt, ganz im `title`-Hover und im
@@ -158,10 +158,8 @@ Fehler (s. Verhalten).
 
 ## Offene Fragen
 
-1. Bleibt „Blockierend" in den Zeilen der Liste? Der Owner fand das Tag in der
-   Step-Karte nichtssagend. *Ohne Antwort:* bleibt — es ist dieselbe Zeile wie
-   am Sachverhalt und im Stapel, und in der Übersicht unterscheidet es die
-   offenen Fragen.
+1. ~~Bleibt „Blockierend" in den Zeilen der Liste?~~ Entschieden (Owner
+   2026-10-26 über llcto): nein, s. Nachtrag.
 2. Kommen Notizen in den Drawer? *Ohne Antwort:* ja, als letzte Gruppe — die
    App gibt mit, was sie hat; „Fragen dieses Stapels" ohne Notizen hieße, die
    App filtert sie selbst heraus.
@@ -180,7 +178,7 @@ Fest (gilt immer):
 
 Variabel (aus dieser Spec):
 
-- [ ] `groupBy="state"`: Gruppen Offen · Zurückgestellt · Beantwortet · Notiz in dieser Reihenfolge, Wörter aus der Registry, leere Gruppen fehlen, Zähler im Kopf, kein Stand-Badge in den Zeilen (Story `ByState`)
+- [ ] `groupBy="state"`: Gruppen Offen · Zurückgestellt · Beantwortet · Notiz in dieser Reihenfolge, Wörter aus der Registry, leere Gruppen fehlen, Zähler im Kopf, **kein Badge** in den Zeilen, optionale offene/zurückgestellte Frage mit „optional" in der Meta-Zeile (Story `ByState`; Nachtrag 2026-10-26)
 - [ ] `onOpen` nur an offenen und zurückgestellten Fragen; ganze Zeile klickbar mit Hover, `Enter` löst aus; beantwortete und Notizen ohne Sprung (Story `ByState`, Tastatur gemessen)
 - [ ] `activeId` markiert genau eine Zeile mit `aria-current` (Story `ByState`)
 - [ ] `answer`: Zeile „Antwort: …" einzeilig gekürzt, ganz im Hover; ohne `answer` keine Zeile (Story `ByState`, Rand)
@@ -193,8 +191,8 @@ Variabel (aus dieser Spec):
 
 `Clarification.tsx`: `ClarificationVM.answer`; `ClarificationRow` mit
 `onOpen` (Titel als `button.v2link.v2rowlink`, Überzug über die Zeile; mit
-`onOpen` klappt die Zeile nicht), `hideState` (nur noch „Blockierend",
-`severityBadge`), Zeile „Antwort: …"; `ClarificationList` mit
+`onOpen` klappt die Zeile nicht), `hideState` (nur noch „Blockierend";
+im Nachtrag ersetzt durch `hideBadges`), Zeile „Antwort: …"; `ClarificationList` mit
 `groupBy="state"` (Gruppen aus `resolveStatus("clarification", …)` und
 `resolveStatus("clarification_type", "comment")`, eine Gruppenschleife für
 `audience` und `state`), `onOpen` nur an offenen und zurückgestellten Fragen,
@@ -227,3 +225,18 @@ Bausteins; der Rahmen ist jetzt ein Block wie der Drawer-Körper.
 | … | … | |
 
 Abgenommen von / am: … · Offene Punkte: …
+
+## Nachtrag 2026-10-26 — keine Badges in der Fragenliste (Owner über llcto)
+
+Owner-Linie vom selben Tag, nach dem Bau: „Blockierend" trägt auch in der
+Fragenliste nichts — fast jede Frage blockiert. In `groupBy="state"` fällt
+deshalb **jedes** Badge aus der Zeile; eine optionale Frage bekommt höchstens
+den kurzen Registry-Hinweis, kein Tag.
+
+| Was | Entscheid |
+|---|---|
+| Prop | `ClarificationRow.hideState` wird `hideBadges` (noch kein Aufrufer außer der Liste selbst; die App nutzt `groupBy`) |
+| Zeile | ohne `.v2cl__state`; der Titel nimmt die ganze Breite |
+| Optional | in der Meta-Zeile „· optional" — das Registry-Wort (`clarification_severity.optional.label`) klein im laufenden Text wie „zurückgestellt bis …"; nur bei offenen und zurückgestellten Fragen. Der lange Registry-Satz der Karte („Hilfreich, aber …") passt in keine einzeilige Meta-Zeile |
+| Andere Gruppierungen | unverändert: `audience`/`none` zeigen Stand und „Blockierend" wie bisher |
+

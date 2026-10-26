@@ -127,13 +127,6 @@ export function ClarificationCell({
   return <span className="v2cl__cell">{body}</span>;
 }
 
-/** Without the state badge (the group says it, 0224) — the severity stays, as in every row. */
-function severityBadge(c: ClarificationVM) {
-  return c.type === "question" && c.state !== "answered" && c.severity === "required" ? (
-    <StatusBadge axis="clarification_severity" status="required" info={false} />
-  ) : null;
-}
-
 /**
  * @when    A clarification in a list — at the case, in the batch review, in
  *          the portal, at the run; with `detail` it folds open, with `onOpen`
@@ -149,7 +142,7 @@ export function ClarificationRow({
   defaultOpen,
   active = false,
   onOpen,
-  hideState = false,
+  hideBadges = false,
 }: {
   clarification: ClarificationVM;
   /** Puts case number and title in front — rank 6 is context, not identity. */
@@ -165,8 +158,12 @@ export function ClarificationRow({
    * meaning.
    */
   onOpen?: () => void;
-  /** No state badge — the group above says it (`groupBy="state"`). */
-  hideState?: boolean;
+  /**
+   * No badges (`groupBy="state"`, owner 2026-10-26): the group above says the
+   * state, and nearly every question blocks, so „Blockierend" says nothing. An
+   * optional question says so in a word in the meta line instead.
+   */
+  hideBadges?: boolean;
 }) {
   const item = active ? "v2cl__item is-active" : "v2cl__item";
   const head = (
@@ -202,7 +199,7 @@ export function ClarificationRow({
         )}
         {/* Right-aligned: the state must not move with the length of the
             question, and down a list it becomes a column one can scan. */}
-        <span className="v2cl__state">{hideState ? severityBadge(c) : stateBadges(c)}</span>
+        {hideBadges ? null : <span className="v2cl__state">{stateBadges(c)}</span>}
       </div>
 
       {/* What was answered — the reason the row is in the list at all, once
@@ -245,6 +242,14 @@ export function ClarificationRow({
             <span>
               zurückgestellt bis <Time value={c.deferredUntil} format="date" size="sm" />
             </span>
+          </>
+        ) : null}
+        {/* Without badges the exception gets a word: the registry's, in running
+            text lower case like „zurückgestellt bis" (0224, owner 2026-10-26). */}
+        {hideBadges && c.type === "question" && c.state !== "answered" && c.severity === "optional" ? (
+          <>
+            <span aria-hidden="true">·</span>
+            <span>{resolveStatus("clarification_severity", "optional").label.toLowerCase()}</span>
           </>
         ) : null}
       </div>
@@ -294,7 +299,7 @@ export function ClarificationList({
   clarifications: readonly ClarificationVM[];
   /**
    * `state`: Offen · Zurückgestellt · Beantwortet, then the notes — words from
-   * the registry, the state badge leaves the rows (0224).
+   * the registry; the badges leave the rows (0224).
    */
   groupBy?: "audience" | "none" | "state";
   showCase?: boolean;
@@ -339,7 +344,7 @@ export function ClarificationList({
         defaultOpen={openBlocking && c.state === "open" && c.severity === "required" && c.type === "question"}
         active={activeId !== null && c.id === activeId}
         onOpen={open}
-        hideState={groupBy === "state"}
+        hideBadges={groupBy === "state"}
       />
     );
   };

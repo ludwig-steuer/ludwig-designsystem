@@ -341,7 +341,8 @@ const BATCH: ClarificationVM[] = [
 
 /**
  * `groupBy="state"` (0224): Offen · Zurückgestellt · Beantwortet, then the
- * notes — the state badge leaves the rows, the group says it. Open and
+ * notes — the badges leave the rows (the group says the state, nearly every
+ * question blocks); the optional one says „optional" in its meta line. Open and
  * deferred questions are a way to the question (`onOpen`), the one on screen
  * is marked; answered rows carry their answer.
  */
