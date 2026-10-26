@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Status | Abnahme (Nachprüfung M1, M2) · vorher: in Arbeit — nicht abgenommen 2026-10-26 (fremde Abnahme, Stand `8280d42`; Mängel 1–2, s. „Abnahme 2026-10-26") · gebaut 2026-10-26 (s. „Gebaut") |
+| Status | in Arbeit — nicht abgenommen 2026-10-26 (Nachprüfung, Stand `7afec27`: M1 und M2 behoben, neuer Mangel 3 — Spec und Code sagen bei `resolution` Verschiedenes, nur Spec-Text; s. „Nachprüfung 2026-10-26") · vorher: Abnahme (Nachprüfung M1, M2) · nicht abgenommen 2026-10-26 (fremde Abnahme, Stand `8280d42`; Mängel 1–2, s. „Abnahme 2026-10-26") · gebaut 2026-10-26 (s. „Gebaut") |
 | Stufe | erweitert `entities/clarification/Clarification.tsx` (`ClarificationList`, `ClarificationRow`, `ClarificationVM`) · `primitives/RecordPager.tsx` (ein Platz für Nebenwege) |
 | Klassen-Test | Liste: nein (Rückfrage, ihre Stände). Pager-Platz: ja („Datensatz 3 von 12" und daneben ein Weg zur ganzen Menge gibt es in jeder App mit einer Warteschlange) |
 | Quelle | Owner-Wunsch 2026-10-26 über llcto (Rückfragen-Schritt der Abnahme, `batches/[id]/close`); Props-Vorschlag des DS an llcto vom selben Tag, vom Owner bestätigt: `RecordPager.actions`, `ClarificationList groupBy="state"`, `onOpen`, `activeId`, `ClarificationVM.answer`; Gruppe „Beantwortet" (Registry), Knopf „n Fragen bei Ludwig", bei n = 0 kein Knopf |
@@ -173,7 +173,7 @@ Fest (gilt immer):
 - [x] Code englisch; `@when`/`@instead` an jedem Export
 - [x] Kein Hex, kein px in TSX, keine lokale Label-Map; Status nur über Registry
 - [x] Alle Stories oben vorhanden; ausgeschlossene Zustände begründet
-- [ ] Prüfliste `design-guidelines.md` §9 durchgegangen
+- [x] Prüfliste `design-guidelines.md` §9 durchgegangen
 - [x] Im Browser angesehen (Storybook), nicht nur gebaut
 
 Variabel (aus dieser Spec):
@@ -183,7 +183,7 @@ Variabel (aus dieser Spec):
 - [x] `activeId` markiert genau eine Zeile mit `aria-current` (Story `ByState`)
 - [x] `answer`: Zeile „Antwort: …" einzeilig gekürzt, ganz im Hover; ohne `answer` keine Zeile (Story `ByState`, Rand)
 - [x] `RecordPager.actions` rechts nach dem Pfeil, mit und ohne Warteschlange; Trefferfläche ≥ 24 × 24 px (Story `WithActions`, gemessen)
-- [ ] Im Einsatz: Knopf öffnet den Drawer, offene Zeile springt und schließt ihn, beantwortete klappt lesend auf, `Esc` schließt (Story `InBatchReviewDrawer`)
+- [x] Im Einsatz: Knopf öffnet den Drawer, offene Zeile springt und schließt ihn, beantwortete klappt lesend auf, `Esc` schließt (Story `InBatchReviewDrawer`)
 - [x] Vorhandene Stories von `ClarificationList`/`ClarificationRow`/`RecordPager` ohne die neuen Props unverändert
 - [ ] offen (App): Knopf und Drawer im Rückfragen-Schritt, n aus den beantworteten Fragen des Stapels, `answer` aus `answer_payload` (L-367)
 
@@ -397,4 +397,140 @@ Knopf und Drawer im Rückfragen-Schritt sowie L-367 offen (App).
 
 Schnittstelle neu: `ClarificationVM.resolution` (Tabelle oben gilt sinngemäß
 wie `answer`). Status: zurück auf Abnahme.
+
+### Nachprüfung 2026-10-26
+
+Abnehmer: Claude (Abnahme-Agent, fremde Sitzung — hat weder gebaut noch
+nachgebessert noch die erste Abnahme geschrieben). Stand `7afec27`
+(Nachbesserung auf `f0992f9`), Arbeitsbaum zu Beginn sauber. Gelesen:
+`CLAUDE.md`, Skill `v3-komponente` (Abnahme), §9 der Guideline, diese Spec
+ganz samt Abnahme und Nachbesserung, `git diff f0992f9 7afec27 -- src/`
+(`focus.ts`, `Clarification.tsx`, `ClarificationCard.tsx`,
+`Clarification.stories.tsx`, `v3.css`), dazu `Drawer.tsx`, `Dialog.tsx`,
+`ClarificationThread.tsx`, L-367 (`befunde-app.md:182`),
+`docs/entitaeten/clarification.md:50–57` und die Achse `clarification` im
+Spiegel.
+
+Gemessen mit `scripts/cdp.mjs` (chrome-headless-shell aus Playwright 1247),
+die Messläufe nacheinander mit je einem Browser, Fenster 1042 × 1000,
+Querlauf bei 1280 und 1480; Tastatur mit echten Tastendrücken
+(`Input.dispatchKeyEvent`: Tab, Umschalt+Tab, Enter mit Wagenrücklauf,
+Leertaste, Esc), Klicks mit echten Mausereignissen. Gegenprobe: `9901556` in
+einem Worktree im Scratchpad und `7afec27` je statisch gebaut
+(`pnpm build -o`), beide lokal ausgeliefert, dieselben Abläufe gegen beide
+und gegen den Dev-Server 6107; Worktree danach entfernt. Befehle selbst
+gelaufen. Bildschirmfotos `.playwright-mcp/0224-nachpruefung-drawer-tab-summary.png`,
+`…-drawer-resolved-open.png`, `…-by-state.png`,
+`…-statusinfodialog-technisch.png`.
+
+| Punkt | Nachweis (Story-ID · Befehl · Messwert · Datei:Zeile) | Ergebnis |
+|---|---|---|
+| M1 · Tab und Umschalt+Tab im Drawer | `clarificationrow--in-batch-review-drawer`, Drawer per Enter auf „3 Fragen bei Ludwig", Fokus auf dem Panel. 9 × Tab: Schließen → drei offene Zeilen (Knopf) → drei beantwortete (`summary` 2026-0176, -0157, -0122) → Schließen → …; 9 × Umschalt+Tab vom Panel: -0122 → -0157 → -0176 → drei offene → Schließen → -0122 …. Jeder Halt im Panel, nie `body`. Fokusring am Kopf 2 px `rgb(59, 143, 196)`, Versatz −2 px, `:focus-visible`, Kasten 481 × 134 ganz in `.v2drawer__b` (oben 514, der Drawer-Kopf endet bei 77) — nicht verdeckt (`…-drawer-tab-summary.png`). In `9901556` derselbe Ablauf: Tab kreist „Schließen → drei offene Zeilen", die Köpfe fehlen | ✓ |
+| M1 · Aufklapper per Taste und per Klick | Enter auf dem Kopf -0176 klappt auf, Leertaste auf und zu; Tab läuft danach weiter über -0157, -0122, Schließen. Klick auf -0122 (letzter Halt): klappt auf, Fokus auf dem Kopf, 9 × Tab Schließen → … → -0122 → Schließen. Zweiter Klick klappt zu, Fokus bleibt, Tab → Schließen. Klick auf -0157, 12 × Umschalt+Tab: -0176 → drei offene → Schließen → -0122 → -0157 …. Nichts läuft hinaus; Esc schließt, Fokus auf „3 Fragen bei Ludwig" | ✓ |
+| M1 · Gegenprobe am Primitive: die Falle wie vorher | 21 Abläufe in `9901556` und `7afec27` (Auslöser fokussiert und per Enter geöffnet bzw. offen geladen; erster Fokus; nach frischem Öffnen je Halte + 3 × Tab und × Umschalt+Tab). **Zeichengleich in 19:** `dialog--confirmation`, `--with-reason`, `--large`, `--enter-confirms`, `--auto-focus-child` (erster Fokus im Suchfeld), `--keyboard-trap` (Schließen → Textfeld → Abbrechen → Weiter → Schließen, rückwärts gespiegelt), `drawer--open`, `--with-footer`, `--full-view`, `--footer-from-body`, `--long-content`, `--in-use`, `reasondialog--open`, `clarificationcard--step` mit dem Zurückstellen-Dialog (erster Fokus Begründung; Halte Schließen · Datum · drei Chips · Begründung · Abbrechen — der gesperrte Bestätigen-Knopf fehlt wie vorher) und mit „Anderweitig geklärt", `clarificationcard--deferred-with-undo` („Anderweitig geklärt"), `accountdrawer--opened`, `casedrawer--filled`, `sourcedocumentdrawer--opened`: erster Halt, Folge und Wendepunkte gleich, nie `body`, nie hinter dem Schleier; Dev-Server und statischer Bau gleich. **Anders in 2, beide gewollt:** die M1-Story und `statusinfodialog--entry` — dort war der Aufklapper „Technisch" (letzter Halt) in `9901556` unerreichbar (Tab von „Zurückgezogen" sprang auf Schließen), jetzt Halt 8; per Enter aufgeklappt kreist Tab weiter im Dialog (`…-statusinfodialog-technisch.png`). Sonst unterscheidet sich der neue Filter (`focus.ts:31–33`, `:48`) vom alten nur bei `position: fixed` (früher ohne `offsetParent`, jetzt gezählt) — in keinem Overlay vorhanden | ✓ |
+| M2 · Zeile | `clarificationrow--by-state`: „Antwort: Ohne Umsatzsteuer …", „Antwort: Betrieblich: …" (gekürzt, `scrollWidth > clientWidth`) und „Ohne Antwort aufgelöst: telefonisch mit dem Mandanten geklärt" (`title` = Grund, Wort `rgb(92, 92, 92)` wie „Antwort:"), je 20,9 px, eine Zeile; vor der Auflösung kein „Antwort:". `resolution` geht vor `answer` (`Clarification.tsx:220–227`); Frage `b6` trägt den Grund ohne Vorsatz (`Clarification.stories.tsx:328`) (`…-by-state.png`) | ✓ |
+| M2 · Karte im Drawer | Klick auf -0122: Zeile „Ohne Antwort aufgelöst: telefonisch …"; Verlauf „Gefragt von Ludwig · 09.10.2026, 18:40" und „Ohne Antwort aufgelöst von S. Vogt · 26.10.2026, 10:03 — telefonisch mit dem Mandanten geklärt"; „Antwort:" kommt im Aufklapper nicht vor (`…-drawer-resolved-open.png`) | ✓ |
+| M2 · eine Quelle | `RESOLVED_WORD` (`Clarification.tsx:93`) ist in `src/ui/v3` der einzige Ort des Worts; die Zeile (`:222`) und `EVENT_LABEL.resolved` der Karte (`ClarificationCard.tsx:65`) lesen ihn. Für Zeile und Karte erfüllt; die dritte Darstellung der Familie sagt es anders (Hinweis 1) | ✓ (mit Hinweis) |
+| Textflucht im Drawer | alle sieben Zeilen (drei offene, drei aufklappbare, Notiz) beginnen bei x 571, die Titel ebenso; Text der Gruppenköpfe bei 557 — wie angegeben. Die Regel greift nur in Listen mit Aufklapper **und** flachen Zeilen (`v3.css:3110`). Gegenprobe: 177 Stories der Dateien, die `ClarificationList`/`ClarificationRow` zeigen, in `9901556` und `7afec27` — 21 mit Liste beim Laden, Lage und Maß jeder Zeile gleich, keine gemischte Liste außer der im Drawer; `ByState` (ohne Aufklapper) unverändert bei x 33 | ✓ |
+| Registry-Wörter der Zählung | Drawer-Meta aus `resolveStatus("clarification", st).label`, klein (`Clarification.stories.tsx:418–421`), gemessen „2 offen · 1 zurückgestellt · 3 beantwortet" (Registry „Offen", „Zurückgestellt", „Beantwortet"). Die Unterzeile von `ByState` steht weiter als Literal (`:359`) — Hinweis 5 der Abnahme zur Hälfte (Hinweis 2) | ✓ (Drawer) · teilweise |
+| Story-Text „Frage 4 von 9" | Story-Tabelle (`:134`) sagt „Frage 1 von 3 (gezählt werden die offenen und zurückgestellten Fragen, die der Ablauf durchgeht)", die Story zeigt „Frage 1 von 3" | ✓ |
+| 32 statt 24 px nach dem Rückweg | „Gebaut" (`:213`) sagt jetzt „24 px nach dem Pfeil, 32 px nach dem Rückweg"; `RecordPager.tsx`, `RecordPager.stories.tsx` und die Pager-Regeln in `v3.css` seit `8280d42` unverändert (`git diff 8280d42 7afec27`), das Maß der Abnahme gilt | ✓ |
+| Lesekarte wiederholt Titel und Badge; `href` über dem Überzug ohne Story — beide offen gelassen | Begründungen tragen: dieselbe volle Karte wie in `WithCard`, eine schlankere wäre eine neue Form; die `href`-Regel ist die der Tabellenzeilen (I11, `v3.css:3105`), weiter ohne Story nicht messbar | ✓ (offen, begründet) |
+| Kriterium „Im Einsatz" (`InBatchReviewDrawer`) | Enter auf dem Knopf öffnet (`md`, 521 px, Fokus auf dem Panel, aktuelle Frage markiert); Enter auf der zweiten offenen Zeile → „Frage 2 von 3", Drawer zu, Fokus auf „3 Fragen bei Ludwig", nächster Tab ins Antwortfeld; Klick auf die Meta-Zeile der zurückgestellten → „Frage 3 von 3", Drawer zu; beantwortete klappen lesend auf; Esc schließt. Die Tastatur erreicht jetzt jede Zeile (M1) | ✓ |
+| Kriterium „Prüfliste §9" | was M1/M2 offen ließen, ist zu (Tastaturweg zu jeder Zeile, keine Falle; Auflösung benannt); die Nachbesserung bricht keinen Punkt: Maß der Flucht in `v3.css` (kein px in TSX), Fokusring ≥ 3:1 wie gemessen, Hover nur an Klickzielen (`summary`), Text links, Schrift aus der Skala (`check:type`) | ✓ |
+| Kriterium „`answer`" | nur Antworten tragen „Antwort:", die lange gekürzt mit ganzem Text im `title`, ohne `answer` und ohne `resolution` keine Zeile (Notiz, offene Fragen) | ✓ |
+| Kriterium „Vorhandene Stories unverändert" | Geometrie der 21 Listen gleich (s. Textflucht), Fokusfolge der 19 Overlays gleich (s. Gegenprobe) | ✓ |
+| Zusatz: Auflösung ohne Antwort benannt | s. M2 · Zeile, Karte, eine Quelle | ✓ |
+| Zusatz: Schnittstelle Zeichen für Zeichen | s. M3 | ✗ |
+| Befehle | `typecheck` Exit 0; `check:type`, `check:language`, `check:when`, `check:icons`, `check:contrast` Exit 0, je `--test` Exit 0; `check:classes` Exit 1 nur mit den vier Altfällen (`v3clt__step`, `v3clt`, `v2tbl__foot`, `cy-page`), `--test` Exit 0; `pnpm build -o` ins Scratchpad Exit 0 (nur die Chunk-Warnung), Index mit `--by-state` und `--in-batch-review-drawer`. Konsole von `ByState`, `InBatchReviewDrawer`, `WithActions`, `statusinfodialog--entry`, `dialog--keyboard-trap`, `drawer--open` ohne Meldung (nur Vite- und DevTools-Info) | ✓ |
+| Zusatz: keine echten Daten | Datenprobe über die Diffs (`9901556..HEAD`): leer | ✓ |
+
+#### Mängel
+
+3. **Spec und Code sagen bei der Auflösung Verschiedenes.** Der Code trägt
+   den Grund in `resolution` und in `answer` nur Option oder Freitext
+   (`Clarification.tsx:74–86`). Die Spec sagt es noch anders: die Tabelle
+   `ClarificationVM` (`:62`) lässt `answer` „bei „anderweitig geklärt" der
+   Grund" tragen und hat keine Zeile `resolution`; „Die Zeile mit Antwort"
+   (`:79–81`) kennt nur „Antwort: {answer}"; „Befunde an die App"
+   (`:153–157`) sagt „die Zeile sagt dann „Anderweitig geklärt: …"". Die
+   Nachbesserung verweist nur mit einem Satz darauf (`:398`); L-367
+   (`befunde-app.md:182`) ist richtig. Folge: wer nach der Spec einbaut
+   (llcto), legt den Grund in `answer` und hat M2 in der App zurück.
+   Verletzt „Die Spec stimmt mit dem Code überein — Prop-Tabelle Zeichen für
+   Zeichen, und die Sätze daneben" (`CLAUDE.md` §4). Vorschlag, nur Text:
+   in die Tabelle die Zeile `resolution` · `string | null` (optional) ·
+   „der Grund einer Auflösung ohne Antwort; gesetzt, sagt die Zeile „Ohne
+   Antwort aufgelöst: {resolution}" statt „Antwort: …"" · `ClarificationRow/ByState`;
+   aus `answer` den Halbsatz zur Auflösung streichen; „Die Zeile mit Antwort"
+   um den Vorrang von `resolution` ergänzen; in „Befunde an die App" Wort und
+   Feld wie in L-367.
+
+#### Hinweise (nicht blockierend)
+
+1. **Ein drittes Wort in der Familie.** `ClarificationThread.tsx:38–42`
+   benennt dasselbe Ereignis `resolved` in einer eigenen Wortliste
+   „Anderweitig geklärt" (und `answered` „Antwort", wo die Karte
+   „Beantwortet" sagt). Das stammt aus 0214, nicht aus 0224 — „die eine
+   Quelle" gilt damit für Zeile und Karte, nicht für die Familie Klärung.
+   Vorschlag: `STEP.resolved` liest `RESOLVED_WORD`; soll stattdessen
+   „Anderweitig geklärt" gelten, entscheidet das der Owner. Der Knopf
+   „Anderweitig geklärt" im Schritt ist die Handlung, nicht ihr Ergebnis,
+   und bleibt davon unberührt.
+2. **Zählung in `ByState` weiter Literal** (`Clarification.stories.tsx:359`);
+   die Drawer-Meta (`:418–421`) zeigt, wie es aus der Registry geht.
+3. **Feldname `resolution`.** In der Tabelle heißt `resolution` die Art der
+   Auflösung (`answered` | `obsolete`, `docs/entitaeten/clarification.md:50–57`),
+   am VM ist es der Grund als Text. Beim Einbau leicht verwechselt. Solange
+   es keinen Aufrufer gibt: L-367 sagt, woher der Text kommt (Begründung der
+   Auflösung; bei `obsolete` der Marker in `answer_payload`), oder das Feld
+   heißt `resolutionReason`.
+4. **„Beantwortet" über „Ohne Antwort aufgelöst".** Gruppe und Badge der
+   Lesekarte sagen „Beantwortet", die Zeile darunter „Ohne Antwort
+   aufgelöst". Die Registry deckt es („Beantwortet oder als gegenstandslos
+   aufgelöst"); ein eigenes Gruppenwort wäre ein neues Label (Owner). Beim
+   ersten Einsatz beobachten wie Hinweis 7 der Abnahme.
+5. **Maß der Flucht doppelt.** `calc(2 * var(--space-2) + 14px)`
+   (`v3.css:3110`) wiederholt die Chevron-Größe aus `Disclosure.tsx:54`
+   (`size={14}`) und Polster und Abstand des Kopfs; ändert sich eins, laufen
+   die Zeilen wieder auseinander. Ein Maß am `.v2disc` für beide hielte sie
+   zusammen.
+6. **Meta-Zeile bricht bei 1042.** Im Drawer (521 px) bricht die Meta-Zeile
+   der zurückgestellten optionalen Frage: „optional" steht allein in der
+   zweiten Zeile, der Trennpunkt am Ende der ersten (Breite 435 px; in
+   `9901556` 449 px mit demselben Umbruch — nicht aus der Nachbesserung). Bei
+   1280 und 1480 eine Zeile (Drawer 640 bzw. 740 px).
+7. **Dieselbe Fehlerklasse wie M1.** `TABBABLE` (`focus.ts:23–24`) kennt
+   kein `iframe`, kein `audio[controls]`/`video[controls]`, kein
+   `[contenteditable]`. In `sourcedocumentdrawer--opened` ist die Vorschau
+   (`iframe`) ein nativer Halt zwischen Schließen und „Vollansicht öffnen"
+   und deshalb harmlos; stünde sie zuletzt, liefe Tab aus dem Drawer.
+   Unverändert gegen `9901556`.
+
+Aus der Abnahme bleiben offen: Hinweise 2 und 6 (begründet offen gelassen)
+und 7 (Owner).
+
+Vier Linsen: **Sprache** — die Auflösung heißt in Zeile und Verlauf „Ohne
+Antwort aufgelöst", aus einer Konstante; „Antwort:" steht nur noch vor
+Antworten; die Zählung im Drawer kommt aus der Registry. Aber die Spec sagt
+noch „Anderweitig geklärt" und legt den Grund in `answer` (M3) ✗; der Thread
+spricht ein drittes Wort (Hinweis 1). **Bedienung** — Tab und Umschalt+Tab
+erreichen jede Zeile in Lesefolge, Enter und Leertaste klappen, vom
+geklickten Kopf läuft nichts hinaus, Esc schließt und gibt den Fokus zurück,
+der Fokusring ist nicht verdeckt; die Gegenprobe an 19 Overlays zeigt die
+Falle unverändert, ein zweiter Fund derselben Ursache („Technisch") ist
+mitbehoben ✓. **Logik** — Antwort und Auflösung haben je ein Feld,
+`resolution` geht vor; die Gruppe folgt weiter dem Stand ✓ (Namensnähe zur
+Tabellenspalte, Hinweis 3). **Darstellung** — eine Flucht für flache und
+aufklappbare Zeilen, das Wort der Auflösung grau wie „Antwort:", eine Zeile;
+keine Verschiebung in den übrigen 21 Listen ✓.
+
+Vier-Wochen-Test: weiter bestanden; eine aufgelöste Frage liest man jetzt
+richtig, ohne die Karte zu öffnen.
+
+Abgenommen von / am: Claude (Nachprüfung, fremde Sitzung), 2026-10-26, Stand
+`7afec27` · **Nicht abgenommen.** M1 und M2 behoben; offen: Mangel 3 (nur
+Spec-Text, kein Code), Hinweise 1–7 dieser Nachprüfung, aus der Abnahme
+Hinweise 2, 6 und 7; Knopf und Drawer im Rückfragen-Schritt sowie L-367 offen
+(App).
 
