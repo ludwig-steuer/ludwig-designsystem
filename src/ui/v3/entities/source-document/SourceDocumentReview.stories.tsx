@@ -49,10 +49,20 @@ function decisions(recommended: string | null): ChoiceOption[] {
       note: { label: "Kommentar an Ludwig", placeholder: "Was soll mit dem Beleg passieren?", required: true },
     },
     { id: "next", label: "In den nächsten Zeitraum", hint: "Gehört in einen späteren Stapel; Ludwig bucht ihn dort." },
-    { id: "archive", label: "Archivieren", hint: "Kein Buchungsbeleg; bleibt beim Mandanten abgelegt (z. B. Kontoauszug, Vertrag)." },
-    { id: "annual", label: "Jahresabschluss-Ablage", hint: "Kein laufender Beleg; wird für den Jahresabschluss abgelegt." },
-    { id: "private", label: "Private Steuererklärung des Mandanten", hint: "Wird für die Einkommensteuer des Mandanten abgelegt." },
-    { id: "delete", label: "Löschen", hint: "Nicht aufzubewahren (Werbung, Dublette)." },
+    { id: "duplicate", label: "Dublette verwerfen", hint: "Derselbe Beleg liegt schon vor; dieser wird verworfen." },
+    {
+      // The places to file as one row that unfolds (owner 2026-10-27).
+      id: "file",
+      label: "Ablegen ohne Buchung",
+      hint: "Kein Buchungsbeleg; er wird abgelegt, nicht gebucht.",
+      options: [
+        { id: "annual", label: "Jahresabschluss", hint: "Für den Jahresabschluss abgelegt." },
+        { id: "private", label: "Private Steuerunterlage", hint: "Für die Einkommensteuer des Mandanten abgelegt." },
+        { id: "payroll", label: "Lohn", hint: "Für die Lohnabrechnung abgelegt." },
+        { id: "permanent", label: "Dauerakte", hint: "Bleibt dauerhaft abgelegt, z. B. Vertrag oder Kontoauszug." },
+        { id: "irrelevant", label: "Irrelevant", hint: "Nicht aufzubewahren, z. B. Werbung oder Rundschreiben." },
+      ],
+    },
     {
       id: "client",
       label: "Beim Mandanten klären",
@@ -60,7 +70,12 @@ function decisions(recommended: string | null): ChoiceOption[] {
       note: { label: "Notiz für den Mandanten", placeholder: "Was soll der Mandant beantworten oder liefern?", required: true },
     },
   ];
-  return all.map((o) => ({ ...o, recommended: o.id === recommended }));
+  const mark = (o: ChoiceOption): ChoiceOption => ({
+    ...o,
+    recommended: o.id === recommended,
+    ...(o.options ? { options: o.options.map((c) => ({ ...c, recommended: c.id === recommended })) } : {}),
+  });
+  return all.map(mark);
 }
 
 interface ReviewItem {
@@ -122,7 +137,7 @@ const ITEMS: ReviewItem[] = [
     },
     url: original("Hafenbank AG", "Kontoauszug Januar 2026", [["Anfangssaldo", "24.012,40 €"], ["Endsaldo", "24.880,12 €"]], "24.880,12 €"),
     reasonNote: "Die Umsätze dieses Kontos kommen schon über die Schnittstelle. Das PDF ist eine Zweitschrift.",
-    recommended: "archive",
+    recommended: "permanent",
     why: "Alle 41 Umsätze des Auszugs stehen schon aus der Bankschnittstelle in Ludwig; das PDF ist nur Ablage.",
   },
   {
@@ -155,12 +170,12 @@ const ITEMS: ReviewItem[] = [
     },
     url: original("Verlag Brückner & Sohn", "Branchenbrief Januar 2026", [["Rundschreiben", "—"]], "—"),
     reasonNote: null,
-    recommended: "delete",
+    recommended: "irrelevant",
     why: "Ein Rundschreiben ohne Betrag und ohne Bezug zu einer Zahlung.",
   },
 ];
 
-const LABEL: Record<string, string> = Object.fromEntries(decisions(null).map((o) => [o.id, o.label]));
+const LABEL: Record<string, string> = Object.fromEntries(decisions(null).flatMap((o) => o.options ?? [o]).map((o) => [o.id, o.label]));
 
 function Preview({ item }: { item: ReviewItem }) {
   return (

@@ -5174,3 +5174,19 @@ a.v3bbr__val:hover { text-decoration-color: currentColor; }
 @media (prefers-reduced-motion: reduce) {
   .v3runmark::after { animation: none; transform: translateX(75%); }
 }
+
+/* Option groups in a RadioGroup (owner 2026-10-27, „Ablegen ohne Buchung ›").
+   The group is one row with the disclosure's chevron at its end; open, its
+   options stand under it, indented to the group's text, in a fieldset of
+   their own whose legend is only for the screen reader. */
+.v2radiogrp__group, .v2radiogrp__sub { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.v2radiogrp__sub { border: none; margin: 0; padding: 0 0 0 calc(14px + 8px); }
+.v2radioline__chev {
+  flex-shrink: 0; margin: 3px 0 0 auto;
+  color: var(--color-text-muted);
+  transition: transform var(--duration-fast) var(--ease-standard);
+}
+.v2radiogrp__group.is-open > .v2radioline .v2radioline__chev { transform: rotate(90deg); }
+@media (prefers-reduced-motion: reduce) { .v2radioline__chev { transition: none; } }
+.v2radiogrp--rows .v2radiogrp__group, .v2radiogrp--rows .v2radiogrp__sub { display: grid; gap: var(--space-2); }
+.v2radiogrp--rows .v2radiogrp__sub { padding-left: var(--space-6); }

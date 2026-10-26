@@ -65,7 +65,8 @@ export function SourceDocumentReview({
     d.documentDate ? <Time key="when" value={d.documentDate} format="date" size="sm" /> : null,
     measure ? <Amount key="amount" value={measure.value} currency={measure.currency} size="sm" /> : null,
   ].filter(Boolean);
-  const recommended = options.some((o) => o.recommended);
+  // A recommended place to file sits inside its group (owner 2026-10-27).
+  const recommended = options.some((o) => o.recommended || o.options?.some((c) => c.recommended));
 
   return (
     <div className="v3docreview" ref={rootRef}>

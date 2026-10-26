@@ -30,6 +30,13 @@ export interface ChoiceOption {
    * nothing.
    */
   note?: { label: string; placeholder?: string; required?: boolean };
+  /**
+   * A group of answers under one row (owner 2026-10-27: „Ablegen ohne Buchung
+   * ›" with five places to file). Chosen, the row unfolds its options; a
+   * recommended or preselected one opens it from the start. The group itself
+   * is no answer: while it alone is chosen the button waits. One level.
+   */
+  options?: Omit<ChoiceOption, "options">[];
 }
 
 export interface ChoiceAnswer {
@@ -97,8 +104,10 @@ export function ChoicePrompt({
    */
   links?: ReactNode;
 }) {
+  // The answers proper: a group stands for its options.
+  const answers = options.flatMap((o) => (o.options?.length ? o.options : [o]));
   const [choice, setChoice] = useState<string | null>(
-    defaultOptionId ?? options.find((o) => o.recommended)?.id ?? null,
+    defaultOptionId ?? answers.find((o) => o.recommended)?.id ?? null,
   );
   const [text, setText] = useState(freeText?.defaultValue ?? "");
   const [freeOpen, setFreeOpen] = useState(!freeText?.toggle);
@@ -108,20 +117,25 @@ export function ChoicePrompt({
   const textId = useId();
 
   // One field at most: the chosen option's note wins over the free text.
-  const note = options.find((o) => o.id === choice)?.note;
+  const note = answers.find((o) => o.id === choice)?.note;
+  // The group's own row is chosen, none of its options yet: no answer.
+  const openGroup = options.find((o) => o.id === choice && o.options?.length);
+  const answer = openGroup ? null : choice;
   const field = note ?? (freeText && freeOpen ? freeText : null);
   // Only what stands in a visible field is sent: a note typed for one option
   // must not travel with another that shows no field (acceptance 0223, M1).
   const typed = field ? text.trim() : "";
   const missingText = Boolean(field?.required) && !typed;
-  const blocked = (!choice && !typed) || missingText;
+  const blocked = (!answer && !typed) || missingText;
   // Why it is blocked belongs next to the button, not only in a grey button.
   // While the answer is on its way, the sentence would contradict it — the
   // button says „Sende …" and the line next to it must not ask for an answer
   // that has already been given (found in the review of 0028).
   const why = pending
     ? null
-    : !choice && !typed
+    : openGroup && !typed
+      ? `Wählen Sie eine Möglichkeit unter „${openGroup.label}“.`
+      : !answer && !typed
       ? // Without options there is nothing to pick, and the sentence must not
         // send the reader looking for it (found in the review of 0028).
         options.length === 0
@@ -133,7 +147,7 @@ export function ChoicePrompt({
 
   function send() {
     if (blocked || pending) return;
-    void onSubmit({ optionId: choice, text: typed || undefined });
+    void onSubmit({ optionId: answer, text: typed || undefined });
   }
 
   return (
@@ -163,7 +177,10 @@ export function ChoicePrompt({
         name={groupName}
         label={optionsLabel}
         variant={optionStyle === "rows" ? "rows" : "list"}
-        options={options.map<RadioOption>((o) => ({ value: o.id, label: o.label, hint: o.hint, recommended: o.recommended }))}
+        options={options.map<RadioOption>((o) => ({
+          ...radio(o),
+          ...(o.options?.length ? { options: o.options.map(radio) } : {}),
+        }))}
         value={choice}
         onChange={setChoice}
         disabled={pending}
@@ -219,4 +236,8 @@ export function ChoicePrompt({
       </div>
     </div>
   );
+}
+
+function radio(o: Omit<ChoiceOption, "options">): RadioOption {
+  return { value: o.id, label: o.label, hint: o.hint, recommended: o.recommended };
 }

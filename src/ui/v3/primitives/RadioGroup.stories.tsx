@@ -135,3 +135,34 @@ export const Rows: Story = {
     );
   },
 };
+
+/** An option with options (owner 2026-10-27): one row with a chevron; chosen, its options unfold under it. The arrow keys run on through them — they are radios of the same name. */
+export const Grouped: Story = {
+  render: () => {
+    const [v, setV] = useState<string | null>("next");
+    return (
+      <div style={{ maxWidth: 560 }}>
+        <RadioGroup
+          name="decision"
+          label="Entscheidung"
+          options={[
+            { value: "next", label: "In den nächsten Zeitraum" },
+            {
+              value: "file",
+              label: "Ablegen ohne Buchung",
+              options: [
+                { value: "annual", label: "Jahresabschluss", hint: "Für den Jahresabschluss abgelegt." },
+                { value: "permanent", label: "Dauerakte", hint: "Bleibt dauerhaft abgelegt, z. B. Vertrag oder Kontoauszug.", recommended: true },
+                { value: "irrelevant", label: "Irrelevant", hint: "Nicht aufzubewahren, z. B. Werbung." },
+              ],
+            },
+            { value: "client", label: "Beim Mandanten klären" },
+          ]}
+          value={v}
+          onChange={setV}
+        />
+        <p className="lw-ui-hint">Gewählt: {v ?? "—"}</p>
+      </div>
+    );
+  },
+};

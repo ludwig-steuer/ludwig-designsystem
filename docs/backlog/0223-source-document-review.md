@@ -511,3 +511,12 @@ Belege sind verarbeitet, zugeordnet oder gesichtet." (erledigt, mit Zahl;
 Spaltenkopf bleibt); die Unterzeile sagt „alle 5 entschieden" bzw. „kein
 Beleg zu prüfen" statt „0 von 5 offen".
 
+## Nachtrag 2026-10-27: Ablagen als Gruppe
+
+Die Entscheidungen der Story folgen der App (3fc3d664f). „Archivieren" und
+„Löschen" sind ersetzt durch „Dublette verwerfen" und die Gruppe „Ablegen ohne
+Buchung ›" mit Jahresabschluss, Private Steuerunterlage, Lohn, Dauerakte und
+Irrelevant (`ChoiceOption.options`, 0028 Nachtrag). Der Kontoauszug empfiehlt
+„Dauerakte", die Gruppe steht dort offen. `SourceDocumentReview` erkennt eine
+Empfehlung auch in einer Gruppe (der Satz „Warum empfohlen" bleibt dann stehen).
+

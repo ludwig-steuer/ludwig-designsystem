@@ -232,3 +232,12 @@ gewählte Zeile fett (600); die Unterzeile erbte das und stand fett unter der
 Beschriftung (beim Bau von 0223 gemessen). Sie bleibt jetzt in jeder Zeile
 die leise zweite Stimme. Kontrast `--color-text-subtle`: 4,88:1 auf Weiß,
 4,52:1 auf der gewählten Zeile (`accent-50`).
+
+## Nachtrag 2026-10-27: Gruppen (`RadioOption.options`)
+
+Eine Option kann Optionen tragen: eine Zeile mit Chevron, die aufklappt, wenn
+sie oder eine ihrer Optionen gewählt ist. Es bleiben Radios desselben `name`,
+die Tastatur bleibt beim Browser. Ein eigenes `<fieldset>` mit
+`<legend class="v2vh">` umschließt die Optionen der Gruppe. Eine Ebene. Story
+`Grouped`. Anlass, Form und Kriterien stehen in 0028 (Nachtrag 2026-10-27).
+

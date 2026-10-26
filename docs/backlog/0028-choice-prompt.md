@@ -419,3 +419,63 @@ und im DOM ausgelesen.
 
 Abgenommen von / am: Claude (Abnahme-Agent), 2026-09-05 · Offene Punkte: das
 App-Kriterium (`RaiseClarificationForm`), das in `ludwig/app` fällig wird.
+
+## Nachtrag 2026-10-27: Gruppen von Antworten (Owner über llcto)
+
+**Anlass.** Die Beleg-Einzelprüfung (0223) hat sieben Hauptwege und fünf
+Ablagen (Jahresabschluss, Private Steuerunterlage, Lohn, Dauerakte,
+Irrelevant). Der Owner will die Ablagen als **eine** Zeile „Ablegen ohne
+Buchung ›", die erst beim Wählen aufklappt, nicht als fünf flache Zeilen mit
+Präfix. So hat die App es heute gelöst, weil `ChoicePrompt` keine Gruppen kannte
+(App-Commit 3fc3d664f).
+
+**Regel aus `spec-schreiben` §3:** 2. Eine Prop an `ChoiceOption` und die
+gleiche an `RadioOption` (0017). Die Darstellung liegt im Primitive, damit jede
+Radiogruppe sie hat.
+
+| Prop | Typ | Pflicht | Bedeutung | Nachweis (Story) |
+|---|---|---|---|---|
+| `ChoiceOption.options` | `Omit<ChoiceOption, "options">[]` | nein | Die Option ist eine Gruppe. Ihre Zeile trägt rechts das Chevron der Disclosure. Gewählt, oder wenn eine ihrer Optionen gewählt ist, klappen die Optionen eingerückt darunter auf, jede mit ihrer Unterzeile. Eine Ebene | `ChoicePrompt/OptionGroup`, `SourceDocumentReview/*` |
+| `RadioOption.options` | `Omit<RadioOption, "options">[]` | nein | dasselbe im Primitive | `RadioGroup/Grouped` |
+
+**Form, die ich gewählt habe:**
+
+- **Gruppe als Radio:** Die Gruppenzeile ist selbst ein Radio mit demselben
+  `name`. Die Unteroptionen sind Radios derselben Gruppe in einem eigenen
+  `<fieldset>`; dessen `<legend>` (= Gruppenwort) ist nur für den Screenreader.
+- **Tastatur:** Pfeiltasten, Leertaste und Tab-Stopp bleiben beim Browser. Ein
+  Pfeil auf die Gruppe klappt sie auf, der nächste Pfeil geht in ihre erste
+  Option, wer die Gruppe verlässt, klappt sie zu. Kein eigener Tastaturweg,
+  keine Fokusfalle.
+- **Offen ist sie genau dann,** wenn die Gruppe oder eine ihrer Optionen gewählt
+  ist. Das ist aus dem Wert abgeleitet, nicht gespeichert.
+- **„empfohlen" und Vorauswahl** gelten auch für eine Unteroption. Ohne
+  `defaultOptionId` wird die empfohlene vorgewählt, auch in einer Gruppe; die
+  Gruppe steht dann offen. Ist sie zu und enthält die Empfehlung, trägt die
+  Gruppenzeile „empfohlen", damit die Empfehlung nicht verschwindet.
+- **Die Gruppe ist keine Antwort.** Steht die Wahl nur auf der Gruppenzeile,
+  wartet der Knopf und sagt daneben „Wählen Sie eine Möglichkeit unter
+  „Ablegen ohne Buchung"." `onSubmit` meldet immer die Kennung der Unteroption,
+  nie die der Gruppe. `note` gilt an Unteroptionen wie an anderen Optionen.
+
+**Kann bewusst nicht:** keine zweite Ebene; keine Gruppe, die selbst eine
+Antwort ist; kein Aufklappen ohne Wahl (ein Klick aufs Chevron allein wählt die
+Gruppe, weil die ganze Zeile das Ziel ist).
+
+**Abnahmekriterien (Nachtrag):**
+
+- [ ] Zu: nur die Gruppenzeile mit Chevron, keine Unter-Radios im DOM (`OptionGroup` links)
+- [ ] Empfohlene Unteroption: vorgewählt, Gruppe offen (`OptionGroup` rechts, `SourceDocumentReview` Kontoauszug)
+- [ ] Zu mit Empfehlung darin: „empfohlen" an der Gruppenzeile (`RadioGroup/Grouped`)
+- [ ] Pfeiltasten laufen durch Gruppe und Unteroptionen, verlassen klappt zu
+- [ ] Nur Gruppenzeile gewählt: Knopf wartet, Satz daneben; Absenden meldet die Unteroption
+- [ ] Screenreader: Unteroptionen in einer Gruppe mit dem Gruppenwort
+
+**Selbst gemessen (2026-10-27, fremde Abnahme steht aus):**
+- Tastatur: `next` ↓ `file` (offen, 5 Unter-Radios) ↓ `annual` ↓ `private` ↑ `annual` ↑ `file` ↑ `next` (zu, 0 Unter-Radios).
+- Weiter ↓ durch alle fünf bis `client`: zu.
+- Gruppenzeile gewählt: „Wählen Sie eine Möglichkeit unter „Ablegen ohne Buchung"."
+- Strg+Enter mit „Dauerakte": gemeldet `permanent`.
+- Unter-Zeilen um 24 px eingerückt, Chevron offen um 90° gedreht.
+- Keine Konsolenfehler.
+

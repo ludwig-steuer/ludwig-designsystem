@@ -253,3 +253,56 @@ export const OptionNote: Story = {
   },
 };
 
+/** Five places to file without a booking (owner 2026-10-27). */
+const FILE_GROUP = {
+  id: "file",
+  label: "Ablegen ohne Buchung",
+  hint: "Kein Buchungsbeleg; er wird abgelegt, nicht gebucht.",
+  options: [
+    { id: "annual", label: "Jahresabschluss", hint: "Für den Jahresabschluss abgelegt." },
+    { id: "private", label: "Private Steuerunterlage", hint: "Für die Einkommensteuer des Mandanten abgelegt." },
+    { id: "payroll", label: "Lohn", hint: "Für die Lohnabrechnung abgelegt." },
+    { id: "permanent", label: "Dauerakte", hint: "Bleibt dauerhaft abgelegt, z. B. Vertrag oder Kontoauszug." },
+    { id: "irrelevant", label: "Irrelevant", hint: "Nicht aufzubewahren, z. B. Werbung oder Rundschreiben." },
+  ],
+};
+
+/**
+ * A group of answers under one row: „Ablegen ohne Buchung ›" unfolds once it
+ * is chosen. Left the recommendation is outside, so the group stays folded;
+ * right it is inside („Dauerakte"), so the group is open from the start. While
+ * only the group's row is chosen the button waits and says why.
+ */
+export const OptionGroup: Story = {
+  render: () => {
+    const [last, setLast] = useState<ChoiceAnswer | null>(null);
+    const prompt = (recommended: string) => (
+      <ChoicePrompt
+        question="Wohin gehört dieser Beleg?"
+        hideQuestion
+        optionsLabel="Entscheidung"
+        optionStyle="rows"
+        options={[
+          { id: "next", label: "In den nächsten Zeitraum", hint: "Gehört in einen späteren Stapel; Ludwig bucht ihn dort.", recommended: recommended === "next" },
+          { ...FILE_GROUP, options: FILE_GROUP.options.map((o) => ({ ...o, recommended: o.id === recommended })) },
+          { id: "client", label: "Beim Mandanten klären", hint: "Kommt mit Ihrer Notiz in die Liste für den Mandanten.", note: { label: "Notiz für den Mandanten", required: true } },
+        ]}
+        submitLabel="Entscheiden und weiter"
+        onSubmit={async (a) => {
+          await wait(300);
+          setLast(a);
+        }}
+      />
+    );
+    return (
+      <div>
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "var(--space-6)", alignItems: "start" }}>
+          {prompt("next")}
+          {prompt("permanent")}
+        </div>
+        <p className="lw-ui-hint">{last ? `Entschieden: ${last.optionId}` : "Noch nichts entschieden."}</p>
+      </div>
+    );
+  },
+};
+
