@@ -1287,11 +1287,14 @@ export function ClarificationCard({
             setResolving(false);
             void onResolve(reason);
           }}
-          title="Ohne Antwort auflösen"
-          kicker="Außerhalb von Ludwig geklärt"
+          // The word of the way that opened it, not a second process („auflösen"
+          // read like another one — llcto 2026-10-26); the kicker says the
+          // consequence, like the deferral's.
+          title={RESOLVED_WORD}
+          kicker="Die Frage zählt danach als beantwortet"
           label="Wie wurde das geklärt?"
           placeholder="z. B. telefonisch mit dem Mandanten geklärt"
-          confirmLabel="Auflösen"
+          confirmLabel="Als geklärt vermerken"
           required
           chips={["telefonisch geklärt", "per Mail geklärt", "hat sich erledigt"]}
           pending={pending}

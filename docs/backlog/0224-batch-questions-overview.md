@@ -558,7 +558,11 @@ Entschieden (llcto, „ein Wort für eine Sache"): das Ereignis heißt überall
 „Ohne Antwort aufgelöst" entfällt. `RESOLVED_WORD` (`Clarification.tsx`)
 trägt jetzt dieses Wort und ist die eine Quelle für den Knopf der Karte, den
 Verlauf der Karte, die Zeile der Liste und den Faden (`ClarificationThread`).
-Die Zeile lautet „Anderweitig geklärt: {Grund}". Unverändert, weil es die
-Handlung ist und nicht das Ereignis: der Dialog dazu („Ohne Antwort
-auflösen", Knopf „Auflösen").
+Die Zeile lautet „Anderweitig geklärt: {Grund}". Auch der Dialog folgt
+(llcto: „auflösen" las sich wie ein anderer Vorgang): Titel „Anderweitig
+geklärt" (`RESOLVED_WORD`), Einordnung „Die Frage zählt danach als
+beantwortet" (die Folge, in der Form des Zurückstellen-Dialogs, mit dem
+Registry-Wort), Feld „Wie wurde das geklärt?" (Pflicht wie bisher), Knopf
+„Als geklärt vermerken" — nicht „… schließen", das läge am „Schließen" des
+Dialogs.
 
