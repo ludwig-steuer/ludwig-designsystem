@@ -435,7 +435,7 @@ Radiogruppe sie hat.
 
 | Prop | Typ | Pflicht | Bedeutung | Nachweis (Story) |
 |---|---|---|---|---|
-| `ChoiceOption.options` | `Omit<ChoiceOption, "options">[]` | nein | Die Option ist eine Gruppe. Ihre Zeile trägt rechts das Chevron der Disclosure. Gewählt, oder wenn eine ihrer Optionen gewählt ist, klappen die Optionen eingerückt darunter auf, jede mit ihrer Unterzeile. Eine Ebene | `ChoicePrompt/OptionGroup`, `SourceDocumentReview/*` |
+| `ChoiceOption.options` | `Omit<ChoiceOption, "options">[]` | nein | Die Option ist eine Gruppe. Ihre Zeile trägt rechts das Chevron der Disclosure. Gewählt, oder wenn eine ihrer Optionen gewählt ist, klappen die Optionen eingerückt darunter auf, jede mit ihrer Unterzeile. Eine Ebene | `ChoicePrompt/OptionGroup`, `ChoicePrompt/OptionGroupList`, `SourceDocumentReview/*` |
 | `RadioOption.options` | `Omit<RadioOption, "options">[]` | nein | dasselbe im Primitive | `RadioGroup/Grouped` |
 
 **Form, die ich gewählt habe:**
@@ -452,7 +452,9 @@ Radiogruppe sie hat.
   Knopf (gemessen bis 347 px bei fünf Ablagen). Das ist die Folge der Form, die
   der Owner gewählt hat, und keine Bewegung: Es springt nichts ohne Wahl (H6).
 - **Klick auf die offene Gruppenzeile** wählt wieder die Gruppe. Eine gewählte
-  Option ist dann zurückgenommen, die Gruppe bleibt offen, der Knopf wartet.
+  Option ist dann zurückgenommen, die Gruppe bleibt offen, der Knopf wartet —
+  ohne getippten Freitext; mit Freitext geht dann die reine Freitext-Antwort
+  (`optionId: null`, H9).
   Zuklappen geht nur, indem man eine andere Antwort wählt; das Chevron ist
   kein eigener Schalter (H2).
 - **Offen ist sie genau dann,** wenn die Gruppe oder eine ihrer Optionen gewählt
@@ -469,6 +471,11 @@ Radiogruppe sie hat.
   an Unteroptionen wie an anderen Optionen.
 - **`options: []`** ist keine Gruppe: Die Zeile ist eine gewöhnliche Antwort
   ohne Chevron (H4).
+- **Vorlesehilfe:** Zugeklappt nennt die Gruppenzeile ihre Zahl, nur für den
+  Screenreader („Ablegen ohne Buchung, 5 Möglichkeiten"; bei einer
+  „1 Möglichkeit"). Offen entfällt der Zusatz, die verschachtelte Gruppe trägt
+  ihr Wort (llcto 2026-10-27, H3, `207621a`). Ein Radio kennt kein
+  `aria-expanded`; das Chevron sagt es nur dem Auge.
 
 **Kann bewusst nicht:** keine zweite Ebene; keine Gruppe, die selbst eine
 Antwort ist; kein Aufklappen ohne Wahl (ein Klick aufs Chevron allein wählt die
@@ -629,7 +636,70 @@ Geprüft von / am: Claude (Abnahme-Agent, fremd), 2026-10-27 · Offen: M1, M2;
 | H6 Knopf rückt nach | als Folge der Form festgehalten | „Form → Höhe" |
 | H7 2 px in `rows`, Zahlen im CSS | eine Einrückung für beide Stile, `calc(14px + var(--space-2))` mit Herkunft im Kommentar | `v3.css` |
 | H8 gerades Anführungszeichen | Satz mit ‚…‘ im Zitat | „Form" |
-| H3 Ansage „klappt auf" | offen: ein Text nur für die Vorlesehilfe wäre ein neues Wort → Frage an llcto/Owner; bis dahin nennt die verschachtelte Gruppe ihr Wort, sobald sie offen ist | — |
+| H3 Ansage „klappt auf" | llcto: bauen (Barrierefreiheit, kein sichtbares Wort) → zugeklappt „<Label>, n Möglichkeiten" nur für den Screenreader | `207621a`, „Form → Vorlesehilfe" |
 
 Stand: M1 und M2 behoben, H1, H2, H4–H8 aufgenommen, H3 bei llcto. Gemessen: Einrückung `rows` 687/687 px, `list` 46/46 px; `--overview` zeigt „Dauerakte" und „Irrelevant"; keine Konsolenfehler. **Kurze fremde Nachprüfung von M1/M2 steht aus.**
+
+
+## Nachprüfung 2026-10-27 (fremd)
+
+Fremder Prüfer, weder Erbauer noch Prüfer der ersten Abnahme. Gegenstand ist die
+Nachbesserung `a05bdb7`. Gemessen wurde der Stand `207621a`: Das ist `a05bdb7`
+plus der H3-Commit (Zahl der Möglichkeiten für die Vorlesehilfe in
+`RadioGroup.tsx`, `position: relative` an der Gruppe). Er berührt keinen der
+Wege, die hier geprüft werden; H3 selbst ist nicht Gegenstand. Der Arbeitsbaum
+war sauber. Gemessen in headless Chromium über `scripts/cdp.mjs` gegen den
+Dev-Server auf Port 6107, mit echten Tasten- und Mausereignissen. Für M1 sind elf
+Instanzen von `ChoicePrompt` zur Laufzeit in die Story-Seite
+`--option-group` gerendert (`createRoot`, dieselbe React-Instanz wie die
+Story). Grund: Keine Story kombiniert `freeText` mit einer Gruppe.
+
+| Punkt | Nachweis (Story-ID · Befehl · Messwert) | Ergebnis |
+|---|---|---|
+| M1: nur Gruppenzeile + Freitext, Klick = Strg+Enter | `ChoicePrompt.tsx:232` sendet `optionId: answer` wie `send()` (`:150`). Zur Laufzeit, Gruppenzeile gewählt, „Bitte ablegen." getippt: Knopf frei, kein Satz. Der Klick meldet `{"optionId":null,"text":"Bitte ablegen."}` (in `rows` und in `list`). Strg+Enter meldet dasselbe, aus dem Textfeld wie vom Radio der Gruppe | ✓ |
+| M1: ohne Freitext wartet der Knopf | Gruppenzeile gewählt, Feld leer oder nur Leerzeichen: Knopf `disabled`, daneben „Wählen Sie eine Möglichkeit unter „Ablegen ohne Buchung“.". Klick und Strg+Enter senden nichts (0 Aufrufe von `onSubmit`). Ebenso mit `freeText.toggle` bei zugeklapptem Feld | ✓ |
+| M1: Unteroption meldet ihre Kennung | `annual` + Text: Klick und Strg+Enter melden beide `{"optionId":"annual","text":"Für den Abschluss."}`. `private` ohne Freitext: beide `{"optionId":"private"}`. In keinem Lauf kam die Kennung `file` einer Gruppe mit Optionen an | ✓ |
+| M2: Spalte „Entscheidung" in `v3-entitäten-beleg-sourcedocumentreview--overview` | Alle drei Listen aufgeklappt. Die erste: Kopf „3 von 5 offen", Spalte `offen · offen · Dauerakte · offen · Irrelevant`, also drei „offen". Die zweite: „alle 5 entschieden", fünf Wörter, gleich der Spalte „Empfehlung". Die dritte: „kein Beleg zu prüfen", Leertext „Alle 61 Belege sind verarbeitet, zugeordnet oder gesichtet.". Ursache behoben: `SourceDocumentReview.stories.tsx:347` und `:360` nutzen `permanent`/`irrelevant`. Konsole 0 | ✓ |
+| H7: Unter-Radio unter dem Text der Gruppenzeile | x des Unter-Radios gegen x des Gruppentexts. `--option-group` (`rows`): links 51/51, rechts 747/747 bei 1400 px, 687/687 bei 1280, 1007/1007 bei 1920. `--option-group-list` (`list`) 46/46. `RadioGroup --grouped` (`list`) 46/46. `SourceDocumentReview --preview-loading` (`rows`) 676/676. `padding-left` überall 22 px | ✓ |
+| Neue Story `v3-patterns-prüfen-choiceprompt--option-group-list` | Beim Laden ist `annual` gewählt und die Gruppe offen (5 Unter-Radios, Chevron). Der Stil ist `list` (keine Klasse `--rows`). Das Feld „Notiz zur Ablage *" ist da (Platzhalter „Wofür wird er im Abschluss gebraucht?"), der Knopf gesperrt mit „Bitte ergänzen Sie den Text.". Tab fokussiert `annual`. Nach „Belegt die Rückstellung." meldet der Klick „Entschieden: annual · Belegt die Rückstellung.", Strg+Enter nach neuem Laden ebenso. Bei Wechsel auf `private` ist das Feld weg, der Klick meldet `private` ohne Text. Konsole 0 | ✓ |
+| Spec „Form → Tastatur" (↑ von unten) | `--option-group` links: Tab `next`, ↓ `file` (offen, 5), ↓ `annual`, ↑ `file`, ↑ `next` (zu). ↑ springt um auf `client`, ↑ `file` (offen), ↑ `next` (zu), also an ihr vorbei. ↓ `file`, ↓ `annual`, also von der Zeile mit ↓ hinein | ✓ |
+| Spec „Form → Höhe" | Knopf links bei y = 263 px. Hover auf Gruppenzeile und Chevron: 263. Mit ↓ auf die Gruppe: 610 (+347 px). Bei `client` mit Notizfeld: 377. Rechts (offen von Anfang an): 610. Nichts rückt ohne Wahl | ✓ |
+| Spec „Klick auf die offene Gruppenzeile" | `payroll` gewählt, dann Klick auf das Gruppenwort: `file` gewählt, Gruppe offen (5), Knopf gesperrt mit Satz. Ebenso der Klick aufs Chevron der offenen Zeile. Erst „In den nächsten Zeitraum" klappt zu. Mit getipptem Freitext siehe H9 | ✓ (mit H9) |
+| Spec „Die Gruppe ist keine Antwort" | wie M1 oben; Satz Wort für Wort gegen `ChoicePrompt.tsx:121–151` (`openGroup`, `answer`, `blocked`, `why`) | ✓ |
+| Spec „`options: []`" | Laufzeit: Zeile `file` ohne Chevron, kein inneres `fieldset`, keine Gruppe im DOM. Gewählt ist der Knopf frei, der Klick meldet `{"optionId":"file"}` | ✓ |
+| `pnpm typecheck`, `pnpm check:language` | Exit 0 und Exit 0 („0 German comment lines left in 0 files"), auf `207621a` | ✓ |
+
+**Hinweise** (keine Mängel):
+
+- **H9 — Die offene Gruppenzeile mit getipptem Freitext.** Der Satz „… die
+  Gruppe bleibt offen, der Knopf wartet" stimmt nur, solange kein Freitext
+  getippt ist. Gemessen: `annual` gewählt, „Notiz." getippt, Klick aufs Chevron
+  der offenen Zeile. Danach ist `file` gewählt, der Knopf bleibt frei, es steht
+  kein Satz daneben, und der Klick meldet `{"optionId":null,"text":"Notiz."}`.
+  Das folgt widerspruchsfrei aus „Die Gruppe ist keine Antwort" (M1). Wer das
+  Chevron zum Zuklappen nimmt, schickt dann aber eine reine Freitext-Antwort
+  statt „Jahresabschluss". Heute ist das latent: Kein Aufrufer verbindet
+  Freitext und Gruppe. Kommt der erste, sollte der Satz einen Zusatz bekommen
+  („ohne getippten Freitext").
+- **H10 — Rest von H7.** `calc(14px + var(--space-2))` (`v3.css:5188`)
+  wiederholt die Radiobreite aus `.v2radio` weiter als Zahl. In `list` ist der
+  Zeilenabstand das Literal `gap: 8px` (`v3.css:2262`), nicht `--space-2`. Die
+  Ausrichtung hält, weil beide heute 8 px sind; ändert sich eins davon, kippt
+  `list` still.
+- **H11 — Rest von H5.** `pending` bei offener Gruppe hat weiter keine Story
+  (nur R6 zur Laufzeit). Die Spalte „Nachweis (Story)" der Prop-Tabelle nennt
+  `OptionGroupList` nicht.
+
+M1 und M2 sind behoben, alle Punkte ✓.
+
+**Nachtrag abgenommen**
+
+Geprüft von / am: Claude (Prüf-Agent, fremd), 2026-10-27 · `pnpm build` nicht
+gelaufen (Auftrag: kein Build). Der Status im Kopf von 0028 ist unverändert.
+
+### Nachbesserung 2 (2026-10-27, Hinweise der Nachprüfung)
+
+- **H9:** Der Satz zum Klick auf die offene Gruppenzeile nennt jetzt den Fall mit getipptem Freitext.
+- **H10:** `.v2radioline` nimmt `gap: var(--space-2)` statt `8px` (gleicher Wert). Die Einrückung der Gruppe rechnet mit demselben Token, nur die Radiobreite 14 steht als Zahl, mit Herkunft im Kommentar.
+- **H11:** `OptionGroupList` steht in der Prop-Tabelle. Für „`pending` bei offener Gruppe" gibt es keine eigene Story, gemessen zur Laufzeit (R6 der Abnahme).
 
