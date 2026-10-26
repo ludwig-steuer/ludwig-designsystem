@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Status | Abnahme (Nachprüfung) · vorher: in Arbeit — nicht abgenommen 2026-10-24 (fremde Abnahme, Stand `51db640`; Mängel 1–5) · Hashes: `51db640` (Bau) und `b2b84e5` (Nachbesserung) waren lokal und sind vor dem Push in `c848b6d` zusammengefasst (Stories mit fiktiven Daten); `51db640^` = `d3e91ff` |
+| Status | in Arbeit — nicht abgenommen 2026-10-26 (fremde Nachprüfung, Stand `c848b6d`: Mängel 1–5 behoben, Nachtrag Zonen erfüllt, volle Karte unverändert; offen: neuer Mangel 6) · davor: nicht abgenommen 2026-10-24 (fremde Abnahme, Stand `51db640`; Mängel 1–5) · Hashes: `51db640` (Bau) und `b2b84e5` (Nachbesserung) waren lokal und sind vor dem Push in `c848b6d` zusammengefasst (Stories mit fiktiven Daten); `51db640^` = `d3e91ff` |
 | Stufe | erweitert `entities/clarification/ClarificationCard.tsx` · `patterns/ChoicePrompt` (Freitext hinter einem Textknopf, Zeile weiterer Wege) |
 | Klassen-Test | Karte: nein (Klärung). ChoicePrompt-Zeile: ja (jede Frage mit Antwortvorschlägen kennt „selbst schreiben" und Auswege) |
 | Quelle | Auftrag llcto 2026-10-24 (Owner), Paket 2 · Wireframe `ludwig/app/reports/2026-10-24_abnahme-wizard-wireframe.html` (Schritt Rückfragen, echte Fragen eines Stapels; in Stories fiktiv) · Konzept `simple-batch-review.md` §12 „Question screen", Jobs „Rückfragen" |
@@ -244,7 +244,7 @@ Fest (gilt immer):
 - [x] Code englisch; `@when`/`@instead` an jedem Export
 - [x] Kein Hex, kein px in TSX, keine lokale Label-Map; Status nur über Registry
 - [x] Alle Stories oben vorhanden; ausgeschlossene Zustände begründet
-- [ ] Prüfliste `design-guidelines.md` §9 durchgegangen
+- [x] Prüfliste `design-guidelines.md` §9 durchgegangen
 - [x] Im Browser angesehen (Storybook), nicht nur gebaut
 
 Variabel (aus dieser Spec):
@@ -256,7 +256,7 @@ Variabel (aus dieser Spec):
 - [x] Kasten „Kontext": nur Gruppen mit Einträgen, Anzahl im Kopf, die ersten zwei offen, genannte zuerst, jeder Eintrag ruft `onSelect` mit seiner Art (Story `Step`)
 - [x] `cases` und `statements` erscheinen auch im Block der vollen Karte, die Gruppen dort in derselben Reihenfolge wie im Kasten (Story `InBatchReview`)
 - [x] Zustand je Frage: zwei Fragen nacheinander unter derselben Karte beginnen je mit ihrer eigenen Vorauswahl, der Notizmodus wandert nicht mit (Code: `key={c.id}`, `askingFor`)
-- [ ] `variant="card"` ohne `onAskClient` unverändert (vorhandene Stories)
+- [x] `variant="card"` ohne `onAskClient` unverändert (vorhandene Stories)
 - [x] Bei 1280 px Innenbreite mit Seitenleiste kein Querlauf; Kasten und Frage oben bündig (gemessen)
 - [x] Trefferfläche der Textknöpfe und Kasten-Einträge ≥ 24 × 24 px; Kontrast ≥ 4,5:1 (gemessen)
 - [ ] offen (App): ersetzt `ClarificationDetail` in `close/CloseQuestions.tsx` ohne Funktionsverlust
@@ -476,12 +476,159 @@ Notizfeld, „Doch selbst beantworten" → Fokus zurück auf den Weg.
 
 Abnahmekriterien dazu (offen, fremde Abnahme):
 
-- [ ] Drei Zonen ohne Farbe unterscheidbar: Frage-Karte mit Fußzone „Ihre Antwort" (Linie, Tönung, Kopf), Karte „Kontext" daneben (Stories `Step`, `StepFreeText`, `StepDeferredWithHistory`)
-- [ ] Im Kasten Gruppenkopf (Gruppen-Rolle, Zähler) und Eintrag (Zeichen der Art, Linkfarbe) verschieden; Linie zwischen den Gruppen (Story `Step`)
-- [ ] Optionale Frage: kein Badge, Hinweis aus der Registry (Story `StepFreeText`)
-- [ ] Wege-Zeile umbrechend ohne Strich am Zeilenanfang, Fokusring ganz (Story `StepDeferredWithHistory`, gemessen)
-- [ ] Stories und Specs ohne echte Mandantendaten
+- [x] Drei Zonen ohne Farbe unterscheidbar: Frage-Karte mit Fußzone „Ihre Antwort" (Linie, Tönung, Kopf), Karte „Kontext" daneben (Stories `Step`, `StepFreeText`, `StepDeferredWithHistory`)
+- [x] Im Kasten Gruppenkopf (Gruppen-Rolle, Zähler) und Eintrag (Zeichen der Art, Linkfarbe) verschieden; Linie zwischen den Gruppen (Story `Step`)
+- [x] Optionale Frage: kein Badge, Hinweis aus der Registry (Story `StepFreeText`)
+- [x] Wege-Zeile umbrechend ohne Strich am Zeilenanfang, Fokusring ganz (Story `StepDeferredWithHistory`, gemessen)
+- [x] Stories und Specs ohne echte Mandantendaten
 
 Status: zurück auf Abnahme, Stand `c848b6d`; die Nachprüfung der Mängel 1–5
 und dieser Nachtrag gehen zusammen an den Abnehmenden.
+
+### Nachprüfung 2026-10-26
+
+Abnehmer: Claude (Abnahme-Agent, fremde Sitzung, weder Bauender noch
+Abnehmer vom 2026-10-24). Stand `c848b6d` (+ `33e4858`, nur Status-Zeilen),
+Basis `d3e91ff`; Arbeitsbaum zu Beginn sauber. Gelesen: `CLAUDE.md`, Skill
+`v3-komponente` (Abnahme), §9 der Guideline, diese Spec ganz (Abnahme,
+Mängel, Nachbesserung, Nachtrag Zonen), `git diff d3e91ff c848b6d` für
+`ClarificationCard.tsx`, `ChoicePrompt.tsx`, beide Story-Dateien, `v3.css`
+(Blöcke „0222 · the step form", `.v2ask__links`), `tokens.css` (Rollen 0220),
+die Achse `clarification_severity` im Spiegel. Gemessen mit `scripts/cdp.mjs`
+am Dev-Server 6107 (Fenster 1042 × 1000 = 1280 px mit Seitenleiste,
+Gegenprobe 1480, 900, 760, 700 und 640 px): Maße mit `getBoundingClientRect`,
+Farben aus `getComputedStyle` (Pseudo-Element `::before` eingeschlossen),
+Kontrast nach WCAG gerechnet, Tastatur mit echten Tastendrücken (Tab, Pfeil,
+Enter, `Strg+Enter`, Esc) und echten Klicks. Gegenprobe „volle Karte
+unverändert": `d3e91ff` in einem Worktree außerhalb des Repos und `c848b6d`
+je statisch ins Scratchpad gebaut, alle 16 Card- und 8 ChoicePrompt-Stories
+beider Stände in derselben Messung geladen, `innerHTML` (nach Angleichung der
+`useId`-Kennungen) und die Geometrie jedes Elements verglichen. Randfälle
+ohne Story (leere Evidenz, `clientNote` vorbelegt, Lesemodus, Altfall
+`document_upload`, `question` = `title`, `deferLockedReason` in `step`, volle
+Karte mit `clientNote`) serverseitig gerendert (`renderToStaticMarkup`,
+esbuild-Bündel im Scratchpad). Befehle selbst gelaufen. Während der Messung
+haben andere Sitzungen `Clarification.tsx` (0224, `2b54bb6`, `3fdf788`) und
+`DataTable.tsx` geändert; beides berührt `variant="step"` nicht (die Karte
+nimmt aus `Clarification.tsx` nur `AUDIENCE_LABEL` für die Meta-Zeile der
+vollen Karte), und die Gegenprobe alt/neu lief an den statischen Builds aus
+dem sauberen Stand. Bildschirmfotos
+`.playwright-mcp/0222-nachpruefung-1026-step-1042.png`,
+`…-step-focus-first-way.png`, `…-step-640.png`, `…-step-free-text.png`,
+`…-ask-client-empty.png`, `…-ask-client-saved.png`,
+`…-deferred-with-history-1042.png`, `…-deferred-640-wrap-focus.png`,
+`…-step-loading-and-error.png`, `…-step-paging.png`,
+`…-in-batch-review.png`, `…-choiceprompt-links.png`.
+
+| Mangel · Kriterium | Nachweis (Story-ID · Befehl · Messwert · Datei:Zeile) | Ergebnis |
+|---|---|---|
+| M1 Sperrgrund neben „Zurückstellen" rückte in der vollen Karte an den Knopf | `--answering` (`deferLockedReason`): Kinder von `p.v2clc__exit` = Zeichen · Text · `button` · `span.v2clc__exitwhy`, kein Zusatz-`span`, kein führendes Leerzeichen; Abstand Knopf → Grund **8 px** (vorher 3,5). Alt gegen neu: `--answering` HTML und Geometrie gleich. In `step` (serverseitig mit `deferLockedReason`): `span.v2clc__linkitem` mit `button[disabled][aria-describedby]` und dem Grund als **ein** Eintrag der Zeile | ✓ behoben |
+| M2 `ChoicePrompt` ohne neue Props verändert | `choiceprompt--free-text-only`: „Schreiben Sie eine Antwort." wie 0028; `ChoicePrompt.tsx:128` `freeText?.emptyHint ?? …`; die Notiz sagt „Schreiben Sie eine Notiz für den Mandanten." (`--step-ask-client`); `freeText.emptyHint` steht in der Schnittstelle. Alt gegen neu: alle 8 ChoicePrompt-Stories HTML und Geometrie gleich | ✓ behoben |
+| M3 Fokus fiel beim Wechsel der Flächen auf `BODY` | `--step-ask-client`, echte Klicks und Tasten: „Beim Mandanten klären" → `activeElement` = `TEXTAREA` in `[data-client-note]`, Antwortfläche `hidden` (`display: none`); „Doch selbst beantworten" → `BUTTON` „Beim Mandanten klären"; Enter darauf → wieder im Notizfeld, Notiz unverändert; `Strg+Enter` speichert → Fokus auf „Beim Mandanten klären", Callout „Beim Mandanten zu klären: Bitte den Kassenbeleg nachreichen" in der oberen Zone. Gewählte Option (die zweite) und eigener Text bleiben über beide Wechsel | ✓ behoben (beim Blättern s. M6) |
+| M4 leere Evidenz ließ eine leere Spalte | serverseitig mit `evidence: { documents: [], payments: [] }`: Klasse `v2clc v2clc--step`, kein `<aside>`; Zählung `ClarificationCard.tsx:985–988` | ✓ behoben (Hinweis 5) |
+| M5 Überschriften sprangen von `h2` auf `h4` | `--step`: `h2` Frage → `h3` Grundlage · `h3` Ihre Antwort · `h3` Kontext; `--step-deferred-with-history` dazu `h3` Verlauf dieser Frage; volle Karte `--in-batch-review`: `h3` Titel → `h4` Grundlage · `h4` Quellen und Kontext (wie vorher) | ✓ behoben |
+| Hinweis 1 (2026-10-24) Vorbelegung ohne Story | `StepAskClient` beginnt weiter mit `clientNote: null`; die Vorbelegung ist nur serverseitig nachgewiesen (Notiz im `textarea` des Notizfelds, Callout darüber) | offen (Hinweis 1) |
+| Hinweis 2 (2026-10-24) `as` in `EvidencePanel` | `EvidencePanel` typisiert das Feld vor dem `filter`, kein `as`; neu steht eines in der M4-Zählung (Hinweis 5) | erledigt |
+| Hinweis 3 (2026-10-24) Wege während `pending` | `--step-loading-and-error` oben: Optionen und Hauptknopf gesperrt, „Eigene Antwort schreiben" und „Anderweitig geklärt" nicht; ein Klick auf „Eigene Antwort schreiben" öffnet ein gesperrtes Feld, der Knopf verschwindet, der Fokus fällt auf `BODY` | offen (Hinweis 3) |
+| Hinweis 4 (2026-10-24) Minus | Kasten in `--step`: „02.01.2026 · -42,91 € · 1802 Geschäftskonto" mit U+002D | vorbestehend |
+| `pnpm typecheck`, `pnpm build`, `pnpm check:type` grün | `typecheck` Exit 0; `check:type` Exit 0, `--test` Exit 0; `pnpm build -o` ins Scratchpad Exit 0 (nur die bekannte Chunk-Warnung), Index führt die sechs `--step*`-Stories und `choiceprompt--option-rows-with-links`. `check:language`, `check:when`, `check:icons`, `check:contrast` Exit 0, je `--test` Exit 0; `check:classes` Exit 1 mit denselben vier Altfällen wie auf `d3e91ff` (`v3clt__step`, `v3clt`, `v2tbl__foot`, `cy-page`), `--test` Exit 0 | ✓ |
+| Prüfliste `design-guidelines.md` §9 | Stufe und Importe abwärts; kein Hex, px nur als Spurbreite der Evidenztabellen wie bisher; Text links, Zahlen rechts (Grundlage); Farbe nur Link und Fehler; fünf Zustände (leer und leer nach Filter begründet); Kontrast und Fokus s. u., Fokusring `#3B8FC4` 3,55:1 auf Weiß, 3,43:1 auf `surface-head`; Hauptweg mit sichtbarer Taste (`Strg+Enter`); Hover an Wegen, Einträgen und Gruppenköpfen; Trefferflächen ≥ 24 px; Zeichen Lucide 1,5 aus `ENTITY_ICON`, nie ohne Wort; Schrift aus der Skala (12,5/16 px, 400/600/700); Überschriften nach §2a (M5); zwei Karten mit Rand ohne Schatten; Raster `minmax(0, 1fr)` und `.v2clc__main { min-width: 0 }` — unter ≈ 700 px schneidet die Karte die Antwortzone ab (Hinweis 6) | ✓ (mit Hinweisen) |
+| Im Browser angesehen | alle sechs `--step*`-Stories, `--in-batch-review`, `--answering`, `choiceprompt--option-rows-with-links`, `--free-text-only`; Konsole ohne Meldung (nur das `favicon.ico` von Storybook) | ✓ |
+| `variant="card"` ohne `onAskClient` unverändert (vorhandene Stories) | 16 Card-Stories `d3e91ff` gegen `c848b6d` (statische Builds, 1042 px): **15 gleich** in HTML und Geometrie jedes Elements; `--in-batch-review` anders nur im Block „Quellen und Kontext" (gewollt: Sachverhalt · Belege · Zahlungen · Kontoauszug · Konten · Buchungen · Weitere Quellen statt Belege · Konten · Zahlungen · Buchungen · Weitere Quellen, dazu die Fixtur-Gruppen `cases`/`statements`), die Karte ohne diesen Block Zeichen für Zeichen gleich. Serverseitig: volle Karte mit `clientNote` zeigt den Callout und die Zeile „Nur der Mandant weiß es? Beim Mandanten klären" | ✓ |
+| Bei 1280 px Innenbreite kein Querlauf; Kasten und Frage oben bündig | 1042: `scrollWidth` 1042, Raster `654px 340px`, beide Karten `top` 16, Spalt 16 px; 1480: 824 + 340 px; 640: `scrollWidth` 640, Frage 252 px (Hinweis 6) | ✓ |
+| Trefferfläche ≥ 24 × 24, Kontrast ≥ 4,5:1 | Wege 24 px hoch, 83–156 px breit; Kasten-Einträge (alle Gruppen offen) 302 × 42,7–84,6 px; Gruppenköpfe 338 × 34,8 px. Linkfarbe `#2B6F9C` 5,45:1 auf Weiß, 5,26:1 auf `surface-head`; Thema 6,69:1; optionaler Hinweis 4,88:1; „Ihre Antwort" 6,45:1; Gruppenkopf, Unterzeile, „genannt", Zeichen je 6,69:1; Fehler-Callout `#A8403C` 4,99:1 | ✓ |
+| Nachtrag: drei Zonen ohne Farbe | `--step`: Frage-Karte `.v2card` (1 px `#DDE2E8`, kein Schatten) mit `.v2clc__about` (weiß) und `.v2clc__reply`: Linie 1 px `#DDE2E8` über die volle Innenbreite (652 px), Fläche `#FAFBFC`, Kopf `h3.lw-ui-group` „Ihre Antwort" (12,5 px, 700, `#5C5C5C`, 6,45:1, `aria-labelledby` der `section`); Karte „Kontext" daneben. Kein Farbton — die Tönung ist 1,04:1 zu Weiß, die Trennung tragen Linie, Kopf und Abstand. Legende „Antwortoptionen" 1 × 1 px, `clip-path: inset(50%)`. `--step-free-text` und `--step-deferred-with-history`: dieselben Zonen und Köpfe | ✓ |
+| Nachtrag: Gruppenkopf und Eintrag verschieden, Linie zwischen den Gruppen | Gruppenkopf (`summary`) 12,5 px, 700, `#5C5C5C`, Zähler an der rechten Kante, Hover `bg-soft`. Eintrag: Zeichen aus `ENTITY_ICON` (svg, `stroke-width` 1,5, `#5C5C5C`) **in der Spalte des Chevrons** (x 705 = 705), Haupttext **in der Flucht des Gruppenworts** (x 727 = 727) in `#2B6F9C`, Gewicht 400, Unterzeile in Textgrau; Hover unterstrichen. Linie 1 px `#ECEFF3` über die volle Kartenbreite zwischen den Gruppen, über der ersten keine. Reihenfolge Sachverhalt · Belege · Zahlungen · Kontoauszug · Konten · Buchungen, die ersten zwei offen. Sieben Klicks: `case:case-0412`, `document:doc-0871`, `payment:bt-0207`, `statement:imp-1802-2026-01`, `account:6837`, `account:70412`, `entry:je-2025-1187`. Ohne `onSelect` (`--step-ask-client`) Einträge als Text in Textfarbe, ohne Hover | ✓ |
+| Nachtrag: optionale Frage | `--step-free-text`: kein Badge; `p.lw-ui-hint` „Hilfreich, aber die Buchung kann auch ohne Antwort erfolgen." = `clarification_severity.optional.description` (Spiegel `status-registry.ts:968`), 4,88:1; Feld heißt „Antwort oder Anweisung für die Buchung", kein Platzhalter; Zeile ohne „Eigene Antwort schreiben" | ✓ |
+| Nachtrag: Wege-Zeile umbrechend, kein Strich am Zeilenanfang, Fokusring ganz | `--step-deferred-with-history`, `clip-path: inset(-6px -6px -6px 13px)`, Schnittkante x 29: bei 1042 zwei Zeilen, „Zurückstellung aufheben" beginnt die zweite (x 41), sein Strich bei x 28 → weggeschnitten; bei 900, 760 und 640 (vier Zeilen) ebenso — jeder Zeilenanfang ohne Strich, jeder Folgeeintrag mit Strich. Fokusring (Tab, `:focus-visible`, 2 px, Versatz 2 px) bei 640 an allen vier Wegen ganz innerhalb der Schnittfläche (links 37 ≥ 29, oben/unten innerhalb ± 6 px), bei 1042 am ersten Weg links 37, Text bündig mit der Zone bei 41 — wie der Nachtrag sagt. 1480: eine Zeile | ✓ |
+| Nachtrag: keine echten Mandantendaten | `git log -p --format= d3e91ff..HEAD \| grep -i -E "Seidlmeier\|FTC\|Qonto\|Fakir\|42606"` leer; Namen der Stories (Wolkenhaus S.à r.l., Tabula Cloud Inc., Brightline Technology GmbH, Serverhaus Nord GmbH, Musterfirma, team@musterfirma.de) fiktiv, „S. Vogt" aus dem Bestand vor `d3e91ff`; die Abnahmetexte nennen den echten Stapel nicht | ✓ |
+| Zusatz: Tab-Weg und Tasten | vom Seitenanfang: gewählte Option → Eigene Antwort schreiben → Beim Mandanten klären → Anderweitig geklärt → Zurückstellen → Speichern und weiter → Sachverhalt (Aufklapper) → Eintrag → Belege → Eintrag → Zahlungen …; Pfeil ↓ wählt die nächste Option; „Eigene Antwort schreiben" (Klick in `--step`, Enter in `choiceprompt--option-rows-with-links`) → Fokus im Feld „Eigene Antwort"; „Zurückstellen" → Dialog, Esc schließt, Fokus zurück auf „Zurückstellen" | ✓ |
+| Zusatz: Zustände | `--step-loading-and-error`: oben „Sende …", Optionen gesperrt; unten Fehler-Callout in der Zone „Ihre Antwort", Wahl bleibt | ✓ |
+| Zusatz: Zustand je Frage im Browser (`StepPaging`) | vorwärts: Wahl der dritten Option auf Frage 1 → Weiter → Frage 2 mit **ihrer** Vorauswahl; zurück → Frage 1 wieder mit ihrer Empfehlung. Notizmodus auf Frage 1, „Notiz zu Frage 1" getippt → Weiter → Frage 2 ohne Notizmodus ✓, aber Fokus auf „Beim Mandanten klären" von Frage 2; → Zurück → Frage 1 **wieder im Notizmodus, Feld leer**, Fokus im Feld (M6) | ✗ |
+| Zusatz: Schnittstelle Zeichen für Zeichen | Props und Felder wie die Tabellen oben, `freeText.emptyHint` nachgetragen; Zeilen 0222 „Aufbau" (Zonen, Reihenfolge 1–11, Notizfläche) wie gerendert | ✓ |
+
+#### Neue Mängel
+
+6. **Notizmodus beim Blättern halb an die Frage gebunden, der Fokus springt.**
+   `ClarificationCard.tsx:773–786`: `askingFor` hält die Id der Frage im
+   Notizmodus über das Blättern hinweg, das Notizfeld selbst ist an
+   `key={c.id}` gebunden (`:1110`) und wird beim Wechsel neu gemountet; der
+   Fokus-Effekt kennt nur „war offen" (`wasAsking` als Boolean) und
+   unterscheidet „Notiz geschlossen" nicht von „Frage gewechselt". Gemessen
+   in `--step-paging` (s. Tabelle): vom Notizmodus aus weitergeblättert,
+   landet der Fokus auf „Beim Mandanten klären" der neuen Frage statt dort,
+   wo die Buchhalterin geblättert hat (bei zwölf Fragen am Pager-Knopf, bei
+   J/K irgendwo); zurückgeblättert, steht die alte Frage wieder im
+   Notizmodus, aber mit leerem Feld, und der Fokus wird hineingezogen.
+   Zustand an zwei Orten mit zwei Lebensdauern (Linse Logik), Fokus ohne
+   Zutun versetzt (Linse Bedienung). Vorschlag: den Notizmodus wie die
+   Antwort an die Frage binden — beim Wechsel von `c.id` auf „zu" setzen —
+   und den Fokus nur zurückgeben, wenn **dieselbe** Frage ihren Notizmodus
+   schließt (`wasAsking` als Id: zurück auf den Weg nur bei
+   `wasAskingId === c.id`). `StepPaging` um diesen Rundlauf ergänzen.
+
+#### Hinweise (nicht blockierend)
+
+Nummern fortlaufend zu denen vom 2026-10-24 (2 ist erledigt, 4 bleibt
+vorbestehend):
+
+- **Hinweis 1** (offen seit 2026-10-24): `StepAskClient` mit gesetzter
+  `clientNote` beginnen (oder eine zweite Karte daneben), damit die
+  Vorbelegung eine Story hat.
+- **Hinweis 3** (offen seit 2026-10-24, jetzt gemessen): während `pending`
+  sind „Eigene Antwort schreiben" (`ChoicePrompt.tsx:176`) und „Anderweitig
+  geklärt" (`ClarificationCard.tsx:884`) bedienbar; der erste öffnet ein
+  gesperrtes Feld und lässt den Fokus auf `BODY` fallen. „Zurückstellung
+  aufheben" sperrt schon mit `pending` (`:905`) — dieselbe Regel für alle
+  Wege.
+- **Hinweis 5 · `as` in der M4-Zählung.** `ClarificationCard.tsx:986`
+  `(rows as readonly unknown[] | undefined)`. Zählen über
+  `evidenceGroups(evidence)` (wie M4 vorschlug) braucht keine Zusicherung,
+  und dieselbe Funktion, die die Gruppen ordnet, sagt dann, ob es welche
+  gibt.
+- **Hinweis 6 · 640 px: die Antwortzone wird abgeschnitten.** Frage-Karte
+  252 px, Zone innen 202 px; der Hauptknopf „Speichern und weiter
+  Strg+Enter" ist 250 px breit und bricht nicht um, also stehen Optionen,
+  „Warum empfohlen", Wege-Zeile und Fuß 48 px über die Zone, und
+  `.v2card { overflow: clip }` schneidet 24 px ab („Strg+Ente", „Kredito");
+  kein Querlauf der Seite. Ab 700 px kein Überstand. In der App greift unter
+  1280 px L1 (Sperre); steht die Karte je schmaler, „Kontext" unter die
+  Frage stellen (Container-Query an `.v2clc--step`, `v3.css:5002`).
+- **Hinweis 7 · Fokus nach „Speichern und weiter".** `StepPaging`,
+  `Strg+Enter` am Radio → nächste Frage, `activeElement` = `BODY` (der
+  `ChoicePrompt` wird über `key` neu gemountet). Chrome hält den Startpunkt
+  der Tab-Folge — ein Tab führt auf die erste Option der neuen Frage —, aber
+  `Strg+Enter` auf `BODY` tut nichts, und eine Vorlesehilfe verliert den Ort.
+  Wohin der Fokus beim Wechsel des Datensatzes unter einem `RecordPager`
+  geht (etwa auf die Frage als `h2` mit `tabIndex={-1}`), ist ein
+  Systementscheid für alle Pager-Abläufe (0223 ebenso) — an Owner/llcto.
+- **Hinweis 8 · Esc im Notizmodus** tut nichts. Kein Dialog, also keine
+  Pflicht; Esc wie „Doch selbst beantworten" läge nahe an der Hausregel
+  „Esc schließt ohne zu speichern".
+
+Vier Linsen: **Sprache** — Frage als Überschrift, Thema klein, „Ihre Antwort"
+als Zonenkopf, das Feld ohne Optionen sagt „Antwort oder Anweisung für die
+Buchung" statt „Antwort" zum zweiten Mal, Wege im Imperativ mit Objekt,
+„optional" als Satz aus der Registry statt Badge, Sperrsatz der
+Freitextfrage wieder wie 0028 ✓. **Bedienung** — Trefferflächen ≥ 24 px,
+Kontrast Text ≥ 4,88:1, Zeichen 6,69:1, Fokusring ≥ 3,43:1 und an jedem
+Zeilenanfang ganz, Tab-Weg Optionen → Wege → Knopf → Kontext, der Fokus folgt
+dem Wechsel in die Notiz und zurück; beim Blättern aus dem Notizmodus springt
+er (M6) ✗. **Logik** — ein Baustein, eine Enum-Prop, eine Gruppenordnung für
+Kasten und Block, leere Evidenz ohne Spalte, die volle Karte bleibt Zeichen
+für Zeichen; Notizmodus und Notiztext leben verschieden lange (M6) ✗.
+**Darstellung** — drei Zonen über Linie, Fläche, Kopf und Abstand ohne
+Farbton, zwei Karten mit Rand ohne Schatten oben bündig, Gruppenkopf und
+Eintrag klar verschieden, Zeichen in der Spalte des Chevrons, kein hängender
+Strich ✓. Vier-Wochen-Test: bestanden — wer Ludwig vergessen hat, liest
+oben die Frage, unter „Ihre Antwort" die vorgewählte Zeile mit dem Wort
+„empfohlen" und gleich darunter das Warum; der Hauptknopf nennt die Folge,
+die Auswege stehen in Worten, nichts davon braucht Taste, Farbe oder Zeichen.
+
+Abgenommen von / am: Claude (fremde Nachprüfung), 2026-10-26, Stand
+`c848b6d` · **Nicht abgenommen.** Mängel 1–5 behoben, die fünf Kriterien des
+Nachtrags Zonen erfüllt, die volle Karte unverändert. Offen: Mangel 6 (klein:
+Notizmodus beim Id-Wechsel zurücksetzen, Fokus nur bei derselben Frage
+zurückgeben, Rundlauf in `StepPaging`); Hinweise 1, 3, 5–8 (4 vorbestehend);
+die Ablösung von `ClarificationDetail` ist offen (App).
 

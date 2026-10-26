@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Status | Abnahme (Nachprüfung) · vorher: in Arbeit — nicht abgenommen 2026-10-24 (fremde Abnahme, Stand `51db640`; Mängel 1–2) · Hashes: `51db640` (Bau) und `b2b84e5` (Nachbesserung) waren lokal und sind vor dem Push in `c848b6d` zusammengefasst (Stories mit fiktiven Daten); `51db640^` = `d3e91ff` |
+| Status | fertig — abgenommen mit Hinweis 2026-10-26 (fremde Nachprüfung), Stand `c848b6d`; offen (App): Ablösung von `DocumentReviewSingle` und der Tabelle in `StepDocumentReview` · davor: nicht abgenommen 2026-10-24 (fremde Abnahme, Stand `51db640`; Mängel 1–2) · Hashes: `51db640` (Bau) und `b2b84e5` (Nachbesserung) waren lokal und sind vor dem Push in `c848b6d` zusammengefasst (Stories mit fiktiven Daten); `51db640^` = `d3e91ff` |
 | Stufe | neu `entities/source-document/SourceDocumentReview.tsx` · erweitert `patterns/ChoicePrompt` (Notizfeld je Option) · erweitert `entities/source-document/source-document-columns.tsx` (drei Spalten, ein Satz) |
 | Klassen-Test | Ansicht: nein (Beleg, Prüfgrund). Notizfeld je Option: ja (jede Auswahl, deren eine Antwort einen Satz braucht) |
 | Quelle | Auftrag llcto 2026-10-24 (Owner), Paket 3 · Wireframe `ludwig/app/reports/2026-10-24_abnahme-wizard-wireframe.html` (Schritt Belege: Übersicht und „Beleg 1 von 5") · Konzept `simple-batch-review.md` §12 „Belege", Owner-Entscheide 1 und 2 der zweiten Runde |
@@ -178,7 +178,7 @@ Variabel (aus dieser Spec):
 - [x] Rechts in der Reihenfolge Themenzeile · „Wohin gehört dieser Beleg?" · Grund mit Wort aus der Registry und Notiz · Optionen mit Unterzeile · „Warum empfohlen" · Notizfeld · Knopf (Story `Filled`)
 - [x] Die empfohlene Option ist vorgewählt und trägt „empfohlen"; ohne Empfehlung keine Vorauswahl (Stories `Filled`, `WithoutRecommendation`)
 - [x] `ChoiceOption.note`: Feld erscheint nur bei gewählter Option mit `note`, mit deren Wort; `required` sperrt mit Satz; Optionswechsel behält den Text (Stories `ChoicePrompt/OptionNote`, `Interactive`)
-- [ ] `onDecide` bekommt `{ optionId, text }` (Story `Interactive`)
+- [x] `onDecide` bekommt `{ optionId, text }` (Story `Interactive`)
 - [x] `DOCUMENT_REVIEW_VIEW`: Spalten Beleg · Betrag · Belegdatum · Prüfgrund · Empfehlung · Entscheidung (Katalogordnung, owner E2: ein Satz wählt aus, ordnet nicht um); „offen" grau ohne Entscheidung; kein Badge ragt über seine Spur (Story `Overview`, gemessen)
 - [x] Trefferfläche der Optionen ≥ 40 px hoch, Kontrast der Unterzeile ≥ 4,5:1 auf Weiß und auf gewählter Zeile (gemessen)
 - [ ] offen (App): ersetzt `DocumentReviewSingle` und die Tabelle in `StepDocumentReview` ohne Funktionsverlust
@@ -316,3 +316,88 @@ liegt in der vorhandenen Spalte `document` (`v3docrow__name`, vor diesem
 Commit, alle Belegtabellen) — eigene Aufgabe auf der Todo-Liste, nicht hier.
 Hinweis zur Unterzeile: Nachtrag in 0017 geschrieben. Status zurück auf
 Abnahme, Nachprüfung durch den Abnehmenden.
+
+### Nachprüfung 2026-10-26
+
+Abnehmer: Claude (Abnahme-Agent, fremde Sitzung, weder Bauender noch
+Abnehmer vom 2026-10-24). Stand `c848b6d` (+ `33e4858`, nur Status-Zeilen),
+Basis `d3e91ff`; Arbeitsbaum zu Beginn sauber. Gelesen: `CLAUDE.md`, Skill
+`v3-komponente` (Abnahme), §9 der Guideline, diese Spec ganz,
+`git diff d3e91ff c848b6d` für `SourceDocumentReview.tsx` und seine Stories,
+`ChoicePrompt.tsx` und `ChoicePrompt.stories.tsx`,
+`source-document-columns.tsx`, `v3.css` (Block „0223", `.v2radioline__hint`),
+0017 (Nachtrag), die Achse `document_review_reason` im Spiegel. Gemessen mit
+`scripts/cdp.mjs` am Dev-Server 6107, Fenster 1042 × 1000 (= 1280 px mit
+Seitenleiste), Gegenprobe 1480 px; weil während der Messung eine andere
+Sitzung `DataTable.tsx` und `v3.css` im Arbeitsbaum änderte (Faltkopf, nicht
+Teil von `c848b6d`), sind `Overview` und der Tab-Weg zusätzlich am statischen
+Build von `c848b6d` (Scratchpad) gemessen — gleiche Werte. Maße mit
+`getBoundingClientRect`, Farben aus `getComputedStyle`, Kontrast nach WCAG
+gerechnet, Rundläufe mit echten Klicks und Tastendrücken (Tab, `Strg+Enter`,
+J/K). Gegenprobe der acht vorhandenen ChoicePrompt-Stories alt gegen neu:
+HTML und Geometrie gleich (s. 0222). Befehle selbst gelaufen (s. 0222,
+dieselben Läufe). Bildschirmfotos
+`.playwright-mcp/0223-nachpruefung-1026-filled-1042.png`,
+`…-interactive.png`, `…-overview-1042.png`.
+
+| Mangel · Kriterium | Nachweis (Story-ID · Befehl · Messwert · Datei:Zeile) | Ergebnis |
+|---|---|---|
+| M1 unsichtbare Notiz ging mit einer Option ohne Notiz mit | `--interactive`: Kommentar „Leistungszeitraum Dezember 2025" zu „Mit Kommentar noch verarbeiten" getippt → „In den nächsten Zeitraum" (kein Feld) → zurück: der Text steht wieder im Feld → erneut „In den nächsten Zeitraum", `Strg+Enter` am Radio → „Serverhaus Nord GmbH: In den nächsten Zeitraum" **ohne Text**. `choiceprompt--option-note`: Notiz zu „Mit Kommentar …", dann „Archivieren", Knopf → „Entschieden: archive · ohne Text"; dann „Beim Mandanten klären" → Feld „Notiz für den Mandanten *" mit demselben Text, Knopf → „client · Bitte mit Leistungszeitraum Dezember buchen." Code: `ChoicePrompt.tsx:115` (`typed`), `:136` und `:210` senden `typed`, die Sperre liest es (`:116–117`) | ✓ behoben |
+| M2 Story `Filled` zeigte einen anderen Beleg | `--filled`: Themenzeile „Serverhaus Nord GmbH · 12.01.2026 · -4,76 €", Callout „Warum Ludwig nicht gebucht hat: [Werte fehlen]" (Badge 4,78:1) mit Notiz, sieben Entscheidungen mit Unterzeile, „Mit Kommentar noch verarbeiten empfohlen" gewählt, „Warum empfohlen" unter den Optionen, Feld „Kommentar an Ludwig *" offen, darüber `RecordPager` „Beleg 1 von 5". Das Minus der Themenzeile ist U+002D, nicht „−" wie die Nachbesserung schreibt (Hinweis 5) | ✓ behoben |
+| Hinweis 1 (2026-10-24) Änderung an `RadioGroup` ohne Nachtrag | 0017 „Nachtrag 2026-10-24 — Unterzeile bleibt leise (0223)" mit Kontrastwerten | erledigt |
+| Hinweis 2 (2026-10-24) Belegname hart abgeschnitten | weiter sichtbar („Lindner Elektro Distribution Internation"), liegt in der vorhandenen Spalte `document`; als eigene Aufgabe ausgelagert | verschoben (nicht diese Spec) |
+| Hinweis 3 (2026-10-24) Leerzustand der Übersicht ohne Story | unverändert: `Overview` übergibt `empty` nur mit Titel, keine Story zeigt ihn, die Zahl fehlt | offen (Hinweis 3) |
+| Hinweis 4 (2026-10-24) Unterzeile im Hover knapp | 4,51:1 auf `bg-soft` (gemessen), unverändert | offen (Hinweis 4, besteht) |
+| `onDecide` bekommt `{ optionId, text }` (Story `Interactive`) | `--interactive`, Beleg 2: „Beim Mandanten klären" ohne Text gesperrt mit „Bitte ergänzen Sie den Text.", Notiz getippt, Klick auf „Entscheiden und weiter" → „Datenbrise Inc.: Beim Mandanten klären · „Bitte die Rechnung mit Euro-Betrag senden"", danach Beleg 3 mit **seiner** Vorauswahl („Archivieren empfohlen"), ohne Feld; eine Option ohne Feld schickt keinen `text` (M1) | ✓ |
+| Original links, Entscheidung rechts, oben bündig, kein Querlauf (gemessen) | 1042: Raster 1010 px, Original 495 px (x 16), Entscheidung 495 px (x 531), beide `top` 56, `scrollWidth` 1042; Original behält 712,7 px, die Karte wächst. 1480: 580 + 580 px | ✓ |
+| Reihenfolge rechts | Kinder der Karte: Themenzeile → `h2` „Wohin gehört dieser Beleg?" → Callout (Grund + Notiz) → Optionen „Entscheidung" → „Warum empfohlen" → Feld → Fuß mit Knopf links | ✓ |
+| Vorauswahl der Empfehlung, ohne Empfehlung keine | `--filled` gewählt mit „empfohlen"; `--without-recommendation`: keine Wahl, kein „empfohlen", kein Callout, Knopf gesperrt mit „Wählen Sie eine Antwort oder schreiben Sie eine." | ✓ |
+| `ChoiceOption.note` | `choiceprompt--option-note` und `--interactive` s. M1: Feld nur bei gewählter Option mit `note`, mit deren Wort; `required` sperrt mit Satz; Wechsel behält den Text; beim Wählen bleibt der Fokus am Radio | ✓ |
+| `DOCUMENT_REVIEW_VIEW` | Köpfe Beleg · Betrag · Belegdatum · Prüfgrund · Empfehlung · Entscheidung; „offen" `#5C5C5C` 6,69:1 in drei Zeilen; längstes Badge „Keine automatische Auslese" endet 23 px vor der Zellkante (Spur 196 px) bei 1042 und 1480 — Dev-Server und statischer Build gleich; Beträge rechtsbündig mit `tabular-nums` | ✓ |
+| Trefferfläche der Optionen ≥ 40 px, Kontrast der Unterzeile | Zeilen 61,3 px (zweizeilig 80,7 px); Unterzeile Gewicht 400, 4,88:1 auf Weiß, 4,52:1 auf der gewählten Zeile (`#F1F7FB`), 4,51:1 im Hover; Themenzeile und Sperrsatz 6,69:1; „empfohlen" 6,19:1 | ✓ |
+| Zusatz: Tastatur | Tab: „Übersicht" → „Nächster Datensatz" → Original (`iframe`) → gewählte Option → Feld, jeweils mit Ring; `Strg+Enter` am Radio entscheidet; J/K blättert (Beleg 3 → 2 → 3) | ✓ |
+| Zusatz: Zustände | `--states`: „Sende …", Optionen und Feld gesperrt; Fehler-Callout `#A8403C` 4,99:1, Wahl bleibt; `--preview-loading`: „Lade Beleg …" bzw. „Keine Vorschau · Die Datei liegt nur als Zweitschrift …" | ✓ |
+| Zusatz: Befehle | wie 0222: `typecheck`, `check:type`, `check:language`, `check:when`, `check:icons`, `check:contrast` Exit 0 samt `--test`; `check:classes` dieselben vier Altfälle wie `d3e91ff`; `pnpm build -o` ins Scratchpad Exit 0, Index führt die sechs `sourcedocumentreview--*` und `choiceprompt--option-note` | ✓ |
+| Zusatz: keine echten Daten | Probe aus 0222 leer; Belege der Stories (Serverhaus Nord GmbH, Datenbrise Inc., Hafenbank AG, Lindner Elektro Distribution International GmbH, Verlag Brückner & Sohn) fiktiv, die Privatperson ohne Namen | ✓ |
+| offen (App): ersetzt `DocumentReviewSingle` und die Tabelle in `StepDocumentReview` | `befunde-app.md` E, L-365, L-366 | offen (App) |
+
+Neue Mängel: keine.
+
+#### Hinweise (nicht blockierend)
+
+- **Hinweis 3** (offen seit 2026-10-24): eine Story für den Leerzustand der
+  Übersicht („Jeder Beleg ist verarbeitet, zugeordnet oder gesichtet." mit
+  Zahl, Leertext „erledigt").
+- **Hinweis 4** (offen seit 2026-10-24): Unterzeile im Hover 4,51:1 —
+  besteht, ohne Luft.
+- **Hinweis 5 · Minus.** Vorbestehend und set-weit (`Amount`/`AmountCell`,
+  U+002D); die Nachbesserung und die Story-Tabelle schreiben „−4,76 €", der
+  Bildschirm zeigt „-4,76 €", das Original daneben „−4,76 €". Eigene Aufgabe
+  für die Wertzellen, nicht hier.
+- **Hinweis 6 · Fokus nach dem Entscheiden.** `--interactive`, `Strg+Enter`
+  → nächster Beleg, `activeElement` = `BODY` (`ChoicePrompt` über
+  `key={d.id}` neu gemountet, `SourceDocumentReview.tsx:93`). Ein Tab führt
+  zurück auf die erste Option (Chrome hält den Startpunkt), `Strg+Enter` auf
+  `BODY` tut nichts. Derselbe Systementscheid wie 0222, Hinweis 7: wohin der
+  Fokus beim Wechsel des Datensatzes unter einem `RecordPager` geht.
+
+Vier Linsen: **Sprache** — „Wohin gehört dieser Beleg?", „Warum Ludwig nicht
+gebucht hat:", „Warum empfohlen:", „Entscheiden und weiter", „Prüfgrund" wie
+0218, „offen" als Wort, Sperrsätze in Sie-Form ✓. **Bedienung** — Optionen
+61 px hoch und ganz klickbar, Pfeiltasten, Tab ins Feld, `Strg+Enter` vom
+Radio, J/K über den Pager, der Fokus bleibt beim Wählen am Radio; nach dem
+Entscheiden fällt er auf `BODY` (Hinweis 6) ✓. **Logik** — die Antwort trägt
+nur, was sichtbar ist, der Text bleibt für den Rückweg im Zustand, jede
+Entscheidung je Beleg geschlüsselt, Optionen und Empfehlung kommen fertig vom
+Aufrufer ✓. **Darstellung** — zwei gleich breite Spalten oben bündig, rechts
+eine Karte mit Rand ohne Schatten, Grund als Badge mit Wort im Warnton,
+Unterzeile leise auch in der gewählten Zeile, Übersicht ohne überlaufendes
+Badge ✓. Vier-Wochen-Test: bestanden — die vorgewählte Zeile mit
+„empfohlen" und das Warum direkt unter den Optionen tragen die erste
+richtige Handlung ohne Farbe, Zeichen oder Taste; der Knopf nennt die Folge.
+
+Abgenommen von / am: Claude (fremde Nachprüfung), 2026-10-26, Stand
+`c848b6d` · **Abgenommen mit Hinweis.** Mängel 1–2 behoben, alle Kriterien
+außer „offen (App)" nachgewiesen. Offen: Hinweise 3–6 (nicht blockierend);
+die Ablösung von `DocumentReviewSingle` und der Tabelle in
+`StepDocumentReview` ist offen (App).
