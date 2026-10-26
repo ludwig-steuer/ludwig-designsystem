@@ -174,7 +174,8 @@ export function ProcessMini({ phases }: { phases: readonly ProcessPhase[] }) {
  * reasons for that: an overdue follow-up request and a failed export.
  *
  * @when    Who currently holds the batch — icon and word.
- * @instead Entity status → StatusBadge.
+ * @instead Entity status → StatusBadge. Ludwig at work right now, with the
+ *          clock running → AgentRunCell (0225).
  */
 export function Baton({
   owner,

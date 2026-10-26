@@ -717,6 +717,9 @@ export {
   type MirrorEntryLine,
 } from "./entities/datev-mirror-entry/MirrorEntry";
 
+/* Durchgang — Ludwig's run as a bar over the page and in a row (0225) */
+export { AgentRunBanner, AgentRunCell, type AgentRunAction } from "./entities/agent-run/AgentRun";
+
 /* Klärung — the reading family: preview, row, list (0059) */
 export {
   ClarificationCell,

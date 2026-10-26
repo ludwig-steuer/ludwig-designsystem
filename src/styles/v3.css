@@ -5113,3 +5113,55 @@ a.v3bbr__val:hover { text-decoration-color: currentColor; }
 .v3clt__stephead { font-size: var(--fs-ui-sm); color: var(--color-text-muted); }
 .v3clt__stephead strong { color: var(--color-text); }
 .v3clt__text { margin: 2px 0 0; }
+
+/* 0225 · Ludwig's run: the bar under the step bar and the short form in a row.
+   The frame is the step bar's; only the surface takes the state. One height
+   in all three states (the sm button fits), so „fertig" does not jump.
+   The lead takes the colour of the state, the facts stay muted:
+   `--color-accent-700` 5.04:1 on accent-50
+   `--color-success` 4.63:1 on success-bg
+   `--color-danger` 4.99:1 on danger-bg
+   `--color-text-muted` 6.19:1 on accent-50 */
+.v3run {
+  display: flex; align-items: center; gap: var(--space-3);
+  min-height: 40px; box-sizing: border-box;
+  padding: var(--space-1) var(--space-3);
+  font-size: var(--fs-ui); line-height: var(--lh-ui);
+  background: var(--color-info-bg);
+  border: 1px solid var(--color-border); border-radius: var(--radius-lg);
+}
+.v3run--done { background: var(--color-success-bg); }
+.v3run--failed { background: var(--color-danger-bg); }
+.v3run > svg { flex-shrink: 0; }
+.v3run__text { flex: 1 1 auto; min-width: 0; margin: 0; color: var(--color-text-muted); }
+.v3run__lead { font-weight: 600; color: var(--color-accent-700); }
+.v3run--done .v3run__lead { color: var(--color-success); }
+.v3run--failed .v3run__lead { color: var(--color-danger); }
+.v3run__part::before { content: "·"; margin: 0 var(--space-2); }
+.v3run__ref { margin-left: var(--space-2); }
+/* The link accent misses 4.5 on red by a hair (measured); navy keeps it
+   a link beside the red sentence. `--color-primary` 9.59:1 on danger-bg */
+.v3run--failed .v2link { color: var(--color-primary); }
+.v3run__action { flex-shrink: 0; margin-left: auto; }
+
+.v3runcell { display: inline-flex; align-items: center; gap: var(--space-2); }
+
+/* The mark: a piece of 40 % glides to and fro in the track, calm (1.8 s each
+   way). Without motion it stands in the middle, where it cannot be read as
+   a share. `--color-accent-700` 4.69:1 on accent-100 */
+.v3runmark {
+  position: relative; flex: 0 0 auto;
+  width: 32px; height: 4px; overflow: hidden;
+  border-radius: var(--radius-sm);
+  background: var(--color-accent-100);
+}
+.v3runmark::after {
+  content: ""; position: absolute; inset: 0 auto 0 0; width: 40%;
+  border-radius: inherit;
+  background: var(--color-accent-700);
+  animation: v3runmark 1.8s ease-in-out infinite alternate;
+}
+@keyframes v3runmark { to { transform: translateX(150%); } }
+@media (prefers-reduced-motion: reduce) {
+  .v3runmark::after { animation: none; transform: translateX(75%); }
+}
