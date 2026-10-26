@@ -10,6 +10,7 @@ import { Disclosure } from "../../primitives/Disclosure";
 import { EmptyState } from "../../primitives/EmptyState";
 import { Time } from "../../primitives/Time";
 import { StatusBadge } from "../../patterns/StatusBadge";
+import { resolveStatus } from "@/ludwig/ui/status/status-registry";
 import type { TodoItem } from "../../patterns/TodoList";
 import type { StateKind } from "../../patterns/Review";
 
@@ -70,6 +71,12 @@ export interface ClarificationVM {
   caseTitle?: string | null;
   /** Without it the row is not a link (portal, read-only). */
   href?: string | null;
+  /**
+   * The answer given, as text — the chosen option, the free text, or the
+   * reason it was resolved without one (0224). The app derives it from
+   * `answer_payload` (L-367); the row shows it under the title.
+   */
+  answer?: string | null;
 }
 
 function stateBadges(c: ClarificationVM) {
@@ -120,9 +127,17 @@ export function ClarificationCell({
   return <span className="v2cl__cell">{body}</span>;
 }
 
+/** Without the state badge (the group says it, 0224) — the severity stays, as in every row. */
+function severityBadge(c: ClarificationVM) {
+  return c.type === "question" && c.state !== "answered" && c.severity === "required" ? (
+    <StatusBadge axis="clarification_severity" status="required" info={false} />
+  ) : null;
+}
+
 /**
  * @when    A clarification in a list — at the case, in the batch review, in
- *          the portal, at the run; with `detail` it folds open.
+ *          the portal, at the run; with `detail` it folds open, with `onOpen`
+ *          the whole row is a way to the question.
  * @instead Mentioned inside something else → ClarificationCell. Read or
  *          answered on its own → ClarificationCard. Several of them →
  *          ClarificationList.
@@ -133,6 +148,8 @@ export function ClarificationRow({
   detail,
   defaultOpen,
   active = false,
+  onOpen,
+  hideState = false,
 }: {
   clarification: ClarificationVM;
   /** Puts case number and title in front — rank 6 is context, not identity. */
@@ -142,6 +159,14 @@ export function ClarificationRow({
   defaultOpen?: boolean;
   /** The question shown beside the list — selected, so its row is marked (0214). */
   active?: boolean;
+  /**
+   * The row is a way to the question (0224): the title is a button whose
+   * overlay covers the row. With it the row does not fold — one click, one
+   * meaning.
+   */
+  onOpen?: () => void;
+  /** No state badge — the group above says it (`groupBy="state"`). */
+  hideState?: boolean;
 }) {
   const item = active ? "v2cl__item is-active" : "v2cl__item";
   const head = (
@@ -166,13 +191,27 @@ export function ClarificationRow({
           The title is cut to one line — a question runs long and would push
           the badges around. The whole of it stays in the hover.
         */}
-        <span className="v2main v2cl__clamp" title={c.title}>
-          {c.title}
-        </span>
+        {onOpen ? (
+          <button type="button" className="v2link v2rowlink v2cl__clamp v2cl__open" title={c.title} onClick={onOpen}>
+            {c.title}
+          </button>
+        ) : (
+          <span className="v2main v2cl__clamp" title={c.title}>
+            {c.title}
+          </span>
+        )}
         {/* Right-aligned: the state must not move with the length of the
             question, and down a list it becomes a column one can scan. */}
-        <span className="v2cl__state">{stateBadges(c)}</span>
+        <span className="v2cl__state">{hideState ? severityBadge(c) : stateBadges(c)}</span>
       </div>
+
+      {/* What was answered — the reason the row is in the list at all, once
+          the question is with Ludwig (0224). One line, whole in the hover. */}
+      {c.answer ? (
+        <span className="v2cl__answer v2cl__clamp" title={c.answer}>
+          <span className="v2cl__answerlabel">Antwort:</span> {c.answer}
+        </span>
+      ) : null}
 
       <div className="v2cl__meta">
         {/* A comment addresses nobody — naming an audience would claim work. */}
@@ -212,7 +251,7 @@ export function ClarificationRow({
     </div>
   );
 
-  if (!detail)
+  if (!detail || onOpen)
     return (
       <div className={item} {...(active ? { "aria-current": "true" as const } : {})}>
         {head}
@@ -230,9 +269,13 @@ export function ClarificationRow({
   );
 }
 
+/** The order of `groupBy="state"` (0224): what is still to do first, then what is done; notes last. */
+const STATE_ORDER: readonly ClarificationState[] = ["open", "deferred", "answered"];
+
 /**
  * @when    The clarifications of a case, a batch, a run or a portal user —
- *          few rows, optionally grouped by who is asked.
+ *          few rows, optionally grouped by who is asked or by state; with
+ *          `onOpen` each open question is a way to it.
  * @instead Hundreds of rows with columns, sorting and paging → DataTable. The
  *          course of the case itself → CaseTimeline. Items to work through →
  *          TodoList with `toTodoItem`.
@@ -244,10 +287,16 @@ export function ClarificationList({
   renderDetail,
   openBlocking = true,
   empty,
+  onOpen,
+  activeId = null,
 }: {
   /** The list does not reorder — the caller owns the order. */
   clarifications: readonly ClarificationVM[];
-  groupBy?: "audience" | "none";
+  /**
+   * `state`: Offen · Zurückgestellt · Beantwortet, then the notes — words from
+   * the registry, the state badge leaves the rows (0224).
+   */
+  groupBy?: "audience" | "none" | "state";
   showCase?: boolean;
   /** In the app the `ClarificationCard` (0060); without it the list stays flat. */
   renderDetail?: (c: ClarificationVM) => ReactNode;
@@ -258,6 +307,14 @@ export function ClarificationList({
    */
   openBlocking?: boolean;
   empty?: { title: string; hint?: string };
+  /**
+   * Open and deferred questions become a way to the question — in the batch
+   * review a jump back into the run (0224). Answered questions and notes get
+   * none: they are read here, folded open with `renderDetail`.
+   */
+  onOpen?: (c: ClarificationVM) => void;
+  /** The question on screen right now; its row is marked. */
+  activeId?: string | null;
 }) {
   if (clarifications.length === 0) {
     return (
@@ -269,35 +326,55 @@ export function ClarificationList({
     );
   }
 
-  const row = (c: ClarificationVM) => (
-    <ClarificationRow
-      key={c.id}
-      clarification={c}
-      showCase={showCase}
-      detail={renderDetail?.(c)}
-      // A blocking question that is still open is the reason the case stands
-      // still — it opens itself, the way the banner does today.
-      defaultOpen={openBlocking && c.state === "open" && c.severity === "required" && c.type === "question"}
-    />
-  );
+  const row = (c: ClarificationVM) => {
+    const open = onOpen && c.type === "question" && c.state !== "answered" ? () => onOpen(c) : undefined;
+    return (
+      <ClarificationRow
+        key={c.id}
+        clarification={c}
+        showCase={showCase}
+        detail={open ? undefined : renderDetail?.(c)}
+        // A blocking question that is still open is the reason the case stands
+        // still — it opens itself, the way the banner does today.
+        defaultOpen={openBlocking && c.state === "open" && c.severity === "required" && c.type === "question"}
+        active={activeId !== null && c.id === activeId}
+        onOpen={open}
+        hideState={groupBy === "state"}
+      />
+    );
+  };
 
   if (groupBy === "none") return <div className="v2cl">{clarifications.map(row)}</div>;
 
+  const groups: { key: string; label: string; rows: readonly ClarificationVM[] }[] =
+    groupBy === "audience"
+      ? AUDIENCE_ORDER.map((a) => ({ key: a, label: AUDIENCE_LABEL[a], rows: clarifications.filter((c) => c.audience === a) }))
+      : [
+          ...STATE_ORDER.map((st) => ({
+            key: st,
+            label: resolveStatus("clarification", st).label,
+            rows: clarifications.filter((c) => c.type === "question" && c.state === st),
+          })),
+          {
+            key: "comment",
+            label: resolveStatus("clarification_type", "comment").label,
+            rows: clarifications.filter((c) => c.type === "comment"),
+          },
+        ];
+
   return (
     <div className="v2cl">
-      {AUDIENCE_ORDER.map((audience) => {
-        const rows = clarifications.filter((c) => c.audience === audience);
-        if (rows.length === 0) return null;
-        return (
-          <section key={audience}>
+      {groups.map((g) =>
+        g.rows.length === 0 ? null : (
+          <section key={g.key}>
             <h3 className="v2cl__group">
-              {AUDIENCE_LABEL[audience]}
-              <span className="v2cl__count">{rows.length}</span>
+              {g.label}
+              <span className="v2cl__count">{g.rows.length}</span>
             </h3>
-            {rows.map(row)}
+            {g.rows.map(row)}
           </section>
-        );
-      })}
+        ),
+      )}
     </div>
   );
 }

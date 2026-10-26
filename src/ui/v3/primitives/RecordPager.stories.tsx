@@ -2,6 +2,7 @@ import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { useState } from "react";
 import { PageHeader } from "./PageHeader";
 import { RecordPager } from "./RecordPager";
+import { TextButton } from "./TextButton";
 
 const meta: Meta<typeof RecordPager> = {
   title: "v3/Primitives/Navigation/RecordPager",
@@ -114,3 +115,24 @@ export const InUse: Story = {
     />
   ),
 };
+
+/**
+ * A side way at the end of the bar (0224): after the forward arrow, set apart
+ * by space — with a queue, and with only the way back.
+ */
+export const WithActions: Story = {
+  render: () => (
+    <div style={{ display: "grid", gap: "var(--space-4)", justifyItems: "start" }}>
+      <RecordPager
+        position={1}
+        total={3}
+        label="Frage"
+        onPrev={null}
+        onNext={() => {}}
+        actions={<TextButton onClick={() => {}}>3 Fragen bei Ludwig</TextButton>}
+      />
+      <RecordPager back={BACK} actions={<TextButton onClick={() => {}}>3 Fragen bei Ludwig</TextButton>} />
+    </div>
+  ),
+};
+

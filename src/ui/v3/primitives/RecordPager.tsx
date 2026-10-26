@@ -1,5 +1,6 @@
 "use client";
 
+import type { ReactNode } from "react";
 import { ActionIcon } from "../Icons";
 import { formatCount } from "../format";
 
@@ -32,6 +33,12 @@ type Common = {
   label?: string;
   /** The way back into the queue, named („Sachverhalte"). */
   back?: { href: string; label: string };
+  /**
+   * Side ways at the right end of the bar, after the forward arrow — one or
+   * two text buttons to the whole of the queue („3 Fragen bei Ludwig", 0224).
+   * They stand there in every step, so they are found where they were.
+   */
+  actions?: ReactNode;
 };
 
 /** Links — works without JavaScript. `null` means: end of the queue. */
@@ -61,7 +68,7 @@ type PagerButtonProps = Common & {
  *          a fixed order → StepRail. Narrowing a list down → FilterBar.
  */
 export function RecordPager(props: PagerLinkProps | PagerButtonProps) {
-  const { position, total, label, back } = props;
+  const { position, total, label, back, actions } = props;
   const isLinks = props.prevHref !== undefined || props.nextHref !== undefined;
   const hotkeys = "hotkeys" in props ? Boolean(props.hotkeys) : false;
   const onPrev = "onPrev" in props ? props.onPrev : undefined;
@@ -94,9 +101,16 @@ export function RecordPager(props: PagerLinkProps | PagerButtonProps) {
     </Link>
   ) : null;
 
+  const side = actions ? <span className="v2pager__actions">{actions}</span> : null;
+
   // No queue: only the way back. Without that either there is nothing to say.
   if (position === undefined || total === undefined) {
-    return backLink ? <div className="v2pager">{backLink}</div> : null;
+    return backLink || side ? (
+      <div className="v2pager">
+        {backLink}
+        {side}
+      </div>
+    ) : null;
   }
 
   return (
@@ -108,6 +122,7 @@ export function RecordPager(props: PagerLinkProps | PagerButtonProps) {
         {formatCount(position)} von {formatCount(total)}
       </span>
       <Step dir="next" target={next} hotkey={hotkeys ? "K" : undefined} />
+      {side}
     </div>
   );
 }

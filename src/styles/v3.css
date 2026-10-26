@@ -2815,6 +2815,9 @@ button.v2ibtn[aria-disabled="true"] > * { opacity: 0.5; }
   min-width: 6ch; text-align: center;
 }
 .v2pager__step { display: inline-flex; align-items: center; gap: 3px; }
+/* 0224 · side ways after the forward arrow, set apart by space, not by a line. */
+.v2pager__actions { display: inline-flex; align-items: center; gap: var(--space-3); margin-left: var(--space-4); font-size: var(--fs-ui-sm); line-height: var(--lh-ui-sm); }
+.v2pager__actions .v2link { min-height: 24px; }
 /* The active arrow is the bar's main action — for 117 cases. So it carries the
    text colour, not the `IconButton`'s muted one. */
 .v2pager .v2ibtn:not(.v2pager__off) { color: var(--color-text); }
@@ -3081,6 +3084,17 @@ button.v2ibtn[aria-disabled="true"] > * { opacity: 0.5; }
   color: var(--color-text-muted);
 }
 .v2cl__count { font-weight: 400; }
+
+/* 0224 · a row that is a way to its question: the title's overlay covers the
+   row (as in table rows), the row answers the hover; links in it lie above. */
+.v2cl__item:has(.v2rowlink) { position: relative; cursor: pointer; transition: background var(--duration-fast) var(--ease-standard); }
+.v2cl__item:has(.v2rowlink):hover { background: var(--color-bg-soft); }
+.v2cl__item.is-active:has(.v2rowlink):hover { background: var(--color-accent-50); }
+.v2cl__item:has(.v2rowlink) a:not(.v2rowlink) { position: relative; z-index: 2; }
+.v2cl__open { text-align: left; }
+/* The answer is content, not a sub-line: text size and colour, its word muted. */
+.v2cl__answer { font-size: var(--fs-ui); line-height: var(--lh-ui); color: var(--color-text); }
+.v2cl__answerlabel { color: var(--color-text-muted); } /* `--color-text-muted`, 6.69:1 on white, 6.17:1 on bg-soft */
 
 /* The preview stands in the middle of a foreign row's text. */
 .v2cl__cell { display: inline-flex; align-items: center; gap: var(--space-2); min-width: 0; max-width: 100%; }
