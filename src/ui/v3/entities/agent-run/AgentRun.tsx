@@ -124,8 +124,12 @@ function Facts({ startedBy, expectedMinutes, pass }: RunFacts) {
   ].filter((p): p is string => p !== null);
   return (
     <>
+      {/* The dot is text, so a copied line reads „6 Min · meist fertig …" (H5). */}
       {parts.map((p) => (
-        <span key={p} className="v3run__part">
+        <span key={p}>
+          <span className="v3run__sep" aria-hidden="true">
+            {" · "}
+          </span>
           {p}
         </span>
       ))}
@@ -133,13 +137,17 @@ function Facts({ startedBy, expectedMinutes, pass }: RunFacts) {
   );
 }
 
-/** „seit 6 Min", the full start as its title (T7). Server and browser may differ by a minute. */
-function Since({ startedAt, now }: { startedAt: string | Date; now: number }) {
-  const seconds = (now - new Date(startedAt).getTime()) / 1000;
+/**
+ * „seit 6 Min", the full start as its title (T7). The server's minute is kept
+ * through hydration (React leaves suppressed text alone) — so the span is
+ * keyed on the browser's first clock and drawn anew once it ticks (H1).
+ */
+function Since({ startedAt, now }: { startedAt: string | Date; now: number | null }) {
+  const seconds = ((now ?? Date.now()) - new Date(startedAt).getTime()) / 1000;
   // Below a minute formatDuration counts seconds with a decimal; a run is counted in minutes.
   const text = seconds >= 60 ? formatDuration(Math.floor(seconds / 60) * 60) : "weniger als 1 Min";
   return (
-    <span title={`Gestartet am ${formatTimeFull(startedAt)}`} suppressHydrationWarning>
+    <span key={now === null ? "server" : "browser"} title={`Gestartet am ${formatTimeFull(startedAt)}`} suppressHydrationWarning>
       seit {text}
     </span>
   );
@@ -150,9 +158,13 @@ function RunMark() {
   return <span className="v3runmark" aria-hidden="true" />;
 }
 
-/** Now, renewed every 15 s while `active` — the minute shown is never more than that behind. */
-function useNow(active: boolean): number {
-  const [now, setNow] = useState(() => Date.now());
+/**
+ * Now, renewed every 15 s while `active` — the minute shown is never more than
+ * that behind. `null` until the browser has mounted: server and hydration
+ * render the same, the first tick tells `Since` to draw its own.
+ */
+function useNow(active: boolean): number | null {
+  const [now, setNow] = useState<number | null>(null);
   useEffect(() => {
     if (!active) return;
     setNow(Date.now());

@@ -737,8 +737,12 @@ a.v3stepbar__step.is-current:hover { background: var(--color-accent-50); }
   background: var(--color-primary-700);
   color: var(--color-text-on-dark);
 }
+/* The colour is said again on hover: `a:hover` in tokens.css (0,1,1) beats
+   `.v2btn--primary` (0,1,0), and a Button with `href` turned navy on navy
+   (1.27 contrast, 0225 M6). */
 .v2btn--primary:hover:not(:disabled) {
   background: var(--color-primary-600);
+  color: var(--color-text-on-dark);
   box-shadow: var(--shadow-md);
 }
 .v2btn--primary:active:not(:disabled) {
@@ -765,7 +769,7 @@ a.v3stepbar__step.is-current:hover { background: var(--color-accent-50); }
   background: var(--color-danger);
   color: var(--color-text-on-dark);
 }
-.v2btn--danger:hover:not(:disabled) { filter: brightness(1.08); box-shadow: var(--shadow-md); }
+.v2btn--danger:hover:not(:disabled) { color: var(--color-text-on-dark); filter: brightness(1.08); box-shadow: var(--shadow-md); }
 .v2btn--danger:active:not(:disabled) { transform: translateY(0.5px); }
 
 .v2btn:disabled { opacity: 0.5; cursor: not-allowed; }
@@ -5124,7 +5128,8 @@ a.v3bbr__val:hover { text-decoration-color: currentColor; }
    `--color-text-muted` 6.19:1 on accent-50 */
 .v3run {
   display: flex; align-items: center; gap: var(--space-3);
-  min-height: 40px; box-sizing: border-box;
+  /* 30.2 (sm button) + 2 × 4 padding + 2 × 1 border = 40.2, measured (M3). */
+  min-height: 42px; box-sizing: border-box;
   padding: var(--space-1) var(--space-3);
   font-size: var(--fs-ui); line-height: var(--lh-ui);
   background: var(--color-info-bg);
@@ -5137,14 +5142,18 @@ a.v3bbr__val:hover { text-decoration-color: currentColor; }
 .v3run__lead { font-weight: 600; color: var(--color-accent-700); }
 .v3run--done .v3run__lead { color: var(--color-success); }
 .v3run--failed .v3run__lead { color: var(--color-danger); }
-.v3run__part::before { content: "·"; margin: 0 var(--space-2); }
+.v3run__sep { white-space: pre; margin: 0 var(--space-1); }
 .v3run__ref { margin-left: var(--space-2); }
 /* The link accent misses 4.5 on red by a hair (measured); navy keeps it
    a link beside the red sentence. `--color-primary` 9.59:1 on danger-bg */
 .v3run--failed .v2link { color: var(--color-primary); }
+/* The ring too: the focus colour reaches 2.93 on red (M5), navy 9.59. */
+.v3run--failed .v2link:focus-visible { outline-color: var(--color-primary); }
 .v3run__action { flex-shrink: 0; margin-left: auto; }
 
-.v3runcell { display: inline-flex; align-items: center; gap: var(--space-2); }
+/* `top`, not the baseline: an inline-flex takes its baseline from the first
+   child, the empty mark, and pushed the line open by 2.3 px (M4). */
+.v3runcell { display: inline-flex; align-items: center; gap: var(--space-2); vertical-align: top; }
 
 /* The mark: a piece of 40 % glides to and fro in the track, calm (1.8 s each
    way). Without motion it stands in the middle, where it cannot be read as

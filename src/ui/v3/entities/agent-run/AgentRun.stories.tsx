@@ -1,6 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { useState } from "react";
-import { Baton, type BatonMeta } from "../../patterns/Process";
+import { HOLDER } from "@/ludwig/modules/source-docs/domain/document-process";
+import { Baton } from "../../patterns/Process";
 import { StepRail, type RailItem } from "../../patterns/StepRail";
 import { TaskList } from "../../patterns/TaskList";
 import { Segmented } from "../../primitives/Nav";
@@ -82,7 +83,7 @@ export const Done: Story = {
   },
 };
 
-/** Failed: a red sentence and a reference — and without one, when the app has nowhere to point. */
+/** Failed — what the registry calls danger (`run_outcome.blocked`): a red sentence and a reference, and without one when the app has nowhere to point. */
 export const Failed: Story = {
   render: () => (
     <Stack>
@@ -91,7 +92,7 @@ export const Failed: Story = {
         message="Ludwig ist nicht fertig geworden: Der Kontoauszug für März fehlt."
         action={{ label: "Protokoll des Durchgangs öffnen", href: "#log" }}
       />
-      <AgentRunBanner state="failed" message="Ludwig ist seit zwei Stunden still. Der Stapel liegt zur Prüfung bei Ihnen." />
+      <AgentRunBanner state="failed" message="Ludwig steckt fest: Im Schritt Konten fehlen zwei offene Posten." />
     </Stack>
   ),
 };
@@ -117,10 +118,6 @@ export const Edge: Story = {
     </div>
   ),
 };
-
-const HOLDER = {
-  client: { key: "mandant", label: "Mandant", color: "var(--color-text-muted)" },
-} satisfies Record<string, BatonMeta>;
 
 /** The short form in „Zu tun" on the client overview: the batch lies with Ludwig, and he is at it. Next to a row with a holder, same height. */
 export const Cell: Story = {

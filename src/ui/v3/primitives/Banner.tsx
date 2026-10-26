@@ -19,7 +19,8 @@ interface Props {
  * @when    Page-wide, lasting message above the content (chart of accounts
  *          incomplete, period locked).
  * @instead A note in the flow → Callout. The state of one thing →
- *          StatusCallout. A fleeting receipt → Toast.
+ *          StatusCallout. A fleeting receipt → Toast. Ludwig's run going on
+ *          or just ended → AgentRunBanner (0225).
  */
 export function Banner({ tone = "info", title, children, className }: Props) {
   return (
