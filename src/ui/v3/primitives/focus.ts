@@ -14,9 +14,23 @@
 
 import { useEffect, useRef, type RefObject } from "react";
 
-/** Everything a keyboard can reach inside the panel, in document order. */
+/**
+ * Everything a keyboard can reach inside the panel, in document order — the
+ * `summary` of a fold-out included: without it a list of fold-outs in a
+ * drawer was out of reach, and Tab from a clicked one left the panel
+ * (acceptance 0224, M1).
+ */
 const TABBABLE =
-  'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])';
+  'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), summary, [tabindex]:not([tabindex="-1"])';
+
+/**
+ * Can it take the focus right now? `offsetParent` takes the content of a
+ * closed `<details>` for visible (Chrome, measured 2026-10-26); the browser's
+ * own check knows better. The fallback is for engines without it.
+ */
+function reachable(el: HTMLElement): boolean {
+  return typeof el.checkVisibility === "function" ? el.checkVisibility() : el.offsetParent !== null;
+}
 
 /**
  * Keep Tab inside the panel. Without it the focus walks on behind the scrim,
@@ -31,9 +45,7 @@ const TABBABLE =
  */
 export function trapTab(panel: HTMLElement | null, e: KeyboardEvent): void {
   if (!panel) return;
-  const stops = [...panel.querySelectorAll<HTMLElement>(TABBABLE)].filter(
-    (el) => el.offsetParent !== null,
-  );
+  const stops = [...panel.querySelectorAll<HTMLElement>(TABBABLE)].filter(reachable);
   if (stops.length === 0) return;
   const first = stops[0]!;
   const last = stops[stops.length - 1]!;

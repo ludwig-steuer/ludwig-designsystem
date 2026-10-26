@@ -323,7 +323,8 @@ export const PreviewLoading: Story = {
  * durchgehen" — it starts the single review at document 1 — and the side
  * way „Überspringen: Konten". The table of every document to check stays,
  * folded (`DataTable` `head.collapsed`); no „Weiter" under it. Below: the
- * same step once everything is decided — the main way names the next step.
+ * same step once everything is decided — the main way names the next step —
+ * and once there was nothing to check: the list says so with its number.
  */
 export const Overview: Story = {
   render: function OverviewStory() {
@@ -342,8 +343,8 @@ export const Overview: Story = {
         },
       });
     const allDecided = Object.fromEntries(ITEMS.map((i) => [i.document.id, i.recommended ?? "archive"]));
-    const step = (decided: Record<string, string>) => {
-      const open = ITEMS.filter((i) => !decided[i.document.id]).length;
+    const step = (decided: Record<string, string>, items: readonly ReviewItem[] = ITEMS) => {
+      const open = items.filter((i) => !decided[i.document.id]).length;
       const columns = cols(decided);
       return (
         <div style={{ display: "grid", gap: "var(--space-4)" }}>
@@ -351,8 +352,9 @@ export const Overview: Story = {
             <CardHead title="Belege" sub={<DateRange from="2026-01-01" to="2026-01-31" size="sm" />} />
             <div style={{ padding: "var(--space-4)", display: "grid", gap: "var(--space-4)" }}>
               <p className="lw-ui-lead">
-                Im Zeitraum sind 61 Belege eingegangen, Ludwig hat die meisten gebucht.{" "}
-                {open > 0 ? `${open} brauchen Ihre Entscheidung.` : "Alle sind entschieden."}
+                {items.length === 0
+                  ? "Im Zeitraum sind 61 Belege eingegangen, Ludwig hat jeden gebucht oder zugeordnet."
+                  : `Im Zeitraum sind 61 Belege eingegangen, Ludwig hat die meisten gebucht. ${open > 0 ? `${open} brauchen Ihre Entscheidung.` : "Alle sind entschieden."}`}
               </p>
               {/* At reading width: a count must not stand a page away from its word. */}
               <div style={{ maxWidth: "var(--content-measure)" }}>
@@ -360,9 +362,9 @@ export const Overview: Story = {
                   tone="soft"
                   rows={[
                     ["Eingegangen", "61"],
-                    ["Gebucht", "53"],
+                    ["Gebucht", items.length === 0 ? "58" : "53"],
                     ["Warten auf eine Rückfrage", "3"],
-                    ["Ohne Buchung oder von Ludwig als nicht buchungsrelevant eingestuft", String(ITEMS.length)],
+                    ["Ohne Buchung oder von Ludwig als nicht buchungsrelevant eingestuft", String(items.length)],
                   ]}
                 />
               </div>
@@ -393,12 +395,17 @@ export const Overview: Story = {
             </div>
           </Card>
           <DataTable<SourceDocumentVM>
-            rows={ITEMS.map((i) => i.document)}
+            rows={items.map((i) => i.document)}
             columns={columns}
             rowKey={(d) => d.id}
-            head={{ title: "Alle zu prüfenden Belege als Liste", sub: `${open} von ${ITEMS.length} offen`, collapsed: true }}
+            head={{
+              title: "Alle zu prüfenden Belege als Liste",
+              sub: items.length === 0 ? "kein Beleg zu prüfen" : open > 0 ? `${open} von ${items.length} offen` : `alle ${items.length} entschieden`,
+              collapsed: true,
+            }}
             minWidth={sourceDocumentMinWidth(columns)}
-            empty={{ title: "Jeder Beleg ist verarbeitet, zugeordnet oder gesichtet." }}
+            // Empty because done — with the number (T6, acceptance 0223 H3).
+            empty={{ done: true, title: "Alle 61 Belege sind verarbeitet, zugeordnet oder gesichtet." }}
           />
         </div>
       );
@@ -408,6 +415,7 @@ export const Overview: Story = {
         {step(decidedOf)}
         <p className="lw-ui-hint">{went ?? "Der Hauptknopf startet die Einzelprüfung; die Liste klappt mit ihrem Kopf auf."}</p>
         {step(allDecided)}
+        {step({}, [])}
       </div>
     );
   },

@@ -768,3 +768,9 @@ Kriterien der Nachbesserung und des Nachtrags `yes_no` nachgewiesen. Offen:
 Hinweise 6 (angenommen), 9–11 (nicht blockierend), 4 vorbestehend; die
 Ablösung von `ClarificationDetail` sowie L-363, L-364, L-368 sind offen (App).
 
+Hinweise der zweiten Prüfung, erledigt 2026-10-26: `StepPaging` hat eine
+dritte Frage (gemessen: Fokus auf dem Pfeil „Nächster" bleibt dort, „Frage 2
+von 3"); `StepYesNo` zeigt darunter die Lesekarte mit „Empfehlung: Ja";
+`YES_NO` ist als benannte Ausnahme in der Guideline (T4). Der Verlauf der
+Karte nimmt „Ohne Antwort aufgelöst" jetzt aus `RESOLVED_WORD` (0224, M2).
+

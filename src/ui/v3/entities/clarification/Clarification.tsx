@@ -72,12 +72,25 @@ export interface ClarificationVM {
   /** Without it the row is not a link (portal, read-only). */
   href?: string | null;
   /**
-   * The answer given, as text — the chosen option, the free text, or the
-   * reason it was resolved without one (0224). The app derives it from
-   * `answer_payload` (L-367); the row shows it under the title.
+   * The answer given, as text — the chosen option or the free text (0224).
+   * The app derives it from `answer_payload` (L-367); the row shows it under
+   * the title.
    */
   answer?: string | null;
+  /**
+   * Why it was resolved without an answer (0224, acceptance M1/M2): a
+   * resolution is no answer and must not read like one (entity profile
+   * „Eine Antwort, nicht mehrere"). With it the row says „Ohne Antwort
+   * aufgelöst: …" instead of „Antwort: …".
+   */
+  resolution?: string | null;
 }
+
+/**
+ * The word for a question closed without an answer — once, for the row and for
+ * the history of the card (0224, acceptance M2).
+ */
+export const RESOLVED_WORD = "Ohne Antwort aufgelöst";
 
 function stateBadges(c: ClarificationVM) {
   if (c.type === "comment") {
@@ -204,7 +217,11 @@ export function ClarificationRow({
 
       {/* What was answered — the reason the row is in the list at all, once
           the question is with Ludwig (0224). One line, whole in the hover. */}
-      {c.answer ? (
+      {c.resolution ? (
+        <span className="v2cl__answer v2cl__clamp" title={c.resolution}>
+          <span className="v2cl__answerlabel">{RESOLVED_WORD}:</span> {c.resolution}
+        </span>
+      ) : c.answer ? (
         <span className="v2cl__answer v2cl__clamp" title={c.answer}>
           <span className="v2cl__answerlabel">Antwort:</span> {c.answer}
         </span>

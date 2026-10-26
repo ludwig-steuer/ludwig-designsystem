@@ -9,6 +9,7 @@ import { TextButton } from "../../primitives/TextButton";
 import { TodoList } from "../../patterns/TodoList";
 import { CaseTimeline } from "../accounting-case/CaseTimeline";
 import { ClarificationCard } from "./ClarificationCard";
+import { resolveStatus } from "@/ludwig/ui/status/status-registry";
 import {
   ClarificationCell,
   ClarificationList,
@@ -324,7 +325,7 @@ const BATCH: ClarificationVM[] = [
     audience: "accounting",
     raisedAt: "2026-10-09T18:40:00+02:00",
     answeredAt: "2026-10-26T10:03:00+01:00",
-    answer: "Anderweitig geklärt: telefonisch mit dem Mandanten geklärt",
+    resolution: "telefonisch mit dem Mandanten geklärt",
     caseNumber: "2026-0122",
     caseTitle: "Serverhaus Nord GmbH, Gutschrift Januar",
   },
@@ -414,7 +415,10 @@ export const InBatchReviewDrawer: Story = {
           open={drawer}
           onClose={() => setDrawer(false)}
           title="Fragen dieses Stapels"
-          meta={`${open.filter((c) => c.state === "open").length} offen · ${open.filter((c) => c.state === "deferred").length} zurückgestellt · ${answered.length} beantwortet`}
+          // The counts with the registry's words, in running text lower case.
+          meta={(["open", "deferred", "answered"] as const)
+            .map((st) => `${BATCH.filter((c) => c.type === "question" && c.state === st).length} ${resolveStatus("clarification", st).label.toLowerCase()}`)
+            .join(" · ")}
         >
           <ClarificationList
             clarifications={BATCH}
@@ -435,7 +439,7 @@ export const InBatchReviewDrawer: Story = {
                     answerKind: "free_text",
                     history: [
                       { kind: "raised", at: c.raisedAt, by: null },
-                      { kind: c.answer?.startsWith("Anderweitig") ? "resolved" : "answered", at: c.answeredAt ?? c.raisedAt, by: "S. Vogt", text: c.answer ?? null },
+                      { kind: c.resolution ? "resolved" : "answered", at: c.answeredAt ?? c.raisedAt, by: "S. Vogt", text: c.resolution ?? c.answer ?? null },
                     ],
                   }}
                 />

@@ -114,7 +114,7 @@ type ListPatch = { page?: number; pageSize?: number; sort?: string; dir?: "asc" 
 | `rows` | `T[]` | ja | die Zeilen **dieser Seite**, schon sortiert und gefiltert | `Filled` |
 | `columns` | `ColumnDef<T>[]` | ja | der Spaltenvertrag; `cols` der `Table` entsteht aus `width`, davor `32px` je Auswahl/Chevron, dahinter `max-content` für Aktionen | `Filled` |
 | `rowKey` | `(row: T) => string` | ja | Schlüssel für React, Auswahl und Aufklappen | `Filled` |
-| `head` | `CardHead`-Props (`title`, `sub?`, `icon?`, `meta?`, `actions?`) | ja | Zone 1 — jede Tabelle in einer Karte, mit Kopf, auch leer (V5) | `Filled` |
+| `head` | `CardHead`-Props (`title`, `sub?`, `icon?`, `meta?`, `actions?`, `headingLevel?: 2 \| 3`, `collapsed?: boolean`) | ja | Zone 1 — jede Tabelle in einer Karte, mit Kopf, auch leer (V5). `headingLevel` nach Lage (0220 §2); `collapsed`: zugeklappt, der Kopf schaltet, ohne Aktionen und Auswahlleiste, der Fuß `next` klappt mit (Nachtrag 2026-10-26) | `Filled`; `collapsed`: `SourceDocumentReview/Overview` |
 | `density` | `"compact" \| "default" \| "wide"` | nein, Default `default` | Zeilenmaß (E9): `compact` einzeilig und eng (Kontenblatt, Protokoll), `default` die heutige `.v2tbl__row`, `wide` Raum für Titel + Untertitel in einer Zelle. Werte im CSS | `Density` |
 | `minWidth` | `number` | nein | ab wann horizontal gescrollt statt gequetscht wird; durchgereicht an `Table` | `InUse` |
 | `rowHref` | `(row: T) => string` | nein | die **ganze** Zeile ist das Ziel (I11): Overlay-Link in der ersten Textspalte, Hover und Cursor kommen aus dem CSS. Ohne `rowHref` bleibt die Zeile stumm | `Filled` |
@@ -488,4 +488,9 @@ dass er aufgeht.
 
 Abgenommen von / am: Claude (fremde Abnahme, nicht der Bauende), 2026-10-26,
 Stand `8280d42` · **Abgenommen mit Hinweis.** Offen: Hinweise 1–3.
+
+Hinweise der Prüfung, erledigt 2026-10-26: Schnittstellentabelle nennt
+`headingLevel?` und `collapsed?`; der Fuß `next` klappt mit der Tabelle zu
+(er gehört zu ihren Zeilen). Kein eigenes Beispiel im DataTable-Baum (24
+Stories, Obergrenze längst erreicht) — Nachweis bleibt `Overview`.
 

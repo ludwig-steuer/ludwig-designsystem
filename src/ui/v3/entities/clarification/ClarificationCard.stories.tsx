@@ -820,6 +820,25 @@ export const StepYesNo: Story = {
           onDefer={async () => {}}
         />
         {sent ? <p className="lw-ui-hint">Gesendet: {sent}</p> : null}
+        {/* Read mode: no row carries the mark, the callout names the word — „Ja", not the key. */}
+        <div style={{ marginTop: "var(--space-6)" }}>
+          <ClarificationCard
+            mode="read"
+            clarification={{
+              ...STEP_QUESTION,
+              id: "q-0421-read",
+              title: "Soll die Rechnung im Rechnungsmonat Januar gebucht werden?",
+              question: null,
+              context: null,
+              facts: [],
+              answerKind: "yes_no",
+              answerOptions: [],
+              recommendedOption: "yes",
+              recommendation: "Leistung und Rechnung liegen im Januar.",
+              evidence: undefined,
+            }}
+          />
+        </div>
       </StepFrame>
     );
   },
@@ -848,6 +867,20 @@ export const StepPaging: Story = {
         recommendedOption: "Zuordnung des Sachverhalts behalten",
         recommendation: "Der Beleg nennt Serverhaus Nord als Leistenden; Brightline Technology steht nur in der Rechnungsadresse.",
         evidence: { cases: [{ id: "case-0129", number: "2026-0129", title: "Serverhaus Nord GmbH, Serverkosten Januar" }] },
+      },
+      // A third, so the middle one has both arrows: a focus on the pager stays
+      // there while paging (rule I13; acceptance 0222, hint of the second check).
+      {
+        ...STEP_QUESTION,
+        id: "q-0133",
+        title: "Druckerei-Hansen-Rechnung ohne Leistungsmonat",
+        question: "In welchem Monat lag die Leistung der Druckerei Hansen?",
+        context: "Die Rechnung DH-2026-0094 nennt kein Leistungsdatum. Bezahlt wurde am 12.01.2026.",
+        facts: [{ label: "Rechnungsbetrag", value: "119,00 €" }],
+        answerOptions: ["Dezember 2025", "Januar 2026"],
+        recommendedOption: null,
+        recommendation: null,
+        evidence: { cases: [{ id: "case-0133", number: "2026-0133", title: "Druckerei Hansen, Flyer" }] },
       },
     ];
     const [i, setI] = useState(0);

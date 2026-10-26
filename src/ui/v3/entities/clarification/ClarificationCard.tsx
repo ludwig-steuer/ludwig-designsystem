@@ -30,7 +30,7 @@ import { StatusBadge } from "../../patterns/StatusBadge";
 import { resolveStatus } from "@/ludwig/ui/status/status-registry";
 import { ChoicePrompt, type ChoiceAnswer } from "../../patterns/ChoicePrompt";
 import { BankTransactionPurpose } from "../bank-transaction/BankTransactionPurpose";
-import { AUDIENCE_LABEL, type ClarificationVM } from "./Clarification";
+import { AUDIENCE_LABEL, RESOLVED_WORD, type ClarificationVM } from "./Clarification";
 
 /**
  * The unfolded clarification: what was asked, what it rests on, who asked it
@@ -62,7 +62,7 @@ export type ClarificationEventKind = "raised" | "answered" | "resolved" | "defer
 const EVENT_LABEL: Record<ClarificationEventKind, string> = {
   raised: "Gefragt",
   answered: "Beantwortet",
-  resolved: "Ohne Antwort aufgelöst",
+  resolved: RESOLVED_WORD,
   deferred: "Zurückgestellt",
 };
 

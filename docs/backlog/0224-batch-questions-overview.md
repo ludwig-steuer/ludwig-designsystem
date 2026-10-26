@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Status | in Arbeit — nicht abgenommen 2026-10-26 (fremde Abnahme, Stand `8280d42`; Mängel 1–2, s. „Abnahme 2026-10-26") · gebaut 2026-10-26 (s. „Gebaut") |
+| Status | Abnahme (Nachprüfung M1, M2) · vorher: in Arbeit — nicht abgenommen 2026-10-26 (fremde Abnahme, Stand `8280d42`; Mängel 1–2, s. „Abnahme 2026-10-26") · gebaut 2026-10-26 (s. „Gebaut") |
 | Stufe | erweitert `entities/clarification/Clarification.tsx` (`ClarificationList`, `ClarificationRow`, `ClarificationVM`) · `primitives/RecordPager.tsx` (ein Platz für Nebenwege) |
 | Klassen-Test | Liste: nein (Rückfrage, ihre Stände). Pager-Platz: ja („Datensatz 3 von 12" und daneben ein Weg zur ganzen Menge gibt es in jeder App mit einer Warteschlange) |
 | Quelle | Owner-Wunsch 2026-10-26 über llcto (Rückfragen-Schritt der Abnahme, `batches/[id]/close`); Props-Vorschlag des DS an llcto vom selben Tag, vom Owner bestätigt: `RecordPager.actions`, `ClarificationList groupBy="state"`, `onOpen`, `activeId`, `ClarificationVM.answer`; Gruppe „Beantwortet" (Registry), Knopf „n Fragen bei Ludwig", bei n = 0 kein Knopf |
@@ -131,7 +131,7 @@ verweigert die zweite — Entitätsprofil „Eine Antwort, nicht mehrere").
 | Story | Beweist |
 |---|---|
 | `ClarificationRow/ByState` | `groupBy="state"`: Offen (zwei, eine davon `activeId`), Zurückgestellt (eine), Beantwortet (drei, eine mit langer Antwort gekürzt, eine „anderweitig geklärt"), Notiz (eine) — in dieser Reihenfolge, Zähler je Kopf, kein Stand-Badge in den Zeilen; `onOpen`-Rundlauf („springt zu: …") nur bei offenen und zurückgestellten |
-| `ClarificationRow/InBatchReviewDrawer` | im Einsatz: `RecordPager` „Frage 4 von 9" mit `actions` „3 Fragen bei Ludwig" über der Step-Karte (0222); Klick öffnet den Drawer; offene Zeile springt und schließt; beantwortete klappt zur Karte `mode="read"` auf |
+| `ClarificationRow/InBatchReviewDrawer` | im Einsatz: `RecordPager` „Frage 1 von 3" (gezählt werden die offenen und zurückgestellten Fragen, die der Ablauf durchgeht) mit `actions` „3 Fragen bei Ludwig" über der Step-Karte (0222); Klick öffnet den Drawer; offene Zeile springt und schließt; beantwortete klappt zur Karte `mode="read"` auf |
 | `RecordPager/WithActions` | `actions` rechts nach dem Pfeil, einmal mit Warteschlange, einmal nur mit dem Weg zurück |
 
 Ableitung (§6): Zustand gefüllt → `ByState`; leer → vorhandene Story `Empty`;
@@ -210,7 +210,7 @@ Stand-Badge, „Blockierend" an den zwei offenen; nur die lange Antwort gekürzt
 einer offenen Frage `rgb(244, 246, 248)`, Zeiger, Titel unterstrichen;
 beantwortete Zeile ohne Hover; Klick auf die Zeilenfläche und `Enter` auf dem
 Titel rufen `onOpen`; Fokusring 2 px. `WithActions`: Knopf 122 × 24 px, 24 px
-nach dem Pfeil bzw. nach dem Rückweg. `InBatchReviewDrawer`: Knopf öffnet den
+nach dem Pfeil, 32 px nach dem Rückweg (dessen eigener Abstand kommt dazu). `InBatchReviewDrawer`: Knopf öffnet den
 Drawer, aktuelle Frage markiert, beantwortete klappt zur Karte `mode="read"`
 mit Verlauf auf, Klick auf eine offene Frage → „Frage 2 von 3", Drawer zu,
 Fokus auf „3 Fragen bei Ludwig"; `Esc` schließt.
@@ -381,4 +381,20 @@ Knopfs (Hinweis 7).
 Abgenommen von / am: Claude (fremde Abnahme, nicht der Bauende), 2026-10-26,
 Stand `8280d42` · **Nicht abgenommen.** Offen: Mängel 1–2, Hinweise 1–7;
 Knopf und Drawer im Rückfragen-Schritt sowie L-367 offen (App).
+
+## Nachbesserung 2026-10-26 (nach der fremden Abnahme)
+
+| Punkt | Behoben |
+|---|---|
+| M1 Beantwortete Zeilen im Drawer per Tastatur nicht erreichbar; Tab lief aus dem Drawer | Ursache im Primitive: `TABBABLE` (`primitives/focus.ts`) kannte kein `summary`, und der Sichtbarkeitsfilter über `offsetParent` hielt Inhalte eines zugeklappten `<details>` für erreichbar. Jetzt `summary` in der Liste und `el.checkVisibility()` (Rückfall `offsetParent`). Gilt für Drawer **und** Dialog. Gemessen: Tab kreist im Drawer über die drei offenen Zeilen, die drei Aufklapper und „Schließen", nie hinaus |
+| M2 Eine Auflösung stand als Antwort da | neues Feld `ClarificationVM.resolution?: string \| null`; die Zeile sagt dann „Ohne Antwort aufgelöst: {Grund}" — das Wort, das die aufgeklappte Karte im Verlauf zeigt, jetzt einmal als `RESOLVED_WORD` in `Clarification.tsx` für beide. `answer` trägt nur noch Option oder Freitext. L-367 entsprechend geteilt |
+| Hinweis: zwei Fluchten im Drawer | in einer Liste mit aufklappbaren **und** flachen Zeilen beginnt der Text der flachen hinter dem Chevron (gemessen: alle Zeilen bei 571 px, Gruppenköpfe bei 557) |
+| Hinweis: Zählung im Drawer-Kopf als Literal | Story baut sie aus den Registry-Wörtern |
+| Hinweis: Story-Tabelle „Frage 4 von 9" | korrigiert; was der Pager zählt, steht in der Zeile der Story |
+| Hinweis: 32 statt 24 px nach dem Rückweg | Text oben korrigiert (der Rückweg bringt seinen Abstand mit) |
+| Hinweis: Lesekarte im Aufklapper wiederholt Titel und Badge | offen gelassen: das ist die volle Karte `mode="read"`, wie in jeder `renderDetail`-Liste (`WithCard`); eine schlankere Lesekarte wäre eine eigene Form |
+| Hinweis: `href` über dem Überzug ohne Story | offen gelassen: dieselbe Regel wie in Tabellenzeilen (I11), dort gemessen |
+
+Schnittstelle neu: `ClarificationVM.resolution` (Tabelle oben gilt sinngemäß
+wie `answer`). Status: zurück auf Abnahme.
 

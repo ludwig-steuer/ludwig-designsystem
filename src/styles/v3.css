@@ -3104,6 +3104,10 @@ button.v2ibtn[aria-disabled="true"] > * { opacity: 0.5; }
 .v2cl__item.is-active:has(.v2rowlink):hover { background: var(--color-accent-50); }
 .v2cl__item:has(.v2rowlink) a:not(.v2rowlink) { position: relative; z-index: 2; }
 .v2cl__open { text-align: left; }
+/* A list with folding and flat rows (0224 drawer, acceptance hint): one line
+   for the text — the flat row starts where the folding row's text starts,
+   past the summary's padding, the 14 px chevron and its gap. */
+.v2cl:has(.v2cl__item > .v2disc) .v2cl__item > .v2cl__row { padding-left: calc(2 * var(--space-2) + 14px); }
 /* The answer is content, not a sub-line: text size and colour, its word muted. */
 .v2cl__answer { font-size: var(--fs-ui); line-height: var(--lh-ui); color: var(--color-text); }
 .v2cl__answerlabel { color: var(--color-text-muted); } /* `--color-text-muted`, 6.69:1 on white, 6.17:1 on bg-soft */

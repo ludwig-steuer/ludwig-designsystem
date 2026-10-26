@@ -730,17 +730,20 @@ export function DataTable<T>(props: DataTableProps<T>) {
   const card = (
     <Card>
       {folds ? (
+        // The way onward belongs to the rows: folded, it folds with them
+        // (acceptance 0057 Nachtrag, hint).
         <details className="v2dt__fold">
           <summary className="v2dt__foldsum">{cardHead}</summary>
           {tableBody}
+          {next ? <CardFoot>{next}</CardFoot> : null}
         </details>
       ) : (
         <>
           {cardHead}
           {tableBody}
+          {next ? <CardFoot>{next}</CardFoot> : null}
         </>
       )}
-      {next ? <CardFoot>{next}</CardFoot> : null}
     </Card>
   );
 

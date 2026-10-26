@@ -505,3 +505,9 @@ nachgewiesen. Offen: Hinweise 3 (teilweise), 4, 7; 5 vorbestehend; die
 Ablösung von `DocumentReviewSingle` und der Tabelle in `StepDocumentReview`
 ist offen (App).
 
+Hinweise der zweiten Prüfung, erledigt 2026-10-26: `Overview` zeigt einen
+dritten Zustand — nichts zu prüfen, die aufgeklappte Liste sagt „Alle 61
+Belege sind verarbeitet, zugeordnet oder gesichtet." (erledigt, mit Zahl;
+Spaltenkopf bleibt); die Unterzeile sagt „alle 5 entschieden" bzw. „kein
+Beleg zu prüfen" statt „0 von 5 offen".
+
