@@ -78,12 +78,14 @@ export interface ClarificationVM {
    */
   answer?: string | null;
   /**
-   * Why it was resolved without an answer (0224, acceptance M1/M2): a
+   * Why it was resolved without an answer, as text (0224, acceptance M2): a
    * resolution is no answer and must not read like one (entity profile
    * „Eine Antwort, nicht mehrere"). With it the row says „Ohne Antwort
-   * aufgelöst: …" instead of „Antwort: …".
+   * aufgelöst: …" instead of „Antwort: …" and it wins over `answer`.
+   * `…Reason`, because the column `resolution` holds the **kind**
+   * (`answered`/`obsolete`), not the reason (second check of 0224, hint 3).
    */
-  resolution?: string | null;
+  resolutionReason?: string | null;
 }
 
 /**
@@ -217,9 +219,9 @@ export function ClarificationRow({
 
       {/* What was answered — the reason the row is in the list at all, once
           the question is with Ludwig (0224). One line, whole in the hover. */}
-      {c.resolution ? (
-        <span className="v2cl__answer v2cl__clamp" title={c.resolution}>
-          <span className="v2cl__answerlabel">{RESOLVED_WORD}:</span> {c.resolution}
+      {c.resolutionReason ? (
+        <span className="v2cl__answer v2cl__clamp" title={c.resolutionReason}>
+          <span className="v2cl__answerlabel">{RESOLVED_WORD}:</span> {c.resolutionReason}
         </span>
       ) : c.answer ? (
         <span className="v2cl__answer v2cl__clamp" title={c.answer}>

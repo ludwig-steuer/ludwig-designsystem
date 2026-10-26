@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Status | in Arbeit — nicht abgenommen 2026-10-26 (Nachprüfung, Stand `7afec27`: M1 und M2 behoben, neuer Mangel 3 — Spec und Code sagen bei `resolution` Verschiedenes, nur Spec-Text; s. „Nachprüfung 2026-10-26") · vorher: Abnahme (Nachprüfung M1, M2) · nicht abgenommen 2026-10-26 (fremde Abnahme, Stand `8280d42`; Mängel 1–2, s. „Abnahme 2026-10-26") · gebaut 2026-10-26 (s. „Gebaut") |
+| Status | Abnahme (M3 Text + Umbenennung `resolutionReason`) · vorher: in Arbeit — nicht abgenommen 2026-10-26 (Nachprüfung, Stand `7afec27`: M1 und M2 behoben, neuer Mangel 3 — Spec und Code sagen bei `resolution` Verschiedenes, nur Spec-Text; s. „Nachprüfung 2026-10-26") · vorher: Abnahme (Nachprüfung M1, M2) · nicht abgenommen 2026-10-26 (fremde Abnahme, Stand `8280d42`; Mängel 1–2, s. „Abnahme 2026-10-26") · gebaut 2026-10-26 (s. „Gebaut") |
 | Stufe | erweitert `entities/clarification/Clarification.tsx` (`ClarificationList`, `ClarificationRow`, `ClarificationVM`) · `primitives/RecordPager.tsx` (ein Platz für Nebenwege) |
 | Klassen-Test | Liste: nein (Rückfrage, ihre Stände). Pager-Platz: ja („Datensatz 3 von 12" und daneben ein Weg zur ganzen Menge gibt es in jeder App mit einer Warteschlange) |
 | Quelle | Owner-Wunsch 2026-10-26 über llcto (Rückfragen-Schritt der Abnahme, `batches/[id]/close`); Props-Vorschlag des DS an llcto vom selben Tag, vom Owner bestätigt: `RecordPager.actions`, `ClarificationList groupBy="state"`, `onOpen`, `activeId`, `ClarificationVM.answer`; Gruppe „Beantwortet" (Registry), Knopf „n Fragen bei Ludwig", bei n = 0 kein Knopf |
@@ -59,7 +59,8 @@ gegebenen Antwort, nur zum Lesen.
 
 | Feld | Typ | Bedeutung | Nachweis |
 |---|---|---|---|
-| `answer` | `string \| null` (optional) | die gegebene Antwort als Text — der gewählte Optionstext, der Freitext, bei „anderweitig geklärt" der Grund. Die App leitet ihn aus `answer_payload` ab (L-367) | `ClarificationRow/ByState` |
+| `answer` | `string \| null` (optional) | die gegebene Antwort als Text — der gewählte Optionstext oder der Freitext. Die App leitet ihn aus `answer_payload` ab (L-367) | `ClarificationRow/ByState` |
+| `resolutionReason` | `string \| null` (optional) | der Grund, wenn die Frage **ohne Antwort aufgelöst** wurde („anderweitig geklärt"); geht `answer` vor. Nicht die Spalte `resolution` — die trägt die Art (`answered`/`obsolete`), dies ist der Grund als Text (Nachbesserung 2, M2/M3) | `ClarificationRow/ByState` |
 
 ### `ClarificationList` — neu
 
@@ -76,9 +77,11 @@ gegebenen Antwort, nur zum Lesen.
 | `onOpen` | `() => void` | nein | wie oben, für die einzelne Zeile; die Liste reicht ihn nur bei offenen und zurückgestellten Fragen durch | `ClarificationRow/ByState` |
 | `hideBadges` | `boolean` | nein | ohne Badges (`groupBy="state"` setzt es): den Stand sagt die Gruppe, „Blockierend" trägt nichts, weil fast jede Frage blockiert (Owner 2026-10-26, Nachtrag); eine offene oder zurückgestellte **optionale** Frage trägt in der Meta-Zeile das Registry-Wort „optional" | `ClarificationRow/ByState` |
 
-**Die Zeile mit Antwort:** Ist `answer` gesetzt, steht unter dem Titel eine
-Zeile „Antwort: {answer}", einzeilig gekürzt, ganz im `title`-Hover und im
-Aufklapper. Ohne `answer` keine Zeile.
+**Die Zeile mit Antwort:** Ist `resolutionReason` gesetzt, steht unter dem
+Titel „Ohne Antwort aufgelöst: {resolutionReason}" — dasselbe Wort wie im
+Verlauf der Karte (`RESOLVED_WORD`). Sonst, ist `answer` gesetzt, „Antwort:
+{answer}". Einzeilig gekürzt, ganz im `title`-Hover und im Aufklapper; das
+Wort vor dem Doppelpunkt grau. Ohne beide keine Zeile.
 
 **Der Knopf** (App, kein neuer Baustein): `TextButton` in `RecordPager.actions`,
 Wort „{n} Fragen bei Ludwig" bzw. „1 Frage bei Ludwig"; n = Fragen dieses
@@ -151,10 +154,11 @@ Fehler (s. Verhalten).
 ## Befunde an die App
 
 - **L-367** `ClarificationVM.answer` — die App leitet den Text aus
-  `answer_payload` ab: gewählte Option (Optionstext, Regel S13) oder Freitext;
-  bei einer Auflösung ohne Antwort der Grund (Entitätsprofil: „`resolution`
-  … benennen, statt ihn wie eine Antwort zu zeigen" — die Zeile sagt dann
-  „Anderweitig geklärt: …").
+  `answer_payload` ab: gewählte Option (Optionstext, Regel S13) oder Freitext.
+  Bei einer Auflösung ohne Antwort **nicht** dort, sondern der Grund als
+  `ClarificationVM.resolutionReason` (Entitätsprofil: „`resolution` …
+  benennen, statt ihn wie eine Antwort zu zeigen") — die Zeile sagt dann
+  „Ohne Antwort aufgelöst: …".
 
 ## Offene Fragen
 
@@ -533,4 +537,17 @@ Abgenommen von / am: Claude (Nachprüfung, fremde Sitzung), 2026-10-26, Stand
 Spec-Text, kein Code), Hinweise 1–7 dieser Nachprüfung, aus der Abnahme
 Hinweise 2, 6 und 7; Knopf und Drawer im Rückfragen-Schritt sowie L-367 offen
 (App).
+
+## Nachbesserung 2 2026-10-26 (nach der Nachprüfung)
+
+| Punkt | Behoben |
+|---|---|
+| M3 Spec widersprach dem Code beim Grund einer Auflösung | Schnittstellentabelle `ClarificationVM` mit eigener Zeile, Absatz „Die Zeile mit Antwort" und „Befunde an die App" (L-367) nachgezogen |
+| Hinweis 3: `resolution` verwechselbar mit der Spalte (Art der Auflösung) | Feld heißt jetzt **`resolutionReason`** — noch kein Aufrufer, nichts gepusht |
+| Hinweis 2: Zählung in `ByState` als Literal | aus den Registry-Wörtern gebaut, wie im Drawer |
+| Hinweis 1: `ClarificationThread` sagt „Anderweitig geklärt" | Wortfrage an llcto/Owner (drei Wortlaute für dieselbe Auflösung: Knopf „Anderweitig geklärt", Verlauf „Ohne Antwort aufgelöst", Faden „Anderweitig geklärt") — bis zur Antwort unverändert |
+| Hinweis 5: `14px` der Textflucht wiederholt die Chevron-Größe | bleibt mit Kommentar; die Chevron-Größe ist eine TSX-Prop von `Disclosure`, kein Token. Ändert sie sich, wandert diese Regel mit (Kommentar in `v3.css` nennt den Bezug) |
+| Hinweise 4, 6, 7 | 4 Owner-Wort (Gruppe „Beantwortet" folgt der Registry); 6 vorbestehend, bei 1280 px eine Zeile; 7 `iframe`/`contenteditable` in `TABBABLE`: bewusst nicht — in ein `iframe` hinein lässt sich Tab nicht fangen, der Fokus käme nicht zurück; heute kein Fall |
+
+Status: Abnahme — Nachprüfung nur noch für M3 (Text) und die Umbenennung.
 

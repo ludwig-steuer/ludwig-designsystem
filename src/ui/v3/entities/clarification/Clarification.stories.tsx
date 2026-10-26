@@ -325,7 +325,7 @@ const BATCH: ClarificationVM[] = [
     audience: "accounting",
     raisedAt: "2026-10-09T18:40:00+02:00",
     answeredAt: "2026-10-26T10:03:00+01:00",
-    resolution: "telefonisch mit dem Mandanten geklärt",
+    resolutionReason: "telefonisch mit dem Mandanten geklärt",
     caseNumber: "2026-0122",
     caseTitle: "Serverhaus Nord GmbH, Gutschrift Januar",
   },
@@ -356,7 +356,13 @@ export const ByState: Story = {
       // unbroken answer line.
       <div style={{ maxWidth: 521 }}>
         <Card>
-          <CardHead title="Fragen dieses Stapels" sub="2 offen · 1 zurückgestellt · 3 beantwortet" />
+          <CardHead
+            title="Fragen dieses Stapels"
+            // The counts with the registry's words, as in the drawer (second check of 0224, hint 2).
+            sub={(["open", "deferred", "answered"] as const)
+              .map((st) => `${BATCH.filter((c) => c.type === "question" && c.state === st).length} ${resolveStatus("clarification", st).label.toLowerCase()}`)
+              .join(" · ")}
+          />
           <ClarificationList clarifications={BATCH} groupBy="state" showCase activeId="b1" onOpen={(c) => setJumped(c.title)} />
         </Card>
         <p className="lw-ui-hint" style={{ marginTop: "var(--space-2)" }}>
@@ -439,7 +445,7 @@ export const InBatchReviewDrawer: Story = {
                     answerKind: "free_text",
                     history: [
                       { kind: "raised", at: c.raisedAt, by: null },
-                      { kind: c.resolution ? "resolved" : "answered", at: c.answeredAt ?? c.raisedAt, by: "S. Vogt", text: c.resolution ?? c.answer ?? null },
+                      { kind: c.resolutionReason ? "resolved" : "answered", at: c.answeredAt ?? c.raisedAt, by: "S. Vogt", text: c.resolutionReason ?? c.answer ?? null },
                     ],
                   }}
                 />
