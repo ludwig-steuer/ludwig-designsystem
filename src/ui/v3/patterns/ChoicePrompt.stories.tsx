@@ -306,3 +306,34 @@ export const OptionGroup: Story = {
   },
 };
 
+
+/** The edges of a group: `list` style, `defaultOptionId` on an option inside the group (open from the start), and a note on that option. */
+export const OptionGroupList: Story = {
+  render: () => {
+    const [last, setLast] = useState<ChoiceAnswer | null>(null);
+    return (
+      <div style={{ maxWidth: 560 }}>
+        <ChoicePrompt
+          question="Wohin gehört dieser Beleg?"
+          optionsLabel="Entscheidung"
+          defaultOptionId="annual"
+          options={[
+            { id: "next", label: "In den nächsten Zeitraum", recommended: true },
+            {
+              ...FILE_GROUP,
+              options: FILE_GROUP.options.map((o) =>
+                o.id === "annual" ? { ...o, note: { label: "Notiz zur Ablage", placeholder: "Wofür wird er im Abschluss gebraucht?", required: true } } : o,
+              ),
+            },
+          ]}
+          submitLabel="Entscheiden und weiter"
+          onSubmit={async (a) => {
+            await wait(300);
+            setLast(a);
+          }}
+        />
+        <p className="lw-ui-hint">{last ? `Entschieden: ${last.optionId} · ${last.text ?? "ohne Text"}` : "Noch nichts entschieden."}</p>
+      </div>
+    );
+  },
+};

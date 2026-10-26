@@ -344,7 +344,7 @@ export const PreviewLoading: Story = {
 export const Overview: Story = {
   render: function OverviewStory() {
     const [went, setWent] = useState<string | null>(null);
-    const decidedOf: Record<string, string> = { "doc-statement": "archive", "doc-newsletter": "delete" };
+    const decidedOf: Record<string, string> = { "doc-statement": "permanent", "doc-newsletter": "irrelevant" };
     const cols = (decided: Record<string, string>) =>
       sourceDocumentColumns({
         columns: DOCUMENT_REVIEW_VIEW,
@@ -357,7 +357,7 @@ export const Overview: Story = {
           };
         },
       });
-    const allDecided = Object.fromEntries(ITEMS.map((i) => [i.document.id, i.recommended ?? "archive"]));
+    const allDecided = Object.fromEntries(ITEMS.map((i) => [i.document.id, i.recommended ?? "permanent"]));
     const step = (decided: Record<string, string>, items: readonly ReviewItem[] = ITEMS) => {
       const open = items.filter((i) => !decided[i.document.id]).length;
       const columns = cols(decided);

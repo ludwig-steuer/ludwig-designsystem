@@ -226,8 +226,10 @@ export function ChoicePrompt({
              would stay grey without a word — exactly the case V7 forbids. So
              the label carries the word when `pending` comes from outside
              (0028). */
+          // `answer`, not `choice`: the group's own row is no answer, by click
+          // as by Ctrl+Enter (acceptance of the groups, M1).
           action={async () => {
-            await onSubmit({ optionId: choice, text: typed || undefined });
+            await onSubmit({ optionId: answer, text: typed || undefined });
           }}
         >
           {pending ? "Sende …" : submitLabel}

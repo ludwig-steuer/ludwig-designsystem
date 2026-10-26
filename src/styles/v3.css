@@ -5180,7 +5180,9 @@ a.v3bbr__val:hover { text-decoration-color: currentColor; }
    options stand under it, indented to the group's text, in a fieldset of
    their own whose legend is only for the screen reader. */
 .v2radiogrp__group, .v2radiogrp__sub { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
-.v2radiogrp__sub { border: none; margin: 0; padding: 0 0 0 calc(14px + 8px); }
+/* Radio width (14, `.v2radio`) plus the gap of the line (8): the sub radio
+   stands under the group's text, in `list` and in `rows` alike (H7). */
+.v2radiogrp__sub { border: none; margin: 0; padding: 0 0 0 calc(14px + var(--space-2)); }
 .v2radioline__chev {
   flex-shrink: 0; margin: 3px 0 0 auto;
   color: var(--color-text-muted);
@@ -5189,4 +5191,3 @@ a.v3bbr__val:hover { text-decoration-color: currentColor; }
 .v2radiogrp__group.is-open > .v2radioline .v2radioline__chev { transform: rotate(90deg); }
 @media (prefers-reduced-motion: reduce) { .v2radioline__chev { transition: none; } }
 .v2radiogrp--rows .v2radiogrp__group, .v2radiogrp--rows .v2radiogrp__sub { display: grid; gap: var(--space-2); }
-.v2radiogrp--rows .v2radiogrp__sub { padding-left: var(--space-6); }
