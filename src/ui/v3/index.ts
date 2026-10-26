@@ -396,6 +396,7 @@ export {
   PARTNER_DOCUMENTS_VIEW,
   UNBOOKED_VIEW,
   UNBOOKED_GROUPED_VIEW,
+  DOCUMENT_REVIEW_VIEW,
   COMPACT_VIEW,
   NARROW_VIEW,
   type SourceDocumentColumn,
@@ -407,6 +408,7 @@ export {
   SourceDocumentPreview,
   type SourceDocumentOriginal,
 } from "./entities/source-document/SourceDocumentPreview";
+export { SourceDocumentReview } from "./entities/source-document/SourceDocumentReview";
 export {
   SourceDocumentCard,
   type SourceDocumentCardProps,
@@ -738,6 +740,8 @@ export {
   type EvidenceAccount,
   type EvidencePayment,
   type EvidenceEntry,
+  type EvidenceCase,
+  type EvidenceStatement,
   type EvidenceKind,
 } from "./entities/clarification/ClarificationCard";
 export { ClarificationThread, type ThreadItem } from "./entities/clarification/ClarificationThread";

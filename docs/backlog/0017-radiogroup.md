@@ -224,3 +224,11 @@ Abgenommen von / am: Claude (Abnahme-Agent), 2026-09-05 · zweite Prüfung gegen
 die wiederhergestellten Kriterien · Offene Punkte: nur „offen (App)" — die
 Umstellung der drei rohen Radios in `ludwig/app`. Die Versalien der
 Feldbeschriftung laufen als Befund unter 0089.
+
+## Nachtrag 2026-10-24 — Unterzeile bleibt leise (0223)
+
+`.v2radioline__hint` trägt `font-weight: 400`. In `variant="rows"` wird die
+gewählte Zeile fett (600); die Unterzeile erbte das und stand fett unter der
+Beschriftung (beim Bau von 0223 gemessen). Sie bleibt jetzt in jeder Zeile
+die leise zweite Stimme. Kontrast `--color-text-subtle`: 4,88:1 auf Weiß,
+4,52:1 auf der gewählten Zeile (`accent-50`).

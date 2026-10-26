@@ -1,6 +1,6 @@
 "use client";
 
-import { useId, useState } from "react";
+import { useEffect, useId, useRef, useState } from "react";
 
 import type { ClarificationAnswerKind } from "@/ludwig/modules/invoices/domain/invoice";
 import {
@@ -16,15 +16,15 @@ import { AmountCell } from "../../primitives/Cells";
 import { Callout } from "../../primitives/Callout";
 import { Disclosure } from "../../primitives/Disclosure";
 import { Link } from "../../primitives/Link";
-import { HeadRow, Row, Table } from "../../primitives/Table";
+import { CardHead, HeadRow, Row, Table } from "../../primitives/Table";
 import { DateField } from "../../primitives/DateField";
 import { Field } from "../../primitives/Form";
 import { FieldList } from "../../primitives/FieldList";
 import { Markdown } from "../../primitives/Markdown";
 import { ReasonDialog } from "../../primitives/ReasonDialog";
 import { TextButton } from "../../primitives/TextButton";
-import { Time } from "../../primitives/Time";
-import { ActionIcon } from "../../Icons";
+import { DateRange, Time } from "../../primitives/Time";
+import { ActionIcon, EntityIcon, type EntityKey } from "../../Icons";
 import { StatusBadge } from "../../patterns/StatusBadge";
 import { resolveStatus } from "@/ludwig/ui/status/status-registry";
 import { ChoicePrompt, type ChoiceAnswer } from "../../patterns/ChoicePrompt";
@@ -152,15 +152,31 @@ export interface EvidenceEntry extends EvidenceRow {
   /** Axis `journal_entry` — a proposal carries its state. */
   state?: string | null;
 }
+/** The case the question belongs to (0222) — in the step form it is not on screen otherwise. */
+export interface EvidenceCase extends EvidenceRow {
+  number: string;
+  title: string | null;
+}
+/**
+ * A bank statement, as the import batch carries it (0222; GLOSSARY, document
+ * kinds point 4): the payment account and the period it covers.
+ */
+export interface EvidenceStatement extends EvidenceRow {
+  paymentAccount: string;
+  periodFrom: string | null;
+  periodTo: string | null;
+}
 export interface ClarificationEvidence {
+  cases?: readonly EvidenceCase[];
   documents?: readonly EvidenceDocument[];
   accounts?: readonly EvidenceAccount[];
   payments?: readonly EvidencePayment[];
   entries?: readonly EvidenceEntry[];
+  statements?: readonly EvidenceStatement[];
   /** Contract, rule, clarification, law, web … — what fits no group. */
   other?: readonly ClarificationSource[];
 }
-export type EvidenceKind = "document" | "account" | "payment" | "entry" | "other";
+export type EvidenceKind = "case" | "document" | "payment" | "statement" | "account" | "entry" | "other";
 
 /** What only the card shows — ranks 8–19 of the entity profile. */
 export interface ClarificationDetailVM {
@@ -238,6 +254,11 @@ export interface ClarificationDetailVM {
   deferredBy?: { id: string; title: string; href?: string } | null;
   /** What the question rests on, by kind (0214). Given, it replaces the flat `sources` list. */
   evidence?: ClarificationEvidence | null;
+  /**
+   * Marked for the client, with this note (0222): the card says so above the
+   * answer and fills the note field with it. `null` = not marked.
+   */
+  clientNote?: string | null;
 }
 
 /**
@@ -356,6 +377,19 @@ function EvidenceTable({ cols, head, children }: { cols: string; head: string[];
   );
 }
 
+/** The groups in the order of the step form (owner wireframe 2026-10-24) — one order for both forms. */
+function evidenceGroups(e: ClarificationEvidence) {
+  return {
+    cases: citedFirst(e.cases ?? []),
+    docs: citedFirst(e.documents ?? []),
+    pays: citedFirst(e.payments ?? []),
+    stmts: citedFirst(e.statements ?? []),
+    accs: citedFirst(e.accounts ?? []),
+    ents: citedFirst(e.entries ?? []),
+    other: citedFirst(e.other ?? []),
+  };
+}
+
 /**
  * Sources and context in one block (owner 2026-09-29): one fold-out per kind,
  * its count in the head, the rows in columns — amounts right, digits of one
@@ -363,15 +397,25 @@ function EvidenceTable({ cols, head, children }: { cols: string; head: string[];
  * typed stays, the caller opens a drawer.
  */
 function Evidence({ e, select }: { e: ClarificationEvidence; select: Select }) {
-  const docs = citedFirst(e.documents ?? []);
-  const accs = citedFirst(e.accounts ?? []);
-  const pays = citedFirst(e.payments ?? []);
-  const ents = citedFirst(e.entries ?? []);
-  const other = citedFirst(e.other ?? []);
-  if (docs.length + accs.length + pays.length + ents.length + other.length === 0) return null;
+  const { cases, docs, pays, stmts, accs, ents, other } = evidenceGroups(e);
+  if (cases.length + docs.length + pays.length + stmts.length + accs.length + ents.length + other.length === 0) return null;
   return (
     <Block label="Quellen und Kontext">
       <div className="v2clc__evidence">
+        {cases.length ? (
+          <Disclosure summary="Sachverhalt" count={cases.length}>
+            <EvidenceTable cols="96px minmax(0, 1fr)" head={["Nummer", "Titel"]}>
+              {cases.map((x) => (
+                <Row key={x.id}>
+                  <Pick kind="case" row={x} select={select}>
+                    <span className="v2mono">{x.number}</span>
+                  </Pick>
+                  <span className="v2trunc" title={x.title ?? undefined}>{x.title ?? "—"}</span>
+                </Row>
+              ))}
+            </EvidenceTable>
+          </Disclosure>
+        ) : null}
         {docs.length ? (
           <Disclosure summary="Belege" count={docs.length}>
             <EvidenceTable cols="88px minmax(0, 1.4fr) minmax(0, 1fr) 112px" head={["Datum", "Aussteller", "Beleg-Nr.", "Betrag"]}>
@@ -383,20 +427,6 @@ function Evidence({ e, select }: { e: ClarificationEvidence; select: Select }) {
                   <span className="v2trunc" title={d.issuer ?? undefined}>{d.issuer ?? "—"}</span>
                   <span className="v2mono v2trunc">{d.number ?? "—"}</span>
                   <span className="v2num">{d.amount === null ? "—" : <AmountCell value={d.amount} currency={d.currency} />}</span>
-                </Row>
-              ))}
-            </EvidenceTable>
-          </Disclosure>
-        ) : null}
-        {accs.length ? (
-          <Disclosure summary="Konten" count={accs.length}>
-            <EvidenceTable cols="96px minmax(0, 1fr)" head={["Konto", "Name"]}>
-              {accs.map((a) => (
-                <Row key={a.id}>
-                  <Pick kind="account" row={a} select={select}>
-                    <span className="v2mono">{a.number}</span>
-                  </Pick>
-                  <span className="v2trunc">{a.name ?? "—"}</span>
                 </Row>
               ))}
             </EvidenceTable>
@@ -416,6 +446,34 @@ function Evidence({ e, select }: { e: ClarificationEvidence; select: Select }) {
                   <span className="v2trunc" title={p.counterparty ?? undefined}>{p.counterparty ?? "—"}</span>
                   <BankTransactionPurpose purpose={p.purpose} />
                   <span className="v2trunc" title={p.paymentAccount ?? undefined}>{p.paymentAccount ?? "—"}</span>
+                </Row>
+              ))}
+            </EvidenceTable>
+          </Disclosure>
+        ) : null}
+        {stmts.length ? (
+          <Disclosure summary="Kontoauszug" count={stmts.length}>
+            <EvidenceTable cols="minmax(0, 1fr) minmax(0, 1fr)" head={["Zahlungskonto", "Zeitraum"]}>
+              {stmts.map((x) => (
+                <Row key={x.id}>
+                  <Pick kind="statement" row={x} select={select}>
+                    <span className="v2trunc" title={x.paymentAccount}>{x.paymentAccount}</span>
+                  </Pick>
+                  <DateRange from={x.periodFrom} to={x.periodTo} size="sm" />
+                </Row>
+              ))}
+            </EvidenceTable>
+          </Disclosure>
+        ) : null}
+        {accs.length ? (
+          <Disclosure summary="Konten" count={accs.length}>
+            <EvidenceTable cols="96px minmax(0, 1fr)" head={["Konto", "Name"]}>
+              {accs.map((a) => (
+                <Row key={a.id}>
+                  <Pick kind="account" row={a} select={select}>
+                    <span className="v2mono">{a.number}</span>
+                  </Pick>
+                  <span className="v2trunc">{a.name ?? "—"}</span>
                 </Row>
               ))}
             </EvidenceTable>
@@ -459,18 +517,191 @@ function Evidence({ e, select }: { e: ClarificationEvidence; select: Select }) {
   );
 }
 
-function Block({ label, children }: { label: string; children: React.ReactNode }) {
+/** Pieces of a sub-line, joined by „ · "; empty ones fall out. */
+function joined(parts: React.ReactNode[]): React.ReactNode {
+  const kept = parts.filter((p) => p !== null && p !== undefined && p !== "");
+  return kept.map((p, i) => (
+    <span key={i}>
+      {i > 0 ? " · " : null}
+      {p}
+    </span>
+  ));
+}
+
+interface PanelItem {
+  row: EvidenceRow;
+  main: React.ReactNode;
+  sub?: React.ReactNode;
+}
+
+/** The sign of each kind in the box — from the registry; „Weitere Quellen" mix kinds and carry none. */
+const PANEL_ICON: Record<EvidenceKind, EntityKey | null> = {
+  case: "accounting-case",
+  document: "source-document",
+  payment: "bank-transaction",
+  // The entry opens the payment account (0222), so it carries its sign.
+  statement: "bank-account",
+  account: "ledger-account",
+  entry: "journal-entry",
+  other: null,
+};
+
+/**
+ * The same evidence as a list beside the question (0222): the step form has
+ * no room for tables, and a list reads top to bottom next to the question.
+ * Only groups with entries; the first two open; each entry opens its drawer.
+ * A card of its own with a head (owner 2026-10-26): the place to look things
+ * up, apart from the question and the answer.
+ */
+function EvidencePanel({ e, select }: { e: ClarificationEvidence; select: Select }) {
+  const g = evidenceGroups(e);
+  const all: { kind: EvidenceKind; label: string; items: PanelItem[] }[] = [
+    {
+      kind: "case",
+      label: "Sachverhalt",
+      items: g.cases.map((x) => ({ row: x, main: x.title ? `${x.number} · ${x.title}` : x.number })),
+    },
+    {
+      kind: "document",
+      label: "Belege",
+      items: g.docs.map((d) => ({
+        row: d,
+        main: d.issuer ?? d.number ?? "Beleg",
+        sub: joined([
+          d.date ? <Time value={d.date} format="date" size="sm" /> : null,
+          d.issuer ? d.number : null,
+          d.amount === null ? null : <AmountCell value={d.amount} currency={d.currency} />,
+        ]),
+      })),
+    },
+    {
+      kind: "payment",
+      label: "Zahlungen",
+      items: g.pays.map((p) => ({
+        row: p,
+        main: p.counterparty ?? p.purpose ?? "Zahlung",
+        sub: joined([
+          <Time value={p.date} format="date" size="sm" />,
+          <AmountCell value={p.amount} currency={p.currency} />,
+          p.paymentAccount,
+        ]),
+      })),
+    },
+    {
+      kind: "statement",
+      label: "Kontoauszug",
+      items: g.stmts.map((x) => ({
+        row: x,
+        main: x.paymentAccount,
+        sub: <DateRange from={x.periodFrom} to={x.periodTo} size="sm" />,
+      })),
+    },
+    {
+      kind: "account",
+      label: "Konten",
+      items: g.accs.map((a) => ({
+        row: a,
+        main: (
+          <>
+            <span className="v2mono">{a.number}</span>
+            {a.name ? ` ${a.name}` : null}
+          </>
+        ),
+      })),
+    },
+    {
+      kind: "entry",
+      label: "Buchungen",
+      items: g.ents.map((x) => ({
+        row: x,
+        main: (
+          <span className="v2mono">
+            {x.debit ?? "—"} an {x.credit ?? "—"}
+          </span>
+        ),
+        sub: joined([
+          <Time value={x.date} format="date" size="sm" />,
+          <AmountCell value={x.amount} currency={x.currency} />,
+          x.taxKey ? `BU ${x.taxKey}` : null,
+        ]),
+      })),
+    },
+    {
+      kind: "other",
+      label: "Weitere Quellen",
+      items: g.other.map((o) => ({ row: { id: o.id ?? o.label, cited: o.cited, href: o.href }, main: o.label })),
+    },
+  ];
+  const groups = all.filter((x) => x.items.length > 0);
+  if (groups.length === 0) return null;
+  return (
+    <aside className="v2card v2clc__side" aria-label="Kontext">
+      <CardHead title="Kontext" headingLevel={3} />
+      {groups.map((grp, i) => {
+        const icon = PANEL_ICON[grp.kind];
+        return (
+          <Disclosure key={grp.kind} summary={grp.label} count={grp.items.length} defaultOpen={i < 2}>
+            <ul className="v2clc__ctx">
+              {grp.items.map((it) => (
+                <li key={it.row.id}>
+                  <Pick kind={grp.kind} row={it.row} select={select} inRow={false}>
+                    <span className="v2clc__ctxico">{icon ? <EntityIcon entity={icon} size={14} /> : null}</span>
+                    <span className="v2clc__ctxmain">{it.main}</span>
+                    {it.sub ? <span className="v2clc__ctxsub">{it.sub}</span> : null}
+                  </Pick>
+                </li>
+              ))}
+            </ul>
+          </Disclosure>
+        );
+      })}
+    </aside>
+  );
+}
+
+function Block({ label, children, level = 4 }: { label: string; children: React.ReactNode; level?: 3 | 4 }) {
+  // Under the step form's `h2` the blocks are `h3` — no jump in the outline (A14, acceptance 0222, M5).
+  const Heading = level === 3 ? "h3" : "h4";
   return (
     <section className="v2clc__block">
-      <h4 className="v2clc__label">{label}</h4>
+      <Heading className="v2clc__label">{label}</Heading>
       {children}
     </section>
   );
 }
 
+function HistoryBlock({ history, level }: { history: readonly ClarificationEvent[]; level?: 3 | 4 }) {
+  return (
+    // „dieser Frage": the course of the whole case is the thread below the
+    // card (ClarificationThread, 0214) — two blocks must not share a name.
+    <Block label="Verlauf dieser Frage" level={level}>
+      <ol className="v2clc__hist">
+        {history.map((e, i) => (
+          <li key={`${e.kind}-${e.at}-${i}`}>
+            <span className="v2clc__histHead">
+              <strong>{EVENT_LABEL[e.kind]}</strong>
+              {" von "}
+              {actorName(e.by, e.kind === "raised" ? "Ludwig" : "System")}
+              {" · "}
+              <Time value={e.at} format="dateTime" size="sm" />
+            </span>
+            {e.text ? <p className="v2clc__histText">{e.text}</p> : null}
+          </li>
+        ))}
+      </ol>
+    </Block>
+  );
+}
+
 /**
+ * `variant="step"` is the slim form inside a review run (0222): question as
+ * the headline, no state badges, no meta line, no „asked" entry in the
+ * history, the recommendation right under the options, every way out in one
+ * row — and the evidence as a list in a box on the right.
+ *
  * @when    One clarification with everything it carries — read it, or answer
- *          it where the reader is the one being asked.
+ *          it where the reader is the one being asked; `step` when it is one
+ *          of several answered in a row.
  * @instead Several of them in a list → ClarificationList. Named inside
  *          something else → ClarificationCell. Asking a new one →
  *          ClarificationEditor.
@@ -489,6 +720,8 @@ export function ClarificationCard({
   onSelect,
   submitLabel = "Antwort speichern",
   onUndefer,
+  variant = "card",
+  onAskClient,
 }: {
   clarification: ClarificationVM & ClarificationDetailVM;
   /** `answer` shows the answer area — the caller decides who is asked. */
@@ -526,8 +759,30 @@ export function ClarificationCard({
   submitLabel?: string;
   /** Lift the deferral — a small line like the other exits, not below the card (0214). */
   onUndefer?: () => Promise<void>;
+  /** `step`: the slim form of a review run, evidence on the right (0222). */
+  variant?: "card" | "step";
+  /**
+   * The fourth exit: only the client knows (0222). It swaps the answer for a
+   * note field; without the callback there is no way, as with `onResolve`.
+   */
+  onAskClient?: (note: string) => Promise<void>;
 }) {
   const [resolving, setResolving] = useState(false);
+  // Held per question: a pager that swaps the clarification under the same
+  // card must not carry the note mode over to the next one.
+  const [askingFor, setAskingFor] = useState<string | null>(null);
+  const asking = askingFor === c.id;
+  const setAsking = (on: boolean) => setAskingFor(on ? c.id : null);
+  // Focus follows the swap (acceptance 0222, M3): into the note when it opens,
+  // back to the way that opened it when it closes — never onto the body.
+  const articleRef = useRef<HTMLElement>(null);
+  const askId = useId();
+  const wasAsking = useRef(false);
+  useEffect(() => {
+    if (asking) articleRef.current?.querySelector<HTMLTextAreaElement>("[data-client-note] textarea")?.focus();
+    else if (wasAsking.current) document.getElementById(askId)?.focus();
+    wasAsking.current = asking;
+  }, [asking, askId]);
   const [deferring, setDeferring] = useState(false);
   const [until, setUntil] = useState<string | null>(defaultDeferralDay());
   // Generated, not hard-coded: several cards stand in one list, and two
@@ -535,6 +790,7 @@ export function ClarificationCard({
   const dayId = useId();
   const hintId = useId();
   const whyId = useId();
+  const replyId = useId();
 
   /**
    * Hold the day inside the window — **once the field is left**, so the
@@ -592,47 +848,151 @@ export function ClarificationCard({
   // Marked in its row, the option is not named again — the callout gives the why.
   const markedInRow = canAnswer && recommendedId !== null;
 
-  return (
-    <article className="v2clc">
-      <header className="v2clc__head">
-        {showTitle ? (
-          <>
-            <h3 className="v2clc__title">{c.title}</h3>
-            <div className="v2clc__badges">
-              {isComment ? (
-                <StatusBadge axis="clarification_type" status="comment" info={false} />
-              ) : (
-                <>
-                  <StatusBadge axis="clarification" status={c.state} info={false} />
-                  {c.state !== "answered" && c.severity === "required" ? (
-                    <StatusBadge axis="clarification_severity" status="required" info={false} />
-                  ) : null}
-                </>
-              )}
-            </div>
-          </>
-        ) : null}
-        {caseLink ? (
-          <p className="v2clc__case">
-            <Link href={caseLink.href} className="v3cell-link">
-              {caseLink.label}
-            </Link>
-          </p>
-        ) : null}
-        <p className="v2clc__meta">
-          {isComment ? "Notiz" : `Gefragt ist: ${AUDIENCE_LABEL[c.audience]}`}
-          {/* Who asked — several people work on one case (owner 2026-09-29, 0214). */}
-          {/* Only when a person or the system asked — for Ludwig the origin word
-              already says „von Ludwig" (acceptance 0214, M3/M6). */}
-          {c.raisedBy && !(typeof c.raisedBy !== "string" && c.raisedBy.kind === "agent")
-            ? ` · ${isComment ? "von" : "gefragt von"} ${actorName(c.raisedBy, "Ludwig")}`
-            : ""}
-          {questionWord ? ` · ${questionWord}` : ""}
-          {originWord ? ` · ${originWord}` : ""}
-          {" · "}
-          <Time value={c.raisedAt} format="dateTime" size="sm" />
+  const step = variant === "step";
+  const deferredUndo = c.state === "deferred" && Boolean(onUndefer);
+
+  // The callout of the recommendation — where it stands depends on the form.
+  const recommendationNote = markedInRow ? (
+    c.recommendation ? (
+      <Callout tone="soft">
+        <strong>Warum empfohlen:</strong> {c.recommendation}
+      </Callout>
+    ) : null
+  ) : c.recommendedOption ? (
+    // No row to mark (read mode, answered): a why without its what says nothing.
+    <Callout tone="soft">
+      <strong>Empfehlung: {c.recommendedOption}</strong>
+      {c.recommendation ? <> · {c.recommendation}</> : null}
+    </Callout>
+  ) : c.recommendation ? (
+    <Callout tone="soft">
+      <strong>Empfehlung:</strong> {c.recommendation}
+    </Callout>
+  ) : null;
+  // In the step form it sits right under the options — nothing between the
+  // mark and its why (0222; hint 4 of the acceptance of 0214).
+  const noteUnderOptions = step && canAnswer;
+
+  // The ways out, as text buttons — in the step form one row under the
+  // options, in the card each on its own small line.
+  const askButton = canExit && onAskClient ? (
+    <TextButton id={askId} onClick={() => setAsking(true)}>
+      Beim Mandanten klären
+    </TextButton>
+  ) : null;
+  const resolveButton = canExit && onResolve ? (
+    <TextButton onClick={() => setResolving(true)}>Anderweitig geklärt</TextButton>
+  ) : null;
+  // A fragment, as before: in the card's line the gap of the line spaces the
+  // reason (acceptance 0222, M1); the step row wraps it in one item.
+  const deferButton = canExit && onDefer && !deferredUndo ? (
+    <>
+      <TextButton
+        onClick={() => setDeferring(true)}
+        disabled={Boolean(deferLockedReason)}
+        {...(deferLockedReason ? { "aria-describedby": whyId } : {})}
+      >
+        Zurückstellen
+      </TextButton>
+      {deferLockedReason ? (
+        <span className="v2clc__exitwhy" id={whyId}>
+          {deferLockedReason}
+        </span>
+      ) : null}
+    </>
+  ) : null;
+  const undeferButton = canExit && deferredUndo ? (
+    <TextButton onClick={() => void onUndefer?.()} disabled={pending}>
+      Zurückstellung aufheben
+    </TextButton>
+  ) : null;
+  const stepLinks =
+    askButton || resolveButton || deferButton || undeferButton ? (
+      <>
+        {askButton}
+        {resolveButton}
+        {deferButton ? <span className="v2clc__linkitem">{deferButton}</span> : null}
+        {undeferButton}
+      </>
+    ) : null;
+
+  // Visible history: in the step form „asked by Ludwig" says nothing — every
+  // question here was asked (0222).
+  const shownHistory = step ? history.filter((e) => e.kind !== "raised") : history;
+
+  const head = step ? (
+    <header className="v2clc__head">
+      {c.question && c.question.trim() !== c.title.trim() ? <p className="v2clc__topic">{c.title}</p> : null}
+      <h2 className="lw-ui-section">{c.question ?? c.title}</h2>
+      {/* No badge in the step form (owner 2026-10-26): every question here is
+          open, nearly all block. One that need not be answered says so in a
+          sentence from the registry. */}
+      {c.severity === "optional" && !isComment ? (
+        <p className="lw-ui-hint">{resolveStatus("clarification_severity", "optional").description}</p>
+      ) : null}
+      {caseLink ? (
+        <p className="v2clc__case">
+          <Link href={caseLink.href} className="v3cell-link">
+            {caseLink.label}
+          </Link>
         </p>
-      </header>
+      ) : null}
+    </header>
+  ) : (
+    <header className="v2clc__head">
+      {showTitle ? (
+        <>
+          <h3 className="v2clc__title">{c.title}</h3>
+          <div className="v2clc__badges">
+            {isComment ? (
+              <StatusBadge axis="clarification_type" status="comment" info={false} />
+            ) : (
+              <>
+                <StatusBadge axis="clarification" status={c.state} info={false} />
+                {c.state !== "answered" && c.severity === "required" ? (
+                  <StatusBadge axis="clarification_severity" status="required" info={false} />
+                ) : null}
+              </>
+            )}
+          </div>
+        </>
+      ) : null}
+      {caseLink ? (
+        <p className="v2clc__case">
+          <Link href={caseLink.href} className="v3cell-link">
+            {caseLink.label}
+          </Link>
+        </p>
+      ) : null}
+      <p className="v2clc__meta">
+        {isComment ? "Notiz" : `Gefragt ist: ${AUDIENCE_LABEL[c.audience]}`}
+        {/* Who asked — several people work on one case (owner 2026-09-29, 0214). */}
+        {/* Only when a person or the system asked — for Ludwig the origin word
+            already says „von Ludwig" (acceptance 0214, M3/M6). */}
+        {c.raisedBy && !(typeof c.raisedBy !== "string" && c.raisedBy.kind === "agent")
+          ? ` · ${isComment ? "von" : "gefragt von"} ${actorName(c.raisedBy, "Ludwig")}`
+          : ""}
+        {questionWord ? ` · ${questionWord}` : ""}
+        {originWord ? ` · ${originWord}` : ""}
+        {" · "}
+        <Time value={c.raisedAt} format="dateTime" size="sm" />
+      </p>
+    </header>
+  );
+
+  const evidence = c.evidence ?? (c.sources && c.sources.length > 0 ? { other: c.sources } : null);
+  // Groups given but all empty are no evidence: no box, no empty column (acceptance 0222, M4).
+  const evidenceCount = evidence
+    ? Object.values(evidence).reduce<number>((n, rows) => n + ((rows as readonly unknown[] | undefined)?.length ?? 0), 0)
+    : 0;
+  const side = step && evidence && evidenceCount > 0 ? <EvidencePanel e={evidence} select={onSelect} /> : null;
+
+  // Two zones (owner 2026-10-26): what the question is about, and the answer.
+  // The card renders them one after the other, as before; the step form gives
+  // the answer a zone of its own.
+  const about = (
+    <>
+      {head}
 
       {/* What a deferral says, and it says it in four sentences, not in a
           date: until when, why, how often already — and, if it hangs on a
@@ -666,63 +1026,36 @@ export function ClarificationCard({
         </Callout>
       ) : null}
 
-      {/* While answering, `ChoicePrompt` carries the question — once is enough. */}
-      {c.question && !canAnswer ? <p className="v2clc__question">{c.question}</p> : null}
+      {c.clientNote ? (
+        <Callout tone="soft">
+          <strong>Beim Mandanten zu klären:</strong> {c.clientNote}
+        </Callout>
+      ) : null}
+
+      {/* While answering, `ChoicePrompt` carries the question — once is enough;
+          the step form has it as its headline. */}
+      {c.question && !canAnswer && !step ? <p className="v2clc__question">{c.question}</p> : null}
       {c.context ? <Markdown text={c.context} className="v2clc__prose" /> : null}
       <Markdown text={c.text} className="v2clc__prose" />
 
       {/* Recommendation first, then what it rests on (owner 2026-09-29, 0214). */}
-      {markedInRow ? (
-        c.recommendation ? (
-          <Callout tone="soft">
-            <strong>Warum empfohlen:</strong> {c.recommendation}
-          </Callout>
-        ) : null
-      ) : c.recommendedOption ? (
-        // No row to mark (read mode, answered): a why without its what says nothing.
-        <Callout tone="soft">
-          <strong>Empfehlung: {c.recommendedOption}</strong>
-          {c.recommendation ? <> · {c.recommendation}</> : null}
-        </Callout>
-      ) : c.recommendation ? (
-        <Callout tone="soft">
-          <strong>Empfehlung:</strong> {c.recommendation}
-        </Callout>
-      ) : null}
+      {noteUnderOptions ? null : recommendationNote}
 
       {c.facts && c.facts.length > 0 ? (
-        <Block label="Grundlage">
+        <Block label="Grundlage" level={step ? 3 : 4}>
           <FieldList tone="soft" rows={c.facts.map((f) => [f.label, f.value])} />
         </Block>
       ) : null}
 
-      {c.evidence ? (
-        <Evidence e={c.evidence} select={onSelect} />
-      ) : c.sources && c.sources.length > 0 ? (
-        <Evidence e={{ other: c.sources }} select={onSelect} />
-      ) : null}
+      {!step && evidence ? <Evidence e={evidence} select={onSelect} /> : null}
 
-      {history.length > 0 ? (
-        // „dieser Frage": the course of the whole case is the thread below the
-        // card (ClarificationThread, 0214) — two blocks must not share a name.
-        <Block label="Verlauf dieser Frage">
-          <ol className="v2clc__hist">
-            {history.map((e, i) => (
-              <li key={`${e.kind}-${e.at}-${i}`}>
-                <span className="v2clc__histHead">
-                  <strong>{EVENT_LABEL[e.kind]}</strong>
-                  {" von "}
-                  {actorName(e.by, e.kind === "raised" ? "Ludwig" : "System")}
-                  {" · "}
-                  <Time value={e.at} format="dateTime" size="sm" />
-                </span>
-                {e.text ? <p className="v2clc__histText">{e.text}</p> : null}
-              </li>
-            ))}
-          </ol>
-        </Block>
-      ) : null}
+      {/* In the step form the course so far belongs to what the question is about. */}
+      {shownHistory.length > 0 ? <HistoryBlock history={shownHistory} level={step ? 3 : undefined} /> : null}
+    </>
+  );
 
+  const reply = (
+    <>
       {legacyUpload ? (
         <Callout tone="warning">
           Diese Frage stammt aus der Zeit vor der Beleg-Erwartung. Der Beleg wird
@@ -730,23 +1063,38 @@ export function ClarificationCard({
         </Callout>
       ) : null}
 
+      {/* Both stay mounted while the other shows: whoever goes back finds what
+          they typed (Eingabe bleibt). */}
       {canAnswer ? (
-        <div className="v2clc__answer">
+        <div className="v2clc__answer" hidden={asking}>
           <ChoicePrompt
+            // Keyed by the question: paging to the next one starts from its
+            // own preselection, not from the choice made on the last.
+            key={c.id}
             question={c.question ?? c.title}
+            hideQuestion={step}
             options={options}
             defaultOptionId={preselected}
             // With options: „Antwortoptionen" as whole rows, and the free text
             // always beside them (rule S13 — 0214, ll-cto); without: no heading,
-            // only the field.
+            // only the field. In the step form the free text waits behind
+            // „Eigene Antwort schreiben" (0222).
             optionsLabel="Antwortoptionen"
             optionStyle="rows"
             submitLabel={submitLabel}
             freeText={
               options.length === 0
-                ? { label: "Antwort", placeholder: "Antwort oder Anweisung für die Buchung" }
-                : { label: "Oder selbst formulieren" }
+                ? // Under the zone head „Ihre Antwort" the field must not say
+                  // „Antwort" once more; the step form gives the hint as label.
+                  step
+                  ? { label: "Antwort oder Anweisung für die Buchung" }
+                  : { label: "Antwort", placeholder: "Antwort oder Anweisung für die Buchung" }
+                : step
+                  ? { label: "Eigene Antwort", toggle: "Eigene Antwort schreiben" }
+                  : { label: "Oder selbst formulieren" }
             }
+            optionsNote={noteUnderOptions ? recommendationNote : undefined}
+            links={step ? stepLinks : undefined}
             onSubmit={async (answer) => {
               await onAnswer?.(answer);
             }}
@@ -756,41 +1104,92 @@ export function ClarificationCard({
         </div>
       ) : null}
 
-      {canExit && onResolve ? (
-        <p className="v2clc__exit">
-          <ActionIcon action="help" size={14} />
-          Woanders geklärt?{" "}
-          <TextButton onClick={() => setResolving(true)}>Anderweitig geklärt</TextButton>
-        </p>
-      ) : null}
-      {canExit && onDefer && !(c.state === "deferred" && onUndefer) ? (
-        <p className="v2clc__exit">
-          <ActionIcon action="time" size={14} />
-          Jetzt nicht zu klären?{" "}
-          <TextButton
-            onClick={() => setDeferring(true)}
-            disabled={Boolean(deferLockedReason)}
-            {...(deferLockedReason ? { "aria-describedby": whyId } : {})}
-          >
-            Zurückstellen
-          </TextButton>
-          {deferLockedReason ? (
-            <span className="v2clc__exitwhy" id={whyId}>
-              {deferLockedReason}
-            </span>
-          ) : null}
-        </p>
+      {canExit && onAskClient ? (
+        <div className="v2clc__answer" data-client-note hidden={!asking}>
+          <ChoicePrompt
+            key={c.id}
+            question="Notiz für den Mandanten"
+            hideQuestion
+            context="Die Frage geht mit dieser Notiz an den Mandanten."
+            options={[]}
+            freeText={{
+              label: "Notiz für den Mandanten",
+              placeholder: "Was soll der Mandant beantworten oder liefern?",
+              required: true,
+              defaultValue: c.clientNote ?? undefined,
+              emptyHint: "Schreiben Sie eine Notiz für den Mandanten.",
+            }}
+            submitLabel="Beim Mandanten klären"
+            links={<TextButton onClick={() => setAsking(false)}>Doch selbst beantworten</TextButton>}
+            onSubmit={async (answer) => {
+              await onAskClient(answer.text ?? "");
+              setAsking(false);
+            }}
+            pending={pending}
+            error={error}
+          />
+        </div>
       ) : null}
 
-      {canExit && onUndefer && c.state === "deferred" ? (
-        <p className="v2clc__exit">
-          <ActionIcon action="time" size={14} />
-          Doch jetzt klären?{" "}
-          <TextButton onClick={() => void onUndefer()} disabled={pending}>
-            Zurückstellung aufheben
-          </TextButton>
-        </p>
+      {/* A step question one cannot answer (legacy upload) keeps its ways in the same row. */}
+      {step && !canAnswer && !asking && stepLinks ? <div className="v2ask__links">{stepLinks}</div> : null}
+
+      {!step && !asking ? (
+        <>
+          {askButton ? (
+            <p className="v2clc__exit">
+              <ActionIcon action="person" size={14} />
+              Nur der Mandant weiß es? {askButton}
+            </p>
+          ) : null}
+          {resolveButton ? (
+            <p className="v2clc__exit">
+              <ActionIcon action="help" size={14} />
+              Woanders geklärt? {resolveButton}
+            </p>
+          ) : null}
+          {deferButton ? (
+            <p className="v2clc__exit">
+              <ActionIcon action="time" size={14} />
+              Jetzt nicht zu klären? {deferButton}
+            </p>
+          ) : null}
+          {undeferButton ? (
+            <p className="v2clc__exit">
+              <ActionIcon action="time" size={14} />
+              Doch jetzt klären? {undeferButton}
+            </p>
+          ) : null}
+        </>
       ) : null}
+    </>
+  );
+  // Read mode without a way out: the step form has no answer zone to show.
+  const hasReply = canAnswer || legacyUpload || (canExit && Boolean(onAskClient)) || Boolean(stepLinks);
+
+  return (
+    <article ref={articleRef} className={step ? `v2clc v2clc--step${side ? " v2clc--side" : ""}` : "v2clc"}>
+      {step ? (
+        <>
+          <div className="v2card v2clc__main">
+            <div className="v2clc__about">{about}</div>
+            {hasReply ? (
+              <section className="v2clc__reply" aria-labelledby={replyId}>
+                <h3 className="lw-ui-group" id={replyId}>
+                  Ihre Antwort
+                </h3>
+                {reply}
+              </section>
+            ) : null}
+          </div>
+          {side}
+        </>
+      ) : (
+        <>
+          {about}
+          {reply}
+        </>
+      )}
 
       {onDefer ? (
         <ReasonDialog

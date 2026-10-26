@@ -325,6 +325,72 @@
 .review__step--neutral .dot { background: var(--color-border-strong); }
 .review__step.is-readonly .dot { background: var(--color-border-strong); }
 
+/* --- StepRail `bar` (0221): the steps across the page, head left ---------- */
+.v3stepbar {
+  container-type: inline-size;
+  font-size: var(--fs-ui); line-height: var(--lh-ui);
+  display: flex; flex-wrap: wrap; align-items: stretch; gap: var(--space-1);
+  padding: var(--space-2);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border); border-radius: var(--radius-lg);
+}
+.v3stepbar__head {
+  flex: 0 1 auto; max-width: 25%; min-width: 0;
+  display: flex; flex-direction: column; justify-content: center; gap: 2px;
+  padding: var(--space-1) var(--space-4) var(--space-1) var(--space-2);
+  margin-right: var(--space-1);
+  border-right: 1px solid var(--color-border-subtle);
+}
+/* Too narrow for head and steps in one row (1280 px with the sidebar open:
+   ~1010 px): the head moves above the steps instead of squeezing them. */
+@container (max-width: 1100px) {
+  .v3stepbar__head {
+    flex-basis: 100%; max-width: none; margin: 0;
+    padding: var(--space-1) var(--space-2) var(--space-2);
+    border-right: 0; border-bottom: 1px solid var(--color-border-subtle);
+  }
+}
+/* Shares by content, so a long word gets more; it wraps rather than ending in
+   an ellipsis — after four weeks away the word is what finds the step. */
+.v3stepbar__step {
+  flex: 1 1 auto; min-width: 0; min-height: 40px;
+  display: flex; align-items: center; gap: var(--space-2);
+  padding: var(--space-2);
+  border-radius: var(--radius-md);
+  color: inherit; text-decoration: none;
+  transition: background var(--duration-fast) var(--ease-standard);
+}
+a.v3stepbar__step:hover { background: var(--color-bg-sunken); }
+a.v3stepbar__step:focus-visible { outline: 2px solid var(--color-focus); outline-offset: -2px; }
+.v3stepbar__step.is-current,
+a.v3stepbar__step.is-current:hover { background: var(--color-accent-50); }
+.v3stepbar__step--dimmed { opacity: 0.45; }
+.v3stepbar__num {
+  width: 24px; height: 24px; flex-shrink: 0;
+  display: inline-flex; align-items: center; justify-content: center;
+  border: 1px solid var(--color-border-strong); border-radius: var(--radius-pill);
+  background: var(--color-surface); color: var(--color-text-muted);
+  font-size: var(--fs-ui-sm); font-weight: 600; font-variant-numeric: tabular-nums;
+}
+.v3stepbar__step.is-current .v3stepbar__num {
+  background: var(--color-primary); border-color: var(--color-primary); color: var(--color-text-on-dark);
+}
+.v3stepbar__step--done:not(.is-current) .v3stepbar__num {
+  background: var(--color-success); border-color: var(--color-success); color: var(--color-text-on-dark);
+}
+.v3stepbar__step--blocked:not(.is-current) .v3stepbar__num {
+  background: var(--color-danger); border-color: var(--color-danger); color: var(--color-text-on-dark);
+}
+.v3stepbar__lbl { display: flex; flex-direction: column; min-width: 0; }
+.v3stepbar__name { font-size: var(--fs-ui); line-height: var(--lh-ui); font-weight: 500; color: var(--color-text); }
+.v3stepbar__step.is-current .v3stepbar__name { font-weight: 600; color: var(--color-primary); }
+/* `--color-text-muted` 6.69:1 on white, 6.19:1 on `accent-50` (current), 5.80:1 on `bg-sunken` (hover) — measured. */
+.v3stepbar__count {
+  font-size: var(--fs-ui-xs); line-height: var(--lh-ui-xs); color: var(--color-text-muted);
+  font-variant-numeric: tabular-nums lining-nums;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+
 .review__step .count {
   display: block; margin-top: 3px;
   font-size: var(--fs-ui-2xs); font-variant-numeric: tabular-nums lining-nums;
@@ -2189,7 +2255,8 @@ button.v2ibtn[aria-disabled="true"] > * { opacity: 0.5; }
   accent-color: var(--color-primary-700);
   cursor: pointer;
 }
-.v2radioline__hint { display: block; font-size: var(--fs-ui-sm); color: var(--color-text-subtle); margin-top: 1px; }
+/* Weight 400 in a checked (bold) row too — the sub-line stays the quiet second voice (0223). */
+.v2radioline__hint { display: block; font-size: var(--fs-ui-sm); font-weight: 400; color: var(--color-text-subtle); margin-top: 1px; }
 /* „empfohlen" (0214, 2026-10-24): quiet, and quiet in a checked row too.
    `--color-text-muted` 6.69:1 on white, ≥ 6:1 on `accent-50`. */
 .v2radioline__rec { margin-left: var(--space-1); font-size: var(--fs-ui-sm); font-weight: 400; color: var(--color-text-muted); }
@@ -2482,6 +2549,28 @@ button.v2ibtn[aria-disabled="true"] > * { opacity: 0.5; }
 .v2ask__q { font-size: var(--fs-ui-md); font-weight: 600; color: var(--color-text); }
 .v2ask__ctx { font-size: var(--fs-ui-sm); color: var(--color-text-muted); }
 .v2ask__foot { display: flex; align-items: center; gap: var(--space-3); flex-wrap: wrap; }
+/* The other ways, one row (0222): a hairline between them, no character. */
+/* Every item carries its line in its left margin, outside its box (the focus
+   ring stays tight on the word); the row is pulled left by one item's lead and
+   clipped just past the line, so the line in front of the first item of
+   **each** row — also after a wrap — falls away (measured 2026-10-26:
+   „| Zurückstellung aufheben" hung at the start of the second row). Clipped
+   on the left only, and left of every ring. */
+.v2ask__links {
+  display: flex; flex-wrap: wrap; align-items: center; row-gap: var(--space-1);
+  margin-left: calc(-2 * var(--space-3) - 1px);
+  clip-path: inset(-6px -6px -6px calc(var(--space-3) + 1px));
+  font-size: var(--fs-ui-sm); line-height: var(--lh-ui-sm); color: var(--color-text-muted);
+}
+.v2ask__links > * { position: relative; margin-left: calc(2 * var(--space-3) + 1px); }
+.v2ask__links > *::before {
+  content: ""; position: absolute; left: calc(-1 * var(--space-3) - 1px); top: 2px; bottom: 2px;
+  border-left: 1px solid var(--color-border);
+}
+/* A row of ways, not running text: each target at least 24 px high (WCAG 2.5.8, measured 19 before). */
+.v2ask__links .v2link { min-height: 24px; }
+/* „Zurückstellen" and its lock reason are one item of the row (0222). */
+.v2clc__linkitem { display: inline-flex; align-items: center; gap: var(--space-2); }
 .v2ask__why { font-size: var(--fs-ui-sm); color: var(--color-text-muted); }
 /* The gap keeps its dashed line: it **is** the statement ("nothing happened
    here for two weeks"), not decoration. */
@@ -4902,6 +4991,56 @@ a.v3bbr__val:hover { text-decoration-color: currentColor; }
 
 /* 0214 · clarification card */
 .v2clc__case { margin: 0; font-size: var(--fs-ui-sm); }
+/* Both answer areas stay mounted; `hidden` must win over the flex column. */
+.v2clc__answer[hidden] { display: none; }
+
+/* 0222 · the step form: the question card left, „Kontext" right — two cards.
+   Three zones you tell apart at a glance (owner 2026-10-26): what the question
+   is about, the answer, the sources. Apart by surface, line, space and type,
+   never by colour (colour stays criticality). */
+.v2clc--step { display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--space-4); align-items: start; }
+.v2clc--side { grid-template-columns: minmax(0, 1fr) var(--v2clc-side, 340px); }
+.v2clc__main { display: flex; flex-direction: column; min-width: 0; }
+.v2clc__about { display: flex; flex-direction: column; gap: var(--space-3); padding: var(--space-5) var(--space-6); }
+/* The answer is the card's foot zone: the tint of a card head or foot, a full
+   line above, its own head (0220 role 5). The option rows stay white on it. */
+.v2clc__reply {
+  display: flex; flex-direction: column; gap: var(--space-3);
+  padding: var(--space-4) var(--space-6) var(--space-5);
+  border-top: 1px solid var(--color-border);
+  background: var(--color-surface-head);
+}
+/* The zone head names the options already; the legend stays for screen readers. */
+.v2clc__reply .v2radiogrp > legend {
+  position: absolute; width: 1px; height: 1px; margin: -1px; overflow: hidden;
+  clip-path: inset(50%); white-space: nowrap;
+}
+.v2clc__topic { margin: 0; font-size: var(--fs-ui-sm); line-height: var(--lh-ui-sm); color: var(--color-text-muted); }
+/* „Kontext": a card with a head; each group a fold-out whose head is a group
+   head (0220 role 5), a full line between the groups; the entries are rows
+   with the sign of their kind, in link colour — head and entry never alike. */
+.v2clc__side { min-width: 0; }
+.v2clc__side > .v2disc:first-of-type { border-top: 0; }
+.v2clc__side > .v2disc > .v2disc__sum {
+  padding: var(--space-2) 18px; border-radius: 0;
+  font-size: var(--fs-ui-sm); line-height: var(--lh-ui-sm); font-weight: 700; color: var(--color-text-muted);
+}
+.v2clc__side > .v2disc > .v2disc__body { padding: 0 18px var(--space-3); }
+.v2clc__ctx { list-style: none; margin: 0; padding: 0; display: grid; gap: var(--space-1); }
+/* The entry is a button, a link or — with neither — plain text; the grid holds for all three. */
+.v2clc__ctx > li > * {
+  display: grid; grid-template-columns: 14px minmax(0, 1fr); column-gap: var(--space-2);
+  width: 100%; padding: 2px 0;
+}
+.v2clc__ctx > li > * > * { grid-column: 2; }
+/* The sign sits in the chevron's column, centred on the first line; muted, not link-blue (≥ 3:1: 6.69:1). */
+.v2clc__ctx > li > * > .v2clc__ctxico {
+  grid-column: 1; grid-row: 1; display: flex; align-items: center;
+  height: calc(var(--lh-ui) * 1em); color: var(--color-text-muted);
+}
+.v2clc__ctxmain { display: block; overflow-wrap: anywhere; }
+/* The sub-line in text colour, not link colour: only the main line is the name of the thing. */
+.v2clc__ctxsub { display: block; font-size: var(--fs-ui-sm); line-height: var(--lh-ui-sm); color: var(--color-text-muted); }
 .v2clc__evidence { display: grid; gap: var(--space-2); }
 .v2clc__pick { background: none; border: 0; padding: 0; font: inherit; cursor: pointer; text-align: left; min-height: 24px; }
 /* The key in link colour, mono or not; „genannt" as a quiet second line, not glued to the date. */
@@ -4911,6 +5050,18 @@ a.v3bbr__val:hover { text-decoration-color: currentColor; }
    cover only the button, not the row (the rule for other buttons in a linked
    row lifts them — 0214, M1). */
 .v2tbl .v2clc__pick.v2rowlink { position: static; }
+
+/* 0223 · one document of the review: the original left, the decision right, top-aligned. */
+.v3docreview { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: var(--space-5); align-items: start; }
+.v3docreview__original { min-width: 0; }
+.v3docreview__decide {
+  display: flex; flex-direction: column; gap: var(--space-3); min-width: 0;
+  padding: var(--space-5) var(--space-6);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border); border-radius: var(--radius-lg);
+}
+.v3docreview__topic { margin: 0; font-size: var(--fs-ui-sm); line-height: var(--lh-ui-sm); color: var(--color-text-muted); }
+.v3docreview__note { margin: var(--space-1) 0 0; }
 
 /* 0214 · the thread of a case's clarifications */
 .v3clt__list { list-style: none; margin: 0; padding: 0; display: grid; }

@@ -4,6 +4,7 @@ import { useId, useState } from "react";
 import type { ReactNode } from "react";
 import { ActionButton } from "../primitives/ActionButton";
 import { Callout } from "../primitives/Callout";
+import { TextButton } from "../primitives/TextButton";
 import { Field, Textarea } from "../primitives/Form";
 import { RadioGroup, type RadioOption } from "../primitives/RadioGroup";
 
@@ -22,6 +23,13 @@ export interface ChoiceOption {
   hint?: string;
   /** Marked „empfohlen", and preselected when `defaultOptionId` is absent (0214). */
   recommended?: boolean;
+  /**
+   * Chosen, this option asks for a sentence (0223): a field with this word
+   * stands under the options — a comment for Ludwig, a note for the client.
+   * It shares its text with the free text, so switching options loses
+   * nothing.
+   */
+  note?: { label: string; placeholder?: string; required?: boolean };
 }
 
 export interface ChoiceAnswer {
@@ -48,6 +56,8 @@ export function ChoicePrompt({
   optionsLabel = "Antwort",
   optionStyle = "list",
   hideQuestion = false,
+  optionsNote,
+  links,
 }: {
   question: string;
   /** What this is about — document, amount, row. */
@@ -55,8 +65,20 @@ export function ChoicePrompt({
   options: ChoiceOption[];
   /** Pre-selected answer — the agent's own suggestion, for instance. */
   defaultOptionId?: string | null;
-  /** Without this prop there is no text field at all. */
-  freeText?: { label: string; placeholder?: string; required?: boolean };
+  /**
+   * Without this prop there is no text field at all. `toggle` hides it behind
+   * a text button with that word („Eigene Antwort schreiben", 0222); a click
+   * shows the field and moves the focus into it. `defaultValue` fills it.
+   */
+  freeText?: {
+    label: string;
+    placeholder?: string;
+    required?: boolean;
+    toggle?: string;
+    defaultValue?: string;
+    /** The sentence beside the blocked button while the field is empty — for a field that is no answer (a note). */
+    emptyHint?: string;
+  };
   submitLabel?: string;
   onSubmit: (answer: ChoiceAnswer) => Promise<void> | void;
   pending?: boolean;
@@ -67,29 +89,43 @@ export function ChoicePrompt({
   optionStyle?: "list" | "rows";
   /** The question stands above already (a card that shows it) — not twice. */
   hideQuestion?: boolean;
+  /** A line right under the options — the why of the recommended one (0222, 0223). */
+  optionsNote?: ReactNode;
+  /**
+   * More text buttons in one row under the options, after the free-text
+   * button — the other ways out of the question (0222).
+   */
+  links?: ReactNode;
 }) {
   const [choice, setChoice] = useState<string | null>(
     defaultOptionId ?? options.find((o) => o.recommended)?.id ?? null,
   );
-  const [text, setText] = useState("");
+  const [text, setText] = useState(freeText?.defaultValue ?? "");
+  const [freeOpen, setFreeOpen] = useState(!freeText?.toggle);
   // Two questions on one page must not deselect each other — a fixed `name`
   // ties their radios into one group (0028).
   const groupName = useId();
   const textId = useId();
 
-  const missingText = Boolean(freeText?.required) && !text.trim();
-  const blocked = (!choice && !text.trim()) || missingText;
+  // One field at most: the chosen option's note wins over the free text.
+  const note = options.find((o) => o.id === choice)?.note;
+  const field = note ?? (freeText && freeOpen ? freeText : null);
+  // Only what stands in a visible field is sent: a note typed for one option
+  // must not travel with another that shows no field (acceptance 0223, M1).
+  const typed = field ? text.trim() : "";
+  const missingText = Boolean(field?.required) && !typed;
+  const blocked = (!choice && !typed) || missingText;
   // Why it is blocked belongs next to the button, not only in a grey button.
   // While the answer is on its way, the sentence would contradict it — the
   // button says „Sende …" and the line next to it must not ask for an answer
   // that has already been given (found in the review of 0028).
   const why = pending
     ? null
-    : !choice && !text.trim()
+    : !choice && !typed
       ? // Without options there is nothing to pick, and the sentence must not
         // send the reader looking for it (found in the review of 0028).
         options.length === 0
-        ? "Schreiben Sie eine Antwort."
+        ? (freeText?.emptyHint ?? "Schreiben Sie eine Antwort.")
         : "Wählen Sie eine Antwort oder schreiben Sie eine."
       : missingText
         ? "Bitte ergänzen Sie den Text."
@@ -97,7 +133,7 @@ export function ChoicePrompt({
 
   function send() {
     if (blocked || pending) return;
-    void onSubmit({ optionId: choice, text: text.trim() || undefined });
+    void onSubmit({ optionId: choice, text: typed || undefined });
   }
 
   return (
@@ -133,17 +169,26 @@ export function ChoicePrompt({
         disabled={pending}
       />
       )}
-      {freeText ? (
-        <Field
-          label={freeText.required ? `${freeText.label} *` : freeText.label}
-          htmlFor={textId}
-        >
+      {optionsNote}
+      {(freeText?.toggle && !freeOpen) || links ? (
+        <div className="v2ask__links">
+          {freeText?.toggle && !freeOpen ? (
+            <TextButton onClick={() => setFreeOpen(true)}>{freeText.toggle}</TextButton>
+          ) : null}
+          {links}
+        </div>
+      ) : null}
+      {field ? (
+        <Field label={field.required ? `${field.label} *` : field.label} htmlFor={textId}>
           <Textarea
             id={textId}
             value={text}
             rows={3}
-            placeholder={freeText.placeholder}
+            placeholder={field.placeholder}
             disabled={pending}
+            // Only when a click on the free-text button opened it — a note that
+            // appears with an option must not take the focus off the radios.
+            autoFocus={field === freeText && Boolean(freeText.toggle)}
             onChange={(e) => setText(e.target.value)}
           />
         </Field>
@@ -162,7 +207,7 @@ export function ChoicePrompt({
              the label carries the word when `pending` comes from outside
              (0028). */
           action={async () => {
-            await onSubmit({ optionId: choice, text: text.trim() || undefined });
+            await onSubmit({ optionId: choice, text: typed || undefined });
           }}
         >
           {pending ? "Sende …" : submitLabel}

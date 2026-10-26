@@ -1,5 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { useState } from "react";
+import { DateRange } from "../primitives/Time";
 import { ProgressBar, StepHeader, StepRail, type RailItem } from "./StepRail";
 
 const meta: Meta<typeof StepRail> = { title: "v3/Patterns/Frame/StepRail", component: StepRail };
@@ -132,5 +133,69 @@ export const ScreenHeaderWithoutNav: Story = {
         actions={<ProgressBar done={41} total={118} />}
       />
     </div>
+  ),
+};
+
+/* --- `layout="bar"` (0221): the head bar over the whole batch review --- */
+
+const BAR_STEPS: RailItem[] = [
+  { key: "start", index: 1, label: "Start", tone: "done", counterText: "Überblick", href: "#start" },
+  { key: "questions", index: 2, label: "Rückfragen", tone: "open", counterText: "11 offen", href: "#questions", current: true },
+  { key: "documents", index: 3, label: "Belege", tone: "open", counterText: "5 prüfen", href: "#documents" },
+  { key: "accounts", index: 4, label: "Konten", tone: "open", counterText: "1 Warnung", href: "#accounts" },
+  { key: "bookings", index: 5, label: "Buchungen", tone: "open", counterText: "109 offen", href: "#bookings" },
+  { key: "handover", index: 6, label: "Übergeben", tone: "neutral", counterText: "an DATEV", href: "#handover" },
+];
+
+const BarHead = () => (
+  <>
+    <strong>Stapel 2026-0001 abnehmen</strong>
+    <span className="v2sub">
+      <DateRange from="2026-01-01" to="2026-01-31" size="sm" />
+    </span>
+  </>
+);
+
+/** The batch review of one batch: the batch and its period on the left, every step one click, its count below. */
+export const Bar: Story = {
+  render: () => <StepRail layout="bar" ariaLabel="Schritte der Abnahme" head={<BarHead />} items={BAR_STEPS} />,
+};
+
+/** A conditional step („Vorsteuer-Aufteilung" only for mixed input-tax use) is an ordinary item; the numbers move up. */
+export const BarConditional: Story = {
+  render: () => {
+    const items: RailItem[] = [
+      ...BAR_STEPS.slice(0, 5),
+      { key: "vat", index: 6, label: "Vorsteuer-Aufteilung", tone: "open", counterText: "Quote bestätigen", href: "#vat" },
+      { ...BAR_STEPS[5]!, index: 7 },
+    ];
+    return <StepRail layout="bar" ariaLabel="Schritte der Abnahme" head={<BarHead />} items={items} />;
+  },
+};
+
+/** Every tone side by side: done, current, open, dimmed (not clickable, its reason as title), blocked (clickable — the page says why). */
+export const BarStates: Story = {
+  render: () => (
+    <StepRail
+      layout="bar"
+      ariaLabel="Schritte der Abnahme"
+      head={<BarHead />}
+      items={[
+        { key: "a", index: 1, label: "Start", tone: "done", counterText: "Überblick", href: "#a" },
+        { key: "b", index: 2, label: "Rückfragen", tone: "done", counterText: "alle beantwortet", href: "#b" },
+        { key: "c", index: 3, label: "Belege", tone: "open", counterText: "2 prüfen", href: "#c", current: true },
+        { key: "d", index: 4, label: "Konten", tone: "open", counterText: "1 Warnung", href: "#d" },
+        {
+          key: "e",
+          index: 5,
+          label: "Buchungen",
+          tone: "dimmed",
+          counterText: "Ludwig bucht",
+          href: null,
+          disabledReason: "Ludwig bucht gerade nach. Die Vorschläge stehen hier, sobald der Durchgang fertig ist.",
+        },
+        { key: "f", index: 6, label: "Übergeben", tone: "blocked", counterText: "2 Sperren", href: "#f" },
+      ]}
+    />
   ),
 };

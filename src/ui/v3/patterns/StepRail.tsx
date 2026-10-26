@@ -3,7 +3,7 @@ import { Link } from "../primitives/Link";
 import { PageHeader } from "../primitives/PageHeader";
 import { Progress } from "../primitives/Progress";
 import type { ReactNode } from "react";
-import { ActionIcon } from "../Icons";
+import { ActionIcon, type ActionKey } from "../Icons";
 
 /**
  * Frame building blocks (F123 T123.2): step rail, screen header,
@@ -37,20 +37,40 @@ export interface RailItem {
  * counter below it says how much is waiting there — both together, because
  * color alone is not a signal (UX-Guidelines V7).
  *
- * @when    Multi-step review with a traffic light and counter per step, on the left.
+ * `layout="bar"` lays the same rows across the page, `head` on the left (0221):
+ * the frame of a review whose steps are pages of their own. The number sits
+ * in a circle; a finished step shows a check, a blocked one an alert sign —
+ * each with its word as `aria-label`, the counter says the rest.
+ *
+ * @when    Multi-step review with a traffic light and counter per step, on the
+ *          left (`rail`) or across the top of the page (`bar`).
  * @instead Two to four views → Tabs. Process phases of a batch → ProcessStepper.
+ *          A linear run whose steps cannot be jumped to → Wizard.
  */
 export function StepRail({
   items,
   head,
   foot,
   ariaLabel,
+  layout = "rail",
 }: {
   items: RailItem[];
   head?: ReactNode;
   foot?: ReactNode;
   ariaLabel: string;
+  layout?: "rail" | "bar";
 }) {
+  if (layout === "bar") {
+    return (
+      <nav className="v3stepbar" aria-label={ariaLabel}>
+        {head ? <div className="v3stepbar__head">{head}</div> : null}
+        {items.map((it) => (
+          <BarStep key={it.key} item={it} />
+        ))}
+        {foot}
+      </nav>
+    );
+  }
   return (
     <nav className="review__rail" aria-label={ariaLabel}>
       {head}
@@ -79,6 +99,46 @@ function RailRow({ item }: { item: RailItem }) {
     </>
   );
   if (item.href === null) {
+    return (
+      <span className={cls} title={item.disabledReason}>
+        {inner}
+      </span>
+    );
+  }
+  return (
+    <Link className={cls} href={item.href} aria-current={item.current ? "step" : undefined}>
+      {inner}
+    </Link>
+  );
+}
+
+/** Sign and word for the two tones a number cannot say — the same signs as Wizard (0087). */
+const BAR_SIGN: Partial<Record<RailTone, ActionKey>> = { done: "confirm", blocked: "alert" };
+const BAR_WORD: Partial<Record<RailTone, string>> = { done: "erledigt", blocked: "gesperrt" };
+
+function BarStep({ item }: { item: RailItem }) {
+  // The current step shows its number: „where am I" beats „is it done".
+  const sign = item.current ? undefined : BAR_SIGN[item.tone];
+  const cls =
+    `v3stepbar__step v3stepbar__step--${item.tone}` + (item.current ? " is-current" : "");
+  const inner = (
+    <>
+      <span
+        className="v3stepbar__num"
+        role={sign ? "img" : undefined}
+        aria-label={sign ? BAR_WORD[item.tone] : undefined}
+      >
+        {sign ? <ActionIcon action={sign} size={14} /> : item.index}
+      </span>
+      <span className="v3stepbar__lbl">
+        <span className="v3stepbar__name" title={item.label}>
+          {item.label}
+        </span>
+        {item.counterText ? <span className="v3stepbar__count">{item.counterText}</span> : null}
+      </span>
+    </>
+  );
+  if (item.href === null || item.tone === "dimmed") {
     return (
       <span className={cls} title={item.disabledReason}>
         {inner}

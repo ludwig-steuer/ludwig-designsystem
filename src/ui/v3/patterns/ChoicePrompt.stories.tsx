@@ -3,6 +3,8 @@ import { useState } from "react";
 import { AmountCell } from "../primitives/Cells";
 import { FieldList } from "../primitives/FieldList";
 import { Card, CardHead } from "../primitives/Table";
+import { Callout } from "../primitives/Callout";
+import { TextButton } from "../primitives/TextButton";
 import { ChoicePrompt, type ChoiceAnswer } from "./ChoicePrompt";
 
 const meta: Meta<typeof ChoicePrompt> = {
@@ -180,3 +182,74 @@ export const OptionRows: Story = {
     </div>
   ),
 };
+
+/** The free text behind a text button, the other ways in the same row (0222). */
+export const OptionRowsWithLinks: Story = {
+  render: () => (
+    <div style={{ maxWidth: 640 }}>
+      <ChoicePrompt
+        question="Welche Gegenpartei gilt für diesen Sachverhalt?"
+        hideQuestion
+        optionsLabel="Antwortoptionen"
+        optionStyle="rows"
+        options={[
+          { id: "keep", label: "Zuordnung des Sachverhalts behalten", recommended: true },
+          { id: "switch", label: "Auf „Brightline Technology GmbH“ ändern" },
+        ]}
+        optionsNote={
+          <Callout tone="soft">
+            <strong>Warum empfohlen:</strong> Der Beleg nennt Serverhaus Nord als Leistenden, Brightline Technology nur als Rechnungsadresse.
+          </Callout>
+        }
+        freeText={{ label: "Eigene Antwort", toggle: "Eigene Antwort schreiben" }}
+        links={
+          <>
+            <TextButton onClick={() => {}}>Beim Mandanten klären</TextButton>
+            <TextButton onClick={() => {}}>Anderweitig geklärt</TextButton>
+          </>
+        }
+        submitLabel="Speichern und weiter"
+        onSubmit={async () => wait(400)}
+      />
+    </div>
+  ),
+};
+
+/** An option that needs a sentence (0223): its field appears when it is chosen; switching keeps the text. */
+export const OptionNote: Story = {
+  render: () => {
+    const [last, setLast] = useState<ChoiceAnswer | null>(null);
+    return (
+      <div style={{ maxWidth: 640 }}>
+        <ChoicePrompt
+          question="Wohin gehört dieser Beleg?"
+          hideQuestion
+          optionsLabel="Entscheidung"
+          optionStyle="rows"
+          options={[
+            {
+              id: "process",
+              label: "Mit Kommentar noch verarbeiten",
+              hint: "Geht an Ludwig zurück, er bucht ihn im nächsten Durchgang.",
+              note: { label: "Kommentar an Ludwig", placeholder: "Was soll mit dem Beleg passieren?", required: true },
+            },
+            { id: "archive", label: "Archivieren", hint: "Kein Buchungsbeleg; bleibt beim Mandanten abgelegt (z. B. Kontoauszug, Vertrag)." },
+            {
+              id: "client",
+              label: "Beim Mandanten klären",
+              hint: "Kommt mit Ihrer Notiz in die Liste für den Mandanten.",
+              note: { label: "Notiz für den Mandanten", required: true },
+            },
+          ]}
+          submitLabel="Entscheiden und weiter"
+          onSubmit={async (a) => {
+            await wait(400);
+            setLast(a);
+          }}
+        />
+        <p className="lw-ui-hint">{last ? `Entschieden: ${last.optionId} · ${last.text ?? "ohne Text"}` : "Noch nichts entschieden."}</p>
+      </div>
+    );
+  },
+};
+

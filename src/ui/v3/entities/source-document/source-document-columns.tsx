@@ -72,7 +72,11 @@ export type SourceDocumentColumn =
   | "status"
   | "confidence"
   | "size"
-  | "stuckState";
+  | "stuckState"
+  // — 0223: the document review of the batch —
+  | "reviewReason"
+  | "recommendation"
+  | "decision";
 
 /**
  * **The catalogue order** (owner E2, F335, 2026-09-29): one order for every
@@ -97,10 +101,13 @@ const CATALOG_ORDER: SourceDocumentColumn[] = [
   "progress",
   "status",
   "stuckState",
+  "reviewReason",
   "reason",
   "case",
   "batch",
   "booking",
+  "recommendation",
+  "decision",
 ];
 
 /** V1 · Eingang — is every file there and recognised right, before the basket is released? */
@@ -111,6 +118,11 @@ export const DOCUMENT_LIST_VIEW: SourceDocumentColumn[] = ["document", "classifi
 export const BATCH_DOCUMENTS_VIEW: SourceDocumentColumn[] = ["document", "classification", "amount", "documentDate", "progress", "case", "booking"];
 /** V4 · Geschäftspartner → Belege — hold a new case against the old ones. */
 export const PARTNER_DOCUMENTS_VIEW: SourceDocumentColumn[] = ["document", "classification", "amount", "documentDate", "progress", "case", "batch"];
+/**
+ * V6 · Abnahme „Belege" (0223) — the documents Ludwig did not book or rated
+ * not bookkeeping-relevant: why, what he recommends, what was decided.
+ */
+export const DOCUMENT_REVIEW_VIEW: SourceDocumentColumn[] = ["document", "documentDate", "amount", "reviewReason", "recommendation", "decision"];
 /** V5 · Abnahme „ohne Buchung" — the reason is the object of the review, so it is a column. */
 export const UNBOOKED_VIEW: SourceDocumentColumn[] = ["document", "classification", "amount", "documentDate", "progress", "reason", "case"];
 /**
@@ -241,6 +253,12 @@ export interface SourceDocumentColumnOptions {
     entries: readonly { id: string; lines: readonly JournalLine[]; currency: Currency }[];
     entryHref?: (entryId: string) => string;
   } | null;
+  /**
+   * The review of a document (0223): the word of the recommended decision and
+   * of the one taken — from the app's choice model, the set invents none.
+   * Read by the columns `recommendation` and `decision`.
+   */
+  review?: (document: SourceDocumentVM) => { recommended: string | null; decided: string | null } | null;
   /** `compact` = the row K: classification as a word, progress on one line without holder. */
   variant?: "full" | "compact" | "narrow";
   /**
@@ -348,6 +366,7 @@ export function sourceDocumentColumns({
   processPicture,
   batch,
   bookings,
+  review,
   variant = "full",
   dateSort,
 }: SourceDocumentColumnOptions = {}): ColumnDef<SourceDocumentVM>[] {
@@ -847,6 +866,40 @@ export function sourceDocumentColumns({
         ) : (
           <span className="v2num">{Math.round(d.classConfidence * 100)} %</span>
         ),
+    },
+    reviewReason: {
+      key: "reviewReason",
+      // „Prüfgrund" — the word of the entry column of 0218: the same question, the same word.
+      header: "Prüfgrund",
+      headerAside: <StatusInfoButton axis="document_review_reason" />,
+      // The longest words of the axis stand about 150 px wide in their badge
+      // and spilt over a 150 px track (measured, 0223).
+      width: "minmax(196px, 1fr)",
+      cell: (d) =>
+        d.reviewReason ? <StatusBadge axis="document_review_reason" status={d.reviewReason} info={false} /> : null,
+    },
+    recommendation: {
+      key: "recommendation",
+      header: "Empfehlung",
+      width: "minmax(150px, 1.2fr)",
+      cell: (d) => {
+        const word = review?.(d)?.recommended;
+        return word ? <span className="v3docrow__reason" title={word}>{word}</span> : null;
+      },
+    },
+    decision: {
+      key: "decision",
+      header: "Entscheidung",
+      width: "minmax(130px, 1fr)",
+      cell: (d) => {
+        const word = review?.(d)?.decided;
+        // „offen" in grey, a word and not only a blank: the open ones are what is left to do.
+        return word ? (
+          <span className="v3docrow__reason" title={word}>{word}</span>
+        ) : (
+          <span className="v2muted">offen</span>
+        );
+      },
     },
     size: {
       key: "size",

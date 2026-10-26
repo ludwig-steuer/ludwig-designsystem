@@ -1,6 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { useState } from "react";
 
+import { RecordPager } from "../../primitives/RecordPager";
 import { Card, CardHead } from "../../primitives/Table";
 import { ClarificationCard, type ClarificationDetailVM } from "./ClarificationCard";
 import { ClarificationThread } from "./ClarificationThread";
@@ -55,6 +56,8 @@ const AGENT_DETAIL: ClarificationDetailVM = {
 };
 
 const EVIDENCE: ClarificationDetailVM["evidence"] = {
+  cases: [{ id: "case-0042", number: "2026-0042", title: "Bewirtung Musterfirma GmbH mit Übernachtung" }],
+  statements: [{ id: "imp-2026-08", paymentAccount: "1800 Sparkasse Musterstadt", periodFrom: "2026-08-01", periodTo: "2026-08-31" }],
   documents: [
     { id: "doc-4471", cited: true, date: "2026-08-21", issuer: "Musterfirma GmbH", number: "RE-2026-4471", amount: 240.4, currency: "EUR" },
     { id: "doc-4470", date: "2026-08-14", issuer: "Hotel am Markt GmbH & Co. KG", number: "HM-88213", amount: 172, currency: "EUR" },
@@ -535,3 +538,263 @@ export const ErrorState: Story = {
     </Card>
   ),
 };
+
+/* --- `variant="step"` (0222): one question at a time in the batch review --- */
+
+/**
+ * A question as the batch review asks it — fictional, modelled on a real kind
+ * (seat of the supplier against §13b): long account name, foreign currency,
+ * every group of the box filled.
+ */
+const STEP_QUESTION: ClarificationVM & ClarificationDetailVM = {
+  id: "q-0412",
+  title: "Wolkenhaus-Rechnung WH-26-00871 über 42,84 € (Dezember 2025): Steuerschlüssel unklar",
+  state: "open",
+  severity: "required",
+  type: "question",
+  audience: "accounting",
+  raisedAt: "2026-10-09T19:14:47+02:00",
+  raisedBy: { kind: "agent", id: null, label: null },
+  question: "Wie soll die Wolkenhaus-Rechnung WH-26-00871 über 42,84 € gebucht werden?",
+  context:
+    "Die Rechnung von **Wolkenhaus S.à r.l.** lautet über 50,00 USD (42,84 €) und weist 6,84 € USt (19 %) aus. " +
+    "Die Erkennung hat Deutschland als Sitzland gelesen, Wolkenhaus sitzt in Luxemburg. 2025 liefen Wolkenhaus-Rechnungen " +
+    "auf **6837 Lizenzen und Konzessionen mit BU 506** (§13b EU) gegen **70412**. Vorsteuer 19 % lehnt der Server wegen " +
+    "der USD-Rechnung ab, §13b wegen des Sitzlands DE.",
+  text: "",
+  facts: [
+    { label: "Rechnung", value: "36,00 € netto + 6,84 € USt = 42,84 € (50,00 USD)" },
+    { label: "Kartenzahlung", value: "42,91 € am 02.01.2026" },
+    { label: "Präzedenz 2025", value: "6837 an 70412 BU 506" },
+  ],
+  answerKind: "single_choice",
+  answerOptions: [
+    "Wie 2025: 6837 mit BU 506 gegen 70412 (Sitzland Luxemburg)",
+    "Brutto ohne Steuerschlüssel auf 6837 gegen 70412",
+    "Mit Vorsteuer 19 % (BU 9) auf 6837 gegen 70412",
+  ],
+  recommendedOption: "Wie 2025: 6837 mit BU 506 gegen 70412 (Sitzland Luxemburg)",
+  recommendation: "So hat die Kanzlei Wolkenhaus bisher gebucht; das Sitzland am Kreditor wird auf Luxemburg korrigiert.",
+  allowFreeText: true,
+  questionType: "agent_clarification",
+  sourceModule: "booking-module",
+  evidence: {
+    cases: [{ id: "case-0412", number: "2026-0412", title: "Wolkenhaus S.à r.l., Cloud-Speicher Dezember 2025" }],
+    documents: [
+      { id: "doc-0871", cited: true, date: "2026-01-01", issuer: "Wolkenhaus S.à r.l.", number: "WH-26-00871", amount: 42.84, currency: "EUR" },
+    ],
+    payments: [
+      {
+        id: "bt-0207",
+        date: "2026-01-02",
+        amount: -42.91,
+        currency: "EUR",
+        counterparty: "WOLKENHAUS SARL",
+        purpose: "WOLKENHAUS*STORAGE 50.00 USD KURS 1,1652",
+        paymentAccount: "1802 Geschäftskonto",
+      },
+    ],
+    statements: [{ id: "imp-1802-2026-01", paymentAccount: "1802 Geschäftskonto", periodFrom: "2026-01-01", periodTo: "2026-01-31" }],
+    accounts: [
+      { id: "6837", cited: true, number: "6837", name: "Aufwendungen für die zeitlich befristete Überlassung von Rechten (Lizenzen, Konzessionen)" },
+      { id: "70412", cited: true, number: "70412", name: "Wolkenhaus S.à r.l." },
+    ],
+    entries: [{ id: "je-2025-1187", date: "2025-12-02", debit: "6837", credit: "70412", amount: 41.97, currency: "EUR", taxKey: "506" }],
+  },
+};
+
+/** The page around the step card: full width, the drawer line under it. */
+const StepFrame = ({ children, picked }: { children: React.ReactNode; picked?: string | null }) => (
+  <div style={{ maxWidth: 1180 }}>
+    {children}
+    {picked !== undefined ? (
+      <p className="lw-ui-hint">{picked ? `Drawer öffnet: ${picked}` : "Ein Eintrag im Kasten „Kontext“ öffnet seinen Drawer."}</p>
+    ) : null}
+  </div>
+);
+
+/**
+ * The slim question (0222): topic small, question as the headline, context,
+ * facts, the options with the recommended one marked and its why right under
+ * them, every way out in one row — and „Kontext" on the right.
+ */
+export const Step: Story = {
+  render: () => {
+    const [picked, setPicked] = useState<string | null>(null);
+    return (
+      <StepFrame picked={picked}>
+        <ClarificationCard
+          variant="step"
+          mode="answer"
+          clarification={STEP_QUESTION}
+          submitLabel="Speichern und weiter"
+          onSelect={(item) => setPicked(`${item.kind}:${item.id}`)}
+          onAnswer={async () => {}}
+          onAskClient={async () => {}}
+          onResolve={async () => {}}
+          onDefer={async () => {}}
+        />
+      </StepFrame>
+    );
+  },
+};
+
+/** Without options the field stands open, and the row has no „Eigene Antwort schreiben"; one group in the box; optional, so a hint and no badge. */
+export const StepFreeText: Story = {
+  render: () => (
+    <StepFrame>
+      <ClarificationCard
+        variant="step"
+        mode="answer"
+        clarification={{
+          ...STEP_QUESTION,
+          id: "q-0131",
+          // Optional: the hint under the question instead of a badge (owner 2026-10-26).
+          severity: "optional",
+          title: "Tabula-Rechnung vom 03.01.2026 ohne Projekt",
+          question: "Zu welchem Projekt gehört die Tabula-Rechnung über 54,00 USD vom 03.01.2026?",
+          context: "Die Rechnung nennt nur das Konto **team@musterfirma.de**. Für Tabula gibt es zwei Kostenstellen.",
+          facts: [{ label: "Betrag", value: "54,00 USD" }],
+          answerKind: "free_text",
+          answerOptions: [],
+          recommendedOption: null,
+          recommendation: null,
+          evidence: {
+            documents: [
+              { id: "doc-0131", cited: true, date: "2026-01-03", issuer: "Tabula Cloud Inc.", number: "INV-2026-000183", amount: 54, currency: "USD" },
+            ],
+          },
+        }}
+        submitLabel="Speichern und weiter"
+        onAnswer={async () => {}}
+        onAskClient={async () => {}}
+        onResolve={async () => {}}
+        onDefer={async () => {}}
+      />
+    </StepFrame>
+  ),
+};
+
+/** „Beim Mandanten klären": the note replaces the answer; saved, the card says so and keeps the note. */
+export const StepAskClient: Story = {
+  render: () => {
+    const [note, setNote] = useState<string | null>(null);
+    return (
+      <StepFrame>
+        <ClarificationCard
+          variant="step"
+          mode="answer"
+          clarification={{ ...STEP_QUESTION, clientNote: note }}
+          submitLabel="Speichern und weiter"
+          onAnswer={async () => {}}
+          onAskClient={async (text) => {
+            await new Promise((r) => setTimeout(r, 400));
+            setNote(text);
+          }}
+          onResolve={async () => {}}
+          onDefer={async () => {}}
+        />
+      </StepFrame>
+    );
+  },
+};
+
+/** Deferred, with a history that says more than „asked": the row offers „Zurückstellung aufheben". */
+export const StepDeferredWithHistory: Story = {
+  render: () => (
+    <StepFrame>
+      <ClarificationCard
+        variant="step"
+        mode="answer"
+        clarification={{
+          ...STEP_QUESTION,
+          state: "deferred",
+          deferredUntil: "2026-11-05",
+          deferredReason: "Rückfrage beim Mandanten läuft",
+          history: [
+            { kind: "raised", at: "2026-10-09T14:22:01+02:00", by: null },
+            { kind: "deferred", at: "2026-10-12T09:41:00+02:00", by: "S. Vogt", text: "Rückfrage beim Mandanten läuft" },
+          ],
+        }}
+        submitLabel="Speichern und weiter"
+        onAnswer={async () => {}}
+        onAskClient={async () => {}}
+        onResolve={async () => {}}
+        onDefer={async () => {}}
+        onUndefer={async () => {}}
+      />
+    </StepFrame>
+  ),
+};
+
+/** Saving (`pending`) and a failed save (`error`) — the choice stays. */
+export const StepLoadingAndError: Story = {
+  render: () => (
+    <StepFrame>
+      <div style={{ display: "grid", gap: "var(--space-6)" }}>
+        <ClarificationCard variant="step" mode="answer" clarification={STEP_QUESTION} submitLabel="Speichern und weiter" pending onAnswer={async () => {}} onResolve={async () => {}} />
+        <ClarificationCard
+          variant="step"
+          mode="answer"
+          clarification={STEP_QUESTION}
+          submitLabel="Speichern und weiter"
+          error="Die Antwort wurde nicht gespeichert. Die Verbindung zum Server ist abgebrochen. Versuchen Sie es noch einmal."
+          onAnswer={async () => {}}
+          onResolve={async () => {}}
+        />
+      </div>
+    </StepFrame>
+  ),
+};
+
+/**
+ * Paging under one card (0222, „Zustand je Frage"): each question starts from
+ * its own preselection, and the note mode does not travel to the next one.
+ */
+export const StepPaging: Story = {
+  render: () => {
+    const questions: (ClarificationVM & ClarificationDetailVM)[] = [
+      STEP_QUESTION,
+      {
+        ...STEP_QUESTION,
+        id: "q-0129",
+        title: "Gegenpartei weicht ab: Beleg nennt „Brightline Technology GmbH“",
+        question: "Welche Gegenpartei gilt für diesen Sachverhalt?",
+        context:
+          "Der Sachverhalt ist bereits einer Gegenpartei zugeordnet, der neu angehängte Beleg weist aber auf eine andere hin. Zuordnungen werden nicht still überschrieben.",
+        facts: [
+          { label: "Zuordnung des Sachverhalts", value: "Serverhaus Nord GmbH" },
+          { label: "Signal des Belegs", value: "Brightline Technology GmbH (Konto 10129)" },
+        ],
+        answerOptions: ["Zuordnung des Sachverhalts behalten", "Auf „Brightline Technology GmbH“ ändern"],
+        recommendedOption: "Zuordnung des Sachverhalts behalten",
+        recommendation: "Der Beleg nennt Serverhaus Nord als Leistenden; Brightline Technology steht nur in der Rechnungsadresse.",
+        evidence: { cases: [{ id: "case-0129", number: "2026-0129", title: "Serverhaus Nord GmbH, Serverkosten Januar" }] },
+      },
+    ];
+    const [i, setI] = useState(0);
+    return (
+      <StepFrame>
+        <div style={{ display: "grid", gap: "var(--space-3)" }}>
+          <RecordPager
+            label="Frage"
+            position={i + 1}
+            total={questions.length}
+            onPrev={i > 0 ? () => setI(i - 1) : null}
+            onNext={i < questions.length - 1 ? () => setI(i + 1) : null}
+          />
+          <ClarificationCard
+            variant="step"
+            mode="answer"
+            clarification={questions[i]!}
+            submitLabel="Speichern und weiter"
+            onAnswer={async () => setI(Math.min(i + 1, questions.length - 1))}
+            onAskClient={async () => {}}
+            onResolve={async () => {}}
+          />
+        </div>
+      </StepFrame>
+    );
+  },
+};
+
