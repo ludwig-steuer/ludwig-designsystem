@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Status | Abnahme (M3 Text + Umbenennung `resolutionReason`) · vorher: in Arbeit — nicht abgenommen 2026-10-26 (Nachprüfung, Stand `7afec27`: M1 und M2 behoben, neuer Mangel 3 — Spec und Code sagen bei `resolution` Verschiedenes, nur Spec-Text; s. „Nachprüfung 2026-10-26") · vorher: Abnahme (Nachprüfung M1, M2) · nicht abgenommen 2026-10-26 (fremde Abnahme, Stand `8280d42`; Mängel 1–2, s. „Abnahme 2026-10-26") · gebaut 2026-10-26 (s. „Gebaut") |
+| Status | fertig 2026-10-27 (Nachprüfung fremd: abgenommen mit Auflage M4; M4 und Hinweis 1 behoben, s. „Nachbesserung 3") · vorher: Abnahme (M3 Text + Umbenennung `resolutionReason`) · vorher: in Arbeit — nicht abgenommen 2026-10-26 (Nachprüfung, Stand `7afec27`: M1 und M2 behoben, neuer Mangel 3 — Spec und Code sagen bei `resolution` Verschiedenes, nur Spec-Text; s. „Nachprüfung 2026-10-26") · vorher: Abnahme (Nachprüfung M1, M2) · nicht abgenommen 2026-10-26 (fremde Abnahme, Stand `8280d42`; Mängel 1–2, s. „Abnahme 2026-10-26") · gebaut 2026-10-26 (s. „Gebaut") |
 | Stufe | erweitert `entities/clarification/Clarification.tsx` (`ClarificationList`, `ClarificationRow`, `ClarificationVM`) · `primitives/RecordPager.tsx` (ein Platz für Nebenwege) |
 | Klassen-Test | Liste: nein (Rückfrage, ihre Stände). Pager-Platz: ja („Datensatz 3 von 12" und daneben ein Weg zur ganzen Menge gibt es in jeder App mit einer Warteschlange) |
 | Quelle | Owner-Wunsch 2026-10-26 über llcto (Rückfragen-Schritt der Abnahme, `batches/[id]/close`); Props-Vorschlag des DS an llcto vom selben Tag, vom Owner bestätigt: `RecordPager.actions`, `ClarificationList groupBy="state"`, `onOpen`, `activeId`, `ClarificationVM.answer`; Gruppe „Beantwortet" (Registry), Knopf „n Fragen bei Ludwig", bei n = 0 kein Knopf |
@@ -60,7 +60,7 @@ gegebenen Antwort, nur zum Lesen.
 | Feld | Typ | Bedeutung | Nachweis |
 |---|---|---|---|
 | `answer` | `string \| null` (optional) | die gegebene Antwort als Text — der gewählte Optionstext oder der Freitext. Die App leitet ihn aus `answer_payload` ab (L-367) | `ClarificationRow/ByState` |
-| `resolutionReason` | `string \| null` (optional) | der Grund, wenn die Frage **ohne Antwort aufgelöst** wurde („anderweitig geklärt"); geht `answer` vor. Nicht die Spalte `resolution` — die trägt die Art (`answered`/`obsolete`), dies ist der Grund als Text (Nachbesserung 2, M2/M3) | `ClarificationRow/ByState` |
+| `resolutionReason` | `string \| null` (optional) | der Grund, wenn die Frage **anderweitig geklärt** wurde, ohne Antwort; geht `answer` vor. Nicht die Spalte `resolution` — die trägt die Art (`answered`/`obsolete`), dies ist der Grund als Text (Nachbesserung 2, M2/M3) | `ClarificationRow/ByState` |
 
 ### `ClarificationList` — neu
 
@@ -566,3 +566,90 @@ Registry-Wort), Feld „Wie wurde das geklärt?" (Pflicht wie bisher), Knopf
 „Als geklärt vermerken" — nicht „… schließen", das läge am „Schließen" des
 Dialogs.
 
+### Nachprüfung 2026-10-27 (fremd)
+
+Abnehmer: Claude (Abnahme-Agent, fremde Sitzung — hat weder gebaut noch
+nachgebessert noch eine frühere Abnahme geschrieben). Stand `6c01caf`
+(Nachbesserung 2 `c464f6c`, Nachträge `7225f13` und `6c01caf`); im
+Arbeitsbaum liegt fremde, nicht gestagte Arbeit an 0225, an den geprüften
+Dateien nichts. Gelesen: `git show` der drei Commits, diese Spec ganz,
+`Clarification.tsx`, `ClarificationCard.tsx` (Wege, `EVENT_LABEL`, beide
+`ReasonDialog`), `ClarificationThread.tsx`, `ReasonDialog.tsx`, L-367.
+Gemessen mit `scripts/cdp.mjs` (chrome-headless-shell aus Playwright 1247) am
+Dev-Server 6107, Fenster 1042 × 1000, echte Klicks und Tasten; dazu eine
+Textsuche im gerenderten Text von 216 Stories (Klärung, Sachverhalt, Stapel,
+`ChoicePrompt`). Bildschirmfotos `.playwright-mcp/0224-nachpruefung2-dialog.png`,
+`…-drawer-resolved.png`.
+
+| Punkt | Nachweis (Story-ID · Befehl · Messwert · Datei:Zeile) | Ergebnis |
+|---|---|---|
+| 1 · M3: Spec-Text und Prop-Tabellen gegen den Code | `actions?: ReactNode` (`RecordPager.tsx:41`); `answer?: string \| null` (`Clarification.tsx:79`), `resolutionReason?: string \| null` (`:88`); `groupBy?: "audience" \| "none" \| "state"` Vorgabe `"none"` (`:310`), `onOpen?: (c: ClarificationVM) => void` (`:340`), `activeId?: string \| null` (`:316`); `ClarificationRow.onOpen?: () => void` (`:176`), `hideBadges?: boolean` (`:161`) — Zeichen für Zeichen wie die Tabellen. Die Sätze: `answer` ohne den Halbsatz zur Auflösung; „Die Zeile mit Antwort" nennt Vorrang und Wort wie der Code (`:223–231`); „Befunde an die App" und L-367 (`befunde-app.md:182`) nennen dasselbe Feld und dasselbe Wort | ✓ (Hinweis 1) |
+| 2 · Umbenennung `resolution` → `resolutionReason` | `grep -rnw resolution src/ docs/` ohne Spiegel: am VM, in der Zeile und in den Stories nur noch `resolutionReason` (`Clarification.tsx:88`, `:223–225`; `Clarification.stories.tsx:328`, `:448`). `resolution` steht noch als englisches Wort bzw. Spaltenname in Kommentaren (`Clarification.tsx:82`, `:85`; `ClarificationThread.tsx:44`, `:78`), an `Expectation` (andere Entität) und in den datierten Abschnitten dieser Spec (Abnahme M2, Nachbesserung, Nachprüfung 2026-10-26) — Protokoll, bleibt. L-367: Feld `resolutionReason`, Abgrenzung zur Spalte, Wort „Anderweitig geklärt"; im Arbeitsbaum gleich `HEAD` | ✓ |
+| 3 · Ein Wort, eine Quelle | `RESOLVED_WORD` (`Clarification.tsx:96`) lesen Knopf (`ClarificationCard.tsx:909`), Kartenverlauf (`:65`), Dialogtitel (`:1293`), Zeile (`Clarification.tsx:225`) und Faden (`ClarificationThread.tsx:40`). Gemessen: `clarificationrow--by-state` „Anderweitig geklärt: telefonisch mit dem Mandanten geklärt", Wort `rgb(92, 92, 92)` wie „Antwort:", 20,9 px, `title` = Grund; Unterzeile jetzt aus der Registry („2 offen · 1 zurückgestellt · 3 beantwortet"). `…--in-batch-review-drawer`, Aufklapper -0122: dieselbe Zeile, im Verlauf „Anderweitig geklärt von {Person} · 26.10.2026, 10:03" (`…-drawer-resolved.png`). Knopf im Schritt 119 × 24 px; Dialogkopf `h2` „Anderweitig geklärt" = `aria-labelledby`. Das Badge trägt den Stand „Beantwortet", nicht das Ereignis — dazu passt die Einordnung des Dialogs. Textsuche nach „aufgelöst · auflös · Ohne Antwort": in den Texten der Bausteine kein Treffer (nur „ohne Antwort" im Sinn von „optional", aus der Registry); übrig in drei Story-Texten (M4). `onResolve`, `resolving`, `resolveButton` bleiben als Bezeichner | ✓ Bausteine · ✗ Stories (M4) |
+| 4 · Dialog nach den Hausregeln | `clarificationcard--step`, Klick auf „Anderweitig geklärt": Einordnung „Die Frage zählt danach als beantwortet" über dem Titel, Feld „Wie wurde das geklärt?" mit drei Chips, „Abbrechen" (sekundär) und „Als geklärt vermerken" (primär, 167,9 × 30,2 px) (`…-dialog.png`). Der Primärknopf nennt die Folge, kein „OK", kein Ausrufezeichen, keine Anrede, nichts in Versalien; dieselbe Form wie der Geschwister-Dialog „Zurückstellen" (Titel = Wort des Wegs, Einordnung = Folge). Erster Fokus im Textfeld; Primärknopf gesperrt, bis ein Grund steht; der Chip „telefonisch geklärt" füllt und entsperrt; Esc schließt ohne zu speichern, Fokus zurück auf „Anderweitig geklärt"; Bestätigen meldet den Grund (`clarificationcard--answering`) | ✓ |
+| 5 · Befehle | `pnpm typecheck` Exit 0; `pnpm check:language` Exit 0 („0 German comment lines left in 0 files"), beide über den Arbeitsbaum samt der fremden 0225-Arbeit | ✓ |
+
+#### Mängel
+
+4. **Das alte Verb in Story-Texten der Karte.** `ClarificationCard.stories.tsx:167`
+   und `:243` melden den Rundlauf als „Aufgelöst: {Grund}" (gemessen nach
+   „Als geklärt vermerken": „· Aufgelöst: telefonisch geklärt"); `:355`
+   gibt der Story `History` die Unterzeile „gestellt · beantwortet ·
+   aufgelöst, je mit Person und Datum" — direkt über einem Verlauf, der
+   „Gefragt" und „Anderweitig geklärt" sagt. Der Nachtrag sagt „überall",
+   und die Stories sind das Vorbild für den Einbau. Nur Story-Text, kein
+   Baustein-Code. Vorschlag: im Rundlauf `${RESOLVED_WORD}: ${reason}`; die
+   Unterzeile „gefragt · beantwortet · anderweitig geklärt, je mit Person und
+   Datum".
+
+#### Hinweise (nicht blockierend)
+
+1. **Die Tabelle beschreibt mit dem alten Wort.** Die Zeile `resolutionReason`
+   (`:63`) hebt „**ohne Antwort aufgelöst**" fett hervor — genau den
+   Wortlaut, der entfallen ist. Als Beschreibung nicht falsch; ruhiger wäre
+   „der Grund, wenn die Frage anderweitig geklärt wurde, ohne Antwort der
+   Gefragten".
+2. **Die Registry sagt noch „aufgelöst".** `clarification.answered` hat die
+   Beschreibung „Beantwortet oder als gegenstandslos aufgelöst."
+   (`src/ludwig/ui/status/status-registry.ts:947`, Spiegel). In den Flächen
+   von 0224 unsichtbar (alle Badges `info={false}`), überall, wo das (i) der
+   Achse steht, aber sichtbar. Wortlaut der App-Registry: Befund an die App,
+   falls gewünscht.
+3. **Eine Abschrift des Worts.** `ChoicePrompt.stories.tsx:208` schreibt
+   „Anderweitig geklärt" als Literal — eine Pattern-Story darf die Entität
+   nicht importieren, folgt einer künftigen Änderung aber nicht.
+4. **Faden nicht messbar.** Keine Story von `ClarificationThread` hat ein
+   Ereignis `resolved`; dass der Faden „Anderweitig geklärt" sagt, steht nur
+   im Code (`ClarificationThread.tsx:40`).
+5. **„geklärt" zweimal.** Die Chips heißen „telefonisch geklärt" und „per
+   Mail geklärt"; eine so begründete Zeile liest sich „Anderweitig geklärt:
+   telefonisch geklärt". Wortfrage, beim ersten Einsatz beobachten.
+
+Vier Linsen: **Sprache** — ein Wort für das Ereignis in Knopf, Dialog,
+Verlauf, Zeile und Faden, aus einer Konstante; der Dialog nennt die Folge im
+Knopf; drei Story-Texte sprechen noch das alte Verb (M4) ✗. **Bedienung** —
+Dialog: Fokus ins Feld, Sperre bis zum Grund, Esc ohne Speichern mit Fokus
+zurück, Ziele ≥ 24 px ✓. **Logik** — Grund und Antwort haben je ein Feld,
+der Name trennt den Grund von der Spalte, der Grund geht vor; die
+Einordnung erklärt, warum die Frage danach unter „Beantwortet" steht ✓.
+**Darstellung** — unverändert gegen die Nachprüfung 2026-10-26, das Wort
+grau wie „Antwort:", eine Zeile ✓.
+
+Vier-Wochen-Test: bestanden; wer den Weg „Anderweitig geklärt" nimmt,
+findet dasselbe Wort im Dialog, in der Zeile und im Verlauf wieder.
+
+Abgenommen von / am: Claude (Nachprüfung, fremde Sitzung), 2026-10-27, Stand
+`6c01caf` · **Abgenommen mit Auflage M4** (drei Story-Texte, kein
+Baustein-Code). M3 und die Umbenennung erledigt. Offen: Hinweise 1–5 dieser
+Nachprüfung; aus den früheren Prüfungen die begründet offen gelassenen und
+die Owner-Hinweise; Knopf und Drawer im Rückfragen-Schritt sowie L-367 (App).
+
+### Nachbesserung 3 (2026-10-27)
+
+| Punkt | Behoben | Wo |
+|---|---|---|
+| M4 Das alte Verb in Story-Texten | Rundlauf meldet `${RESOLVED_WORD}: ${reason}`, Unterzeile von `History` „gefragt · beantwortet · anderweitig geklärt, je mit Person und Datum" | `ClarificationCard.stories.tsx` |
+| Hinweis 1 Tabelle mit dem alten Wort | Zeile `resolutionReason`: „der Grund, wenn die Frage **anderweitig geklärt** wurde, ohne Antwort" | diese Spec, Schnittstelle |
+| Hinweise 2–5 | bleiben offen wie begründet: 2 ist Wortlaut der App-Registry (an llcto), 3 darf die Entität nicht importieren, 4 und 5 beim ersten Einsatz beobachten | — |
+
+Damit ist die Auflage erfüllt; Status `fertig`. Offen bleiben die App-Punkte (Knopf und Drawer im Rückfragen-Schritt, L-367).

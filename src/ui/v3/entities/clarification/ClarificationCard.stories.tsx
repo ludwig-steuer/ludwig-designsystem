@@ -6,7 +6,7 @@ import { Card, CardHead } from "../../primitives/Table";
 import { ClarificationCard, type ClarificationDetailVM } from "./ClarificationCard";
 import { ClarificationThread } from "./ClarificationThread";
 import { ITEMS as THREAD } from "./thread-fixtures";
-import type { ClarificationVM } from "./Clarification";
+import { RESOLVED_WORD, type ClarificationVM } from "./Clarification";
 
 const meta: Meta<typeof ClarificationCard> = {
   title: "v3/Entitäten/Klärung/ClarificationCard",
@@ -164,7 +164,7 @@ export const Answering: Story = {
               mode="answer"
               clarification={{ ...BASE, ...AGENT_DETAIL }}
               onAnswer={(a) => answer(`Auswahl: ${a.optionId ?? "—"}${a.text ? ` (${a.text})` : ""}`)}
-              onResolve={(reason) => answer(`Aufgelöst: ${reason}`)}
+              onResolve={(reason) => answer(`${RESOLVED_WORD}: ${reason}`)}
               onDefer={(until, reason) => answer(`Zurückgestellt bis ${until}: ${reason}`)}
             />
           </div>
@@ -240,7 +240,7 @@ export const Answering: Story = {
               // answered any more — the upload went with F125 — so resolving
               // and deferring are the only ways left. While they hung on
               // `canAnswer`, this one had neither.
-              onResolve={(reason) => answer(`Aufgelöst: ${reason}`)}
+              onResolve={(reason) => answer(`${RESOLVED_WORD}: ${reason}`)}
               onDefer={(until, reason) => answer(`Zurückgestellt bis ${until}: ${reason}`)}
             />
           </div>
@@ -352,7 +352,7 @@ export const People: Story = {
 export const History: Story = {
   render: () => (
     <Card>
-      <CardHead title="Verlauf" sub="gestellt · beantwortet · aufgelöst, je mit Person und Datum" />
+      <CardHead title="Verlauf" sub="gefragt · beantwortet · anderweitig geklärt, je mit Person und Datum" />
       <div style={{ padding: "var(--space-4)" }}>
         <ClarificationCard
           clarification={{
