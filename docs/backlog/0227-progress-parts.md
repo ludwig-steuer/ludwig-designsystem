@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Status | Abnahme |
+| Status | fertig |
 | Stufe | `primitives/` — Gruppe Daten, Familie `Progress.tsx` (Erweiterung von 0045/0046); dazu `CardSection` in der Familie `Table.tsx` (Gruppe Tabelle) |
 | Klassen-Test | „Ergäbe das auch in einer Versicherungs-App Sinn?" → ja: „bearbeitet · wartet · offen" über einen Stapel Schadensmeldungen ist fachfrei |
 | Quelle | ll-abnahme 2026-10-27, Owner-Punkt 4 der Demo-Runde (llcto in Kopie): Belege-Übersicht der Abnahme, …/close/documents |
@@ -41,6 +41,12 @@ Warnung.
   entweder ein Anteil (`share` bzw. `done`/`total`, `tone`) oder `parts`.
   Beides zugleich lässt der Typ nicht zu. Damit kann keine Prop still
   übergangen werden.
+- **Dazu ein neuer Export der Card-Familie (Nachbesserung 2):** `CardSection`,
+  eine Zeile auf dem Einzug der Karte. Den Baustein trägt der Entscheid von
+  llcto für den Owner (Weg B, 2026-10-27). §3 Regel 2 passt nur sinngemäß:
+  Sie erweitert um eine Prop, hier kommt ein Export dazu (Nachprüfung 3, S1).
+  An der Aufrufstelle ginge die Zeile nur mit px, denn der Einzug ist ein Wert
+  der Familie und kein Token.
 - **Setzt auf:** `BadgeTone` aus `primitives/Badge.tsx` als Tonwort
   („neutral" · „info" · „success" · „warning" · „danger"). Es ist dasselbe
   Wort wie am `StatusBadge` derselben Seite, also derselbe Ton für dieselbe
@@ -554,3 +560,46 @@ Nachgeprüft von / am: Claude (designsystem, fremde Nachprüfung) / 2026-10-27 �
 | Q2 | Kein Mangel: Die Rahmen-px (`gap`, `maxWidth`) in `Section` folgen den Nachbar-Stories. |
 
 Stand nach Nachbesserung 3: P1–P3 behoben und gemessen (`.v2card__section` 13,5 px wie die Zeilen, `color` `--color-text`, vor `CardFoot` ohne Linie, Konsole leer). Der Status bleibt `Abnahme`, bis eine fremde Nachprüfung 3 sie bestätigt hat.
+
+## Nachprüfung 3 · 2026-10-27
+
+Kurze fremde Nachprüfung der Nachbesserung 3 gegen `09e887f`. Geprüft sind nur
+P1–P3, Q1, Q3–Q5 und die Reichweite. Danach kam nur `664887d` dazu (0119,
+0220), der keinen Code von 0227 berührt.
+
+- **Browser:** gemessen mit `scripts/cdp.mjs` (ein Messbrowser,
+  `chrome-headless-shell` 1247) gegen Storybook 6107. Gemessen bei 1280 px,
+  zur Probe auch bei 700 und 1920 px, per `getBoundingClientRect` und
+  `getComputedStyle`. Danach `pnpm cdp:clean`.
+
+| Punkt | Nachweis | Ergebnis |
+|---|---|---|
+| P1 · Schrift in `.v2card__section` | v3.css:59 setzt `font-size: var(--fs-ui)` und `color: var(--color-text)`. **`section`:** Der Satz in Karte 2 steht in 13,5 px / 20,925 px, rgb(45, 45, 45). Das gleicht genau der Tabellenzeile (`td` 13,5 px / 20,925 px, rgb(45, 45, 45)). Der Kartentitel hat 14 px / 600, die Unterzeile 12,5 px. Vorher waren es 16 px / 24,8 px. Der Satz beginnt bei x = 35, wie Titel und erste Zelle. Label und Legende des Balkens in Karte 1 bleiben bei 11 px, denn sie setzen ihre Größe selbst. **`parts-in-use`:** Die Section hat 13,5 px. Satz und Legende stehen wie zuvor in 11 px, rgb(113, 113, 113). Der Titel der zweiten Karte hat 14 px, die Zeilen haben 13,5 px. Bei 700 und 1920 px ist alles gleich, ohne Querlauf, die Konsole ist leer | ✓ |
+| P2 (a) · Beispielsatz Z. 62 | `parts`, Zeile „Satz aus allen Teilen": Das Label lautet Zeichen für Zeichen „gebucht oder zugeordnet: 25, wartet auf eine Rückfrage: 2, ohne Buchung, zu entscheiden: 1" (Progress.tsx:76). In den vier übrigen Zeilen steht derselbe Satz als `aria-label` des Balkens | ✓ |
+| P2 (b) · `CardSection` Z. 70 | Der Kopf hat `14px 18px` (v3.css:21), der Fuß `12px 18px` (v3.css:66). Die Section hat `12px 18px` (v3.css:58, so gemessen). Die Schrift ist `--fs-ui` wie bei `.v2tbl__row` (v3.css:154). Die Linie darunter ist 1px solid rgb(236, 239, 243), dieselbe wie die Trennlinie der Zeilen (v3.css:153, gemessen in `parts-in-use`). Als letztes Kind und vor `CardFoot` ist sie 0, siehe Q4. Table.tsx:108–110 rendert nur das `div` mit der Klasse. Jeder Satz der Zeile stimmt | ✓ |
+| P3 · `@when`/`@instead` der Nachbarn | Das `@when` von `Card` nennt die Karte ohne Kopf (Table.tsx:17–18). Das `@instead` von `CardHead` nennt „A summary across the card's width under the head → CardSection" (Table.tsx:44–45). Das `@instead` von `CardFoot` nennt „A line before the rows → CardSection" (Table.tsx:117). `pnpm check:when` Exit 0 | ✓ |
+| Q3 · Lage des Kommentars | Der Kommentar in v3.css:53–56 gehört zu `.v2card__section`. „Card foot — …" (v3.css:64) steht direkt über `.v2card__f` (Z. 65) | ✓ |
+| Q4 · keine doppelte Linie vor `CardFoot` | In `section` bei 1280 px per JS vier Karten aufgebaut, aus `.v2card`, `.v2card__h`, `.v2card__section`, `.v2card__f` und `.v2tbl`. `CSS.supports('selector(:has(+ a))')` ergibt `true`. **Kopf · Section · Fuß und Section · Fuß:** Die Section hat unten 0, der Fuß oben 1px solid rgb(221, 226, 232) (`--color-border`), Abstand 0. Es bleibt also eine Linie. **Section · Tabelle · Fuß:** Die Section behält ihre Linie (1px, rgb(236, 239, 243)). **Section als letztes Kind:** 0. Die Konsole ist leer | ✓ |
+| Q5 · Einordnung und §11 | Nachbesserung 3 nennt `spec-schreiben` §3, Regel 2, mit Grund: vier Fünftel, eine Verwendung heute, Weg B als Vorlage. Das trägt mit einer Einschränkung, siehe S1. `design-guidelines.md:554`, Zeile „Daten": „`parts`, mit `legend`". Die Zeile „Fläche" (Z. 529) nennt `CardSection` | ✓, S1 |
+| Q1 · Legenden-Schrift | Offen als Frage an 0119 bzw. den Owner. Die Nachbesserung nennt die drei Größen und sagt „nicht still geändert". Seit `664887d` steht die Frage auch in 0119:56 und im Ausbau von 0220 (Z. 217), mit Auslöser und dem Entscheid von llcto für den Owner: „einmal festlegen, nicht jetzt umbauen" | offen (Owner), sauber benannt |
+| Reichweite | `grep -rn "v2card__section\|CardSection" src` trifft nur `index.ts:152`, `Table.tsx:45, 108–109, 117`, `Table.stories.tsx` (Import, `Section`), `Progress.stories.tsx` (Import, `PartsInUse`) und `v3.css:57–62`. Keine andere Karte im Set trägt die Klasse | ✓ |
+| Wächter | Exit 0: `pnpm typecheck`, `check:type`, `check:when`. `check:classes` Exit 1, nur mit v3clt, v3clt__step, v2tbl__foot, cy-page. Kein `pnpm build` im Arbeitsbaum | ✓ |
+
+**Hinweis**
+
+- **S1 · Regel 2 passt nur sinngemäß.**
+  - Regel 2 erweitert um **eine Prop**. `CardSection` ist dagegen ein neuer
+    Export der Familie `Table.tsx`.
+  - Die Vorbedingung „zwei geplante Verwendungen oder eine Design-Vorlage"
+    gilt nur, wenn man den Entscheid von llcto für den Owner (Weg B) als
+    Vorlage liest. Heute gibt es eine Verwendung.
+  - Den Baustein trägt dieser Entscheid (CLAUDE.md §7: Ein neuer Baustein
+    geht an den Owner), und die Nachbesserung nennt ihn. Am Ergebnis ändert
+    das nichts.
+  - Die Einordnung oben (Z. 23–48) nennt `CardSection` noch nicht. Beim
+    nächsten Griff dort einen Halbsatz ergänzen: Die Familie wird um einen
+    Export erweitert, nach Entscheid von llcto für den Owner.
+
+Nachgeprüft von / am: Claude (designsystem, fremde Nachprüfung) / 2026-10-27 · Offene Punkte: Q1 als Owner-Frage (0119, 0220); S1
+
+S1 nachgetragen (Bauender, 2026-10-27): Die Einordnung nennt `CardSection` jetzt mit dem Entscheid, der ihn trägt.
