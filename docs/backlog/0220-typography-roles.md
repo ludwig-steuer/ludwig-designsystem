@@ -214,6 +214,7 @@ Ebenen-Folge ohne Sprung und genau ein `h1` (axe `heading-order`,
 | Ebene automatisch aus dem Kontext (`HeadingLevel`-Context statt Prop) | Provider in `Section`/`Drawer` | sobald `headingLevel` an mehr als drei Bausteinen von Hand gesetzt wird |
 | Abschnitt mit Aktionen rechts | `SectionHead` (Titel, Aktionen) | zwei Seiten brauchen eine Aktion am Abschnittstitel |
 | `Wizard` in einem Dialog (Ebene 3) | `headingLevel` am Wizard | erste Verwendung im Dialog |
+| **Rolle „Legende"** für alle Legenden des Sets (offen seit 2026-10-27, llcto für den Owner: „einmal festlegen, nicht jetzt umbauen") | eine Zeile in §1 (Größe, Gewicht, Farbe), danach `.pz-staffel-legend`, `.v3period__legend` und `.v2bar__legend` auf diese eine Rolle | Heute sind es drei Schriften für dieselbe Rolle: Staffel-Legende `--fs-ui-xs` 11,5 px `text-muted`, Perioden-Legende `--fs-ui-sm` 12,5 px `text-muted`, Legende des Balkens `--fs-ui-2xs` 11 px `text-subtle` wie sein Label (0227, Nachprüfung 2 Q1). Auslöser: der nächste Griff an eine der drei oder der Durchgang von 0119 |
 
 ## Entschieden (Owner 2026-10-01)
 

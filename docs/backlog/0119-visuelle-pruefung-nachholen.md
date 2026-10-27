@@ -53,6 +53,7 @@ Behauptung, die nur eine Messung stützt:
 | 0134 | `Edges` mit `currency="CHF"`: schlägt die Währung bis in `AmountCell` und `JournalEntryCard` durch, oder steht irgendwo noch ein Euro-Zeichen |
 | 0132 · 0133 | Ein Spaltensatz, der **nicht** schon in `ORDER`-Reihenfolge steht: Kopfzeile, Spuren und Zellen müssen sich trotzdem decken. Das ist der Fall, den `recurringRuleColumnOrder()` abfangen soll |
 | 0126 | Die Kachel mit `href` **und** einem Link im Untertitel — sie darf so nicht gebaut werden, und die Messung sagt, ob man es sieht, wenn doch |
+| 0227 · 0220 | Drei Legenden, drei Schriften (Staffel 11,5 px, Perioden 12,5 px, Balken 11 px). Beim Durchgang die Rolle „Legende" einmal festlegen und alle drei messen. Der Plan steht im Ausbau von 0220 (llcto für den Owner 2026-10-27: nicht vorher umbauen) |
 
 ## Wie das später läuft
 
