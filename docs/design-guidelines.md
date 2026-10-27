@@ -159,6 +159,14 @@ je genau eine Farbkategorie — technisch (Log-Level, Job, Pipeline) und fachlic
 eine Kategorie trägt keine Stufe und damit keine Farbe. Eine zweite Farbe für
 dieselbe Stufe („warning-strong") ist ein Verstoß.
 
+**Empfehlung (0229):** Der Owner hat am 2026-10-27 eine farbliche Markierung
+gewünscht. Das Design-System ordnet Ludwigs Empfehlung als **Hinweis** ein: das
+Wort „empfohlen" als `info`-Badge an der Option (`RadioOption.recommended`), damit
+es in einer langen Liste sofort auffällt. Es gibt keine neue Farbe und keine
+eigene Stufe, und das Wort bleibt. llcto hat das am 2026-10-27 für den Owner
+angenommen. Der Entscheid kehrt den vom 2026-10-24 um (0214, „ein Wort, keine
+Farbe“).
+
 **Farbrollen**
 
 | Rolle | Token | Text | Fläche | Rand/Icon | Anmerkung |

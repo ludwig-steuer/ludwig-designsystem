@@ -166,3 +166,46 @@ export const Grouped: Story = {
     );
   },
 };
+
+/**
+ * `underChecked` (owner 2026-10-27, 0229): what the chosen option needs — its
+ * field, its button — stands right under it, inside its frame, not under the
+ * whole list. Pick another option and it follows; Tab from the radio goes
+ * straight into it.
+ */
+export const UnderChecked: Story = {
+  render: () => {
+    const [v, setV] = useState<string | null>("client");
+    const [note, setNote] = useState("");
+    return (
+      <div style={{ maxWidth: 560 }}>
+        <RadioGroup
+          name="decision-under"
+          label="Entscheidung"
+          variant="rows"
+          options={[
+            { value: "next", label: "In den nächsten Zeitraum", hint: "Gehört in einen späteren Stapel; Ludwig bucht ihn dort." },
+            { value: "duplicate", label: "Dublette verwerfen", hint: "Derselbe Beleg liegt schon vor; dieser wird verworfen." },
+            { value: "client", label: "Beim Mandanten klären", hint: "Kommt mit Ihrer Notiz in die Liste für den Mandanten.", recommended: true },
+          ]}
+          value={v}
+          onChange={setV}
+          underChecked={
+            <>
+              {v === "client" ? (
+                <Field label="Notiz für den Mandanten" htmlFor="under-note">
+                  <Input id="under-note" value={note} onChange={(e) => setNote(e.target.value)} />
+                </Field>
+              ) : null}
+              <div>
+                <Button variant="primary" size="sm">
+                  Entscheiden und weiter
+                </Button>
+              </div>
+            </>
+          }
+        />
+      </div>
+    );
+  },
+};

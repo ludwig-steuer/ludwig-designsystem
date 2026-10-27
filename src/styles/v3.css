@@ -2313,9 +2313,16 @@ button.v2ibtn[aria-disabled="true"] > * { opacity: 0.5; }
 }
 /* Weight 400 in a checked (bold) row too — the sub-line stays the quiet second voice (0223). */
 .v2radioline__hint { display: block; font-size: var(--fs-ui-sm); font-weight: 400; color: var(--color-text-subtle); margin-top: 1px; }
-/* „empfohlen" (0214, 2026-10-24): quiet, and quiet in a checked row too.
-   `--color-text-muted` 6.69:1 on white, ≥ 6:1 on `accent-50`. */
-.v2radioline__rec { margin-left: var(--space-1); font-size: var(--fs-ui-sm); font-weight: 400; color: var(--color-text-muted); }
+/* „empfohlen" (0214, 0229): the `info` badge. The owner asked for a colour
+   (2026-10-27); the step „Hinweis" — Ludwig's hint — is the design system's
+   reading, accepted by llcto for the owner, so it catches the eye in a long
+   list. Weight 500
+   in a checked (bold) row too. Text `--color-accent-700` 4.69:1 on accent-100.
+   The negative margin keeps the row as high as one without it. */
+.v2radioline__rec { margin: -2px 0 -2px var(--space-1); vertical-align: 1px; font-weight: 500; }
+/* The chosen answer's field and button (0229): under its text, not under the
+   list. Radio (14) plus the line's gap and padding — the column of the label. */
+.v2radiogrp__under { display: grid; gap: var(--space-3); padding: var(--space-2) 8px var(--space-3) calc(8px + 14px + var(--space-2)); }
 
 /* --- AmountInput (0019) — Ziffern rechts, tabellarisch -------------------- */
 /* `sm` is the editor density — the same measures as the booking editor's row. */
@@ -5064,6 +5071,15 @@ a.v3bbr__val:hover { text-decoration-color: currentColor; }
 .v2radiogrp--rows .v2radioline:hover { background: var(--color-bg-soft); }
 .v2radiogrp--rows .v2radioline:has(input:checked) { border-color: var(--color-accent); background: var(--color-accent-50); font-weight: 600; }
 .v2radiogrp--rows .v2radioline:has(input:focus-visible) { outline: 2px solid var(--color-focus); outline-offset: -2px; }
+/* The block under a chosen row continues its frame: one box, row and its field (0229). */
+.v2radiogrp--rows .v2radioline:has(input:checked):has(+ .v2radiogrp__under) { border-bottom-color: transparent; border-radius: var(--radius-md) var(--radius-md) 0 0; }
+.v2radiogrp--rows .v2radioline:has(input:checked) + .v2radiogrp__under {
+  margin-top: calc(-1 * var(--space-2));
+  border: 1px solid var(--color-accent); border-top: 0; border-radius: 0 0 var(--radius-md) var(--radius-md);
+  background: var(--color-accent-50); padding: 0 12px 12px calc(12px + 14px + var(--space-2));
+}
+/* Under a chosen group row the block follows the group's options: their edge. */
+.v2radiogrp--rows .v2radiogrp__sub + .v2radiogrp__under { padding: 0 0 0 calc(14px + var(--space-2)); }
 
 /* 0214 · clarification card */
 .v2clc__case { margin: 0; font-size: var(--fs-ui-sm); }

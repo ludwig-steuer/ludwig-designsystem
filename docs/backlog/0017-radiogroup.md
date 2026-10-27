@@ -241,3 +241,11 @@ die Tastatur bleibt beim Browser. Ein eigenes `<fieldset>` mit
 `<legend class="v2vh">` umschließt die Optionen der Gruppe. Eine Ebene. Story
 `Grouped`. Anlass, Form und Kriterien stehen in 0028 (Nachtrag 2026-10-27).
 
+
+## Nachtrag 2026-10-27 — `underChecked` und „empfohlen“ im Hinweis-Ton
+
+Owner 2026-10-27 über ll-abnahme. `underChecked?: ReactNode` steht direkt unter
+der gewählten Option: bei `rows` im Rahmen der Zeile, bei einer gewählten
+Gruppe unter ihren Optionen. Ist nichts gewählt, fehlt er. Story
+`UnderChecked`. „empfohlen“ ist jetzt ein `Badge tone="info"` statt grauer
+Schrift. Anlass, Form und Kriterien stehen in 0229.

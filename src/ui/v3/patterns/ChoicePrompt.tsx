@@ -1,6 +1,6 @@
 "use client";
 
-import { useId, useState } from "react";
+import { useEffect, useId, useState } from "react";
 import type { ReactNode } from "react";
 import { ActionButton } from "../primitives/ActionButton";
 import { Callout } from "../primitives/Callout";
@@ -25,7 +25,7 @@ export interface ChoiceOption {
   recommended?: boolean;
   /**
    * Chosen, this option asks for a sentence (0223): a field with this word
-   * stands under the options — a comment for Ludwig, a note for the client.
+   * stands under it (0229) — a comment for Ludwig, a note for the client.
    * It shares its text with the free text, so switching options loses
    * nothing.
    */
@@ -111,6 +111,18 @@ export function ChoicePrompt({
   );
   const [text, setText] = useState(freeText?.defaultValue ?? "");
   const [freeOpen, setFreeOpen] = useState(!freeText?.toggle);
+  // Set by the click on the free-text button only. The field moves with the
+  // choice and mounts anew each time, so `autoFocus` would pull the focus off
+  // the radios on every arrow key (acceptance 0229, M3).
+  const [focusText, setFocusText] = useState(false);
+  // The prompt's own run, besides the caller's `pending`: the block moves with
+  // the choice, so a choice changed mid-run would mount a fresh button without
+  // its „Sende …" and its lock — and a second click would send twice
+  // (acceptance 0229, N2). While it runs, the choice and the text hold — by
+  // ignoring changes, not by locking the fieldset: a locked radio or field
+  // drops the focus to the page (re-check 2 of 0229, H9).
+  const [sending, setSending] = useState(false);
+  const busy = pending || sending;
   // Two questions on one page must not deselect each other — a fixed `name`
   // ties their radios into one group (0028).
   const groupName = useId();
@@ -131,7 +143,7 @@ export function ChoicePrompt({
   // While the answer is on its way, the sentence would contradict it — the
   // button says „Sende …" and the line next to it must not ask for an answer
   // that has already been given (found in the review of 0028).
-  const why = pending
+  const why = busy
     ? null
     : openGroup && !typed
       ? `Wählen Sie eine Möglichkeit unter „${openGroup.label}“.`
@@ -145,10 +157,68 @@ export function ChoicePrompt({
         ? "Bitte ergänzen Sie den Text."
         : null;
 
-  function send() {
-    if (blocked || pending) return;
-    void onSubmit({ optionId: answer, text: typed || undefined });
+  async function run() {
+    setSending(true);
+    try {
+      await onSubmit({ optionId: answer, text: typed || undefined });
+    } finally {
+      setSending(false);
+    }
   }
+
+  function send() {
+    if (blocked || busy) return;
+    void run();
+  }
+
+  // Field, error and button — one block, under the chosen answer or below.
+  const tail = (
+    <>
+      {field ? (
+        <Field label={field.required ? `${field.label} *` : field.label} htmlFor={textId}>
+          <Textarea
+            id={textId}
+            value={text}
+            rows={3}
+            placeholder={field.placeholder}
+            disabled={pending}
+            readOnly={sending}
+            onChange={(e) => setText(e.target.value)}
+          />
+        </Field>
+      ) : null}
+      {error ? <Callout tone="danger">{error}</Callout> : null}
+      <div className="v2ask__foot">
+        <ActionButton
+          variant="primary"
+          size="sm"
+          hotkey="Strg+Enter"
+          disabled={blocked || busy}
+          pendingLabel="Sende …"
+          /* `ActionButton` only knows its **own** run. When the caller holds
+             the pending state (the server action is in their hand), the button
+             would stay grey without a word — exactly the case V7 forbids. So
+             the label carries the word when `pending` comes from outside
+             (0028). */
+          // `answer`, not `choice`: the group's own row is no answer, by click
+          // as by Ctrl+Enter (acceptance of the groups, M1).
+          action={run}
+        >
+          {busy ? "Sende …" : submitLabel}
+        </ActionButton>
+        {why ? <span className="v2ask__why">{why}</span> : null}
+      </div>
+    </>
+  );
+  // The block stands under the chosen answer (owner 2026-10-27, 0229) — with
+  // the free text too: it is sent together with that answer. Only an answer
+  // the group shows can carry the block, else it would vanish.
+  const atChoice = options.some((o) => o.id === choice || o.options?.some((c) => c.id === choice));
+  useEffect(() => {
+    if (!focusText) return;
+    document.getElementById(textId)?.focus();
+    setFocusText(false);
+  }, [focusText, textId]);
 
   return (
     // The key is promised at the button, so it has to work everywhere in the
@@ -174,6 +244,7 @@ export function ChoicePrompt({
           twice, and for a screen reader a group without content. */}
       {options.length === 0 ? null : (
       <RadioGroup
+        underChecked={atChoice ? tail : undefined}
         name={groupName}
         label={optionsLabel}
         variant={optionStyle === "rows" ? "rows" : "list"}
@@ -182,7 +253,9 @@ export function ChoicePrompt({
           ...(o.options?.length ? { options: o.options.map(radio) } : {}),
         }))}
         value={choice}
-        onChange={setChoice}
+        onChange={(v) => {
+          if (!sending) setChoice(v);
+        }}
         disabled={pending}
       />
       )}
@@ -191,51 +264,20 @@ export function ChoicePrompt({
         <div className="v2ask__links">
           {freeText?.toggle && !freeOpen ? (
             // Locked while saving: it would open a field that is locked too (acceptance 0222, H3).
-            <TextButton onClick={() => setFreeOpen(true)} disabled={pending}>
+            <TextButton
+              onClick={() => {
+                setFreeOpen(true);
+                setFocusText(true);
+              }}
+              disabled={busy}
+            >
               {freeText.toggle}
             </TextButton>
           ) : null}
           {links}
         </div>
       ) : null}
-      {field ? (
-        <Field label={field.required ? `${field.label} *` : field.label} htmlFor={textId}>
-          <Textarea
-            id={textId}
-            value={text}
-            rows={3}
-            placeholder={field.placeholder}
-            disabled={pending}
-            // Only when a click on the free-text button opened it — a note that
-            // appears with an option must not take the focus off the radios.
-            autoFocus={field === freeText && Boolean(freeText.toggle)}
-            onChange={(e) => setText(e.target.value)}
-          />
-        </Field>
-      ) : null}
-      {error ? <Callout tone="danger">{error}</Callout> : null}
-      <div className="v2ask__foot">
-        <ActionButton
-          variant="primary"
-          size="sm"
-          hotkey="Strg+Enter"
-          disabled={blocked || pending}
-          pendingLabel="Sende …"
-          /* `ActionButton` only knows its **own** run. When the caller holds
-             the pending state (the server action is in their hand), the button
-             would stay grey without a word — exactly the case V7 forbids. So
-             the label carries the word when `pending` comes from outside
-             (0028). */
-          // `answer`, not `choice`: the group's own row is no answer, by click
-          // as by Ctrl+Enter (acceptance of the groups, M1).
-          action={async () => {
-            await onSubmit({ optionId: answer, text: typed || undefined });
-          }}
-        >
-          {pending ? "Sende …" : submitLabel}
-        </ActionButton>
-        {why ? <span className="v2ask__why">{why}</span> : null}
-      </div>
+      {atChoice ? null : tail}
     </div>
   );
 }

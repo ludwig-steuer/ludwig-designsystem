@@ -499,3 +499,14 @@ Abgenommen von / am: Claude (Abnahme-Agent), 2026-10-24.
 die drei neuen Stories ergänzt. Hinweis 3: Satz in 0060 wie vorgeschlagen.
 Hinweis 4 bleibt Beobachtung für die App mit echter Evidenz. Der deutsche
 JSDoc in `ChoicePrompt.stories.tsx` (Story `Filled`) ist übersetzt.
+
+## Nachtrag 2026-10-27 — Form der Empfehlung geändert
+
+Owner 2026-10-27 über ll-abnahme: „Für die Empfehlung in der Auswahl brauchen
+wir eine neue farbliche Markierung.“ Die Form aus dem Nachtrag vom 2026-10-24
+(„klein und grau … keine eigene Farbe“) gilt nicht mehr. „empfohlen“ steht jetzt
+als `info`-Badge an der Option. Die Einordnung als Hinweis (Stufe 3) ist ein
+Entscheid des Design-Systems, von llcto für den Owner angenommen. Ein neues Token
+gibt es dafür nicht. Callout, Vorauswahl und
+Lesemodus bleiben, wie sie sind. Spec 0229, vermerkt in
+`design-guidelines.md` §3.

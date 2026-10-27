@@ -1,6 +1,8 @@
 "use client";
 
+import { Fragment, type ReactNode } from "react";
 import { ActionIcon } from "../Icons";
+import { Badge } from "./Badge";
 
 /**
  * One out of a few named ways (0017).
@@ -21,9 +23,10 @@ export interface RadioOption {
   hint?: string;
   disabled?: boolean;
   /**
-   * The word „empfohlen" after the label (0214, owner 2026-10-24). A word, not
-   * a colour: a recommendation is no criticality. Inside the label, so it is
-   * read out with the option.
+   * The word „empfohlen" after the label (0214), as an `info` badge (0229): the
+   * owner asked for a colour (2026-10-27); that it is the step „Hinweis" — Ludwig's
+   * hint, no new colour — is the design system's reading, accepted by llcto for
+   * the owner. Inside the label, so it is read out with the option.
    */
   recommended?: boolean;
   /**
@@ -54,6 +57,7 @@ export function RadioGroup({
   error,
   required,
   disabled,
+  underChecked,
 }: {
   name: string;
   label: string;
@@ -71,7 +75,18 @@ export function RadioGroup({
   error?: string;
   required?: boolean;
   disabled?: boolean;
+  /**
+   * Stands right under the checked option — its field and its button, so they
+   * are where the eye is and not under a long list (owner 2026-10-27, 0229).
+   * A checked group carries it under its options. Nothing checked: not shown.
+   * It sits inside the group's `<fieldset>`, so a screen reader names it as
+   * part of the group. Vertical only: between options side by side it would
+   * break the line, so `horizontal` leaves it out.
+   */
+  underChecked?: ReactNode;
 }) {
+  const under =
+    underChecked && orientation === "vertical" ? <div className="v2radiogrp__under">{underChecked}</div> : null;
   return (
     <div className="v2field">
       <fieldset
@@ -81,7 +96,13 @@ export function RadioGroup({
       >
         <legend className="v2field__label">{required ? `${label} *` : label}</legend>
         {options.map((o) => {
-          if (!o.options?.length) return <Line key={o.value} o={o} name={name} value={value} onChange={onChange} disabled={disabled} />;
+          if (!o.options?.length)
+            return (
+              <Fragment key={o.value}>
+                <Line o={o} name={name} value={value} onChange={onChange} disabled={disabled} />
+                {value === o.value ? under : null}
+              </Fragment>
+            );
           const open = value === o.value || o.options.some((c) => c.value === value);
           // Folded, the group says that a recommendation waits inside it.
           const recommended = !open && o.options.some((c) => c.recommended);
@@ -92,10 +113,14 @@ export function RadioGroup({
                 <fieldset className="v2radiogrp__sub">
                   <legend className="v2vh">{o.label}</legend>
                   {o.options.map((c) => (
-                    <Line key={c.value} o={c} name={name} value={value} onChange={onChange} disabled={disabled} />
+                    <Fragment key={c.value}>
+                      <Line o={c} name={name} value={value} onChange={onChange} disabled={disabled} />
+                      {value === c.value ? under : null}
+                    </Fragment>
                   ))}
                 </fieldset>
               ) : null}
+              {value === o.value ? under : null}
             </div>
           );
         })}
@@ -145,7 +170,7 @@ function Line({
         {o.label}
         {folded ? <span className="v2vh">{`, ${folded} ${folded === 1 ? "Möglichkeit" : "Möglichkeiten"}`}</span> : null}
         {/* The space keeps the accessible name two words („… (4670) empfohlen"). */}
-        {o.recommended ? <> <span className="v2radioline__rec">empfohlen</span></> : null}
+        {o.recommended ? <> <Badge tone="info" className="v2radioline__rec">empfohlen</Badge></> : null}
         {o.hint ? <span className="v2radioline__hint">{o.hint}</span> : null}
       </span>
       {chevron ? <ActionIcon action="collapse" size={14} className="v2radioline__chev" /> : null}

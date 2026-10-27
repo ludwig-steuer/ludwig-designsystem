@@ -703,3 +703,11 @@ gelaufen (Auftrag: kein Build). Der Status im Kopf von 0028 ist unverändert.
 - **H10:** `.v2radioline` nimmt `gap: var(--space-2)` statt `8px` (gleicher Wert). Die Einrückung der Gruppe rechnet mit demselben Token, nur die Radiobreite 14 steht als Zahl, mit Herkunft im Kommentar.
 - **H11:** `OptionGroupList` steht in der Prop-Tabelle. Für „`pending` bei offener Gruppe" gibt es keine eigene Story, gemessen zur Laufzeit (R6 der Abnahme).
 
+
+## Nachtrag 2026-10-27 — Feld und Knopf an der Wahl
+
+Owner 2026-10-27 über ll-abnahme. Feld, Fehler und Knopf stehen jetzt unter der
+gewählten Antwort, über `RadioGroup.underChecked`. Das Feld ist die `note` ihrer
+Option oder der offene Freitext, denn beide gehen mit ihr auf den Weg. Unter der
+Liste bleiben sie, wenn nichts gewählt ist oder es keine Optionen gibt. Eine
+neue Prop gibt es nicht. Anlass, Form und Kriterien stehen in 0229.
