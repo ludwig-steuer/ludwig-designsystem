@@ -461,3 +461,40 @@ sauber) ist nur gelesen. Gesucht wurde mit `grep -rn Prüfpunkt` über
 | `pnpm typecheck` | Exit 0 | ✓ |
 
 Abgenommen von / am: fremde Nachprüfung 3 (Punkte aus Nachbesserung 3), 2026-10-27 · Alle Mängel M1–M6 und N1–N2 erfüllt; H2, H4–H7, N5 sowie die Reste von N6 und N7 sind Hinweise und blockieren nicht
+
+## Nachtrag 2026-10-27 — Begründung erst ab etwa zehn Zeilen gefaltet
+
+llcto für den Owner, nach dem Zeigerhub: Im Aufklapper faltete die Begründung
+schon nach etwa sechs Zeilen; bei vier Sätzen fehlten genau die letzten Worte.
+`LongText max` steigt von 420 auf 700 Zeichen, bei 68ch Satzbreite etwa zehn
+Zeilen. Die Satzbreite bleibt, sie ist die Rolle „Fließtext“ (0220); eine
+breitere Zeile nur in diesem Kasten wäre eine zweite Regel.
+
+
+## Prüfung des Nachtrags (2026-10-27)
+
+Fremde Prüfung des uncommitteten Diffs an `BookingReview.tsx` (`LongText max` 420 →
+700). Gemessen auf dem Dev-Server 6107 mit einem Messbrowser über
+`scripts/cdp.mjs`, in `v3-entitäten-buchungssatz-bookingreview--in-foldout` bei
+1280 und 1440 px. Für die Probe ist `LongText` per esbuild gebaut und mit
+`max={700}` zu statischem Markup gerendert. Dieses Markup ersetzt zur Laufzeit
+den Inhalt des Kastens „Begründung“ (`.v3bkr__text`); im Repo liegt dafür keine
+Datei. Geprüft sind vier Proben: vier Sätze mit 547 Zeichen, sechs Sätze mit 853
+Zeichen und die Grenze mit 700 und 701 Zeichen. Skripte und Rohdaten liegen als
+`abn0232n-*` im Scratchpad der Sitzung.
+
+| Punkt | Nachweis | Ergebnis |
+|---|---|---|
+| Vier Sätze um die 560 Zeichen stehen ganz da, ohne „mehr“ | Vier Sätze mit 547 Zeichen: kein `details`, kein „mehr“, 7 Zeilen. Der Text endet mit dem letzten Wort („… des Kreditors 70412 aus.“). Bei 1280 und 1440 px ist das gleich, weil der Kasten an 68ch anliegt. Mit dem alten `max` 420 wäre derselbe Text gefaltet gewesen (547 > 420). Die Story-Begründung selbst hat 305 Zeichen und 4 Zeilen | ✓ |
+| Eine deutlich längere Begründung wird gefaltet | 853 Zeichen: `details.more` ist zu, der Anriss hat 9 Zeilen und dann „ mehr ▾“. Aufgeklappt stehen alle 12 Zeilen, der Anriss ist verborgen, am Ende steht „weniger ▴“. An der Grenze steht ein Text mit 700 Zeichen ganz da (9 Zeilen); ab 701 Zeichen wird er gefaltet. 9 Zeilen bei 700 Zeichen decken sich mit „etwa zehn Zeilen“ im Nachtrag | ✓ |
+| Die Satzbreite bleibt bei 68ch | `.v3bkr__text` ist bei 1280 und 1440 px 579,1 px breit. `max-width` beträgt 579,129 px = `68ch` in der Schrift des Kastens (13,5 px, Zeilenhöhe 20,925 px); der Abschnitt daneben ist 1114 px breit. Das gilt für die Story-Begründung und für alle vier Proben | ✓ |
+| `pnpm typecheck` | Exit 0 | ✓ |
+| Konsole und Bild | Die Konsole meldet nichts. Screenshots `abn0232n-1280.png` und `abn0232n-1440.png` | ✓ |
+
+Ergebnis: Der Nachtrag ist erfüllt.
+
+Hinweis: Die Grenze bleibt eine Zeichengrenze. Ein Text knapp über 700 Zeichen
+zeigt 9 Zeilen Anriss und versteckt hinter „mehr“ nur die letzten Worte. Das ist
+dieselbe Lage wie vorher bei 421 Zeichen, nur später. Wenn das stört, wäre in
+`LongText` ein Mindestrest zu prüfen, zum Beispiel erst falten, wenn mehr als
+etwa eine Zeile verborgen bliebe. Das ist nicht Gegenstand dieses Nachtrags.

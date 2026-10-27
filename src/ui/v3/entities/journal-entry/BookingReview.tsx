@@ -159,11 +159,13 @@ export function BookingReview({
                   {e.rationale ? (
                     <>
                       <h3 className="lw-ui-group v3bkr__label">Begründung</h3>
-                      {/* Whole — it is what is read after the accounts; cut only
-                          past about five lines (owner 2026-10-27). */}
+                      {/* Whole — it is what is read after the accounts. Cut only
+                          past about ten lines at the 68ch of running text: at
+                          420 characters four sentences lost their last words
+                          (llcto for the owner, 2026-10-27, after 0232). */}
                       {/* A div, not a p: past the cut, LongText is a <details>. */}
                       <div className="lw-ui-text v3bkr__text">
-                        <LongText max={420}>{e.rationale}</LongText>
+                        <LongText max={700}>{e.rationale}</LongText>
                       </div>
                     </>
                   ) : null}
