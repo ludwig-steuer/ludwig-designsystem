@@ -4516,7 +4516,8 @@ a.v3period__cell:focus-visible { text-decoration: underline; }
 a.v3prov:hover,
 a.v3prov:focus-visible { text-decoration: underline; }
 .v3prov__line { display: inline-flex; flex-wrap: wrap; align-items: center; gap: var(--space-2); font-size: var(--fs-ui-sm); }
-.v3prov__sources { display: grid; gap: var(--space-2); margin: 0; padding: 0; list-style: none; }
+/* Its own size: as `ProvenanceSources` it also stands outside a field list (0232, M4). */
+.v3prov__sources { display: grid; gap: var(--space-2); margin: 0; padding: 0; list-style: none; font-size: var(--fs-ui); }
 .v3prov__sources li { display: flex; flex-wrap: wrap; align-items: baseline; gap: var(--space-2); }
 .v3prov__kind { display: inline-flex; align-items: center; gap: var(--space-1); color: var(--color-text-muted); }
 .v3prov__quote { color: var(--color-text-muted); }
@@ -5006,7 +5007,7 @@ a.v3bbr__val:hover { text-decoration-color: currentColor; }
    other. Grid areas keep the actions last also when the evidence goes under
    the entry (acceptance M1). */
 .v3bkr { display: grid; gap: var(--space-5); min-width: 0; container-type: inline-size; }
-.v3bkr__case { display: flex; }
+.v3bkr__case { margin: 0; }
 .v3bkr__item { display: grid; gap: var(--space-4) var(--space-5); min-width: 0; grid-template-areas: "main" "aside" "actions"; }
 .v3bkr__item + .v3bkr__item { border-top: 1px solid var(--color-border-subtle); padding-top: var(--space-5); }
 .v3bkr__item--aside {
@@ -5015,16 +5016,27 @@ a.v3bbr__val:hover { text-decoration-color: currentColor; }
   align-items: start;
 }
 .v3bkr__main { grid-area: main; display: grid; gap: var(--space-4); min-width: 0; }
+/* 0232: every part a section with its group head; in the list's grey fold-out
+   (`compact`) a white box each — the boxes separate, the fold-out stays grey
+   like every fold-out of the set. Neutral frame and ground: no colour (§3). */
+.v3bkr__sec { display: grid; gap: var(--space-2); min-width: 0; }
+.v3bkr--boxes .v3bkr__main { gap: var(--space-3); }
+.v3bkr--boxes .v3bkr__sec {
+  background: var(--color-surface); border: 1px solid var(--color-border-subtle);
+  border-radius: var(--radius-md); padding: var(--space-3) var(--space-4); gap: var(--space-3);
+}
+/* Inside its box the entry needs no frame of its own. */
+.v3bkr--boxes .v3bkr__entry { background: none; border: 0; border-radius: 0; padding: 0; }
+.v3bkr__meta { margin: 0; }
+.v3bkr__text { margin: 0; }
 .v3bkr__aside { grid-area: aside; min-width: 0; }
 .v3bkr__actions { grid-area: actions; display: flex; gap: var(--space-2); flex-wrap: wrap; }
 .v3bkr__head { display: flex; align-items: center; gap: var(--space-2) var(--space-3); flex-wrap: wrap; }
-.v3bkr__who { display: inline-flex; align-items: center; gap: var(--space-2); font-size: var(--fs-ui-sm); color: var(--color-text-muted); }
 .v3bkr__status { margin-left: auto; }
 .v3bkr__entry {
   background: var(--color-surface); border: 1px solid var(--color-border-subtle);
   border-radius: var(--radius-md); padding: var(--space-3) var(--space-4); min-width: 0; overflow-x: auto;
 }
-.v3bkr__block { display: grid; gap: var(--space-2); min-width: 0; }
 .v3bkr__label { margin: 0; }
 /* Narrower than the case view needs: the evidence goes under the entry — by the
    width of this block, not of the window, so a drawer or a fold-out gets the same. */

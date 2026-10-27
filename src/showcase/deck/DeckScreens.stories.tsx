@@ -220,7 +220,7 @@ export const Protocol: Story = {
         next="Weiter zur Übergabe"
       />
       <Banner tone="success" title="Bereit zur Übergabe">
-        Alle 9 Prüfpunkte sind erfüllt, kein Blocker. Der Stapel 09-2026-Ludwig kann an DATEV übergeben werden.
+        Alle 9 Prüfungen sind erfüllt, kein Blocker. Der Stapel 09-2026-Ludwig kann an DATEV übergeben werden.
       </Banner>
       <Checklist rows={CHECKS} />
     </Frame>

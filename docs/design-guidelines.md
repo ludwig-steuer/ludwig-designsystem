@@ -220,7 +220,7 @@ Vorzeichen.
 | **L4 Linksbündig, immer** | Auch Leerzustand und Dialog. Zentrierte Illustration = lesendes Register. |
 | **L5 DATEV-Ordnung** | Konten/Salden: `Konto \| Beschreibung \| Betrag S \| Betrag H \| Saldo`. Buchungssatz: `Datum · Umsatz · S/H · BU · Konto · Gegenkonto · Beleg · Text`. Kontonummer/BU in `--font-mono`. Keine eigene Ordnung, wo DATEV eine hat. |
 | **L6 Leerzustand sagt, was geprüft wurde** | Prüfschritt ohne offene Punkte: Haken `--color-success` + **ein Satz mit Zahl** („Alle 47 Bankumsätze sind zugeordnet."). Spaltenkopf bleibt. |
-| **L7 Abweichungsskala, Prüfpunkte im Akkordeon** | \|%\| auf der Skala §3: Debug ≤ 15 · Hinweis ≤ 50 · Warnung ≤ 100 · Fehler > 100; Schwellen in **einer** Domain-Funktion, nicht im CSS. Bestandene Prüfpunkte in einer Zeile („12 Prüfungen bestanden"), offene aufgeklappt. |
+| **L7 Abweichungsskala, Prüfungen im Akkordeon** | \|%\| auf der Skala §3: Debug ≤ 15 · Hinweis ≤ 50 · Warnung ≤ 100 · Fehler > 100; Schwellen in **einer** Domain-Funktion, nicht im CSS. Bestandene Prüfungen in einer Zeile („12 Prüfungen bestanden"), offene aufgeklappt. **llcto für den Owner, 2026-10-27 (0232):** Die Oberfläche sagt „Prüfung", nicht „Prüfpunkt"; die Zeile einer Gruppe nennt keine Codes, der Code steht klein an der einzelnen Prüfung. |
 
 **Rahmen (fest):** Sidebar links 240 px fixiert (`--color-bg-soft`: Logo,
 Mandanten-Block = Anzeige + Link auf `/clients`, R13; Hauptnavigation) ·

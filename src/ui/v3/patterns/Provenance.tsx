@@ -175,6 +175,39 @@ export function ProvenanceNote({
 }
 
 /**
+ * The sources of a derivation as a list — kind, label, quote. The same list as
+ * the row „Quellen" in `ProvenanceRows`, for a surface that names it with its
+ * own heading (0232: the section „Begründung" of `BookingReview`).
+ *
+ * @when    The sources of a reason under a heading of their own.
+ * @instead Origin, rule, reason and sources together as label/value rows → ProvenanceRows.
+ */
+export function ProvenanceSources({ sources }: { sources: readonly ProvenanceSource[] }) {
+  return (
+    <ul className="v3prov__sources">
+      {sources.map((s) => (
+        <li key={s.key}>
+          <span className="v3prov__kind">{s.kind}</span>
+          {/* Opening beside beats jumping away (0151): where the caller has
+              a drawer, the source is a button; where it has a URL, a link;
+              otherwise it stays text. */}
+          {s.onOpen ? (
+            <button type="button" className="v2link" onClick={s.onOpen}>
+              {s.label ?? "öffnen"}
+            </button>
+          ) : s.href ? (
+            <Link href={s.href}>{s.label ?? "öffnen"}</Link>
+          ) : s.label ? (
+            <span>{s.label}</span>
+          ) : null}
+          {s.quote ? <span className="v3prov__quote">„{s.quote}“</span> : null}
+        </li>
+      ))}
+    </ul>
+  );
+}
+
+/**
  * The rows of a derivation **without** the disclosure around it (0186).
  *
  * Its own export because two places need the same rows: the note above, and
@@ -184,7 +217,8 @@ export function ProvenanceNote({
  *
  * @when    The derivation inside a frame that already has its own head.
  * @instead With its own summary line → ProvenanceNote. Only the origin beside
- *          a value → ProvenanceMark.
+ *          a value → ProvenanceMark. Only the sources, under a heading of their
+ *          own → ProvenanceSources.
  */
 export function ProvenanceRows({ provenance: p }: { provenance: Provenance }) {
   const rows: [ReactNode, ReactNode][] = [];
@@ -220,29 +254,7 @@ export function ProvenanceRows({ provenance: p }: { provenance: Provenance }) {
   if (p.rationale) rows.push(["Begründung", <LongText key="b">{p.rationale}</LongText>]);
   if (p.assessment) rows.push([p.assessment.label, <LongText key="a">{p.assessment.text}</LongText>]);
   if (p.sources && p.sources.length > 0) {
-    rows.push([
-      "Quellen",
-      <ul key="s" className="v3prov__sources">
-        {p.sources.map((s) => (
-          <li key={s.key}>
-            <span className="v3prov__kind">{s.kind}</span>
-            {/* Opening beside beats jumping away (0151): where the caller has
-                a drawer, the source is a button; where it has a URL, a link;
-                otherwise it stays text. */}
-            {s.onOpen ? (
-              <button type="button" className="v2link" onClick={s.onOpen}>
-                {s.label ?? "öffnen"}
-              </button>
-            ) : s.href ? (
-              <Link href={s.href}>{s.label ?? "öffnen"}</Link>
-            ) : s.label ? (
-              <span>{s.label}</span>
-            ) : null}
-            {s.quote ? <span className="v3prov__quote">„{s.quote}“</span> : null}
-          </li>
-        ))}
-      </ul>,
-    ]);
+    rows.push(["Quellen", <ProvenanceSources key="s" sources={p.sources} />]);
   }
   if (p.corrected) {
     rows.push([

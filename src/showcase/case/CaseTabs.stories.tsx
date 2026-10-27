@@ -355,7 +355,7 @@ const CHECKS: CheckItem[] = [
 ];
 
 /**
- * **Plausibilität** — die Prüfpunkte P1–P5, das Belegnummern-Register und,
+ * **Plausibilität** — die Prüfungen P1–P5, das Belegnummern-Register und,
  * seit dem Schnitt nach Zielgruppe (Owner 2026-09-11), **Saldo & Konten**:
  * Personenkonto, offene Posten, Ausgleich. Alles eine Frage — geht es auf?
  * Bestandene Punkte stehen zusammen in einer Zeile, Befunde einzeln.
@@ -372,7 +372,7 @@ export const Plausibility: Story = {
               <EmptyState
                 inline
                 title="Noch nicht geprüft."
-                description="Die Prüfpunkte laufen, sobald ein Beleg oder eine Buchung am Fall hängt."
+                description="Die Prüfungen laufen, sobald ein Beleg oder eine Buchung am Fall hängt."
               />
             </div>
           </Card>
@@ -395,7 +395,7 @@ export const Plausibility: Story = {
         main={
           <div className="v2stack">
       <Card>
-        <CardHead title="Prüfpunkte" sub="1 Befund · 1 offen · 3 bestanden" />
+        <CardHead title="Prüfungen" sub="1 Befund · 1 offen · 3 bestanden" />
         <div className="v3boxbody">
           <CheckItems items={CHECKS} />
         </div>

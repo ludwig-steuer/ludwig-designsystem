@@ -116,7 +116,7 @@ Quelle: `design/Ludwig Design System v2/ui_kits/app/`. Spiegel im Repo unter `ap
 ### Beleg / Bookkeeping
 - `InvoicePreview` — zwei Spalten: PDF-Renderer links, strukturierte Daten (Header/Positionen/Summen) rechts.
 - `InterpretationPanel` — Konfidenz, Klärungsfragen, Review-Items, Buchungsvorschlag. Ambiguität sichtbar, nicht versteckt.
-- `ReviewItemCard` — „Prüfpunkt" mit Akzeptieren/Ablehnen/Nachfragen, optional Compare-Spalten (Original ↔ Ludwig-Vorschlag).
+- `ReviewItemCard` — „Prüfung" (bis 2026-10-27 „Prüfpunkt", 0232) mit Akzeptieren/Ablehnen/Nachfragen, optional Compare-Spalten (Original ↔ Ludwig-Vorschlag).
 - `ClarificationDialog` — freie Rückfrage an Mandanten, asynchrone Antwort.
 - `UploadZone` — Drag-&-Drop für PDF, gestrichelte Border, Icon-Tile, beim Drag-Active solid border + glow. Datei-Liste mit Pipeline-Steps (`uploading → dedup → ocr → extraction → interpretation → done | error`).
 - `Wizard` — n-Step-Form für Mandanten-Onboarding. Numerische Step-Indikator-Pille, aktiv = primary mit Glow.

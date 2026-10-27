@@ -3,7 +3,9 @@ import { useState } from "react";
 
 import type { CheckItem } from "../../patterns/Review";
 import { Button } from "../../primitives/Button";
+import { ExpandableRow } from "../../primitives/ExpandableRow";
 import { FieldList } from "../../primitives/FieldList";
+import { Card, CardHead, HeadRow, Table } from "../../primitives/Table";
 import { BookingReview, type BookingReviewEntry } from "./BookingReview";
 import type { JournalLine } from "./JournalEntryCompact";
 import { JournalEntryEditor, type EditorRow } from "./JournalEntryEditor";
@@ -73,7 +75,7 @@ const DOCUMENT = (
 );
 
 /**
- * Liste, kompakt — wie im Aufklapper von T3: Satz, Begründung, Prüfpunkte mit
+ * Liste, kompakt — wie im Aufklapper von T3: Satz, Begründung, Prüfungen mit
  * Befund, Judge. Der Satz hat Belege, `show={{ evidence: false }}` schaltet sie ab.
  */
 export const ListCompact: Story = {
@@ -205,7 +207,7 @@ export const CaseEditable: Story = {
   },
 };
 
-/** Routinefall: keine Begründung, Judge bestätigt ohne Satz — es bleiben Kopf, Satz und Prüfpunkte. */
+/** Routinefall: keine Begründung, Judge bestätigt ohne Satz — es bleiben Kopf, Satz und Prüfungen. */
 export const RoutineCase: Story = {
   render: () => (
     <div style={{ maxWidth: 1180, background: "var(--color-bg-soft)", padding: "var(--space-5)" }}>
@@ -231,9 +233,9 @@ export const RoutineCase: Story = {
 };
 
 /**
- * „Aufwand mit Zahlung" (P58) in beiden Formen (§3a): oben ein Fall mit zwei
- * Sätzen — Rechnung („Aufwand") und Zahlung („Zahlung"), die Satzart des Falls
- * einmal darüber (`caseKind`) —, jeder vollständig mit eigenen Prüfpunkten;
+ * „Aufwand mit Zahlung" (P58) in beiden Formen (§3a): oben ein Sachverhalt mit zwei
+ * Sätzen — Rechnung („Aufwand") und Zahlung („Zahlung"), die Satzarten des Sachverhalts
+ * einmal darüber (`caseKind`) —, jeder vollständig mit eigenen Prüfungen;
  * darunter ein Einzelsatz, der Aufwand direkt an die Bank bucht, mit allen vier
  * Zeilen einschließlich des § 13b-Steuerpaars.
  */
@@ -241,14 +243,15 @@ export const ExpenseWithPayment: Story = {
   render: () => {
     const twoEntries: BookingReviewEntry[] = [
       { id: "je-inv", lines: INVOICE_LINES, currency: "EUR", kindLabel: "Aufwand", status: "proposed", checks: CHECKS_WITH_FINDING },
-      { id: "je-pay", lines: PAYMENT_LINES, currency: "EUR", kindLabel: "Zahlung", status: "proposed", checks: CHECKS_PAYMENT },
+      // Already accepted: a state other than „Vorschlag" stands as a StatusBadge beside the head (0232).
+      { id: "je-pay", lines: PAYMENT_LINES, currency: "EUR", kindLabel: "Zahlung", status: "accepted", checks: CHECKS_PAYMENT },
     ];
     return (
       <div style={{ display: "grid", gap: "var(--space-6)", maxWidth: 1180 }}>
         <div style={{ background: "var(--color-bg-soft)", padding: "var(--space-5)" }}>
           <BookingReview
             {...HREFS}
-            caseKind={{ label: "Aufwand mit Zahlung", description: "Rechnung und Zahlung in einem Fall." }}
+            caseKind={{ label: "Aufwand mit Zahlung", description: "Rechnung und Zahlung in einem Sachverhalt." }}
             entries={twoEntries}
           />
         </div>
@@ -260,7 +263,8 @@ export const ExpenseWithPayment: Story = {
                 id: "je-ftc",
                 lines: REVERSE_CHARGE_BANK_LINES,
                 currency: "EUR",
-                kindLabel: "Aufwand mit Zahlung",
+                // One entry with expense and bank account: its Satzart is „Aufwand" (GLOSSARY).
+                kindLabel: "Aufwand",
                 kindDescription: "Sachkonto und Geldkonto im selben Satz.",
                 status: "proposed",
                 rationale: "Lizenzgebühr eines Anbieters in Irland, per Kreditkarte bezahlt — § 13b, BU 94.",
@@ -327,3 +331,111 @@ export const InUse: Story = {
   ),
 };
 
+
+const FOLDOUT_LINES: JournalLine[] = [
+  { side: "debit", accountNumber: "3100", accountName: "Fremdleistungen", amount: 1500.0, text: "UX-Beratung August LB-361353", taxKey: "9" },
+  { side: "debit", accountNumber: "1576", accountName: "Abziehbare Vorsteuer 19 %", amount: 285.0, text: "UX-Beratung August LB-361353" },
+  { side: "credit", accountNumber: "70412", accountName: "Studio Lindgrün UX Design", amount: 1785.0, text: "UX-Beratung August LB-361353" },
+];
+const FOLDOUT_PASSED = [
+  ["P-SUMME", "Gleichen sich Soll und Haben aus?"],
+  ["P-BETRAG", "Stimmt der gebuchte Betrag mit dem Beleg überein?"],
+  ["P-UST", "Passt der Steuerschlüssel zum ausgewiesenen Steuersatz?"],
+  ["P-BELEG", "Stimmt die Belegnummer mit dem Beleg überein?"],
+  ["P-DATUM", "Liegt das Belegdatum im Zeitraum des Stapels?"],
+  ["P-KONTO", "Passt das Sachkonto zur Leistung?"],
+  ["P-KRED", "Ist der Kreditor der Aussteller des Belegs?"],
+  ["P-VST", "Ist die Vorsteuer abziehbar ausgewiesen?"],
+  ["P-EMPF", "Ist der Mandant Empfänger der Rechnung?"],
+  ["P-DUBL", "Ist der Beleg nicht schon gebucht?"],
+  ["P-TEXT", "Nennt der Buchungstext Leistung und Belegnummer?"],
+  ["P-HIST", "Passt die Buchung zu den Vorbuchungen dieser Gegenpartei?"],
+  ["P-BU", "Ist der Steuerschlüssel für das Konto zulässig?"],
+] as const;
+const FOLDOUT_NOT_CHECKABLE = [
+  ["P-13B", "Ist die Umkehr der Steuerschuld richtig behandelt?"],
+  ["P-ZAHL", "Ist die Rechnung schon bezahlt?"],
+  ["P-SKONTO", "Wurde ein Skonto gezogen?"],
+  ["P-LZ", "Stimmt der Leistungszeitraum mit dem Buchungsmonat?"],
+  ["P-ANZ", "Ist eine Anzahlung verrechnet?"],
+  ["P-GWG", "Ist ein geringwertiges Wirtschaftsgut darunter?"],
+  ["P-PRIV", "Gibt es einen privaten Anteil?"],
+  ["P-AUSL", "Liegt ein Auslandsbezug vor?"],
+  ["P-RC", "Ist die Rechnung eine Gutschrift?"],
+  ["P-VERTR", "Passt die Leistung zum Vertrag?"],
+  ["P-KST", "Ist eine Kostenstelle nötig?"],
+] as const;
+
+/**
+ * Im Aufklapper der Liste (0232, Owner 2026-10-27): drei Abschnitte mit
+ * Gruppenkopf als weiße Kästen im grauen Aufklapper — Buchung, Begründung mit
+ * Quellen, Prüfungen. Keine Badges ohne Namen; die Begründung voll, die
+ * Prüfungen in einer Zeile ohne Codes.
+ */
+export const InFoldout: Story = {
+  render: () => (
+    <div style={{ maxWidth: 1180 }}>
+      {/* With its card head (h2), as in the step: the section heads below are h3 (0232, N2). */}
+      <Card>
+        <CardHead title="Buchungsvorschläge" sub="1 offen" />
+        <Table cols="var(--v2-tbl-pick) 96px minmax(0, 1.4fr) minmax(0, 1fr) 80px 120px">
+          <HeadRow>
+            <span />
+            <span>Datum</span>
+            <span>Beleg</span>
+            <span>Gegenpartei</span>
+            <span>Konto</span>
+            <span className="v2num">Betrag</span>
+          </HeadRow>
+          <ExpandableRow
+            defaultOpen
+            summary={
+              <>
+                <span>12.09.2026</span>
+                <span>Rechnung LB-361353</span>
+                <span>Studio Lindgrün UX Design</span>
+                <span className="lw-mono">3100</span>
+                <span className="v2num">1.785,00 €</span>
+              </>
+            }
+          >
+            <BookingReview
+              {...HREFS}
+              entries={[
+                {
+                  id: "je-foldout",
+                  lines: FOLDOUT_LINES,
+                  currency: "EUR",
+                  kindLabel: "Aufwand",
+                  kindDescription: "Ein Sachkonto für Aufwand, ein Personenkonto — eine Eingangsrechnung.",
+                  status: "proposed",
+                  confidence: "green",
+                  rationale:
+                    "Studio Lindgrün stellt monatlich UX-Beratung für die Produktentwicklung in Rechnung. Die Rechnung LB-361353 weist 1.500,00 € netto und 19 % Umsatzsteuer aus, Leistungszeitraum August 2026. Gebucht wie die Rechnungen für Juni und Juli: auf 3100 Fremdleistungen mit Vorsteuer 19 %, gegen den Kreditor 70412.",
+                  sources: [
+                    { key: "doc", art: "document", label: "Rechnung LB-361353", quote: "Leistung: UX-Beratung August 2026 · Netto 1.500,00 € · USt 19 % 285,00 €" },
+                    { key: "hist", art: "history", label: "Vorbuchungen Studio Lindgrün UX Design", quote: "2 × 3100 Fremdleistungen, zuletzt 14.08.2026" },
+                  ],
+                  checks: [
+                    ...FOLDOUT_PASSED.map(([code, question]) => ({ code, question, reason: "Erfüllt.", state: "green" as const })),
+                    ...FOLDOUT_NOT_CHECKABLE.map(([code, question]) => ({ code, question, reason: "Am Beleg nicht vermerkt.", state: "open" as const })),
+                  ],
+                  actions: (
+                    <>
+                      <Button variant="primary" size="sm">
+                        Buchung übernehmen
+                      </Button>
+                      <Button variant="secondary" size="sm">
+                        Buchung ablehnen
+                      </Button>
+                    </>
+                  ),
+                },
+              ]}
+            />
+          </ExpandableRow>
+        </Table>
+      </Card>
+    </div>
+  ),
+};

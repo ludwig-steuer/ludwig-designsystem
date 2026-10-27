@@ -297,6 +297,7 @@ export {
   ProvenanceMark,
   ProvenanceNote,
   ProvenanceRows,
+  ProvenanceSources,
   type Provenance,
   type ProvenanceSource,
 } from "./patterns/Provenance";

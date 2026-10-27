@@ -200,7 +200,7 @@ export function AiBookingNotes({
  * stay the vocabulary of this entity, the rendering is the one of every other
  * derivation.
  *
- * @when    Handing an entry's sources to ProvenanceNote or ProvenanceRows.
+ * @when    Handing an entry's sources to ProvenanceNote, ProvenanceRows or ProvenanceSources.
  * @instead The whole box with head and verdict → AiBookingNotes.
  */
 export function aiSourcesToProvenance(sources: readonly AiSource[]): ProvenanceSource[] {
@@ -228,10 +228,10 @@ function SourceKindMark({ art }: { art: SourceKind }) {
 /**
  * The content of the notes without the box around it (0151).
  *
- * Its own export because two places need the same four blocks: the box above,
- * and the fold-out of a row in the booking overview, where the row already
- * carries verdict and confidence and a second heading would say it twice
- * (`spec-schreiben` §4 — a part that is needed elsewhere on its own).
+ * Its own export because a second place needs the same blocks without the box:
+ * a fold-out whose row already carries verdict and confidence, where a second
+ * heading would say it twice (`spec-schreiben` §4). `BookingReview` no longer
+ * uses it — since 0232 it shows reason and sources as sections of their own.
  *
  * @when    The rationale, the judge's sentence and the sources — inside a box that already has a head.
  * @instead With its own head and fold-out → AiBookingNotes. Only the verdict for a row → AiBookingNotesCell.

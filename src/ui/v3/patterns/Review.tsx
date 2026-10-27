@@ -397,7 +397,7 @@ export function checkSummary(items: readonly CheckItem[], kind: CheckKind = "rul
     .map((state) => [items.filter((i) => i.state === state).length, SUMMARY_WORD[kind][state]] as const)
     .filter(([n]) => n > 0)
     .map(([n, word]) => `${n} ${word}`);
-  return parts.length ? parts.join(" · ") : kind === "fact" ? "keine Fakten" : "keine Prüfpunkte";
+  return parts.length ? parts.join(" · ") : kind === "fact" ? "keine Fakten" : "keine Prüfungen";
 }
 
 const PP_ICON: Record<CheckItem["state"], StateKind> = {
@@ -459,8 +459,10 @@ function CheckRow({ item, kind = "rule" }: { item: CheckItem; kind?: CheckKind }
  * `useState` here would have made `Checklist`, `Messages` and `StateIcon`
  * client components too — for a fold-out that the platform already has.
  *
- * The codes stay in the summary: they are what somebody quotes, and reading
- * them should not cost a click.
+ * The summary says the sentence only, no codes (owner 2026-10-27, 0232): a
+ * row of „P-SUMME P-UST …" next to „13 von 13 bestanden" reads as noise to
+ * anyone who has not learnt the codes. The code stays at the single check,
+ * once the group is open — that is where somebody quotes it.
  */
 function CheckGroup({
   state,
@@ -480,7 +482,6 @@ function CheckGroup({
         <span className="v2pp__sum">
           <StateIcon state={state} />
           {summary}
-          {kind === "rule" ? <span className="v2pp__code">{items.map((i) => i.code).join(" ")}</span> : null}
         </span>
       }
     >
@@ -524,7 +525,8 @@ function CheckGroup({
  */
 export function CheckItems({ items, kind = "rule" }: { items: CheckItem[]; kind?: CheckKind }) {
   const words = SUMMARY_WORD[kind];
-  const noun = kind === "fact" ? "Fakten" : "Prüfpunkten";
+  // „Prüfungen", not „Prüfpunkte" — the word of the steps (llcto for the owner, 2026-10-27, 0232).
+  const noun = kind === "fact" ? "Fakten" : "Prüfungen";
   const passed = items.filter((i) => i.state === "green");
   const notRun = items.filter((i) => i.state === "open");
   // Red and yellow keep their own row. A finding that can hide is not a
@@ -553,14 +555,14 @@ export function CheckItems({ items, kind = "rule" }: { items: CheckItem[]; kind?
             kind === "fact"
               ? `${notRun.length} ${notRun.length === 1 ? "Fakt" : "Fakten"} ${words.open}`
               : notRun.length === 1
-                ? "1 Prüfpunkt nicht prüfbar"
-                : `${notRun.length} Prüfpunkte nicht prüfbar`
+                ? "1 Prüfung nicht prüfbar"
+                : `${notRun.length} Prüfungen nicht prüfbar`
           }
           items={notRun}
         />
       ) : null}
       {items.length === 0 ? (
-        <div className="v2pp__ok">{kind === "fact" ? "Keine Fakten für diesen Fall." : "Keine Prüfpunkte für diesen Fall."}</div>
+        <div className="v2pp__ok">{kind === "fact" ? "Keine Fakten für diesen Fall." : "Keine Prüfungen für diesen Fall."}</div>
       ) : null}
     </div>
   );
@@ -598,7 +600,7 @@ export function CheckResult({ items, kind = "rule" }: { items: readonly CheckIte
     state === null
       ? kind === "fact"
         ? "Keine Fakten"
-        : "Keine Prüfpunkte"
+        : "Keine Prüfungen"
       : state === "open"
         ? words.open
         : `${passed} von ${checkable} ${words.green}`;

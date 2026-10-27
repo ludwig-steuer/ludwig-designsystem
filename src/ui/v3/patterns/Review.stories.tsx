@@ -300,7 +300,7 @@ export const CheckItemsMixed: Story = {
 
 /**
  * **Der gemeldete Fall** (Owner, 2026-09-09, an einem echten Journal-Satz):
- * zwölf Prüfpunkte, und **keiner** konnte laufen. Kein Belegbetrag, keine
+ * zwölf Prüfungen, und **keiner** konnte laufen. Kein Belegbetrag, keine
  * Belegnummer, kein Steuersatz, kein Judge-Verdikt.
  *
  * Bis 0148 standen dafür zwölf Zeilen da. Jetzt ist es **eine** — und
@@ -334,7 +334,7 @@ export const CheckItemsAllGreen: Story = {
   ),
 };
 
-/** Keine Prüfpunkte — auch das ist eine Aussage, kein leerer Kasten. */
+/** Keine Prüfungen — auch das ist eine Aussage, kein leerer Kasten. */
 export const CheckItemsEmpty: Story = {
   render: () => (
     <div className="v2card">
