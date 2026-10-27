@@ -187,3 +187,14 @@ Datei im Repo.
 | H1, H2, H5 | H1 liegt als Frage beim Owner. H2 und H5 stehen als Ausbau in der Spec. Keiner der drei blockiert | – |
 
 Abgenommen von / am: fremde Abnahme, 2026-10-27 (Nachprüfung 1) · Offene Punkte: keine blockierenden. H1 wartet auf die Antwort des Owners; H2 und H5 sind Ausbau
+
+## Nachtrag 2026-10-27 — H1 entschieden
+
+llcto hat für den Owner entschieden: Auf der Geschäftspartner-Liste heißt der
+Reiter „Alle“ (neben „Vorschläge“), der Kartenkopf nennt die Menge, zum Beispiel
+„6.396 Geschäftspartner“, statt den Seitentitel zu wiederholen (§2a). Gefiltert
+sagt die Unterzeile weiter „x von y“, ungefiltert „meistgenutzte zuerst“.
+Umgesetzt in `partner-list.tsx` und vom Autor angesehen (1280 px): `h1`
+„Geschäftspartner“, Reiter „Alle · Vorschläge 7“, Kartenkopf „6.396
+Geschäftspartner“. Für die App steht dasselbe in L-374.
+

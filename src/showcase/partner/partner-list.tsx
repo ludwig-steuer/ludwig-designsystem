@@ -267,7 +267,8 @@ function PartnerList({
         ariaLabel="Geschäftspartner"
         active={view}
         items={[
-          { key: "all", label: "Geschäftspartner", href: "#" },
+          // „Alle", not the page title once more (§2a; llcto for the owner, 2026-10-27).
+          { key: "all", label: "Alle", href: "#" },
           { key: "proposals", label: "Vorschläge", count: proposals.length, href: "#view=proposals" },
         ]}
       />
@@ -332,13 +333,14 @@ function PartnerList({
           columns={businessPartnerColumns({ partnerHref: (id) => `#partner-page=${id}`, accountHref })}
           rowKey={(p) => p.businessPartnerId}
           head={{
-            title: "Geschäftspartner",
-            sub:
-              active > 0
-                ? `${formatCount(rows.length)} von ${formatCount(partners.length)}`
-                : sort.key === DEFAULT_SORT.key && sort.dir === DEFAULT_SORT.dir
-                  ? `${formatCount(partners.length)} · meistgenutzte zuerst`
-                  : formatCount(partners.length),
+            // The card names the set, the page title says what it is (§2a;
+            // llcto for the owner, 2026-10-27): „256 Geschäftspartner".
+            title: `${formatCount(partners.length)} Geschäftspartner`,
+            ...(active > 0
+              ? { sub: `${formatCount(rows.length)} von ${formatCount(partners.length)}` }
+              : sort.key === DEFAULT_SORT.key && sort.dir === DEFAULT_SORT.dir
+                ? { sub: "meistgenutzte zuerst" }
+                : {}),
           }}
           sort={sort}
           href={listHref}
