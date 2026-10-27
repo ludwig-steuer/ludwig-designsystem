@@ -7,7 +7,10 @@ import {
   Undo2,
 } from "lucide-react";
 import type { ReactNode } from "react";
+import { formatCount } from "../format";
 import { ActionIcon, LEVEL_ICON } from "../Icons";
+import { ExpandableRow } from "../primitives/ExpandableRow";
+import { Link } from "../primitives/Link";
 import { HeadRow, Table, rowCells } from "../primitives/Table";
 import { TableLoading } from "../primitives/Cells";
 import { Disclosure } from "../primitives/Disclosure";
@@ -106,6 +109,20 @@ export interface ChecklistRow {
   progress?: number | null;
   /** Where the row jumps to („→ Schritt 4: Zahlungen"). */
   jump?: string;
+  /**
+   * What the row shows under itself, folded open (0230, owner 2026-10-27) —
+   * usually `ChecklistItems`. With it the row carries a chevron and is the
+   * switch; it then folds, it does not pick (`onPick` is not called for it,
+   * `activeKey` does not mark it). `null`, a boolean, `""` or `0` count as no
+   * content: `cond && <ChecklistItems … />` folds only when there is something.
+   */
+  detail?: ReactNode;
+}
+
+/** A row folds only with content — `false` or `0` from `cond && …` is none (re-checks of 0230, N1, N4). */
+function folds(row: ChecklistRow): boolean {
+  const d = row.detail;
+  return d != null && typeof d !== "boolean" && d !== "" && d !== 0;
 }
 
 /**
@@ -143,15 +160,19 @@ export function Checklist({
   jumpHeader?: string;
 }) {
   const progress = !without.includes("progress");
+  // The chevron track only when a row can fold — the grip track of DataTable.
+  const expandable = rows.some(folds);
   // 96: „231 von 231" needs 86 px — at 76 the counter ran into the bar (measured 2026-09-29).
-  const cols = `20px minmax(0, 1fr) 96px ${progress ? "100px " : ""}150px`;
+  // The icon track is a variable (`v3.css`): the fold-out's left edge is computed from it.
+  const cols = `${expandable ? "var(--v2-tbl-pick) " : ""}var(--v2-chk-icon) minmax(0, 1fr) 96px ${progress ? "100px " : ""}150px`;
   return (
-    <div className="v2card">
+    <div className="v2card v2chk">
       {/* A real `<table>` like every other list of the set (0106): the
           checklist is a table — each row has the same columns, and a
           screen reader has to be able to read them column by column. */}
       <Table cols={cols}>
         <HeadRow>
+          {expandable ? <span /> : null}
           <span />
           <span>Prüfung</span>
           <span className="v2num">Stand</span>
@@ -162,10 +183,17 @@ export function Checklist({
           // The shape of the content, not a box: as many rows as will come, at
           // least four, so the card does not collapse. The column head stays —
           // it promises what is coming.
-          <TableLoading rows={Math.max(rows.length, 4)} cols={progress ? 5 : 4} />
+          <TableLoading rows={Math.max(rows.length, 4)} cols={progress ? 5 : 4} leadingCols={expandable ? 1 : 0} />
         ) : (
           rows.map((r) => (
-            <ChecklistLine key={r.key} row={r} active={r.key === activeKey} onPick={onPick} progress={progress} />
+            <ChecklistLine
+              key={r.key}
+              row={r}
+              active={r.key === activeKey}
+              onPick={onPick}
+              progress={progress}
+              expandable={expandable}
+            />
           ))
         )}
       </Table>
@@ -178,13 +206,50 @@ function ChecklistLine({
   active,
   onPick,
   progress,
+  expandable,
 }: {
   row: ChecklistRow;
   active: boolean;
   onPick?: (key: string) => void;
   progress: boolean;
+  /** The table has a chevron track: a row without detail keeps an empty cell there. */
+  expandable: boolean;
 }) {
-  const body = (
+  if (folds(row))
+    return <ExpandableRow summary={checklistCells(row, progress)}>{row.detail}</ExpandableRow>;
+  const body = checklistCells(row, progress);
+  // The empty chevron cell stands **before** the cells, outside the button: the
+  // button belongs in the first cell with content, the state icon. In the empty
+  // one it measured 32 × 0 px and had no name (acceptance 0230, M1).
+  const lead = expandable ? <td /> : null;
+  if (!onPick)
+    return (
+      <tr className={`v2tbl__row${active ? " is-active" : ""}`}>
+        {lead}
+        {rowCells(body)}
+      </tr>
+    );
+  return (
+    // The button is in the first cell and covers the row (0106): a `<tr>`
+    // cannot be a button, and a row that is one is no longer a row.
+    <tr className={`v2tbl__row is-clickable${active ? " is-active" : ""}`}>
+      {lead}
+      {rowCells(body, (node) => (
+        <button type="button" className="v2rowbtn" onClick={() => onPick(row.key)}>
+          {node}
+        </button>
+      ))}
+    </tr>
+  );
+}
+
+/**
+ * The cells of a check row — the same in a plain and in a folding row. A plain
+ * function, not a component: `rowCells` walks fragments, and a component
+ * element would arrive as one cell.
+ */
+function checklistCells(row: ChecklistRow, progress: boolean) {
+  return (
     <>
       <span className="v2chk__icon">
         <StateIcon state={row.state} />
@@ -220,18 +285,63 @@ function ChecklistLine({
       </span>
     </>
   );
-  if (!onPick)
-    return <tr className={`v2tbl__row${active ? " is-active" : ""}`}>{rowCells(body)}</tr>;
+}
+
+/**
+ * One item of a folded-open check row. The model's `ChecklistItem`
+ * (`src/ludwig/modules/batch-review/domain/checklist.ts`) fits as it is — the
+ * pattern knows no module, so it states the shape, `null` included (0230, M2).
+ */
+export interface ChecklistItem {
+  text: string;
+  /** Where the item is worked on — the text becomes a link. */
+  href?: string | null;
+  /** One grey line under it — the why, the amount, the date. */
+  note?: string | null;
+}
+
+/**
+ * What a folded-open check row lists (0230): its items, how many more there
+ * are, and the ways out. In DS classes, so the caller sets no type of its own.
+ *
+ * @when    The content of a `ChecklistRow.detail` — the open items of a check.
+ * @instead The defects of one record with a way out each, on their own →
+ *          OpenPoints.
+ */
+export function ChecklistItems({
+  items,
+  more = 0,
+  actions,
+}: {
+  items: readonly ChecklistItem[];
+  /** Items not shown here: „… und 3 weitere im Schritt". */
+  more?: number;
+  /** Buttons under the items („Zurück an Ludwig", „Zu Belege"). */
+  actions?: ReactNode;
+}) {
   return (
-    // The button is in the first cell and covers the row (0106): a `<tr>`
-    // cannot be a button, and a row that is one is no longer a row.
-    <tr className={`v2tbl__row is-clickable${active ? " is-active" : ""}`}>
-      {rowCells(body, (node) => (
-        <button type="button" className="v2rowbtn" onClick={() => onPick(row.key)}>
-          {node}
-        </button>
-      ))}
-    </tr>
+    <div className="v2chk__detail">
+      {items.length === 0 ? (
+        // Where they are, not „keine Einträge" (T6). „Einzelheiten", not
+        // „Posten": that word is the open item (GLOSSARY; llcto for the owner, 2026-10-27).
+        <p className="lw-ui-hint">Die Einzelheiten stehen im Schritt.</p>
+      ) : (
+        <ul className="v2chk__items">
+          {items.map((item, i) => (
+            <li key={i}>
+              {item.href ? <Link href={item.href}>{item.text}</Link> : item.text}
+              {item.note ? <span className="v2sub">{item.note}</span> : null}
+            </li>
+          ))}
+          {more > 0 ? (
+            <li className="v2sub">
+              … und {formatCount(more)} {more === 1 ? "weiterer" : "weitere"} im Schritt
+            </li>
+          ) : null}
+        </ul>
+      )}
+      {actions ? <div className="v2chk__acts">{actions}</div> : null}
+    </div>
   );
 }
 

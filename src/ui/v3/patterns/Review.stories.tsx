@@ -2,7 +2,7 @@ import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { useState } from "react";
 import { Button } from "../primitives/Button";
 import { DetailPane, MasterDetail } from "./MasterDetail";
-import { Checklist, Messages, CheckItems, CheckResult, StateIcon, checkSummary, type CheckItem, type ChecklistRow } from "./Review";
+import { Checklist, ChecklistItems, Messages, CheckItems, CheckResult, StateIcon, checkSummary, type CheckItem, type ChecklistRow } from "./Review";
 import { StatusBadge } from "./StatusBadge";
 
 const meta: Meta<typeof Checklist> = { title: "v3/Patterns/Prüfen/Checklist", component: Checklist };
@@ -122,6 +122,99 @@ export const WithoutProgress: Story = {
 /** Dieselbe Liste, während sie rechnet: vier Spalten auch im Ladezustand, nichts springt (0228). */
 export const WithoutProgressLoading: Story = {
   render: () => <Checklist rows={ROWS} loading without={["progress"]} jumpHeader="Weiter zu" />,
+};
+
+/**
+ * Übergeben (0230, owner 2026-10-27): every row folds its items open right
+ * under itself, several at once; a row without items has no chevron. Row and
+ * „Weiter zu" stay as they were; the content is `ChecklistItems`.
+ */
+const HANDOVER: ChecklistRow[] = [
+  {
+    key: "taken-over",
+    state: "error",
+    label: "Nichts übernommen",
+    counter: "0 von 42",
+    counterAlarm: true,
+    jump: "Buchungen",
+    detail: (
+      <ChecklistItems
+        items={[
+          { text: "Musterfirma GmbH · Bewirtung · 240,40 €", href: "#buchung-1", note: "Ludwig hat den Lauf am 26.10.2026 abgebrochen." },
+          { text: "Serverhaus Nord GmbH · Gutschrift · −4,76 €", href: "#buchung-2" },
+          { text: "Stadtwerke Musterstadt · Strom Oktober · 86,20 €", href: "#buchung-3" },
+        ]}
+        more={39}
+        actions={
+          <Button variant="secondary" size="sm">
+            Zurück an Ludwig
+          </Button>
+        }
+      />
+    ),
+  },
+  {
+    key: "documents",
+    state: "warning",
+    label: "1 Beleg ohne Entscheidung",
+    jump: "Belege",
+    detail: (
+      <ChecklistItems
+        items={[{ text: "Gutschrift G0012345 · Serverhaus Nord GmbH · 12.01.2026", href: "#beleg", note: "Ludwig hat nicht gebucht: Werte fehlen." }]}
+        actions={
+          <Button variant="secondary" size="sm" href="#belege">
+            Zu Belege
+          </Button>
+        }
+      />
+    ),
+  },
+  {
+    key: "questions",
+    state: "warning",
+    label: "1 Rückfrage offen",
+    jump: "Rückfragen",
+    detail: <ChecklistItems items={[{ text: "Bewirtung oder Reisekosten? Beleg nennt beides", href: "#frage" }]} />,
+  },
+  {
+    key: "waiting",
+    state: "info",
+    label: "1 Buchung wartet auf eine Rückfrage oder den Mandanten",
+    jump: "Für den Mandanten",
+    detail: <ChecklistItems items={[]} />,
+  },
+  {
+    key: "client",
+    state: "done",
+    label: "Fragen an den Mandanten verschickt",
+    counter: "2 von 2",
+  },
+  {
+    key: "done",
+    state: "open",
+    label: "7 von 12 Prüfungen in Ordnung",
+    counter: "7 von 12",
+    detail: (
+      <ChecklistItems
+        items={[
+          { text: "Summe der Buchungen gleich Summe der Belege" },
+          { text: "Jeder Beleg hat eine Buchung" },
+          { text: "Bank geht auf", note: "Auszug 8 vom 29.08.2026 weicht um 12,40 € ab." },
+          { text: "Steuerschlüssel passt zum Beleg" },
+          { text: "Keine Dublette im Stapel" },
+        ]}
+      />
+    ),
+  },
+];
+
+export const Expandable: Story = {
+  render: () => <Checklist without={["progress"]} jumpHeader="Weiter zu" rows={HANDOVER} />,
+};
+
+/** While the checks run: the chevron track stands in the loading rows too, so „Prüfung" does not move when they arrive (0230). */
+export const ExpandableLoading: Story = {
+  render: () => <Checklist without={["progress"]} jumpHeader="Weiter zu" rows={HANDOVER} loading />,
 };
 
 /** Die neun Zustands-Icons — Lucide statt Sonderzeichen (V7). */

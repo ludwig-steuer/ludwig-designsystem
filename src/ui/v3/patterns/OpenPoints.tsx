@@ -51,7 +51,8 @@ export interface OpenPoint {
 
 /**
  * @when    What is open on one record — defects, questions, missing values — each with a way out.
- * @instead Every check with its verdict, passed ones included → Checklist. A
+ * @instead Every check with its verdict, passed ones included → Checklist; the
+ *          open items of one check, folded open in its row → ChecklistItems. A
  *          supply of work across records → TodoList. One missing value at the
  *          field it belongs to → the entity's own facts with `missing`. An
  *          error that blocks saving → Messages.

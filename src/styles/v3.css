@@ -1602,6 +1602,16 @@ summary.v2lp__grp:focus-visible { outline: 2px solid var(--color-focus); outline
 .v2chk__jump > svg { flex: none; }
 .v2chk__jumptext { min-width: 0; overflow: hidden; text-overflow: ellipsis; }
 .v2chk__label { min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+/* Folding rows (0230): the content starts at the column „Prüfung" — the row's
+   padding (18) and its two gaps (10, `.v2tbl__row`), the chevron track and the
+   icon track — the same variable `Checklist` puts into its columns. */
+.v2chk { --v2-chk-icon: 20px; }
+.v2chk .v2tbl__detail { padding-left: calc(18px + var(--v2-tbl-pick) + var(--v2-chk-icon) + 2 * 10px); }
+.v2chk__detail { display: grid; gap: var(--space-3); color: var(--color-text); }
+.v2chk__detail > .lw-ui-hint { margin: 0; }
+.v2chk__items { list-style: none; margin: 0; padding: 0; display: grid; gap: var(--space-2); }
+.v2chk__items > li { display: grid; }
+.v2chk__acts { display: flex; gap: var(--space-2); flex-wrap: wrap; }
 
 /* --- Checks (accordion) -------------------------------------------------
  * Passed checks share ONE row (L7); only open, warned or failed ones get their
