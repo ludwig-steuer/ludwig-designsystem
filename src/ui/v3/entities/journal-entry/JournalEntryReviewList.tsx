@@ -341,8 +341,11 @@ export function proposalReviewColumns(options: ProposalColumnOptions = {}): Colu
       key: "reviewReason",
       header: "Prüfgrund",
       // The longest words („Ludwig nicht ganz sicher", „Gegenpartei abweichend")
-      // with „+n" and the (i); a longer word is cut, the title and the (i) carry it.
-      width: "200px",
+      // with „+n" and the (i) at 200 px; a longer word is cut, the title and the
+      // (i) carry it. It gives way first, down to 150 px: at 1440 px with the
+      // sidebar the table is 1084 px wide, and a fixed 200 px pushed „Aktionen"
+      // 32 px past the card (owner, demo round 2026-10-27).
+      width: "minmax(150px, 200px)",
       cell: (p) =>
         p.decided ? (
           <span>entschieden</span>

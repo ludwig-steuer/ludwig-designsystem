@@ -51,7 +51,7 @@ alle Gründe und die Rechnung. Routine bleibt leer. Daneben „So gebucht"
 
 | Feld / Spalte | Bedeutung | Nachweis |
 |---|---|---|
-| `ProposalRow.reviewReasons?: readonly ReviewReasonView[]` | → Spalte „Prüfgrund" (200 px): `ReviewReasonCell`; entschieden → „entschieden"; ohne Gründe leer | `Grouped`, `Flat`, `Compact` |
+| `ProposalRow.reviewReasons?: readonly ReviewReasonView[]` | → Spalte „Prüfgrund" (150–200 px, Nachtrag 2026-10-27): `ReviewReasonCell`; entschieden → „entschieden"; ohne Gründe leer | `Grouped`, `Flat`, `Compact` |
 | `ProposalRow.reviewScore?: { score; reasons; hard? } \| null` | die Teile fürs (i); ohne sie keine Zelle | `Grouped` |
 | `ProposalRow.priorSameBookings?: number \| null` | → Spalte „So gebucht" (72 px): `0` „erstmals", `n` „n×"; ohne Wert gilt `firstTime` („erstmals"), sonst leer | `Grouped`, `Flat` |
 | `ProposalRow.reasons` | jetzt optional und `@deprecated` — nicht mehr gezeigt; die App lässt es weg | Code |
@@ -260,3 +260,38 @@ gemessen, M2–M7 und H1 sind nachgezogen, H2/H5 stehen als Befund an der App. O
 als Hinweise: H3, H4, H6 (wie in der Nacharbeit entschieden), R1, H8.
 
 Abgenommen von / am: Claude (Nachprüfung), 2026-10-01 · Stand `8b27ae7`
+
+## Nachtrag 2026-10-27 — Prüfgrund gibt zuerst nach (Owner-Punkt 6 der Demo-Runde)
+
+**Befund aus der App** (ll-abnahme, …/close/bookings): Die gruppierte Liste
+zeigt Auswahl, Aufklapper und Aktionen, `variant="full"`,
+`accountNames={false}`, `without={["kind"]}`. Bei 1440 px mit Seitenleiste
+(240 px) hat die Karte 1.084 px, für die Spuren bleiben 1.048 px. Die Spuren
+brauchten 980 px plus 10 Lücken zu 10 px, also 1.080 px. „Aktionen" ragte
+32 px über die Karte und wurde abgeschnitten. Der Owner will kein
+waagerechtes Abschneiden und keinen Scrollbalken.
+
+**Behebung:** Die Spalte „Prüfgrund" ist `minmax(150px, 200px)` statt fest
+`200px`. Wo Platz ist, bleibt sie 200 px breit; das Grid füllt Spuren mit
+fester Obergrenze vor den dehnbaren. Wird es eng, gibt sie als erste nach,
+bis 150 px. Ein Wort, das dann nicht mehr passt, kürzt das Badge mit
+Ellipse. `title` und (i) tragen den Rest, wie es der Kommentar der Spalte
+seit 0218 sagt. Die Untergrenze der Tabelle (`columnsMinWidth`) sinkt damit
+im Fall der App von 1.116 auf 1.066 px und passt in die 1.084 px der Karte.
+Keine Spalte fällt weg, die Schnittstelle bleibt unverändert.
+
+**Warum der Prüfgrund und nicht „Aktionen":** Die zwei Knöpfe einer Zeile
+(„Freigeben", „Öffnen") brauchen gemessen 176 px. Unter 180 px bricht dort
+ein Knopf um oder wird abgeschnitten, und das ist der Weg der Handlung. Ein
+Wort mit Ellipse und Erklärung dahinter ist der kleinere Verlust.
+
+**Gemessen** (Storybook 6107, `getBoundingClientRect`):
+
+| Fall | Prüfgrund | Ende der letzten Zelle ↔ Karte | gekürzt |
+|---|---|---|---|
+| `Flat` auf 1.158 px Zeileninhalt (= App-Fall plus die 110 px der Satzart, die die App herausnimmt) | 168 px | 1.193 ↔ 1.212, kein Überlauf, kein Scroll | 1 von 6: „Anders als Vormonat" (braucht 131, hat 121 px) |
+| `Flat` 1280 · 1440 · 1920 | 200 px | innerhalb | keins |
+| `Grouped` 1280 · 1440 | 200 px | innerhalb | keins von 29 |
+| `Compact` 700 | 150 px (vorher fest 200 px und über die Karte hinaus) | 683 ↔ 696, innerhalb | 3 von 4, mit Ellipse |
+
+Konsole in allen Fällen leer.
