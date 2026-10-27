@@ -69,7 +69,9 @@ export function InvoiceLineRow({ line, labels, open, onOpenChange, children }: P
         <span className="v2ilrow__name">{lineTitle(line)}</span>
         {rest ? (
           <span className="v2ilrow__desc">
-            <LongText max={81}>{rest}</LongText>
+            {/* 70: the description cell holds 68–70 characters a line (measured in
+                InvoiceLineList at 1280 and 1440 px, 0234 M1). */}
+            <LongText max={81} lineChars={70}>{rest}</LongText>
           </span>
         ) : null}
         <Strip line={line} labels={labels} />
