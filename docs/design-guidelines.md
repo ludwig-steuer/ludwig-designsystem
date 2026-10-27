@@ -551,7 +551,7 @@ Aufgabe in `docs/backlog/NNNN-*.md` (Stand der Auswertung: 2026-09-03).
 | Tabelle | `ClickRow` (`href`, `v2rowlink`, I11) · `ExpandableRow` | 120 `<Row>`, 6 mit Ziel | v2; Listen heben |
 | Tabelle | `SelectionBar` + `SelectCell` (I5) | — | v2 |
 | Tabelle | `AmountCell` · `DotStatus` · `Timestamp` · `AbweichungsZelle` | — | v2 |
-| Daten | `Progress` (Anteil als Balken, `share` oder `done`/`total`, sm/md/lg, `inline`) · `BarChart` (eine oder zwei Reihen, `layout`, Bezugslinie) | — | v2 (0045, 0046, 0041, 0110) |
+| Daten | `Progress` (Anteil als Balken, `share` oder `done`/`total`, oder die Teile eines Ganzen gestapelt, `parts`; sm/md/lg, `inline`) · `BarChart` (eine oder zwei Reihen, `layout`, Bezugslinie) | — | v2 (0045, 0046, 0227, 0041, 0110) |
 | Tabelle | `RawRecord` · `RawValue` (alle Felder einer DB-Zeile, Wert nach Typ) | 2× `RohdatenTab`, `fmtRawValue` im Drawer | v2 (0051) |
 | Navigation | `RecordPager` (ein Datensatz aus einem Vorrat, „3 von 117", `J`/`K`) | Kopfzeile in `sachverhalt/parts.tsx` | v2 (0047) |
 | Rahmen | `EntityHeader` (Karte über einer Akte: Symbol, Titel, ein Zustand, Kennzahl, Fakten) | `Hero` in `sachverhalt/parts.tsx` (155 Z.) | v2 (0048) |

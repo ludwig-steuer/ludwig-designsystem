@@ -192,3 +192,14 @@ Anmerkung 2). Storybook-Nachweise aus dem laufenden Dev-Server auf Port 6107.
    Stand `2272fe4` + `3dce35f`, also auf 0045 ohne `inline`. Dieselbe
    Parallelität hat den Text dieser Abnahme mit in `bd1eb6a` gezogen — der
    Inhalt ist derselbe, nur die Commit-Zuordnung stimmt nicht.
+
+## Nachtrag 2026-10-27 — mehrere Teile in einem Balken (0227)
+
+Der Ausschluss „mehrere Segmente in einem Balken" unter „Kann bewusst nicht"
+gilt nicht mehr. Die Belege-Übersicht der Abnahme braucht die Teile eines
+Ganzen in einem Balken (Owner-Punkt 4 der Demo-Runde, über ll-abnahme):
+gebucht · wartet auf eine Rückfrage · zu entscheiden. `Progress` trägt das
+seit 0227 als `parts`, mit derselben Spur, denselben Höhen, demselben Label
+und `inline`. Kreisform und unbestimmter Fortschritt bleiben ausgeschlossen.
+Für Reihen über die Zeit bleibt es bei `BarChart`. Schnittstelle, Verhalten
+und Abnahme stehen in `0227-progress-parts.md`.

@@ -42,8 +42,8 @@ export type BarLayout = "stacked" | "grouped";
  * @when    One or two series over time — expense per month, debit against
  *          credit — with at most one period highlighted and, if useful, a
  *          running reference line.
- * @instead A single share of a whole → Progress. One number with a
- *          caption → KpiTile. Two states next to each other →
+ * @instead A single share of a whole, or its parts stacked → Progress. One
+ *          number with a caption → KpiTile. Two states next to each other →
  *          ComparisonTable. A third series, real axes or a tooltip → the
  *          border where a charting library starts.
  */

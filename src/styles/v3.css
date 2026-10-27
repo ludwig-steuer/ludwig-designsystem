@@ -1337,6 +1337,24 @@ select.v2in { padding-right: 26px; }
 }
 .v2bar--sm { height: 4px; }
 .v2bar--lg { height: 10px; }
+/* Parts of one whole (0227). Each part grows with its value and keeps 6px, so
+   1 of 28 stays visible on a 48px track; the 2px joint shows the surface, so
+   a part only has to stand against that, never against its neighbour. The
+   track shows only while nothing is drawn. Fills on white · surface-head ·
+   bg-soft (WCAG 1.4.11):
+   `--color-border-control` 3.45:1 on bg, 3.33:1 on surface-head, 3.19:1 on bg-soft
+   `--color-accent` (info) 3.55:1 on bg, 3.43:1 on surface-head, 3.28:1 on bg-soft
+   `--color-warning` 5.52:1 on bg, 5.32:1 on surface-head, 5.09:1 on bg-soft
+   `--color-danger` 6.06:1 on bg, 5.85:1 on surface-head, 5.60:1 on bg-soft
+   `--color-success` 5.07:1 on bg, 4.89:1 on surface-head, 4.68:1 on bg-soft */
+.v2bar--parts { display: flex; gap: 2px; background: none; }
+.v2bar--parts:empty { background: var(--color-bg-sunken); }
+.v2bar__part { flex: 0 1 0%; min-width: 6px; height: 100%; }
+.v2bar__part--neutral { background: var(--color-border-control); }
+.v2bar__part--info { background: var(--color-info); }
+.v2bar__part--warning { background: var(--color-warning); }
+.v2bar__part--danger { background: var(--color-danger); }
+.v2bar__part--success { background: var(--color-success); }
 /* Inline form (0046): the number left, the bar answers. The bar takes the room
    the caller leaves it, else 120px. */
 .v2prog--inline { display: flex; align-items: center; gap: 10px; }
