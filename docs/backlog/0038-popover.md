@@ -96,6 +96,10 @@ Layer, deshalb steht in `v3.css` **kein `z-index`** für die Familie.
   bewusste Grenze wie 0008).
 - **Zustände:** kein Lade- und kein Fehlerzustand; der Inhalt bringt seinen
   eigenen mit. Leer wird nicht gerendert.
+- **Server-Render:** Die Attribute am Anker (`aria-describedby`,
+  `aria-expanded`, `aria-controls`, der Klick) setzt die Familie erst im
+  Browser, gleich nach der Hydration. Server und Hydration zeichnen das Kind
+  unverändert (Nachtrag 2026-10-27).
 
 ## Stories
 
@@ -230,3 +234,35 @@ begründet ausgeschlossen — die Familie zeigt keinen eigenen Datenbestand.
   Story zeigt aber ein Muster, das eine Seite so nicht übernehmen sollte.
 
 Abgenommen von / am: Claude (Abnahme-Agent), 2026-09-05 · Offene Punkte: keine. Kein Kriterium dieser Spec zielt auf `ludwig/app`; die Ablösung des v1-`Tooltip` und der elf Eigenbauten steht in der Kopfzeile „Ersetzt" und ist ein Schritt der Migration, kein Kriterium.
+
+## Nachtrag 2026-10-27 — Hydration-Fehler am Anker (llcto)
+
+**Befund aus der App** (…/close/documents, `next dev`, DS `5cd2922`): React
+meldete „A tree hydrated but some attributes … didn't match" am Datum der
+Belegzeile — `HoverCard` um einen `Link`. Der Server lieferte
+`aria-describedby` nicht aus, der Browser setzte es.
+
+**Ursache:** `withProps` hängte die Attribute per `cloneElement` an das Kind,
+nur wenn `isValidElement` es erkennt. Rendert eine Server-Komponente das
+Kind (hier der `Link` in der Tabellenzelle), kann es beim Server-Render
+noch als unaufgelöste Referenz ankommen — dann bleibt es ohne Attribut; im
+Browser ist es aufgelöst und bekommt eines. Dasselbe traf `Tooltip` und den
+Trigger von `Popover`.
+
+**Behebung:** `useWithProps` setzt die Attribute nur im Browser
+(`useSyncExternalStore`, Server-Schnappschuss `false`). Server und
+Hydration zeichnen das Kind unverändert, der Durchgang gleich nach der
+Hydration hängt sie an; ein reiner Browser-Render (Storybook, Wechsel per
+`next/link`) hat sie vom ersten Zeichnen an. Kosten: ein Render mehr je
+Anker nach der Hydration. Schnittstelle unverändert.
+
+**Nachweis** (Hydrations-Probe mit `renderToString` → `hydrateRoot`, Kind auf
+dem Server als aufgelöste Lazy-Referenz, im Browser als Element — wie in der
+App):
+
+| Fall | Meldung | Attribute danach |
+|---|---|---|
+| alter Stand, Kind auf dem Server unaufgelöst | „A tree hydrated but some attributes … didn't match" | fehlen dauerhaft (React flickt sie nicht) |
+| neuer Stand, Kind auf dem Server unaufgelöst | keine | `aria-describedby` an beiden Ankern, `aria-expanded="false"` und `aria-controls` am Trigger; die ids zeigen auf Karte und Tooltip; Klick öffnet |
+| neuer Stand, gleiches Element auf beiden Seiten | keine | wie oben |
+| neuer Stand, nur Browser-Render | — | alle Attribute im ersten Commit |

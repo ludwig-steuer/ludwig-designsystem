@@ -1,6 +1,6 @@
 "use client";
 
-import { cloneElement, isValidElement, useCallback, useEffect, useId, useRef, useState } from "react";
+import { cloneElement, isValidElement, useCallback, useEffect, useId, useRef, useState, useSyncExternalStore } from "react";
 import type { ReactNode } from "react";
 
 /**
@@ -117,9 +117,26 @@ function useHoverIntent(openDelay: number, closeDelay: number) {
   };
 }
 
-/** Adds attributes to the element the caller passed, without wrapping it. */
-function withProps(element: ReactNode, props: Record<string, unknown>): ReactNode {
-  return isValidElement<Record<string, unknown>>(element) ? cloneElement(element, props) : element;
+const noSubscribe = () => () => {};
+
+/**
+ * Adds attributes to the element the caller passed, without wrapping it —
+ * in the browser only. An element a server component rendered can reach the
+ * server render still unresolved (a lazy reference in `next dev`), so the
+ * server left `aria-describedby` off and the browser set it: a hydration
+ * mismatch (llcto 2026-10-27, …/close/documents). Server and hydration now
+ * render the bare element, the pass right after hydration adds the props; a
+ * plain client render has them from the start.
+ *
+ * ponytail: one more render per anchor after hydration; 300 rows are cheap.
+ */
+function useWithProps(element: ReactNode, props: Record<string, unknown>): ReactNode {
+  const browser = useSyncExternalStore(
+    noSubscribe,
+    () => true,
+    () => false,
+  );
+  return browser && isValidElement<Record<string, unknown>>(element) ? cloneElement(element, props) : element;
 }
 
 /**
@@ -156,15 +173,16 @@ export function Popover({
     [open, onOpenChange],
   );
   const { anchor, panel } = useLayer(isOpen, align);
+  const button = useWithProps(trigger, {
+    "aria-expanded": isOpen,
+    "aria-controls": id,
+    onClick: () => set(!isOpen),
+  });
 
   return (
     <>
       <span className="v2pop__anchor" ref={anchor}>
-        {withProps(trigger, {
-          "aria-expanded": isOpen,
-          "aria-controls": id,
-          onClick: () => set(!isOpen),
-        })}
+        {button}
       </span>
       <div
         id={id}
@@ -204,11 +222,12 @@ export function Tooltip({
   const { open, close, handlers } = useHoverIntent(TOOLTIP_DELAY, 0);
   const { anchor, panel } = useLayer(open, "start");
   useEscape(open, close);
+  const described = useWithProps(children, { "aria-describedby": id });
 
   return (
     <>
       <span className="v2pop__anchor" ref={anchor} {...handlers}>
-        {withProps(children, { "aria-describedby": id })}
+        {described}
       </span>
       {/* `manual`: a tooltip must not close the field that is currently open. */}
       <div id={id} ref={panel} popover="manual" role="tooltip" className="v2pop v2pop--tip">
@@ -238,11 +257,12 @@ export function HoverCard({
   const { open, close, handlers } = useHoverIntent(CARD_OPEN_DELAY, CARD_CLOSE_DELAY);
   const { anchor, panel } = useLayer(open, "start");
   useEscape(open, close);
+  const described = useWithProps(children, { "aria-describedby": id });
 
   return (
     <>
       <span className="v2pop__anchor" ref={anchor} {...handlers}>
-        {withProps(children, { "aria-describedby": id })}
+        {described}
       </span>
       <div
         id={id}
