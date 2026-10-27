@@ -7,12 +7,15 @@ import {
   useEffect,
   useRef,
   useState,
+  useSyncExternalStore,
   type ReactNode,
 } from "react";
 import { createPortal } from "react-dom";
 import { Button } from "./Button";
 import { trapTab } from "./focus";
 import { IconButton } from "./IconButton";
+
+const noSubscribe = () => () => {};
 
 /**
  * The slide-over from the right (0042) — the one drawer shell of the set.
@@ -70,6 +73,7 @@ export function Drawer({
   ariaLabel,
 }: DrawerProps) {
   const [render, setRender] = useState(open);
+  const browser = useSyncExternalStore(noSubscribe, () => true, () => false);
   const [shown, setShown] = useState(false);
   // Portal target for `<DrawerFooter>`; while empty it stays invisible via `:empty`.
   const [footerSlot, setFooterSlot] = useState<HTMLElement | null>(null);
@@ -133,7 +137,9 @@ export function Drawer({
     if (!render || !open) return;
     const active = document.activeElement;
     if (!active || !panel.current?.contains(active)) panel.current?.focus();
-  }, [render, open]);
+    // `browser` too: once hydrated the panel moves into the portal and mounts
+    // anew — a drawer open in the server render lost its focus there (0236, M1).
+  }, [render, open, browser]);
 
   useEffect(() => {
     if (!open) return;
@@ -154,7 +160,7 @@ export function Drawer({
 
   if (!render) return null;
 
-  return (
+  const overlay = (
     <>
       <div
         className={`v2drawer__scrim${shown ? " is-open" : ""}`}
@@ -191,6 +197,12 @@ export function Drawer({
       </aside>
     </>
   );
+  // Out of the flow it was opened from (0236): opened from a table row, the
+  // panel sat inside the row's cell in the DOM, and the table's cell rules and
+  // the cell's colour reached into it — a Markdown table fell apart into blocks.
+  // On the server and during hydration it renders in place (no `document`),
+  // then moves to the body.
+  return browser ? createPortal(overlay, document.body) : overlay;
 }
 
 /**

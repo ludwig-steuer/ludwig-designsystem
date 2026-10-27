@@ -77,14 +77,17 @@
 .v2tbl { border-collapse: collapse; width: 100%; text-align: left; }
 /* The reset is in `:where()`, specificity **0-0-0**, so any single-class rule
    beats it. At 0-1-1 it beat them all and needed seven counter-rules (0106). */
-:where(.v2tbl th, .v2tbl td) { display: block; min-width: 0; font-weight: inherit; padding: 0; }
+/* Its **own** cells only, by child selectors (0236): as descendant selectors
+   these rules reached any table inside a cell — a Markdown table in a
+   fold-out or in a drawer opened from a row fell apart into blocks. */
+:where(.v2tbl > :is(thead, tbody, tfoot) > tr > :is(th, td)) { display: block; min-width: 0; font-weight: inherit; padding: 0; }
 /* `th` centres by default — V3 centres nothing. Also in `:where()`, or it beats
    `.v2num` and number columns fall to the left. */
-:where(.v2tbl th) { text-align: left; }
+:where(.v2tbl > :is(thead, tbody, tfoot) > tr > th) { text-align: left; }
 /* **Numbers right, in the cell too.** `.v2num` is either the cell's class or a
    span inside it — `text-align` does nothing on an inline span, so both are
    covered (0106: all numbers had fallen left). */
-.v2tbl :is(th, td) > .v2num { display: block; text-align: right; }
+.v2tbl > :where(thead, tbody, tfoot) > :where(tr) > :is(th, td) > .v2num { display: block; text-align: right; }
 /* The caller (Table) sets `--v2-cols`; `--v2-min` optionally, for horizontal
    scrolling with many columns. */
 /* Density (0057 E9): three blocks, one set of measures. `default` sits on
@@ -118,12 +121,12 @@
 /* `colSpan` does nothing since cells are `display: block` (0106): a special row
    with **one** cell would become a shrinking anonymous table cell. So the row
    with a spanning cell becomes a block itself. */
-.v2tbl tr:has(> td[colspan]),
+.v2tbl > :where(thead, tbody, tfoot) > tr:has(> td[colspan]),
 /* Since 0149 the group heading is a `th[colspan]` — the same special row. */
-.v2tbl tr:has(> th[colspan]) { display: block; }
+.v2tbl > :where(thead, tbody, tfoot) > tr:has(> th[colspan]) { display: block; }
 /* Also in `:where()`: at 0-2-1 it beat every class rule on exactly the special
    cells (`__group`, `__empty`, `__detail`, `__error`, `__btxrow__split`). */
-:where(.v2tbl td[colspan], .v2tbl th[colspan]) { width: 100%; }
+:where(.v2tbl > :is(thead, tbody, tfoot) > tr > :is(td, th)[colspan]) { width: 100%; }
 .v2tbl__scroll { overflow-x: auto; }
 .v2tbl__inner { min-width: var(--v2-min, 0); }
 
@@ -1169,6 +1172,9 @@ a.v2kpi--link:focus-visible { outline: 2px solid var(--color-focus); outline-off
 .v2drawer {
   position: fixed; top: 0; right: 0; bottom: 0; z-index: 61;
   width: var(--drawer-md);
+  /* Its own text, wherever it is opened from (0236): the productive register,
+     like `.app__main`, not what the opener's cell set. */
+  font-size: var(--fs-ui); line-height: var(--lh-ui); color: var(--color-text); text-align: left;
   background: var(--color-surface);
   box-shadow: var(--shadow-drawer);
   display: flex; flex-direction: column;
@@ -3555,8 +3561,8 @@ button.v2ibtn[aria-disabled="true"] > * { opacity: 0.5; }
    `DataTable` — `Table`/`HeadRow` appear in stories and pages too, where the
    (i) was a bare sibling of its word (0.0 px gap, 0101). Whoever builds the
    head should not need to know the number. */
-.v2tbl th:has(> .v2sinfo),
-.v2tbl th > *:has(> .v2sinfo) {
+.v2tbl > :where(thead, tbody, tfoot) > :where(tr) > th:has(> .v2sinfo),
+.v2tbl > :where(thead, tbody, tfoot) > :where(tr) > th > *:has(> .v2sinfo) {
   display: flex;
   align-items: baseline;
   gap: var(--space-1);
@@ -4292,7 +4298,7 @@ button.v2oil__side:focus-visible { outline: 2px solid var(--color-focus); outlin
    it is an id, not a quantity (V3). */
 .v2ilrow__pos { font-variant-numeric: tabular-nums lining-nums; }
 /* The emphasised net total. The wrapper carries the weight — and so must carry
-   the edge: `.v2tbl :is(th,td) > .v2num` only reaches a direct child, and an
+   the edge: the `.v2num` rule of `.v2tbl` only reaches a direct child of a cell, and an
    `AmountCell` in a span would silently lose right alignment (0072). */
 .v2ilrow__total { display: block; text-align: right; font-weight: 600; }
 
@@ -4703,11 +4709,10 @@ a.v3prov:focus-visible { text-decoration: underline; }
   font-size: var(--fs-ui);
   font-variant-numeric: tabular-nums lining-nums;
 }
-/* Child combinators only: the table sits inside a `.v2tbl` (whose reset makes
-   cells blocks) and holds one again in its popover (which must stay a grid). */
+/* Child combinators only: the table holds one again in its popover (which must
+   stay a grid). The `.v2tbl` around it no longer reaches these cells (0236). */
 .v3bbr > * > tr > th,
 .v3bbr > * > tr > td {
-  display: table-cell;
   padding: var(--space-2) var(--space-3);
   text-align: right;
   vertical-align: top;
@@ -5069,9 +5074,6 @@ a.v3bbr__val:hover { text-decoration-color: currentColor; }
 .v3rrc__detail { font-size: var(--fs-ui-sm); color: var(--color-text); }
 .v3rrc__parts { border-collapse: collapse; width: 100%; font-size: var(--fs-ui-sm); }
 .v3rrc__parts caption { text-align: left; font-weight: 600; padding-bottom: var(--space-1); }
-/* The panel lives inside the list's table in the DOM: `.v2tbl th, td` would
-   make these cells blocks — so they say what they are. */
-.v3rrc__parts th, .v3rrc__parts td { display: table-cell; }
 .v3rrc__parts th { text-align: left; font-weight: 400; padding: var(--space-1) var(--space-3) var(--space-1) 0; }
 .v3rrc__parts td { padding: var(--space-1) 0; white-space: nowrap; }
 .v3rrc__parts tbody tr + tr > * { border-top: 1px solid var(--color-border-subtle); }
