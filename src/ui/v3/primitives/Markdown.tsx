@@ -91,15 +91,16 @@ const FENCE_RE = /^\s*```/;
 /** Separator row of a GFM table: `|---|:--:|`. */
 const TABLE_SEP_RE = /^\s*\|?[\s:|-]*-[\s:|-]*\|[\s:|-]*$/;
 
-// ponytail: naive split on `|` — a pipe inside inline code would tear it
-// apart; that does not happen in the texts this renders.
+// A row splits at the **unescaped** `|` only, as in GFM: `\|` is a pipe in
+// the cell, inside inline code too (`grep -rnE "a\|b"` in a spec's acceptance
+// table, 0233). The trailing pipe goes only when it is not escaped.
 function splitRow(line: string): InlineTok[][] {
   return line
     .trim()
     .replace(/^\|/, "")
-    .replace(/\|$/, "")
-    .split("|")
-    .map((c) => parseInline(c.trim()));
+    .replace(/(?<!\\)\|$/, "")
+    .split(/(?<!\\)\|/)
+    .map((c) => parseInline(c.trim().replace(/\\\|/g, "|")));
 }
 
 /**

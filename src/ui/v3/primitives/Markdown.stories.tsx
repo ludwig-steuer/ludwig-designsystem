@@ -1,4 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
+import { Drawer } from "./Drawer";
 import { Markdown } from "./Markdown";
 import { ProseCard } from "./ProseCard";
 import { DetailPane } from "../patterns/MasterDetail";
@@ -163,5 +164,29 @@ export const Reader: Story = {
         <Markdown text={[REPORT, REPORT, REPORT].join("\n")} maxHeight={260} overflow="scroll" />
       </DetailPane>
     </div>
+  ),
+};
+
+const SPEC_ACCEPTANCE = `## Abnahme
+
+| Kriterium | Kommando | Erwartung |
+|---|---|---|
+| Typecheck | \`pnpm --filter @ludwig/web typecheck\` | Exit 0 |
+| Übergänge je Zustandsmaschine | \`pnpm --filter @ludwig/web test journal-entry-state case-lifecycle-state export-batch-state file-basket-state\` | alle grün; je Datei mindestens ein „erlaubter Übergang" und ein „verbotener Übergang" |
+| Kein direkter Statuswechsel | \`grep -rnE "status = '(accepted\\|reversed)'" apps/web/src\` | keine Zeile außerhalb von \`state-machine.ts\` |
+| Glossar | \`grep -n "^### Transition\\|Zustandswechsel" docs/GLOSSARY.md\` | beide Einträge vorhanden |
+| Wächter live | \`psql … -c "update journal_entry set status='accepted' where status='reversed' returning id"\` | **ERROR**: transition reversed → accepted not allowed |
+`;
+
+/**
+ * Die Abnahme-Tabelle einer Spec im echten Drawer, in der schmalsten Größe
+ * (`sm`, 0233): so breit wie der Drawer, lange Kommandos brechen um, `\|` im
+ * Code bleibt in seiner Zelle. Kopf und Linien wie bei `DataTable`.
+ */
+export const TableInDrawer: Story = {
+  render: () => (
+    <Drawer open onClose={() => {}} size="sm" title="Spec · Abnahme">
+      <Markdown text={SPEC_ACCEPTANCE} />
+    </Drawer>
   ),
 };

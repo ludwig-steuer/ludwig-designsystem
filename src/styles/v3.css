@@ -2731,7 +2731,10 @@ button.v2ibtn[aria-disabled="true"] > * { opacity: 0.5; }
 }
 .v2mk__hr { margin: var(--space-4) 0; border: 0; border-top: 1px solid var(--color-border); }
 .v2mk__tblwrap { overflow-x: auto; margin: 0 0 11px; }
-.v2mk__tbl { border-collapse: collapse; font-size: var(--fs-ui); }
+/* 0233: as wide as its container — a spec's acceptance table in a 480-px
+   drawer used to run to 873 px behind a scrollbar. Cells wrap, long commands
+   break inside; the wrapper scrolls only for what cannot break. */
+.v2mk__tbl { border-collapse: collapse; font-size: var(--fs-ui); width: 100%; }
 /* The markdown table's reset sits in `:where()`, specificity **0-0-0** — the
    same build as `.v2tbl` (0106), so any class rule on these cells wins,
    including `.v2num` over the head's `text-align: left`. */
@@ -2739,7 +2742,13 @@ button.v2ibtn[aria-disabled="true"] > * { opacity: 0.5; }
   padding: 5px 10px 5px 0; text-align: left; vertical-align: top;
   border-bottom: 1px solid var(--color-border-subtle);
 }
-:where(.v2mk__tbl th) { font-weight: 600; color: var(--color-text-muted); }
+/* The last row without a line, like `DataTable` (0233, H6). */
+:where(.v2mk__tbl tbody tr:last-child > td) { border-bottom: 0; }
+/* Only code breaks anywhere: a word keeps whole and sets the column's minimum,
+   a long command gives way (0233). */
+:where(.v2mk__tbl code) { overflow-wrap: anywhere; }
+/* The head in the role „Tabellenkopf" (0220), like `DataTable`'s (0233). */
+:where(.v2mk__tbl th) { font-size: var(--fs-ui-sm); font-weight: 600; color: var(--color-text-subtle); }
 .v2mk--inline { display: inline; }
 /* Stateless flap: the button sits below the text, the text fades out. */
 .v2mk--clamp { display: flex; flex-direction: column; }
