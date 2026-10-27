@@ -159,6 +159,10 @@ body { background: #FAFBFC; }
   display: flex; align-items: center; padding: 0 24px; gap: 16px;
 }
 .app__main    { grid-column: 2; overflow: auto; padding: 32px; background: #FAFBFC; }
+/* The working surface reads in the productive register (0231): text without a
+   role inherits 13.5 px, not the 16 px of the reading register on `body` —
+   otherwise every bare `p` or `span` looked like a title (A14, owner 2026-10-27). */
+.app__main    { font-size: var(--fs-ui); line-height: var(--lh-ui); }
 /* Content cap: instead of max-width on the content, the side padding grows.
    Full-bleed breakouts (the client band, .bd-page — both margin-inline:
    -32px) stay aligned without a container per page. */
@@ -263,7 +267,7 @@ body { background: #FAFBFC; }
 .tenant__menu-search .ico { position: absolute; left: 22px; top: 18px; color: var(--color-text-subtle); }
 .tenant__menu-search input {
   width: 100%; box-sizing: border-box;
-  font: 13px var(--font-sans); color: var(--color-text);
+  font: var(--fs-ui) var(--font-sans); color: var(--color-text);
   padding: 7px 10px 7px 30px;
   background: #fff;
   border: 1px solid var(--color-border);
@@ -492,7 +496,7 @@ body { background: #FAFBFC; }
 .filter-search { position: relative; display: inline-flex; align-items: center; }
 .filter-search .ico { position: absolute; left: 9px; top: 7px; color: var(--color-text-subtle); display: inline-flex; }
 .filter-search input {
-  font: 13px var(--font-sans); color: var(--color-text);
+  font: var(--fs-ui) var(--font-sans); color: var(--color-text);
   padding: 6px 10px 6px 28px; min-width: 240px;
   background: #fff;
   border: 1px solid var(--color-border);
@@ -549,7 +553,7 @@ body { background: #FAFBFC; }
   padding: 0 4px;
 }
 .md-tab {
-  font: 500 13px var(--font-sans); color: var(--color-text-muted);
+  font: 500 var(--fs-ui) var(--font-sans); color: var(--color-text-muted);
   padding: 10px 14px; cursor: pointer;
   border: none; background: transparent;
   border-bottom: 2px solid transparent;
