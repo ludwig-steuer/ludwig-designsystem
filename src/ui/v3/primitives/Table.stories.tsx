@@ -1,7 +1,8 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { BookOpen, Layers } from "lucide-react";
 import { AmountCell, DotStatus, ErrorRow, TableLoading } from "./Cells";
-import { Card, CardFoot, CardHead, EmptyRow, GroupRow, HeadRow, Row, Table } from "./Table";
+import { Progress } from "./Progress";
+import { Card, CardFoot, CardHead, CardSection, EmptyRow, GroupRow, HeadRow, Row, Table } from "./Table";
 import { TextButton } from "./TextButton";
 
 const meta: Meta<typeof Table> = { title: "v3/Primitives/Tabelle/Table", component: Table };
@@ -144,6 +145,44 @@ export const CardHeadIconMeta: Story = {
             <AmountCell value={42} />
           </Row>
         </Table>
+      </Card>
+    </div>
+  ),
+};
+
+/**
+ * `CardSection` (0227): eine Zeile auf dem Einzug der Karte, zwischen Kopf und
+ * Zeilen oder ganz ohne Kopf — die Zusammenfassung über das, was folgt. Der
+ * Einzug ist der des Kopfes; die Seite schreibt kein eigenes `padding`.
+ */
+export const Section: Story = {
+  render: () => (
+    <div style={{ display: "grid", gap: 12, maxWidth: 620 }}>
+      <Card>
+        <CardHead title="Offene Posten" sub="Kreditoren, Stand 31.08.2026" />
+        <CardSection>
+          <Progress
+            parts={[
+              { label: "ausgeglichen", value: 41, tone: "neutral" },
+              { label: "überfällig", value: 6, tone: "warning" },
+            ]}
+            label="47 Posten, 6 überfällig"
+            legend
+          />
+        </CardSection>
+        <Table cols={COLS}>
+          <Header />
+          <Row>
+            <span className="v2main">Musterbau GmbH</span>
+            <AmountCell value={1475.6} />
+            <DotStatus tone="warning" label="überfällig" />
+            <span>14.08.2026</span>
+          </Row>
+        </Table>
+      </Card>
+      <Card>
+        {/* Without a head: the step head above the card already names it. */}
+        <CardSection>Alle 28 Belege des Stapels sind gebucht oder zugeordnet.</CardSection>
       </Card>
     </div>
   ),

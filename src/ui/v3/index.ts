@@ -142,13 +142,14 @@ export {
 
 /* Daten — series and trends (0041, 0045) */
 export { BarChart, type Bar, type BarLayout } from "./primitives/BarChart";
-export { Progress } from "./primitives/Progress";
+export { Progress, type ProgressPart } from "./primitives/Progress";
 
 /* Tabelle */
 export {
   Card,
   CardHead,
   CardFoot,
+  CardSection,
   Table,
   HeadRow,
   Row,

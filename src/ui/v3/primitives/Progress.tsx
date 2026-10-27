@@ -15,8 +15,9 @@ import type { BadgeTone } from "./Badge";
 export type ProgressPart = {
   /** The caller's name of the part — it reads „label: count" in the sentence. */
   label: string;
+  /** The count; ≤ 0 or not a number counts as 0. */
   value: number;
-  /** The same word, and colour, as the StatusBadge of that step. */
+  /** The same word, and tone, as the StatusBadge of that step. */
   tone: BadgeTone;
 };
 
@@ -33,16 +34,22 @@ type BarProps = {
 type ShareProps = BarProps & {
   /** 0…1. Higher values are clamped so the bar does not break out. */
   share?: number;
-  /** „41 von 118" — alternative to `share`, and the default label. */
+  /** „41 von 118" — alternative to `share`, and the default label; a count, a fraction is rounded. */
   done?: number;
   total?: number;
   tone?: "accent" | "warning" | "danger" | "success";
   parts?: never;
+  legend?: never;
 };
 
 type PartsProps = BarProps & {
   /** The parts of one whole, left to right; the whole is their sum (0227). */
   parts: ProgressPart[];
+  /**
+   * A line naming the drawn parts — a mark in the part's tone and its label;
+   * the count only in the `title` (llcto for the owner, 2026-10-27).
+   */
+  legend?: boolean;
   share?: never;
   done?: never;
   total?: never;
@@ -61,9 +68,11 @@ export function Progress(props: ShareProps | PartsProps) {
   const { size = "md", inline = false } = props;
   const sizeClass = size === "md" ? "" : ` v2bar--${size}`;
   let bar;
+  let legend = null;
   let text: string | null;
   if (props.parts) {
     const parts = props.parts.map((p) => ({ ...p, value: p.value > 0 ? p.value : 0 }));
+    const drawn = parts.filter((p) => p.value > 0);
     const sentence = parts.map((p) => `${p.label}: ${formatCount(p.value)}`).join(", ");
     text = props.label !== undefined ? props.label : sentence;
     // The default label already says every part, the bar would say it twice;
@@ -71,18 +80,29 @@ export function Progress(props: ShareProps | PartsProps) {
     const named = text === sentence || !sentence ? { "aria-hidden": true } : { role: "img", "aria-label": sentence };
     bar = (
       <span className={`v2bar v2bar--parts${sizeClass}`} {...named}>
-        {parts
-          .filter((p) => p.value > 0)
-          .map((p, i) => (
-            <span
-              key={i}
-              className={`v2bar__part v2bar__part--${p.tone}`}
-              style={{ flexGrow: p.value }}
-              title={`${p.label}: ${formatCount(p.value)}`}
-            />
-          ))}
+        {drawn.map((p, i) => (
+          <span
+            key={i}
+            className={`v2bar__part v2bar__part--${p.tone}`}
+            style={{ flexGrow: p.value }}
+            title={`${p.label}: ${formatCount(p.value)}`}
+          />
+        ))}
       </span>
     );
+    // Silent for the reader: the bar's name or the default label already says
+    // every part with its count.
+    legend =
+      props.legend && drawn.length > 0 ? (
+        <span className="v2bar__legend" aria-hidden="true">
+          {drawn.map((p, i) => (
+            <span key={i} className="v2bar__key" title={`${p.label}: ${formatCount(p.value)}`}>
+              <span className={`v2bar__swatch v2bar__part--${p.tone}`} />
+              {p.label}
+            </span>
+          ))}
+        </span>
+      ) : null;
   } else {
     const { share, done, total, tone = "accent", label } = props;
     const pct = Math.max(0, Math.min(1, share ?? (total ? (done ?? 0) / total : 0)));
@@ -90,7 +110,7 @@ export function Progress(props: ShareProps | PartsProps) {
       label !== undefined
         ? label
         : total != null
-          ? `${done ?? 0} von ${total}`
+          ? `${formatCount(done ?? 0)} von ${formatCount(total)}`
           : `${Math.round(pct * 100)} %`;
     bar = (
       <span className={`v2bar${sizeClass}`}>
@@ -103,15 +123,28 @@ export function Progress(props: ShareProps | PartsProps) {
   }
   const labelNode = text === null ? null : <span className="v2bar__label">{text}</span>;
   // Inline reverses the order: the number is read first, the bar answers it.
-  return inline ? (
+  // The legend stands under the bar it explains, before the sentence.
+  if (!inline) {
+    return (
+      <span>
+        {bar}
+        {legend}
+        {labelNode}
+      </span>
+    );
+  }
+  const row = (
     <span className="v2prog--inline">
       {labelNode}
       {bar}
     </span>
-  ) : (
-    <span>
-      {bar}
-      {labelNode}
+  );
+  return legend ? (
+    <span className="v2prog--legend">
+      {row}
+      {legend}
     </span>
+  ) : (
+    row
   );
 }

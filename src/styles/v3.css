@@ -50,6 +50,17 @@
 .v2dt__fold[open] > .v2dt__foldsum .v2dt__chev { transform: rotate(90deg); }
 @media (prefers-reduced-motion: reduce) { .v2dt__chev { transition: none; } }
 
+/* A line on the card's inset between head and rows (0227) — the head's and the
+   foot's 18px sideways, so a page needs no padding of its own. Content, not
+   chrome: no tint, the row's type, the rows' divider below it — none where the
+   card ends or the foot brings its own line. */
+.v2card__section {
+  padding: 12px 18px; border-bottom: 1px solid var(--color-border-subtle);
+  font-size: var(--fs-ui); color: var(--color-text);
+}
+.v2card__section:last-child,
+.v2card__section:has(+ .v2card__f) { border-bottom: 0; }
+
 /* Card foot — pagination keeps using `.pag` from components.css. */
 .v2card__f {
   padding: 12px 18px;
@@ -1355,6 +1366,17 @@ select.v2in { padding-right: 26px; }
 .v2bar__part--warning { background: var(--color-warning); }
 .v2bar__part--danger { background: var(--color-danger); }
 .v2bar__part--success { background: var(--color-success); }
+/* The legend (0227): a mark in the part's own fill — the same class, so bar and
+   key cannot drift — and its label in the label's style. Like the relay
+   legend (`.pz-staffel-legend`): 8px, corners 2px, a part of a bar not a dot. */
+.v2bar__legend {
+  display: flex; flex-wrap: wrap; gap: 2px var(--space-3); margin-top: 4px;
+  font-size: var(--fs-ui-2xs); color: var(--color-text-subtle);
+}
+.v2bar__key { display: inline-flex; align-items: center; gap: var(--space-1); white-space: nowrap; }
+.v2bar__swatch { width: 8px; height: 8px; border-radius: 2px; flex: none; }
+/* Inline with a legend: the row stays one line, the legend goes under it. */
+.v2prog--legend { display: flex; flex-direction: column; min-width: 0; }
 /* Inline form (0046): the number left, the bar answers. The bar takes the room
    the caller leaves it, else 120px. */
 .v2prog--inline { display: flex; align-items: center; gap: 10px; }

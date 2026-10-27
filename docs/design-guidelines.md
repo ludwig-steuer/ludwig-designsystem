@@ -526,7 +526,7 @@ Aufgabe in `docs/backlog/NNNN-*.md` (Stand der Auswertung: 2026-09-03).
 | Navigation | `FilterBar` (Formularzeile, Stand in URL, „gefiltert: … · Zurücksetzen", I4) | 12 Varianten (`AccountFilterForm`, `InvoiceFilterForm`, `CaseListFilters` …) | v2 (0003) |
 | Navigation | `PageHeader` (Titel, Zähler, Aktionen; kompakter als v1) | `PageHeader` v1, 19 Dateien | v2 (0002) |
 | Navigation | `Pagination` | v1 Re-Export | Optik |
-| Fläche | `Card`/`CardHead`/`CardFoot` | `Section`/`SectionHead`/`SectionFilters` | v2; v1 ersetzen |
+| Fläche | `Card`/`CardHead`/`CardSection`/`CardFoot` (`CardSection`: eine Zeile auf dem Einzug der Karte, 0227) | `Section`/`SectionHead`/`SectionFilters` | v2; v1 ersetzen |
 | Fläche | `KpiTile`/`KpiGrid` | `Stat`/`StatGrid` | v2; v1 ersetzen |
 | Fläche | `FieldList` (surface/soft) · `ProseCard` | — | v2 |
 | Fläche | `FieldList` freigestellt (Schlüssel-Wert außerhalb einer Karte) | `KeyValueGrid` (clients), 10 lokale Helfer | v2 (0006) |
@@ -551,7 +551,7 @@ Aufgabe in `docs/backlog/NNNN-*.md` (Stand der Auswertung: 2026-09-03).
 | Tabelle | `ClickRow` (`href`, `v2rowlink`, I11) · `ExpandableRow` | 120 `<Row>`, 6 mit Ziel | v2; Listen heben |
 | Tabelle | `SelectionBar` + `SelectCell` (I5) | — | v2 |
 | Tabelle | `AmountCell` · `DotStatus` · `Timestamp` · `AbweichungsZelle` | — | v2 |
-| Daten | `Progress` (Anteil als Balken, `share` oder `done`/`total`, oder die Teile eines Ganzen gestapelt, `parts`; sm/md/lg, `inline`) · `BarChart` (eine oder zwei Reihen, `layout`, Bezugslinie) | — | v2 (0045, 0046, 0227, 0041, 0110) |
+| Daten | `Progress` (Anteil als Balken, `share` oder `done`/`total`, oder die Teile eines Ganzen gestapelt, `parts`, mit `legend`; sm/md/lg, `inline`) · `BarChart` (eine oder zwei Reihen, `layout`, Bezugslinie) | — | v2 (0045, 0046, 0227, 0041, 0110) |
 | Tabelle | `RawRecord` · `RawValue` (alle Felder einer DB-Zeile, Wert nach Typ) | 2× `RohdatenTab`, `fmtRawValue` im Drawer | v2 (0051) |
 | Navigation | `RecordPager` (ein Datensatz aus einem Vorrat, „3 von 117", `J`/`K`) | Kopfzeile in `sachverhalt/parts.tsx` | v2 (0047) |
 | Rahmen | `EntityHeader` (Karte über einer Akte: Symbol, Titel, ein Zustand, Kennzahl, Fakten) | `Hero` in `sachverhalt/parts.tsx` (155 Z.) | v2 (0048) |

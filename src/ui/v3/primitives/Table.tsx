@@ -14,7 +14,8 @@ import { Link } from "./Link";
 /* ── Karte ──────────────────────────────────────────────────────────── */
 
 /**
- * @when    Every table and every bounded surface with a header.
+ * @when    Every table and every bounded surface — with a header, or without
+ *          one where the head above the card already names it (0227).
  * @instead Prose → ProseCard. Key figure → KpiTile.
  */
 export function Card({
@@ -40,7 +41,8 @@ export function Card({
  * @when    Every card that carries a table or a bounded surface (the kit's
  *          rule: no free-floating rows).
  * @instead The head of a page → PageHeader. The head of one entity →
- *          EntityHeader. The column head of a table → HeadRow.
+ *          EntityHeader. The column head of a table → HeadRow. A summary
+ *          across the card's width under the head → CardSection.
  */
 export function CardHead({
   title,
@@ -93,11 +95,26 @@ export function CardHead({
 }
 
 /**
+ * A line on the card's inset that is neither its head, a row nor its foot —
+ * the summary over what follows (0227: the bar of a step's documents, full
+ * width, with its sentence). The inset is the head's, so the page writes no
+ * padding of its own.
+ *
+ * @when    Something stands in the card before or instead of its rows and
+ *          spans the card: a summary bar, one sentence about the whole list.
+ * @instead The card's title and its one sub-line → CardHead. What belongs
+ *          under the content → CardFoot. A record of the list → Row.
+ */
+export function CardSection({ children }: { children: ReactNode }) {
+  return <div className="v2card__section">{children}</div>;
+}
+
+/**
  * The foot of a card — the pager, a sum, the way onwards.
  *
  * @when    Something belongs under the card's content and is not a row.
  * @instead A row that spans the table → GroupRow. Actions of the whole
- *          card → CardHead.
+ *          card → CardHead. A line before the rows → CardSection.
  */
 export function CardFoot({ children }: { children: ReactNode }) {
   return <div className="v2card__f">{children}</div>;

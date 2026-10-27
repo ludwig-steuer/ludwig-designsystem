@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { Badge } from "./Badge";
 import { Progress, type ProgressPart } from "./Progress";
-import { Card, CardHead, HeadRow, Row, Table } from "./Table";
+import { Card, CardHead, CardSection, HeadRow, Row, Table } from "./Table";
 
 const meta: Meta<typeof Progress> = { title: "v3/Primitives/Daten/Fortschritt", component: Progress };
 export default meta;
@@ -163,7 +163,7 @@ export const Inline: Story = {
 const batch = (booked: number, waiting: number, open: number): ProgressPart[] => [
   { label: "gebucht oder zugeordnet", value: booked, tone: "neutral" },
   { label: "wartet auf eine Rückfrage", value: waiting, tone: "info" },
-  { label: "ohne Buchung / zu entscheiden", value: open, tone: "warning" },
+  { label: "ohne Buchung, zu entscheiden", value: open, tone: "warning" },
 ];
 
 /**
@@ -257,47 +257,83 @@ export const PartsEdge: Story = {
 };
 
 /**
- * Im Einsatz: die Belege-Übersicht der Abnahme. Der Balken steht in einer
- * eigenen Zeile unter dem Kopf, über die volle Breite; der Satz nennt nur zwei
- * Zahlen; welcher Teil was ist, sagen die Badges der Liste
- * in denselben Tönen.
+ * `legend` (0227): eine Zeile unter dem Balken, je gezeichnetem Teil eine Marke
+ * im Ton des Teils und sein Name. Die Anzahl steht im `title`, nicht sichtbar;
+ * die Vorlesehilfe liest sie am Balken. Ein Teil mit 0 fehlt auch hier.
+ */
+export const PartsLegend: Story = {
+  render: () => (
+    <Cases>
+      <Row>
+        <span className="v2main">lg, eigener Satz</span>
+        <Progress parts={batch(25, 2, 1)} size="lg" label="28 Belege, 3 noch zu klären" legend />
+      </Row>
+      <Row>
+        <span className="v2main">ohne Label</span>
+        <Progress parts={batch(25, 2, 1)} label={null} legend />
+      </Row>
+      <Row>
+        <span className="v2main">inline</span>
+        <Progress parts={batch(25, 2, 1)} label="28 Belege, 3 noch zu klären" inline legend />
+      </Row>
+      <Row>
+        <span className="v2main">ein Teil 0</span>
+        <Progress parts={batch(27, 0, 1)} label="28 Belege, 1 noch zu klären" legend />
+      </Row>
+      <Row>
+        <span className="v2main">alle Teile 0</span>
+        <Progress parts={batch(0, 0, 0)} label="Noch keine Belege eingegangen" legend />
+      </Row>
+    </Cases>
+  ),
+};
+
+/**
+ * Im Einsatz: der Schritt „Belege" der Abnahme. Die Karte hat keinen eigenen
+ * Kopf — der Schrittkopf darüber nennt ihn schon. Der Balken ist die Antwort des
+ * Schritts: `lg` über die volle Breite in einer `CardSection`, darunter die
+ * Legende und der Satz mit nur zwei Zahlen. Unter der Karte stehen die offenen
+ * Belege, in denselben Tönen.
  */
 export const PartsInUse: Story = {
   render: () => (
-    <Card>
-      <CardHead title="Eingegangene Belege" />
-      {/* Its own line under the head, on the head's inset (18px): in the sub-line the bar shrinks to 120px. */}
-      <div style={{ padding: "var(--space-3) 18px", borderBottom: "1px solid var(--color-border-subtle)" }}>
-        <Progress parts={batch(25, 2, 1)} label="28 Belege, 3 noch zu klären" inline />
-      </div>
-      <Table cols="1fr 120px 220px">
-        <HeadRow>
-          <span>Beleg</span>
-          <span>Datum</span>
-          <span>Stand</span>
-        </HeadRow>
-        <Row>
-          <span className="v2main">RE-2026-0815 Musterbau GmbH.pdf</span>
-          <span>26.08.2026</span>
-          <span>
-            <Badge tone="neutral">gebucht oder zugeordnet</Badge>
-          </span>
-        </Row>
-        <Row>
-          <span className="v2main">Kontoauszug August 2026 Sparkasse.pdf</span>
-          <span>31.08.2026</span>
-          <span>
-            <Badge tone="info">wartet auf eine Rückfrage</Badge>
-          </span>
-        </Row>
-        <Row>
-          <span className="v2main">Quittung Tankstelle.jpg</span>
-          <span>14.08.2026</span>
-          <span>
-            <Badge tone="warning">zu entscheiden</Badge>
-          </span>
-        </Row>
-      </Table>
-    </Card>
+    <div style={{ display: "grid", gap: "var(--space-4)" }}>
+      <Card>
+        <CardSection>
+          <Progress parts={batch(25, 2, 1)} size="lg" label="28 Belege, 3 noch zu klären" legend />
+        </CardSection>
+      </Card>
+      <Card>
+        <CardHead title="Noch zu klären" meta="3 Belege" />
+        <Table cols="1fr 120px 240px">
+          <HeadRow>
+            <span>Beleg</span>
+            <span>Datum</span>
+            <span>Stand</span>
+          </HeadRow>
+          <Row>
+            <span className="v2main">Kontoauszug August 2026 Sparkasse.pdf</span>
+            <span>31.08.2026</span>
+            <span>
+              <Badge tone="info">wartet auf eine Rückfrage</Badge>
+            </span>
+          </Row>
+          <Row>
+            <span className="v2main">Rechnung 2026-0912 Druckerei Weber.pdf</span>
+            <span>12.09.2026</span>
+            <span>
+              <Badge tone="info">wartet auf eine Rückfrage</Badge>
+            </span>
+          </Row>
+          <Row>
+            <span className="v2main">Quittung Tankstelle.jpg</span>
+            <span>14.08.2026</span>
+            <span>
+              <Badge tone="warning">ohne Buchung, zu entscheiden</Badge>
+            </span>
+          </Row>
+        </Table>
+      </Card>
+    </div>
   ),
 };

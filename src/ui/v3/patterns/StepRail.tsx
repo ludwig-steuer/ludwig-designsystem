@@ -1,3 +1,4 @@
+import { formatCount } from "../format";
 import { ActionBar } from "../primitives/ActionBar";
 import { Link } from "../primitives/Link";
 import { PageHeader } from "../primitives/PageHeader";
@@ -300,9 +301,10 @@ export function ProgressBar({
   label?: string;
 }) {
   if (total === 0) return null;
+  const count = `${formatCount(done)} von ${formatCount(total)} ${label}`;
   return (
-    <div title={`${done} von ${total} ${label} erledigt`}>
-      <Progress done={done} total={total} label={`${done} von ${total} ${label}`} inline />
+    <div title={`${count} erledigt`}>
+      <Progress done={done} total={total} label={count} inline />
     </div>
   );
 }
