@@ -74,7 +74,7 @@ export function ChoicePrompt({
   defaultOptionId?: string | null;
   /**
    * Without this prop there is no text field at all. `toggle` hides it behind
-   * a text button with that word („Eigene Antwort schreiben", 0222); a click
+   * a text button with that word („Anmerkung schreiben", 0222); a click
    * shows the field and moves the focus into it. `defaultValue` fills it.
    */
   freeText?: {

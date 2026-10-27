@@ -639,7 +639,7 @@ export const Step: Story = {
   },
 };
 
-/** Without options the field stands open, and the row has no „Eigene Antwort schreiben"; one group in the box; optional, so a hint and no badge. */
+/** Without options the field stands open, and the row has no „Anmerkung schreiben"; one group in the box; optional, so a hint and no badge. */
 export const StepFreeText: Story = {
   render: () => (
     <StepFrame>

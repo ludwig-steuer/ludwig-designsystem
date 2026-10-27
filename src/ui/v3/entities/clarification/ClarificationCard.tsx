@@ -1106,7 +1106,8 @@ export function ClarificationCard({
             // With options: „Antwortoptionen" as whole rows, and the free text
             // always beside them (rule S13 — 0214, ll-cto); without: no heading,
             // only the field. In the step form the free text waits behind
-            // „Eigene Antwort schreiben" (0222).
+            // „Anmerkung schreiben" (0222). It is a note to the chosen option,
+            // sent with it — hence the word (llcto for the owner, 2026-10-27).
             optionsLabel="Antwortoptionen"
             optionStyle="rows"
             submitLabel={submitLabel}
@@ -1118,8 +1119,8 @@ export function ClarificationCard({
                   ? { label: "Antwort oder Anweisung für die Buchung" }
                   : { label: "Antwort", placeholder: "Antwort oder Anweisung für die Buchung" }
                 : step
-                  ? { label: "Eigene Antwort", toggle: "Eigene Antwort schreiben" }
-                  : { label: "Oder selbst formulieren" }
+                  ? { label: "Anmerkung", toggle: "Anmerkung schreiben" }
+                  : { label: "Anmerkung" }
             }
             optionsNote={noteUnderOptions ? recommendationNote : undefined}
             links={step ? stepLinks : undefined}

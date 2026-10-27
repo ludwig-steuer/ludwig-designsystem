@@ -510,3 +510,10 @@ Entscheid des Design-Systems, von llcto für den Owner angenommen. Ein neues Tok
 gibt es dafür nicht. Callout, Vorauswahl und
 Lesemodus bleiben, wie sie sind. Spec 0229, vermerkt in
 `design-guidelines.md` §3.
+
+## Nachtrag 2026-10-27 — Freitext heißt „Anmerkung“
+
+Das Freitextfeld der Karte mit Optionen heißt „Anmerkung“, nicht mehr „Oder
+selbst formulieren“. Seit 0229 steht es im Rahmen der gewählten Option und geht
+mit ihr hinaus. Entschieden hat das llcto für den Owner am 2026-10-27, ohne
+„(optional)“, weil das Set nur Pflichtfelder markiert (I8).

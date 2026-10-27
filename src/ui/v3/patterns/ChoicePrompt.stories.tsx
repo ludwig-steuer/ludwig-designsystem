@@ -175,7 +175,7 @@ export const OptionRows: Story = {
           { id: "a", label: "Bewirtung (4650)" },
           { id: "b", label: "Reisekosten (4670)", recommended: true },
         ]}
-        freeText={{ label: "Oder selbst formulieren" }}
+        freeText={{ label: "Anmerkung" }}
         submitLabel="Antwort speichern"
         onSubmit={async () => wait(600)}
       />
@@ -201,7 +201,7 @@ export const OptionRowsWithLinks: Story = {
             <strong>Warum empfohlen:</strong> Der Beleg nennt Serverhaus Nord als Leistenden, Brightline Technology nur als Rechnungsadresse.
           </Callout>
         }
-        freeText={{ label: "Eigene Antwort", toggle: "Eigene Antwort schreiben" }}
+        freeText={{ label: "Anmerkung", toggle: "Anmerkung schreiben" }}
         links={
           <>
             <TextButton onClick={() => {}}>Beim Mandanten klären</TextButton>

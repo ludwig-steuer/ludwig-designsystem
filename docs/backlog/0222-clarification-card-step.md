@@ -774,3 +774,11 @@ von 3"); `StepYesNo` zeigt darunter die Lesekarte mit „Empfehlung: Ja";
 `YES_NO` ist als benannte Ausnahme in der Guideline (T4). Der Verlauf der
 Karte nimmt „Ohne Antwort aufgelöst" jetzt aus `RESOLVED_WORD` (0224, M2).
 
+## Nachtrag 2026-10-27 — „Anmerkung schreiben“
+
+Der Textknopf heißt jetzt „Anmerkung schreiben“ und das Feld „Anmerkung“, nicht
+mehr „Eigene Antwort schreiben“ und „Eigene Antwort“. Seit 0229 steht das Feld
+im Rahmen der gewählten Option und wird mit ihr gesendet, die Wörter sagen das
+jetzt. Entschieden von llcto für den Owner am 2026-10-27. Eine echte freie Antwort
+statt der Optionen ist ein eigenes Thema. Die Abnahme oben bleibt wie
+geschrieben.

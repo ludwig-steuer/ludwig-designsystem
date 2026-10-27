@@ -95,7 +95,7 @@ eine eigene Frage (Ausbau).
   Linie, Grund `--color-accent-50`, Rand `--color-accent`. Bei `list` ist er auf
   die Spalte der Beschriftung eingerückt. Unter einer gewählten Gruppenzeile
   steht er ohne Rahmen an der Kante ihrer Optionen.
-- Der Fokus geht nur beim Klick auf „Eigene Antwort schreiben“ ins Feld. Beim
+- Der Fokus geht nur beim Klick auf „Anmerkung schreiben“ ins Feld. Beim
   Wandern wird das Feld neu eingehängt; ein `autoFocus` würde dabei den Fokus
   von den Radios ziehen, deshalb setzt ein Effekt ihn einmal nach dem Klick.
 - Der Block liegt im `<fieldset>` der Radios; ein Screenreader nennt Feld und
@@ -150,7 +150,7 @@ Variabel (aus dieser Spec):
 - [ ] `ChoicePrompt`: Bei gewählter Antwort stehen Feld (`note` oder offener Freitext), Fehler und Knopf im Block. Ohne Wahl und ohne Optionen stehen sie unter der Liste (`OptionRows`, `OptionGroup`, `WithFreeText`, `FreeTextOnly`, `Blocked`)
 - [ ] Tab vom gewählten Radio führt zuerst ins Feld des Blocks, dann zum Knopf (`SourceDocumentReview/Filled`); `Strg+Enter` sendet aus dem Block (`SourceDocumentReview/Interactive`)
 - [ ] Eigener Lauf: Während er läuft, ändert weder Klick noch Pfeiltaste die Wahl, der Knopf bleibt „Sende …“ und gesperrt, ein zweiter Klick oder `Strg+Enter` ruft `onSubmit` nicht noch einmal; der Fokus bleibt, wo er war; danach ist alles wieder frei (`ChoicePrompt/OptionRows`)
-- [ ] Der Fokus bleibt beim Wandern des Blocks am Radio, auch wenn der Freitext per Knopf geöffnet wurde; er geht nur beim Klick auf den Freitext-Knopf ins Feld (`ClarificationCard/Step`: „Eigene Antwort schreiben“, dann Pfeil ab)
+- [ ] Der Fokus bleibt beim Wandern des Blocks am Radio, auch wenn der Freitext per Knopf geöffnet wurde; er geht nur beim Klick auf den Freitext-Knopf ins Feld (`ClarificationCard/Step`: „Anmerkung schreiben“, dann Pfeil ab)
 - [ ] Wechsel der Option: Der Block wandert, ein getippter Text bleibt im Feld (`ChoicePrompt/OptionNote` mit zwei Optionen, die eine `note` tragen, oder zur Laufzeit gemessen)
 - [ ] „empfohlen“ ist ein `info`-Badge; Text ≥ 4,5:1 auf seinem Grund; die Zeile ist so hoch wie eine ohne Badge (`RadioGroup/Rows`, `ChoicePrompt/OptionRows`)
 - [ ] Der Entscheid zur Empfehlung steht mit Datum in `design-guidelines.md` §3, und der JSDoc von `RadioOption.recommended` sagt dasselbe
@@ -506,3 +506,14 @@ Ort des Blocks, Knopf, Textarea und Fokus mitgeschrieben. Tasten über
   Nächster Schritt: Der Label-Commit nimmt die Stellen mit oder nennt sie.
   Nicht blockierend für 0229.
 - H10, H11 bleiben wie in Nachbesserung 3 begründet.
+
+## Label-Commit nach 0229 (2026-10-27)
+
+Wie in Nachbesserung 2 und 3 angekündigt: In `ClarificationCard.tsx` heißen der
+Freitext der Karte und der des Schritts jetzt „Anmerkung“, der Textknopf im
+Schritt „Anmerkung schreiben“ (llcto für den Owner, 2026-10-27). Mitgezogen sind
+die Stories `ChoicePrompt/OptionRows` und `OptionRowsWithLinks`, der Kommentar
+in `ChoicePrompt.tsx` und in `ClarificationCard.stories.tsx` sowie zwei Sätze
+dieser Spec, der in „Verhalten“ und das Kriterium zum Fokus. Das Kriterium hat
+der Spec-Autor nur im Wort des Knopfs geändert, nicht in dem, was es prüft (H14).
+
