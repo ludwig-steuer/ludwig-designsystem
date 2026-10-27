@@ -17,6 +17,7 @@ import { Button } from "@/ui/v3/primitives/Button";
 import { FilterBar } from "@/ui/v3/primitives/FilterBar";
 import { Field, Input, Select } from "@/ui/v3/primitives/Form";
 import { Tabs } from "@/ui/v3/primitives/Nav";
+import { PageHeader } from "@/ui/v3/primitives/PageHeader";
 import { ToastHost, useToast } from "@/ui/v3/primitives/Toast";
 import { DataTable, type ColumnDef } from "@/ui/v3/patterns/DataTable";
 
@@ -252,6 +253,14 @@ function PartnerList({
 
   return (
     <div className="v2stack" style={{ padding: "var(--space-5)" }}>
+      {/* The page's one h1 (0220 A14), like every other page of the set — the
+          runtime guard of 0235 found it missing. */}
+      <PageHeader
+        // No year: the partners hold across years (docs/seiten/partner-liste.md).
+        overline="Musterbau GmbH"
+        title="Geschäftspartner"
+        description="Wer hinter einer Kontonummer, einem Namen oder einer USt-IdNr. steht."
+      />
       {/* One list and one special view (R9): the view has a form of its own —
           the accept column — and an end. */}
       <Tabs
