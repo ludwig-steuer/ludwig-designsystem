@@ -121,6 +121,8 @@ export function Checklist({
   activeKey,
   onPick,
   loading,
+  without = [],
+  jumpHeader = "Sprung",
 }: {
   rows: ChecklistRow[];
   activeKey?: string;
@@ -131,30 +133,39 @@ export function Checklist({
    * done", the opposite of what is happening (V9/T6, 0109).
    */
   loading?: boolean;
+  /**
+   * Columns that say nothing in this frame — `progress` where no check has a
+   * share (0228). Named by the caller, not derived from the rows: a list not
+   * counted yet keeps its column, and the layout does not jump when it loads.
+   */
+  without?: readonly "progress"[];
+  /** Head of the last column — „Weiter zu" where the list leads a non-expert (0228). */
+  jumpHeader?: string;
 }) {
+  const progress = !without.includes("progress");
   // 96: „231 von 231" needs 86 px — at 76 the counter ran into the bar (measured 2026-09-29).
-  const cols = "20px minmax(0, 1fr) 96px 100px 150px";
+  const cols = `20px minmax(0, 1fr) 96px ${progress ? "100px " : ""}150px`;
   return (
     <div className="v2card">
       {/* A real `<table>` like every other list of the set (0106): the
-          checklist is a table — each row has the same five columns, and a
+          checklist is a table — each row has the same columns, and a
           screen reader has to be able to read them column by column. */}
       <Table cols={cols}>
         <HeadRow>
           <span />
           <span>Prüfung</span>
           <span className="v2num">Stand</span>
-          <span>Fortschritt</span>
-          <span>Sprung</span>
+          {progress ? <span>Fortschritt</span> : null}
+          <span>{jumpHeader}</span>
         </HeadRow>
         {loading ? (
           // The shape of the content, not a box: as many rows as will come, at
           // least four, so the card does not collapse. The column head stays —
           // it promises what is coming.
-          <TableLoading rows={Math.max(rows.length, 4)} cols={5} />
+          <TableLoading rows={Math.max(rows.length, 4)} cols={progress ? 5 : 4} />
         ) : (
           rows.map((r) => (
-            <ChecklistLine key={r.key} row={r} active={r.key === activeKey} onPick={onPick} />
+            <ChecklistLine key={r.key} row={r} active={r.key === activeKey} onPick={onPick} progress={progress} />
           ))
         )}
       </Table>
@@ -166,10 +177,12 @@ function ChecklistLine({
   row,
   active,
   onPick,
+  progress,
 }: {
   row: ChecklistRow;
   active: boolean;
   onPick?: (key: string) => void;
+  progress: boolean;
 }) {
   const body = (
     <>
@@ -180,17 +193,19 @@ function ChecklistLine({
       <span className={`v2num v2chk__stand${row.counterAlarm ? " v2num--danger" : ""}`}>
         {row.counter ?? ""}
       </span>
-      <span>
-        {row.progress == null ? null : (
-          // The counter to the left already carries the number, so the bar
-          // stays label-free here.
-          <Progress
-            share={row.progress}
-            tone={row.state === "warning" ? "warning" : "accent"}
-            label={null}
-          />
-        )}
-      </span>
+      {progress ? (
+        <span>
+          {row.progress == null ? null : (
+            // The counter to the left already carries the number, so the bar
+            // stays label-free here.
+            <Progress
+              share={row.progress}
+              tone={row.state === "warning" ? "warning" : "accent"}
+              label={null}
+            />
+          )}
+        </span>
+      ) : null}
       <span className="v2chk__jump">
         {/* The arrow is a Lucide sign, not „→" (T9, 0093 c). */}
         {row.jump ? (

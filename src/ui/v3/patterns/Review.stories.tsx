@@ -99,6 +99,31 @@ export const LoadingEmpty: Story = {
   render: () => <Checklist rows={[]} loading />,
 };
 
+/**
+ * Die Liste vor der Übergabe, für jemanden ohne Systemwissen: keine Prüfung
+ * hat einen Anteil, also fehlt die Spalte „Fortschritt" — sie wäre auf jeder
+ * Zeile leer —, und die letzte Spalte sagt, wohin es geht (0228).
+ */
+export const WithoutProgress: Story = {
+  render: function Render() {
+    const [sel, setSel] = useState<string | undefined>("4");
+    return (
+      <Checklist
+        rows={ROWS.map((z) => ({ ...z, progress: undefined }))}
+        activeKey={sel}
+        onPick={setSel}
+        without={["progress"]}
+        jumpHeader="Weiter zu"
+      />
+    );
+  },
+};
+
+/** Dieselbe Liste, während sie rechnet: vier Spalten auch im Ladezustand, nichts springt (0228). */
+export const WithoutProgressLoading: Story = {
+  render: () => <Checklist rows={ROWS} loading without={["progress"]} jumpHeader="Weiter zu" />,
+};
+
 /** Die neun Zustands-Icons — Lucide statt Sonderzeichen (V7). */
 export const StateIcons: Story = {
   render: () => (
