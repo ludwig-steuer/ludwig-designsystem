@@ -25,7 +25,7 @@
  * Rechnung durch und bekamen eine Richtungszeile über einen Steuerbescheid.
  *
  * ## Python-Spiegel
- * `apps/shared/src/buchassi_shared/document_category.py`. Die beiden Seiten
+ * `apps/pipeline/src/ludwig/shared/document_category.py`. Die beiden Seiten
  * werden von `__tests__/document-form-mapping.test.ts` Zeile für Zeile
  * gegeneinander gehalten — wer hier ändert und dort nicht, wird rot.
  */
@@ -98,6 +98,11 @@ export const DOCUMENT_FORM_ROUTING: Record<string, DocumentFormRouting> = {
   fuel_receipt: { category: "performance", sourceDocType: "invoice", invoiceFlow: true },
   hospitality_receipt: { category: "performance", sourceDocType: "invoice", invoiceFlow: true },
   cash_receipt: { category: "performance", sourceDocType: "invoice", invoiceFlow: true },
+  // F438: Fahrausweis (§ 34 UStDV) — analog fuel_receipt.
+  transport_ticket: { category: "performance", sourceDocType: "invoice", invoiceFlow: true },
+  // F438: Eigenbeleg — Extraktion lohnt (Betrag/Datum); kein Vorsteuerabzug
+  // ist Buchungs-, nicht Pipeline-Sache.
+  own_receipt: { category: "performance", sourceDocType: "invoice", invoiceFlow: true },
   delivery_note: { category: "performance", sourceDocType: "other", invoiceFlow: false },
   payment_reminder: { category: "performance", sourceDocType: "other", invoiceFlow: false },
 
@@ -125,11 +130,19 @@ export const DOCUMENT_FORM_ROUTING: Record<string, DocumentFormRouting> = {
     sourceDocType: "travel_expense_report",
     invoiceFlow: false,
   },
+  // F438: Abrechnung eines Dritten (KV/KZV/PVS/Krankenkasse/PSP/
+  // Zentralregulierung als Oberform) — wird wie Lohn als Sachverhalt gebucht,
+  // Extraktion folgt in W5.
+  third_party_settlement: { category: "internal", sourceDocType: "other", invoiceFlow: false },
 
   // — Kein Beleg (O7) —
   accounting_report: { category: "report", sourceDocType: "other", invoiceFlow: false },
 
   // — Ohne Kategorie —
+  // F438: kein Buchhaltungsbeleg (private Unterlage, Steuererklärungs-
+  // Unterlage, Werbung) — Routing: human_review/not_bookkeeping,
+  // Disposition Kanzlei (process-source-doc-core).
+  not_bookkeeping: { category: null, sourceDocType: "other", invoiceFlow: false },
   // C3: Container. Die Kategorie entsteht erst je Teilbeleg nach dem Split.
   document_collection: { category: null, sourceDocType: "other", invoiceFlow: false },
   other: { category: null, sourceDocType: "other", invoiceFlow: false },
@@ -158,6 +171,12 @@ export function docCategoryForForm(form: string | null | undefined): DocCategory
   return routeDocumentForm(form).category;
 }
 
+/**
+ * F550: Von einer längeren Rechnung gehen nur die relevanten Seiten an die Auslese.
+ * Zwilling: MAX_INVOICE_PAGES in azure_content_understanding.py.
+ */
+export const MAX_INVOICE_PAGES = 10;
+
 /** Ersatz für `qualifiesForInvoiceFlow(entry)` auf der Formen-Achse. */
 export function formQualifiesForInvoiceFlow(form: string | null | undefined): boolean {
   return routeDocumentForm(form).invoiceFlow;
@@ -183,7 +202,7 @@ export const INVOICE_FLOW_FORMS: readonly string[] = Object.entries(DOCUMENT_FOR
  * Belegarten, die zwingend ein Rechnungsdokument beschreiben. `refund` fehlt
  * bewusst: eine Erstattung kann legitim auf einem Kontoauszug stehen.
  *
- * TS-Spiegel von `buchassi_shared.document_category.INVOICE_IMPLYING_KINDS`;
+ * TS-Spiegel von `ludwig.shared.document_category.INVOICE_IMPLYING_KINDS`;
  * `document-form-mapping.test.ts` hält beide Seiten deckungsgleich.
  */
 export const INVOICE_IMPLYING_KINDS: readonly string[] = ["self_billing", "credit_note"];

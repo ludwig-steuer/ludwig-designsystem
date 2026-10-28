@@ -144,7 +144,7 @@ export function deriveVatTreatment(input: VatTreatmentInput): VatTreatmentResult
       null,
       "needs_agent",
       vatShown === "yes"
-        ? `Aussteller im ${abroad}, aber USt ausgewiesen — ausländische Steuer oder Fehler, Ludwig prüft`
+        ? `Aussteller im ${abroad}, aber USt ausgewiesen — ohne deutsche USt-IdNr. des Ausstellers kein Vorsteuerabzug (§ 14c UStG, VST-XB-5); § 13b auf das Netto (94/95) oder Klärung`
         : `Aussteller im ${abroad}, Steuerausweis nicht ermittelbar`,
     );
   }

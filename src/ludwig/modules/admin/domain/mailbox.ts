@@ -1,7 +1,7 @@
 /**
  * F262 — eine aus dem Mailprogramm kopierte Adresse in Adresse und Namen
- * zerlegen: „Amanda Mende <Mende@advicon.tax>", „Mende, Amanda <…>",
- * „"Mende, Amanda" <…>" oder die nackte Adresse. Gespeichert wird der Name
+ * zerlegen: „Anna Muster <Muster@muster-stb.de>", „Muster, Anna <…>",
+ * „"Muster, Anna" <…>" oder die nackte Adresse. Gespeichert wird der Name
  * immer als „Vorname Nachname" (Owner-Entscheid).
  *
  * Ob die Adresse gültig ist, entscheidet weiter das Zod-Schema des Servers —

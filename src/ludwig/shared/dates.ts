@@ -17,3 +17,15 @@ export function formatGermanDate(iso: IsoDate): string {
 export function formatGermanDateTime(iso: IsoDateTime): string {
   return format(parseISO(iso), "dd.MM.yyyy HH:mm", { locale: de });
 }
+
+/**
+ * yyyy-mm-dd um `months` Monate zurück, Tag auf Monatsende geklemmt
+ * (31.03. minus 1 Monat → 28./29.02., nicht 02./03.03.).
+ */
+export function monthsBefore(iso: string, months: number): string {
+  const [y, m, d] = iso.split("-").map(Number);
+  const target = new Date(Date.UTC(y!, m! - 1 - months, 1));
+  const lastDay = new Date(Date.UTC(target.getUTCFullYear(), target.getUTCMonth() + 1, 0)).getUTCDate();
+  target.setUTCDate(Math.min(d!, lastDay));
+  return target.toISOString().slice(0, 10);
+}

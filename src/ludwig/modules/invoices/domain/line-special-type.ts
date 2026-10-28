@@ -2,7 +2,7 @@
  * Der Spezial-Typ einer Position, in Worten.
  *
  * Der Wertebereich gehört dem Interpreter: `LineSpecialType` in
- * `apps/shared/src/buchassi_shared/interpretation.py`. Hier steht, wie ein
+ * `apps/pipeline/src/ludwig/shared/interpretation.py`. Hier steht, wie ein
  * Mensch die Werte liest; die Werte selbst bleiben englisch (Naming-Regel).
  *
  * Unbekanntes bleibt sichtbar: `lineSpecialTypeLabel` gibt den Rohwert zurück.

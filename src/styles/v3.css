@@ -5209,8 +5209,10 @@ a.v3bbr__val:hover { text-decoration-color: currentColor; }
 
 /* 0225 · Ludwig's run: the bar under the step bar and the short form in a row.
    The frame is the step bar's; only the surface takes the state. One height
-   in all three states (the sm button fits), so „fertig" does not jump.
-   The lead takes the colour of the state, the facts stay muted:
+   in all five states (the sm button fits), so „fertig" does not jump.
+   The lead takes the colour of the state's level, the facts stay muted
+   (`success` has no state on the axis today; the class keeps every level
+   styled if one gets it):
    `--color-accent-700` 5.04:1 on accent-50
    `--color-success` 4.63:1 on success-bg
    `--color-danger` 4.99:1 on danger-bg
@@ -5224,20 +5226,32 @@ a.v3bbr__val:hover { text-decoration-color: currentColor; }
   background: var(--color-info-bg);
   border: 1px solid var(--color-border); border-radius: var(--radius-lg);
 }
-.v3run--done { background: var(--color-success-bg); }
-.v3run--failed { background: var(--color-danger-bg); }
+/* Every state takes its tone from the registry axis `agent_run_banner` (0225,
+   owner 2026-10-28): one class per kind, not per state; `info` (running) is
+   the base above. */
+.v3run--success { background: var(--color-success-bg); }
+.v3run--warning { background: var(--color-warning-bg); }
+.v3run--danger { background: var(--color-danger-bg); }
+.v3run--neutral { background: var(--color-bg-soft); }
 .v3run > svg { flex-shrink: 0; }
 .v3run__text { flex: 1 1 auto; min-width: 0; margin: 0; color: var(--color-text-muted); }
 .v3run__lead { font-weight: 600; color: var(--color-accent-700); }
-.v3run--done .v3run__lead { color: var(--color-success); }
-.v3run--failed .v3run__lead { color: var(--color-danger); }
+.v3run--success .v3run__lead { color: var(--color-success); }
+/* `--color-warning` 4.78:1 on warning-bg */
+.v3run--warning .v3run__lead { color: var(--color-warning); }
+.v3run--danger .v3run__lead { color: var(--color-danger); }
+/* `--color-text` 12.71:1 on bg-soft */
+.v3run--neutral .v3run__lead { color: var(--color-text); }
 .v3run__sep { white-space: pre; margin: 0 var(--space-1); }
 .v3run__ref { margin-left: var(--space-2); }
-/* The link accent misses 4.5 on red by a hair (measured); navy keeps it
-   a link beside the red sentence. `--color-primary` 9.59:1 on danger-bg */
-.v3run--failed .v2link { color: var(--color-primary); }
+/* The link accent misses 4.5 on red by a hair (measured); navy keeps it a
+   link beside the coloured sentence, on every tone of an ended run.
+   `--color-primary` 9.59:1 on danger-bg
+   `--color-primary` 10.08:1 on warning-bg
+   `--color-primary` 10.75:1 on bg-soft */
+.v3run__ref .v2link { color: var(--color-primary); }
 /* The ring too: the focus colour reaches 2.93 on red (M5), navy 9.59. */
-.v3run--failed .v2link:focus-visible { outline-color: var(--color-primary); }
+.v3run__ref .v2link:focus-visible { outline-color: var(--color-primary); }
 .v3run__action { flex-shrink: 0; margin-left: auto; }
 
 /* `top`, not the baseline: an inline-flex takes its baseline from the first

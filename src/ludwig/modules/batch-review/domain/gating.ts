@@ -1,6 +1,7 @@
-import { AGENT_STALL_MINUTES, type BookingCycleKind } from "@/ludwig/modules/datev-export";
+import { type BookingCycleKind } from "@/ludwig/modules/accounting-cases";
+import { AGENT_STALL_MINUTES } from "@/ludwig/modules/agent-runs";
 
-import { reviewStepApplies, NACHLESE_STEP, TRANSFER_STEP } from "./steps";
+import { reviewStepApplies, type ReviewStepKey } from "./steps";
 
 /**
  * Wer darf in der Abnahme was — abgeleitet aus dem Stapel-Zustand
@@ -38,10 +39,10 @@ export interface ReviewBanner {
 }
 
 export interface ReviewGating {
-  /** Darf die Kanzlei in den Schritten 0–8 überhaupt schreiben? */
+  /** Darf die Kanzlei in den Prüfschritten bis zum Prüfprotokoll überhaupt schreiben? */
   writable: boolean;
   /** Wohin „Öffnen" springt, wenn kein Schritt in der URL steht. */
-  entryStep: number;
+  entryStep: ReviewStepKey;
   banner: ReviewBanner | null;
 }
 
@@ -82,7 +83,7 @@ function gatingOhneZeit(state: string, opts?: { agentIdleMinutes?: number | null
   ) {
     return {
       writable: false,
-      entryStep: 0,
+      entryStep: "result",
       banner: {
         tone: "warning",
         text:
@@ -95,7 +96,7 @@ function gatingOhneZeit(state: string, opts?: { agentIdleMinutes?: number | null
   if (state === "agent") {
     return {
       writable: false,
-      entryStep: 0,
+      entryStep: "result",
       banner: {
         tone: "info",
         text: "Ludwig arbeitet an diesem Stapel — alles sichtbar, nichts quittierbar.",
@@ -106,7 +107,7 @@ function gatingOhneZeit(state: string, opts?: { agentIdleMinutes?: number | null
   if (state === "prepared") {
     return {
       writable: false,
-      entryStep: 0,
+      entryStep: "result",
       banner: {
         tone: "warning",
         text:
@@ -117,12 +118,12 @@ function gatingOhneZeit(state: string, opts?: { agentIdleMinutes?: number | null
     };
   }
   if (state === "review") {
-    return { writable: true, entryStep: 0, banner: null };
+    return { writable: true, entryStep: "result", banner: null };
   }
   if (IN_TRANSFER.has(state)) {
     return {
       writable: false,
-      entryStep: TRANSFER_STEP,
+      entryStep: "transfer",
       banner:
         state === "failed"
           ? {
@@ -140,7 +141,7 @@ function gatingOhneZeit(state: string, opts?: { agentIdleMinutes?: number | null
   if (IN_DATEV.has(state)) {
     return {
       writable: false,
-      entryStep: NACHLESE_STEP,
+      entryStep: "follow-up",
       banner: {
         tone: "info",
         text: "Der Stapel ist in DATEV angekommen. Änderungen gehen nur noch über Storno im Folgestapel.",
@@ -151,7 +152,7 @@ function gatingOhneZeit(state: string, opts?: { agentIdleMinutes?: number | null
   // `cancelled` und alles Unbekannte: sichtbar, aber tot.
   return {
     writable: false,
-    entryStep: 0,
+    entryStep: "result",
     banner: {
       tone: "warning",
       text: "Dieser Stapel ist abgebrochen — er wird nicht mehr weitergeführt.",
@@ -166,20 +167,20 @@ function gatingOhneZeit(state: string, opts?: { agentIdleMinutes?: number | null
  * `kind` ist Pflicht und hat bewusst keinen Default: ein vergessenes Argument
  * soll auffallen, nicht still `regular` bedeuten.
  *
- * Schritt 10 (Nachlese) öffnet, **sobald DATEV den Stapel bestätigt hat**.
+ * Die Nachlese öffnet, **sobald DATEV den Stapel bestätigt hat**.
  * Vorher gibt es nichts abzugleichen — dann ist der Eintrag gedimmt und sagt
  * im Titel, worauf er wartet. (Bis F123 war er dauerhaft gedimmt, obwohl der
  * Abgleich Ludwig ⟷ DATEV längst gelesen werden kann.)
  */
-export function stepAccess(state: string, step: number, kind: BookingCycleKind): StepAccess {
+export function stepAccess(state: string, step: ReviewStepKey, kind: BookingCycleKind): StepAccess {
   // Was in dieser Stapelart nicht gilt, ist nicht gedimmt-weil-später, sondern
   // gar nicht da (F179) — der Rail blendet es aus.
   if (!reviewStepApplies(step, kind)) return "dimmed";
-  if (step === NACHLESE_STEP) return IN_DATEV.has(state) ? "readonly" : "dimmed";
+  if (step === "follow-up") return IN_DATEV.has(state) ? "readonly" : "dimmed";
   const gating = reviewGating(state);
   // Der Transportschritt ist immer lesbar: „was ginge jetzt raus?" ist auch vor
   // der Prüfung eine sinnvolle Frage (F178).
-  if (step === TRANSFER_STEP) return IN_TRANSFER.has(state) ? "active" : "readonly";
-  // Alles andere (0–8 und der Mandantenstapel-Schritt 11) folgt dem Zustand.
+  if (step === "transfer") return IN_TRANSFER.has(state) ? "active" : "readonly";
+  // Alles andere (bis zum Prüfprotokoll, auch die Buchungen des Mandanten) folgt dem Zustand.
   return gating.writable ? "active" : "readonly";
 }

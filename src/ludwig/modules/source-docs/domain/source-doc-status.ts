@@ -29,6 +29,8 @@ export const SOURCE_DOC_REVIEW_REASONS = [
   "processing_stuck",
   "statement_account_missing",
   "statement_check_failed",
+  "not_bookkeeping",
+  "file_unreadable",
 ] as const;
 export type SourceDocReviewReason = (typeof SOURCE_DOC_REVIEW_REASONS)[number];
 
@@ -69,7 +71,7 @@ export const SOURCE_DOC_STATUS_TRANSITIONS: readonly SourceDocStatusTransition[]
     trigger: "routed_to_accounting",
     from: ["pending"],
     to: "human_review",
-    by: "benannter System-Sonderfall (statement_account_missing, statement_check_failed)",
+    by: "benannter System-Sonderfall (statement_account_missing, statement_check_failed, not_bookkeeping, file_unreadable)",
   },
   { trigger: "extraction_completed", from: ["extracting"], to: "bookable", by: "Pipeline, Split" },
   { trigger: "extraction_needs_review", from: ["extracting"], to: "agent_review", by: "Pipeline (Befunde/Abbruch), Job-Endfehler" },
@@ -81,7 +83,13 @@ export const SOURCE_DOC_STATUS_TRANSITIONS: readonly SourceDocStatusTransition[]
     by: "Revalidierung sauber, Korrektur, Anhängen mit Daten",
   },
   { trigger: "findings_reappeared", from: ["bookable"], to: "agent_review", by: "Revalidierung findet Befunde" },
-  { trigger: "escalated_to_accounting", from: ["agent_review"], to: "human_review", by: "Ludwig (escalate_doc_review, Pflicht-Grund)" },
+  {
+    trigger: "e_invoice_findings",
+    from: ["extracting", "bookable"],
+    to: "human_review",
+    by: "Pipeline/Revalidierung: E-Rechnung mit offenen Befunden (F486, verbindlich — Ludwig korrigiert sie nicht)",
+  },
+  { trigger: "escalated_to_accounting", from: ["agent_review"], to: "human_review", by: "Ludwig (Übergabe an die Kanzlei, Pflicht-Grund)" },
   { trigger: "returned_to_agent", from: ["human_review"], to: "agent_review", by: "Kanzlei (Pflicht-Grund)" },
   {
     trigger: "reprocess_requested",
@@ -93,9 +101,9 @@ export const SOURCE_DOC_STATUS_TRANSITIONS: readonly SourceDocStatusTransition[]
     trigger: "completed",
     from: ["pending", "extracting", "agent_review", "human_review", "bookable"],
     to: "done",
-    by: "Trigger (Buchung, Verzicht, Case-Close, Supersede), complete_doc, Import, Textdublette",
+    by: "Trigger (Buchung, Verzicht, Case-Close, Supersede), Abschluss durch Ludwig mit Grund, Import, Textdublette",
   },
-  { trigger: "reopened", from: ["done"], to: "bookable", by: "Ludwig (reopen_doc), Kanzlei (R14d), Trigger (letzte Buchung weg)" },
+  { trigger: "reopened", from: ["done"], to: "bookable", by: "Ludwig (Wiederöffnen), Kanzlei (R14d), Trigger (letzte Buchung weg)" },
   { trigger: "soft_deleted", from: ALL_BUT_DELETED, to: "deleted", by: "Löschen" },
 ];
 

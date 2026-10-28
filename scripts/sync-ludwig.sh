@@ -52,7 +52,11 @@ rsync -a --prune-empty-dirs \
   --include='*/' \
   --include='core/datev/**.ts' \
   --include='core/documents/*.ts' \
+  --include='core/accounting/clarification-handling.ts' \
   --include='core/accounting/clearing-account.ts' \
+  --include='core/accounting/pruefpunkte.ts' \
+  --include='core/accounting/reversal-note.ts' \
+  --include='core/accounting/vat-by-rate.ts' \
   --include='core/accounting/payment-account-kind.ts' \
   --include='core/accounting/statement-expectation.ts' \
   --include='shared/*.ts' \

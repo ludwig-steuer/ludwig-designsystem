@@ -11,7 +11,7 @@
  * Zustand.
  */
 
-export type BatchPhaseKey = "buchen" | "pruefen" | "uebertragen" | "angekommen";
+export type BatchPhaseKey = "booking" | "review" | "transfer" | "arrived";
 
 export interface BatchPhase {
   key: BatchPhaseKey;
@@ -22,16 +22,16 @@ export interface BatchPhase {
 }
 
 export const BATCH_PHASES: readonly BatchPhase[] = [
-  { key: "buchen", label: "Buchen", sub: "Ludwig", states: ["agent", "prepared"] },
-  { key: "pruefen", label: "Prüfen", sub: "Kanzlei", states: ["review"] },
+  { key: "booking", label: "Buchen", sub: "Ludwig", states: ["agent", "prepared"] },
+  { key: "review", label: "Prüfen", sub: "Kanzlei", states: ["review"] },
   {
-    key: "uebertragen",
+    key: "transfer",
     label: "Übertragen",
     sub: "DATEV",
     states: ["ready", "exporting", "inspection", "failed"],
   },
   {
-    key: "angekommen",
+    key: "arrived",
     label: "Angekommen",
     sub: "Spiegel und Nachlese",
     states: ["confirmed", "mirrored", "closed"],
@@ -45,13 +45,14 @@ export type PhaseStatus = "done" | "active" | "pending" | "failed";
  * passiert ist — der Stapel steht dort, er ist nicht weiter.
  *
  * `cancelled` ist terminal ohne Phase: alles bleibt `pending`, weil der Stapel
- * den Weg nicht zu Ende gegangen ist.
+ * den Weg nicht zu Ende gegangen ist. `closed` ist durch: alle Phasen `done`,
+ * damit die Leiste grün wird wie beim Beleg (`processComplete`, Owner 2026-10-01).
  */
 export function batchPhaseProgress(state: string): Array<BatchPhase & { status: PhaseStatus }> {
   const activeIndex = BATCH_PHASES.findIndex((p) => p.states.includes(state));
   return BATCH_PHASES.map((phase, i) => {
     if (activeIndex < 0) return { ...phase, status: "pending" as const };
-    if (i < activeIndex) return { ...phase, status: "done" as const };
+    if (i < activeIndex || state === "closed") return { ...phase, status: "done" as const };
     if (i > activeIndex) return { ...phase, status: "pending" as const };
     return { ...phase, status: state === "failed" ? ("failed" as const) : ("active" as const) };
   });
@@ -190,13 +191,13 @@ export function batchOpenLabel(state: string): string {
 export interface BatchAction {
   /** Was der Knopf tut. Der Aufrufer verdrahtet Ziel oder Handler. */
   key:
-    | "zur_abnahme"
-    | "uebernehmen"
-    | "zur_uebergabe"
-    | "erneut_uebertragen"
-    | "abbrechen"
-    | "protokoll"
-    | "zur_nachlese";
+    | "to_review"
+    | "take_over"
+    | "to_transfer"
+    | "retransfer"
+    | "cancel"
+    | "timeline"
+    | "to_follow_up";
   label: string;
   variant: "primary" | "secondary" | "tertiary";
 }
@@ -224,20 +225,20 @@ export function batchActions(state: string, exportMethod: BatchExportMethod = nu
     case "agent":
       return {
         ...leer,
-        secondary: { key: "zur_abnahme", label: "Ansehen", variant: "secondary" },
+        secondary: { key: "to_review", label: "Ansehen", variant: "secondary" },
         info: "Ludwig arbeitet — quittieren lässt sich erst nach dem Durchgang, ansehen jederzeit.",
       };
     case "prepared":
       return {
-        primary: { key: "uebernehmen", label: "Prüfung übernehmen", variant: "primary" },
-        secondary: { key: "zur_abnahme", label: "Ansehen", variant: "secondary" },
+        primary: { key: "take_over", label: "Prüfung übernehmen", variant: "primary" },
+        secondary: { key: "to_review", label: "Ansehen", variant: "secondary" },
         tertiary: null,
         // F304 (L-351): der Nebensatz steht in der Registry-description von `prepared` (hinter dem (i)).
         info: null,
       };
     case "review":
       return {
-        primary: { key: "zur_abnahme", label: "Zur Abnahme", variant: "primary" },
+        primary: { key: "to_review", label: "Zur Abnahme", variant: "primary" },
         secondary: null,
         tertiary: null,
         info: null,
@@ -247,58 +248,64 @@ export function batchActions(state: string, exportMethod: BatchExportMethod = nu
       // sonst holt die Bridge, und die Kanzlei sieht nur zu.
       return exportMethod === "csv"
         ? {
-            primary: { key: "zur_uebergabe", label: "Zur Übergabe", variant: "primary" },
+            primary: { key: "to_transfer", label: "Zur Übergabe", variant: "primary" },
             secondary: null,
-            tertiary: { key: "abbrechen", label: "Freigabe zurücknehmen", variant: "tertiary" },
+            tertiary: { key: "cancel", label: "Freigabe zurücknehmen", variant: "tertiary" },
             info: null,
           }
         : {
             primary: null,
-            secondary: { key: "zur_uebergabe", label: "Transport ansehen", variant: "secondary" },
-            tertiary: { key: "abbrechen", label: "Freigabe zurücknehmen", variant: "tertiary" },
+            secondary: { key: "to_transfer", label: "Transport ansehen", variant: "secondary" },
+            tertiary: { key: "cancel", label: "Freigabe zurücknehmen", variant: "tertiary" },
             info: "Freigegeben — die Bridge holt den Stapel beim nächsten Poll.",
           };
     case "exporting":
     case "inspection":
       return {
         ...leer,
-        secondary: { key: "zur_uebergabe", label: "Transport ansehen", variant: "secondary" },
+        secondary: { key: "to_transfer", label: "Transport ansehen", variant: "secondary" },
         info: "Der Stapel ist unterwegs — bis zur Antwort von DATEV gibt es nichts zu entscheiden.",
       };
     case "failed":
       return {
-        primary: { key: "erneut_uebertragen", label: "Erneut übertragen", variant: "primary" },
-        secondary: { key: "protokoll", label: "Protokoll ansehen", variant: "secondary" },
-        tertiary: { key: "abbrechen", label: "Freigabe zurücknehmen", variant: "tertiary" },
+        primary: { key: "retransfer", label: "Erneut übertragen", variant: "primary" },
+        secondary: { key: "timeline", label: "Protokoll ansehen", variant: "secondary" },
+        tertiary: { key: "cancel", label: "Freigabe zurücknehmen", variant: "tertiary" },
         info: null,
       };
     case "confirmed":
       return {
         ...leer,
-        secondary: { key: "zur_uebergabe", label: "Transport ansehen", variant: "secondary" },
+        secondary: { key: "to_transfer", label: "Transport ansehen", variant: "secondary" },
         info: "Von DATEV bestätigt — wartet auf den Spiegel.",
       };
     case "mirrored":
       return {
         ...leer,
-        secondary: { key: "zur_nachlese", label: "Nachlese ansehen", variant: "secondary" },
+        secondary: { key: "to_follow_up", label: "Nachlese ansehen", variant: "secondary" },
         info: "Im Spiegel angekommen — Ludwig macht die Nachlese.",
       };
     case "closed":
       return {
         ...leer,
-        secondary: { key: "zur_nachlese", label: "Nachlese ansehen", variant: "secondary" },
+        secondary: { key: "to_follow_up", label: "Nachlese ansehen", variant: "secondary" },
         info: "Abgeschlossen — Änderungen gehen nur noch über Storno im Folgestapel.",
       };
     case "cancelled":
       return {
         ...leer,
-        secondary: { key: "zur_abnahme", label: "Ansehen", variant: "secondary" },
+        secondary: { key: "to_review", label: "Ansehen", variant: "secondary" },
         info: "Abgebrochen — dieser Stapel wird nicht weitergeführt.",
       };
     default:
       return leer;
   }
+}
+
+/** F352: Die Abnahme ist in jedem Zustand lesbar — fehlt der Weg in den Aktionen, braucht es einen eigenen Link. */
+export function needsReviewLink(state: string, exportMethod: BatchExportMethod = null): boolean {
+  const { primary, secondary, tertiary } = batchActions(state, exportMethod);
+  return ![primary, secondary, tertiary].some((a) => a?.key === "to_review");
 }
 
 /**
@@ -310,16 +317,17 @@ export function batchActions(state: string, exportMethod: BatchExportMethod = nu
 export function batchActionHref(base: string, batchId: string, key: BatchAction["key"]): string {
   const batch = `${base}/batches/${batchId}`;
   switch (key) {
-    case "zur_abnahme":
-    case "uebernehmen":
-      return `${batch}/review`;
-    case "zur_uebergabe":
-    case "erneut_uebertragen":
-    case "abbrechen":
-      return `${batch}/review/9`;
-    case "zur_nachlese":
-      return `${batch}/review/10`;
-    case "protokoll":
+    case "to_review":
+    case "take_over":
+      // F560: die Abnahme beginnt auf ihrer Startseite; einen Mandantenstapel leitet sie in die Stapelabnahme.
+      return `${batch}/close`;
+    case "to_transfer":
+    case "retransfer":
+    case "cancel":
+      return `${batch}/review/transfer`;
+    case "to_follow_up":
+      return `${batch}/review/follow-up`;
+    case "timeline":
       return `${batch}?tab=timeline`;
     default:
       throw new Error(`batch action without target: ${String(key)}`);

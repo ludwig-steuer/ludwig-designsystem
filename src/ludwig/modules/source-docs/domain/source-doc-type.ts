@@ -11,6 +11,21 @@
  */
 import { DOCUMENT_FORM_LABEL } from "./document-form-labels";
 
+/** Werte des CHECK `client_source_docs_source_doc_type_check` (20260923120000), F420 `document_search`. */
+export const SOURCE_DOC_TYPES = [
+  "invoice",
+  "contract",
+  "bank_statement_pdf",
+  "credit_card_statement",
+  "travel_expense_report",
+  "declaration",
+  "other",
+  "extf_booking_batch",
+  "extf_account_list",
+] as const;
+/** Werteraum der Spalte; `SourceDocType` (document-form-mapping) ist der Schreiber-Typ ohne `declaration`. */
+export type SourceDocTypeValue = (typeof SOURCE_DOC_TYPES)[number];
+
 export const SOURCE_DOC_TYPE_LABELS: Record<string, string> = {
   invoice: "Rechnung",
   contract: "Vertrag",

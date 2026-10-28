@@ -1,3 +1,5 @@
+import type { ReviewStepKey } from "./steps";
+
 /**
  * Wie eine offene Gate-Zeile in der Abnahme gelesen wird (F123 §6).
  *
@@ -168,17 +170,19 @@ export function readGateRow(raw: unknown): GateRow {
 /**
  * Wohin ein Befund in der Abnahme führt (F246) — Pfad-Suffix hinter
  * `…/review/`, `null` ohne Gegenstand. Die Bankzeile öffnet ihren Drawer nur
- * in den Schritten, die ihn haben (1 und 4).
+ * in den Schritten, die ihn haben (Vollständigkeit und Kontenausgleich).
  */
-export function findingHref(step: number, z: GateRow): string | null {
-  if (z.transactionId && (step === 1 || step === 4)) return `${step}?transactionId=${z.transactionId}`;
+export function findingHref(step: ReviewStepKey, z: GateRow): string | null {
+  if (z.transactionId && (step === "completeness" || step === "account-clearing")) {
+    return `${step}?transactionId=${z.transactionId}`;
+  }
   if (z.sourceDocId) return `${step}?document=${z.sourceDocId}`;
-  if (z.caseId) return `3?case=${z.caseId}`;
-  if (z.accountNumber && step === 4) return `4?bookings=${z.accountNumber}`;
+  if (z.caseId) return `proposals?case=${z.caseId}`;
+  if (z.accountNumber && step === "account-clearing") return `account-clearing?bookings=${z.accountNumber}`;
   return null;
 }
 
-/** Die Befunde von Gate 4d, wie das Prüfprotokoll (Schritt 8) sie als Prüfpunkte zeigt (F245; seit F255 nur dort). */
+/** Die Befunde von Gate 4d, wie das Prüfprotokoll sie als Prüfpunkte zeigt (F245; seit F255 nur dort). */
 export interface ReconciliationChecks {
   /** Geld ist geflossen, eine freigegebene Buchung fehlt — „Jede Auszugszeile ist gebucht". */
   booked: GateRow[];

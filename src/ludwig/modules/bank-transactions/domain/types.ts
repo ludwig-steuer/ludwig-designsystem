@@ -49,23 +49,6 @@ export interface BankCsvColumnRole {
 }
 
 /**
- * Dry-Run-Ergebnis aus `analyzeBankCsvAction`. Wird im Wizard Schritt 1
- * gerendert: erkanntes Format, Spalten-Mapping, normalisierte Preview,
- * Counts und Hinweise — aber kein DB-Insert.
- */
-export interface BankCsvAnalysis {
-  format: BankFileFormatId;
-  formatLabel: string;
-  columns: BankCsvColumnRole[];
-  /** Maximal die ersten 5 Zeilen, bereits normalisiert. */
-  preview: BankTransactionRow[];
-  rowCount: number;
-  /** Anzahl Zeilen mit Original-Währung ≠ Kontowährung (reine Info). */
-  nonAccountCurrencyCount: number;
-  warnings: string[];
-}
-
-/**
  * Kennung des Kontos, zu dem ein Auszug gehört — aus dem Statement-KOPF, nicht aus den Zeilen.
  * Basis für die automatische Kontozuordnung (`docs/topics/bank.md`).
  * Bisher wurde nur die Gegenpartei-IBAN gelesen und die eigene verworfen.
@@ -101,6 +84,12 @@ export interface BankTransactionRow {
   counterpartyBic: string | null;
   /** Original-Daten der Quelle (CSV-Row als Object, Qonto-JSON-Subset). */
   rawPayload: Record<string, unknown>;
+  /** F489: Transaktionscode der Bank mit Präfix der Quelle (`GVC:105`); null = Format ohne Code. */
+  bankTxCode: string | null;
+  /** F489: Zahlungsart (`BANK_TX_KINDS`); null = unbekannt. */
+  bankTxKind: string | null;
+  /** F489: ISO-Purpose-Code (`SALA`). */
+  purposeCode: string | null;
 }
 
 export interface BankImportPeriod {
@@ -167,5 +156,4 @@ export type BankImportErrorCode =
   | "parser_error"
   /** F288: gelesen, aber Prüfkette nicht aufgegangen — `StatementInconsistentError`. */
   | "statement_inconsistent"
-  | "storage_error"
   | "qonto_api_error";

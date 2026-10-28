@@ -27,3 +27,21 @@ export function clientScopeFor(
   }
   return { kind: "none" };
 }
+
+/**
+ * PT-19 — darf diese Sitzung den Mandanten sehen? Dieselbe Regel wie die Liste
+ * (`clientScopeFor`), keine zweite: wer einen Mandanten nicht in seiner Liste
+ * hat, erreicht auch seine Seiten nicht.
+ */
+export function clientInScope(scope: ClientScope, client: { tenantId: string; clientId: string }): boolean {
+  switch (scope.kind) {
+    case "all":
+      return true;
+    case "tenant":
+      return client.tenantId === scope.tenantId;
+    case "clients":
+      return scope.clientIds.includes(client.clientId);
+    case "none":
+      return false;
+  }
+}

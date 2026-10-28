@@ -137,7 +137,20 @@ function effect(f: DocumentClassificationFacts): ClassificationPicture["effect"]
   return word ? { word } : undefined;
 }
 
-function bundle(f: DocumentClassificationFacts, links: ClassificationLinks): ClassificationPicture["bundle"] {
+/**
+ * Wie das Bild in einer Liste steht. `pageRangeInColumn`: die Ansicht zeigt die
+ * Seiten in einer eigenen Spalte — das Teil-Wort lässt den Bereich dann weg
+ * (DS-Entscheid M6 zu 0212, F341). Der Dialog zeigt ihn immer.
+ */
+export interface ClassificationPictureOptions {
+  pageRangeInColumn?: boolean;
+}
+
+function bundle(
+  f: DocumentClassificationFacts,
+  links: ClassificationLinks,
+  opts: ClassificationPictureOptions,
+): ClassificationPicture["bundle"] {
   const parts = `${links.self}#parts`;
   if (f.doneVia === "superseded") {
     return { role: "superseded", word: f.childCount > 0 ? `zerlegt in ${f.childCount} Teile` : "zerlegt", href: parts };
@@ -146,7 +159,7 @@ function bundle(f: DocumentClassificationFacts, links: ClassificationLinks): Cla
     const href = links.parent ?? undefined;
     if (f.parent.collectionKind === "document_with_annexes") return { role: "attachment", word: "Anlage", href };
     const position = f.bundlePosition ? `Teil ${f.bundlePosition.index} von ${f.bundlePosition.total}` : "Teil";
-    const range = parsePageRange(f.splitPageRange);
+    const range = opts.pageRangeInColumn ? null : parsePageRange(f.splitPageRange);
     return { role: "part", word: range ? `${position} · ${formatPageRanges([range])}` : position, href };
   }
   if (f.childCount > 0 && f.collectionKind && COVER_KINDS.has(f.collectionKind)) {
@@ -160,11 +173,12 @@ function bundle(f: DocumentClassificationFacts, links: ClassificationLinks): Cla
 export function documentClassificationPicture(
   f: DocumentClassificationFacts,
   links: ClassificationLinks,
+  opts: ClassificationPictureOptions = {},
 ): ClassificationPicture {
   const word = identityWord(f);
   const warning = identityWarning(f, word);
   const eff = effect(f);
-  const bun = bundle(f, links);
+  const bun = bundle(f, links, opts);
   return {
     identity: { category: f.docCategory ?? "none", word, ...(warning ? { warning } : {}) },
     ...(eff ? { effect: eff } : {}),

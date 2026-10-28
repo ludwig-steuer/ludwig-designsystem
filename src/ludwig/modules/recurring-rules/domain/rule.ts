@@ -717,7 +717,7 @@ export const RECURRING_AMOUNT_ANOMALY_RATIO = 0.5; // ±50 % vom Median
  * markiert statt blind übernommen. Reine Funktion — kein LLM.
  *
  * ponytail: Median ± fester Quote. Reicht fürs „fällt aus dem Muster"-Signal;
- * Upgrade-Pfad bei Bedarf = LLM-Judge (booking-module) über die Historie.
+ * Upgrade-Pfad bei Bedarf = LLM-Judge über die Historie.
  */
 export function evaluateAmountAnomaly(
   priorAmounts: number[],

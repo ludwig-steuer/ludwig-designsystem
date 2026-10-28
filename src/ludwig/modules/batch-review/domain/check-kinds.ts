@@ -37,6 +37,8 @@ export const CHECK_KINDS = [
   "docs_complete_before_period",
   // Mandantenstapel (Owner 2026-09-23): „zu wie vielen Buchungen haben wir Belege?"
   "client_batch_documents",
+  // F452: Belege ohne klare Verarbeitung (Belegprüfung).
+  "documents_reviewed",
 ] as const;
 
 export type CheckKind = (typeof CHECK_KINDS)[number];

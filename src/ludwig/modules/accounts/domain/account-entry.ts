@@ -38,11 +38,20 @@ export interface AccountEntry {
   creditAmount: number;
   /** Die übrigen Konten des Satzes, kommasepariert. */
   contraAccounts: string | null;
+  /**
+   * Der Beleg zu dieser Bewegung (F338) — Ludwig: Kante am Satz, sonst Beleg des
+   * Ereignisses; Spiegel: der Beleg des gematchten Ludwig-Satzes.
+   */
+  sourceDocId?: string | null;
+  /** BU auf diesem Konto, wie gespeichert (F338). */
+  taxKey?: string | null;
 
   // — nur `ludwig` —
   /** Laufender Saldo bis einschließlich dieser Zeile. */
   runningBalance?: number | null;
   counterpartyName?: string | null;
+  /** Name des (ersten) Gegenkontos — `contraAccounts` trägt nur die Nummer (F338). */
+  contraAccountName?: string | null;
   /** `ai_proposed` · `manual` · `system_reversal` · `recurring_rule`. */
   entryOrigin?: string | null;
   /** Achse `buchung`: proposed · accepted · posted · reversed. */
@@ -50,6 +59,8 @@ export interface AccountEntry {
   /** Deeplink-Ziel `/cases/<caseId>?event=<eventId>`. */
   eventId?: string | null;
   caseId?: string | null;
+  /** Nummer des Sachverhalts hinter dem Ereignis (F338). */
+  caseNumber?: string | null;
   exportedAt?: string | null;
   /** Gesetzt, wenn der Abgleich die Bewegung im Spiegel wiedergefunden hat. */
   datevMirrorEntryId?: string | null;
@@ -95,6 +106,9 @@ export function accountEntryFromLedgerRow(row: {
   status: string;
   exported_at: string | null;
   datev_mirror_entry_id: string | null;
+  source_doc_id?: string | null;
+  tax_key?: string | null;
+  case_number?: string | null;
 }): AccountEntry {
   return {
     id: row.id,
@@ -107,12 +121,16 @@ export function accountEntryFromLedgerRow(row: {
     contraAccounts: row.counter_account_number,
     runningBalance: amount(row.running_balance),
     counterpartyName: row.creditor_name ?? row.counter_account_name,
+    contraAccountName: row.counter_account_name,
     entryOrigin: row.origin,
     status: row.status,
     eventId: row.event_id,
     caseId: row.case_id,
     exportedAt: row.exported_at,
     datevMirrorEntryId: row.datev_mirror_entry_id,
+    sourceDocId: row.source_doc_id ?? null,
+    taxKey: row.tax_key ?? null,
+    caseNumber: row.case_number ?? null,
   };
 }
 
@@ -129,6 +147,9 @@ export function accountEntryFromTruthRow(row: {
   creditAmount: number;
   contraAccounts: string | null;
   markOfOrigin?: string | null;
+  sourceDocId?: string | null;
+  taxKey?: string | null;
+  caseId?: string | null;
 }): AccountEntry {
   return {
     id: row.id,
@@ -143,6 +164,9 @@ export function accountEntryFromTruthRow(row: {
     ludwigCaseNumber: row.ludwigCaseNumber,
     matchState: row.matchState,
     markOfOrigin: row.markOfOrigin ?? null,
+    sourceDocId: row.sourceDocId ?? null,
+    taxKey: row.taxKey ?? null,
+    caseId: row.caseId ?? null,
   };
 }
 
@@ -341,7 +365,10 @@ export const ACCOUNT_ENTRY_ORIGIN_LABEL: Record<AccountEntryOrigin, string> = {
 /** Alle vier, in der Reihenfolge der Label-Map — zum Prüfen von URL-Werten. */
 export const ACCOUNT_ENTRY_ORIGINS = Object.keys(ACCOUNT_ENTRY_ORIGIN_LABEL) as AccountEntryOrigin[];
 
-export function accountEntryOrigin(entry: AccountEntry): AccountEntryOrigin {
+/** Nimmt nur, was es liest — die Abnahme ruft es mit Zeilen der Effektiv-Sicht (F337). */
+export function accountEntryOrigin(
+  entry: Pick<AccountEntry, "source" | "matchState" | "datevMirrorEntryId" | "exportedAt">,
+): AccountEntryOrigin {
   if (entry.source === "datev") {
     return entry.matchState?.startsWith("matched_") ? "mirrored" : "datev";
   }

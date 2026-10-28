@@ -70,6 +70,8 @@ const resolves = (spec, from) => {
   let base;
   if (spec.startsWith("@/ludwig/")) base = path.join(DST, spec.slice("@/ludwig/".length));
   else if (spec.startsWith(".")) base = path.resolve(path.dirname(from), spec);
+  // An app path the rewrite leaves alone (`@/ui/navigation/…`) is not here.
+  else if (spec.startsWith("@/")) return false;
   else return true; // external packages
   return [base + ".ts", path.join(base, "index.ts")].some((c) => fs.existsSync(c));
 };

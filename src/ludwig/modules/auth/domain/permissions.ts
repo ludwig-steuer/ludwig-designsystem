@@ -18,7 +18,6 @@ export const PERMISSIONS = {
   "tenant.create": { minStaffRole: "support" },
   "tenant.members.manage": { minStaffRole: "support" }, // einladen, Kanzleirolle, Status
   "tenant.conventions.manage": { minStaffRole: "support" },
-  "client.create": { minStaffRole: "support" },
   "client.onboard": { minStaffRole: "support" }, // Lauf/Retry/Review/Re-Onboarding, DATEV-Liste + Shell
   "client.master_data.edit": { minStaffRole: "support" },
   "client.activate": { minStaffRole: "support" },
@@ -30,6 +29,7 @@ export const PERMISSIONS = {
   "agent_token.manage": { minStaffRole: "technical" },
   "product_feedback.manage": { minStaffRole: "technical" },
   "staff_role.assign": { minStaffRole: "admin" },
+  "tenant.security_class.manage": { minStaffRole: "admin" }, // F517: welche Modell-Backends Mandantendaten sehen
 } as const satisfies Record<string, { minStaffRole: StaffRole }>;
 
 export type Permission = keyof typeof PERMISSIONS;

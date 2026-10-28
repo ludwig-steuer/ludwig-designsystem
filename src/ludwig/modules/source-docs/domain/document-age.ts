@@ -15,8 +15,8 @@ const BERLIN_DAY = new Intl.DateTimeFormat("en-CA", { timeZone: "Europe/Berlin" 
  * keine Konstante: ein Prozess, der über Mitternacht läuft, würde sonst
  * weiter den Vortag rechnen.
  */
-export function berlinToday(): string {
-  return BERLIN_DAY.format(new Date());
+export function berlinToday(at: Date = new Date()): string {
+  return BERLIN_DAY.format(at);
 }
 
 function utcDay(iso: string): number {

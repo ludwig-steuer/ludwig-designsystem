@@ -32,6 +32,8 @@ export function partnerFixture(over: Partial<BusinessPartnerDetail> = {}): Busin
     addressLine1: "Industriestraße 8",
     postalCode: "12345",
     countryCode: "DE",
+    region: "domestic",
+    countrySource: "datev_import",
     websiteUrl: null,
     businessDescription: "Großhandel mit Baustoffen und Werkzeugen",
     vatNotes: null,

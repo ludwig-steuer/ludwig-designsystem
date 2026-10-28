@@ -2,7 +2,7 @@
  * Der umsatzsteuerliche Sonderfall einer Position, in Worten.
  *
  * Der Wertebereich gehört dem Interpreter: `VatSpecialCase` in
- * `apps/invoice-interpreter/.../invoice_interpretation/public_models.py` — 22
+ * `apps/pipeline/src/ludwig/invoice_interpreter/.../invoice_interpretation/public_models.py` — 22
  * Werte samt Paragraph als Kommentar. Hier steht, wie ein Mensch sie liest;
  * die Werte selbst bleiben englisch (Naming-Regel).
  *

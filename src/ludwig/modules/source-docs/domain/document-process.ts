@@ -28,6 +28,7 @@ import type { EntryDatevStage } from "@/ludwig/modules/entries";
 import { resolveStatus } from "@/ludwig/ui/status/status-registry";
 
 import { DOC_STUCK_MINUTES, type DocProcessing } from "./doc-processing";
+import { berlinToday, daysSince } from "./document-age";
 import { DOCUMENT_FORM_ROUTING } from "./document-form-mapping";
 import {
   SOURCE_DOC_STATUSES,
@@ -190,6 +191,8 @@ export interface DocumentProcessFacts {
   batch: { batchId: string; year: number; description: string | null } | null;
   /** Audit `document.completion_reverted`. */
   reopenedCount: number;
+  /** Eingang beim Mandanten (ISO-Datum) — Grundlage von „n T offen" (F339). */
+  receivedDate: string | null;
   /** ISO, vom Aufrufer — die Ableitung liest keine Uhr. */
   now: string;
 }
@@ -465,6 +468,38 @@ function phaseList(pos: Position): ProcessPhase[] {
   }));
 }
 
+/**
+ * „n T offen" hinter dem Träger: Tage seit Eingang beim Mandanten, solange der
+ * Beleg offen ist (Owner 2026-09-29, F339 E6). Erledigt, gelöscht, ohne Eingang
+ * oder am Eingangstag: nichts.
+ */
+export function openSinceLabel(facts: DocumentProcessFacts): string | null {
+  if (facts.status === "done" || facts.status === "deleted" || !facts.receivedDate) return null;
+  const n = daysSince(facts.receivedDate, berlinToday(new Date(facts.now)));
+  if (n === null || n < 1) return null;
+  return `${n} T offen`;
+}
+
+/** Grenze des freien Grunds an der Zelle — wie `MAX_REASON` im Set. */
+const REASON_MAX = 280;
+
+/**
+ * Der freie Grund als Hover an der Fortschritt-Zelle (DS 0212 G3): warum
+ * erledigt bzw. woran die Prüfung hängt. Das Prüfgrund-Wort steht schon als
+ * Stand-Wort in der Zelle, hier nur die Notiz.
+ */
+export function processReasonHint(facts: DocumentProcessFacts): string | null {
+  const raw =
+    facts.status === "done"
+      ? facts.doneReason
+      : facts.status === "agent_review" || facts.status === "human_review"
+        ? facts.reviewNote
+        : null;
+  const text = raw?.trim();
+  if (!text) return null;
+  return text.length > REASON_MAX ? `${text.slice(0, REASON_MAX - 1)}…` : text;
+}
+
 export function documentProcessPicture(facts: DocumentProcessFacts): ProcessPicture {
   const pos = position(facts);
   return {
@@ -474,6 +509,8 @@ export function documentProcessPicture(facts: DocumentProcessFacts): ProcessPict
     holder: pos.holder,
     running: pos.running,
     next: pos.next,
+    since: openSinceLabel(facts),
+    reason: processReasonHint(facts),
   };
 }
 

@@ -57,6 +57,8 @@ export interface InvoiceFilter {
   /** Der Zeitraum des Jahres fällt weg; nur die Seite setzt daraus
    *  `receivedFrom/To = undefined`. */
   allYears?: boolean;
+  /** Genau diese Belege (F341) — die Auswahl trifft der Aufrufer; gelöschte zählen mit. */
+  sourceDocIds?: readonly string[];
 }
 
 /**
@@ -70,6 +72,7 @@ export const INVOICE_SORT_KEYS = [
   "vendor",
   "document_number",
   "total_amount",
+  "document_date",
 ] as const;
 export type InvoiceSortKey = (typeof INVOICE_SORT_KEYS)[number];
 
@@ -361,11 +364,21 @@ export interface InvoiceListItem {
   businessPartnerId: string | null;
   /** Belegdatum laut Beleg. NULL = nicht bekannt (kein Ersatzwert). */
   invoiceDate: string | null;
+  /** Belegdatum am Supertyp — Rechnung oder jeder andere Beleg (F339). */
+  documentDate: string | null;
+  /** Seitenzahl der Quelldatei. */
+  pageCount: number | null;
+  /** Nummer des Dateikorbs (Rohwert). */
+  fileBasketNumber: string | null;
+  /** Dateiname des Sammel-Originals, wenn der Beleg ein Teilbeleg ist. */
+  parentFileName: string | null;
   /** Eingangsdatum — Perioden-Achse von Liste und Dashboard. */
   receivedDate: string | null;
   /** Ludwig-Eingang (Upload-Zeitpunkt). */
   uploadedAt: string | null;
   dueDate: string | null;
+  /** Leistungszeitraum laut Rechnung (`service_period`) — Datums-Hover der Belegzeile (F341). */
+  servicePeriod: string | null;
   totalValue: number | null;
   currency: string | null;
   lifecycleStatus: InvoiceLifecycle | null;
@@ -405,6 +418,8 @@ export interface InvoiceListItem {
   /** Fiscal Year des Sachverhalts — gebraucht, um die Case-Detail-URL
    *  (`/clients/[slug]/[year]/cases/[caseId]`) zu bauen. */
   caseFiscalYear: number | null;
+  /** F331: Art des Sachverhalts — `client_batch` = Sammel-Sachverhalt eines Mandantenstapels (Satz-Kante). */
+  caseKind: string | null;
   /** Der Stapel, dem der Beleg über seinen Satz zugeordnet ist (jüngster gewinnt); NULL ohne Buchung. */
   batch: { batchId: string; year: number; description: string | null } | null;
   /** F306: Fakten des Prozessbilds (Spalte „Fortschritt"). */
@@ -475,7 +490,7 @@ export interface InvoiceLineItem {
   disabled: boolean;
   // Audit-Trail des Beleg-Kollaps. Nur auf der ``virtual_aggregate``-
   // Line gesetzt. Schema siehe Python ``CollapseDecision`` in
-  // ``apps/invoice-interpreter/.../public_models.py``.
+  // ``apps/pipeline/src/ludwig/invoice_interpreter/.../public_models.py``.
   collapseDecisionJson: unknown;
 }
 
@@ -500,8 +515,15 @@ export interface BookingProposalLine {
   creditAccountName: string | null;
 }
 
-/** Spiegelt `buchassi_shared.preprocessing.ExtractionSource` (R37). */
-export type ExtractionSource = "ocr" | "embedded_xml";
+/** Spiegelt `ludwig.shared.preprocessing.ExtractionSource` (R37). */
+export type ExtractionSource = "ocr" | "embedded_xml" | "layout_template";
+
+/** DB-Wert → `ExtractionSource`; alles außerhalb der Whitelist wird `null`. */
+export function coerceExtractionSource(value: unknown): ExtractionSource | null {
+  return value === "ocr" || value === "embedded_xml" || value === "layout_template"
+    ? value
+    : null;
+}
 
 export interface InvoiceDetail extends InvoiceListItem {
   // ── Identitäten (technisch — nur im Pipeline-Tab anzeigen) ─────────────
@@ -621,9 +643,10 @@ export interface InvoiceDetail extends InvoiceListItem {
   vatSpecialCases: string[] | null;
 
   // ── Pipeline ───────────────────────────────────────────────────────────
-  /** Start des aktuellen Pipeline-Runs — abgeleitet aus
-   *  ``MIN(ops_extraction_logs.logged_at)`` für ``workflow_run_id =
-   *  invoice.extraction_id``. ``null`` bevor irgendein Modul geloggt hat. */
+  /** Start des aktuellen Pipeline-Runs — abgeleitet aus der Spur des
+   *  laufenden Runs (``MIN(client_invoice_traces.created_at)`` für
+   *  ``extraction_id = invoice.extraction_id``). ``null`` bevor irgendein
+   *  Modul geloggt hat. */
   processingStartedAt: string | null;
   /** Letzter Log-Eintrag im aktuellen Run — Heartbeat-Indikator: wenn
    *  dieser Wert lange nicht mehr aktualisiert wird, hängt die Pipeline. */
@@ -737,6 +760,11 @@ export interface InvoiceTraceEntry {
   level: InvoiceTraceLevel;
 }
 
+/** Technik-Zeile (Schritt-Grenzen, Details): `verbose` und `debug`. */
+export function isTechnicalTrace(t: Pick<InvoiceTraceEntry, "level">): boolean {
+  return t.level === "verbose" || t.level === "debug";
+}
+
 /**
  * Trace-Zeile → kanonische Protokollzeile des Design-Systems.
  *
@@ -768,10 +796,33 @@ export function invoiceTraceToLogEntry(t: InvoiceTraceEntry): {
     level: t.level,
     source: t.module,
     code: t.stepKind,
-    depth: t.level === "verbose" || t.level === "debug" ? 3 : 2,
+    depth: isTechnicalTrace(t) ? 3 : 2,
     detail: t.comment ?? undefined,
     payload: t.payload ?? undefined,
     // `module='review'` heißt: ein Mensch hat gehandelt.
     actor: t.actor ? { kind: t.module === "review" ? "user" : "system", label: t.actor } : undefined,
   };
+}
+
+/**
+ * Listenzeilen in die Reihenfolge der gewünschten Beleg-IDs bringen, je Beleg
+ * einmal (F341): die Liste kann einen Beleg mehrfach liefern (ein Ereignis je
+ * Zeile), die erste Zeile gewinnt; IDs ohne Zeile fallen weg.
+ */
+export function orderDocumentRows(items: readonly InvoiceListItem[], sourceDocIds: readonly string[]): InvoiceListItem[] {
+  const byId = new Map<string, InvoiceListItem>();
+  for (const item of items) {
+    const id = item.sourceDocId ?? item.invoiceId;
+    if (id && !byId.has(id)) byId.set(id, item);
+  }
+  const seen = new Set<string>();
+  const ordered: InvoiceListItem[] = [];
+  for (const id of sourceDocIds) {
+    const item = byId.get(id);
+    if (item && !seen.has(id)) {
+      seen.add(id);
+      ordered.push(item);
+    }
+  }
+  return ordered;
 }

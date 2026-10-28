@@ -1,13 +1,14 @@
 /**
- * F315 — Schritt 0 „Ergebnis des Stapels" als reine Ableitung (DS 0208, Brief
+ * F315 — Prüfschritt „Ergebnis des Stapels" als reine Ableitung (DS 0208, Brief
  * F314): ein Urteil, eine Aufgabenliste, der Bericht mit den Auffälligkeiten
- * zuerst. Liest dieselbe Freigabe-Checkliste wie Schritt 8 (`agent-done.ts`)
+ * zuerst. Liest dieselbe Freigabe-Checkliste wie das Prüfprotokoll (`agent-done.ts`)
  * und rechnet „offen" nicht ein zweites Mal. Kein IO, keine Uhr.
  */
-import { matchesBatchFilter } from "@/ludwig/modules/datev-export";
+import { matchesBatchFilter } from "@/ludwig/modules/accounting-cases";
 
 import { agentRows, agentSettled } from "./agent-done";
 import type { ChecklistRow } from "./checklist";
+import { reviewStepLabel } from "./steps";
 
 export interface Step0Task {
   key: string;
@@ -94,12 +95,15 @@ function task(r: ChecklistRow, reviewBase: string): Step0Task {
     counter: r.total > 1 ? `${r.agentDone ?? r.done} von ${r.total}` : settled ? "erledigt" : "offen",
     ...(sub ? { sub } : {}),
     level: r.level === "warn" ? "warning" : "error",
-    jump: { label: r.jumpLabel ?? `Schritt ${r.jumpStep}`, href: `${reviewBase}/${r.jumpHref ?? r.jumpStep}` },
+    jump: {
+      label: r.jumpLabel ?? (r.jumpStep ? reviewStepLabel(r.jumpStep) : ""),
+      href: `${reviewBase}/${r.jumpHref ?? r.jumpStep}`,
+    },
   };
 }
 
 function coverage(input: Step0Input): Step0Coverage | null {
-  const step1 = { label: "Schritt 1", href: `${input.reviewBase}/1` };
+  const completeness = { label: reviewStepLabel("completeness"), href: `${input.reviewBase}/completeness` };
   if (input.kind === "client_batch") {
     const m = input.masterdata;
     if (!m) return null;
@@ -108,18 +112,18 @@ function coverage(input: Step0Input): Step0Coverage | null {
     return {
       complete: false,
       sentence: `${n} ${n === 1 ? "Personenkonto" : "Personenkonten"} ohne Namen.`,
-      jump: { label: "Stammdaten", href: `${input.reviewBase}/8` },
+      jump: { label: "Stammdaten", href: `${input.reviewBase}/protocol` },
     };
   }
   if (!input.facts) return null;
   const to = input.facts.bookedTo;
-  if (!to) return { complete: false, sentence: "Noch nichts gebucht.", jump: step1 };
+  if (!to) return { complete: false, sentence: "Noch nichts gebucht.", jump: completeness };
   const missing = Math.round((dayMs(input.periodTo) - dayMs(to)) / DAY_MS);
   if (missing <= 0) return { complete: true, sentence: `Bank gebucht bis ${dayText(to)} — der Zeitraum ist voll.` };
   return {
     complete: false,
     sentence: `Bank gebucht bis ${dayText(to)} — ${missing} ${missing === 1 ? "Tag fehlt" : "Tage fehlen"}.`,
-    jump: step1,
+    jump: completeness,
   };
 }
 

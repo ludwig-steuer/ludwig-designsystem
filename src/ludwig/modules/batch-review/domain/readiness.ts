@@ -32,6 +32,8 @@
  * freigegeben wird nur ein voll gebuchtes Bankkonto.
  */
 
+import { formatAmount, formatTime } from "@ludwig/designsystem";
+
 import { belegAnzeigename } from "@/ludwig/modules/source-docs";
 
 
@@ -51,6 +53,9 @@ export interface ReadinessItem {
   hinweis: boolean;
   /** Beleg hängt an einem Sachverhalt — nur dann bietet Schritt 1 „Keine Buchung nötig" an (F248). */
   hasCase?: boolean;
+  /** Belegstatus und Prüfgrund — bei human_review/not_bookkeeping bietet Schritt 1 die Entscheidung an (F449). */
+  docStatus?: string | null;
+  docReviewReason?: string | null;
 }
 
 export interface ReadinessRow {
@@ -103,37 +108,19 @@ export interface CoverageEingang {
   }>;
 }
 
-const EUR = new Intl.NumberFormat("de-DE", {
-  minimumFractionDigits: 2,
-  maximumFractionDigits: 2,
-});
-
-const TAG = new Intl.DateTimeFormat("de-DE", {
-  timeZone: "Europe/Berlin",
-  day: "2-digit",
-  month: "2-digit",
-  year: "numeric",
-});
-
-/** ISO-Tag → `09.09.2026`, immer Berlin (sonst 2 h daneben). */
-function fmtDay(iso: string | null): string {
-  if (!iso) return "—";
-  return TAG.format(new Date(iso));
-}
-
 function umsatzPunkt(r: CoverageEingang["rows"][number]): ReadinessItem {
   const problem =
     r.reason === "no_case"
       ? "Ohne Sachverhalt (Gate 2a)."
       : r.reason === "clarification_pending"
-        ? `Klärung offen an Kanzlei/Mandant seit ${fmtDay(r.clarificationSince)}` +
+        ? `Klärung offen an Kanzlei/Mandant seit ${formatTime(r.clarificationSince, "date")}` +
           `${r.caseNumber ? `, Sachverhalt ${r.caseNumber}` : ""}.`
         : `Bei Ludwig offen${r.caseNumber ? ` (${r.caseNumber})` : ""}.`;
   return {
     key: `tx-${r.bankTransactionId}`,
     sourceDocId: null,
     bankTransactionId: r.bankTransactionId,
-    label: `${fmtDay(r.postingDate)} · ${(r.amount < 0 ? "−" : "") + EUR.format(Math.abs(r.amount))} € · ${
+    label: `${formatTime(r.postingDate, "date")} · ${formatAmount(r.amount, "EUR")} · ${
       r.counterpartyName ?? r.purpose ?? "—"
     }`,
     datum: r.postingDate,
@@ -168,6 +155,8 @@ function belegPunkt(o: Record<string, unknown>, i: number): ReadinessItem {
     problem: str(o.problem) ?? "",
     hinweis: false,
     hasCase: o.hasCase === true,
+    docStatus: str(o.docStatus),
+    docReviewReason: str(o.docReviewReason),
   };
 }
 

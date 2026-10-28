@@ -15,6 +15,11 @@ export const ENTRY_ORIGIN = [
 ] as const;
 export type EntryOrigin = (typeof ENTRY_ORIGIN)[number];
 
+/** Spiegel von client_journal_entry_origin_method_check (buchung.md R37): wie der
+ *  Satz entschieden wurde. `origin` sagt den Kanal, das hier die Entscheidung. */
+export const ORIGIN_METHODS = ["rule", "derivation", "model_call", "model_agent", "human", "import"] as const;
+export type OriginMethod = (typeof ORIGIN_METHODS)[number];
+
 export const ENTRY_STATUS = ["proposed", "accepted", "posted", "reversed"] as const;
 export type EntryStatus = (typeof ENTRY_STATUS)[number];
 

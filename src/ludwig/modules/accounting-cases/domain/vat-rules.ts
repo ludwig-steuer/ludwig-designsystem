@@ -18,7 +18,7 @@
  *
  * ponytail: v1 wertet nur Regeln aus, deren Fakten heute ableitbar sind
  * (`evaluate` gesetzt). Der Rest des Katalogs ist als Metadaten enthalten
- * (get_vat_rule liefert Hintergrund), Durchsetzung bleibt Playbook/Judge.
+ * (help liefert Hintergrund), Durchsetzung bleibt Playbook/Judge.
  * Agent-Fakten (submit_vat_fact) folgen, wenn ein Blocker sie wirklich braucht.
  */
 
@@ -35,10 +35,12 @@ export const INPUT_VAT_TAX_KEYS: ReadonlySet<string> = new Set([
 
 /** Nur die Inlands-VSt-Schlüssel — für Regeln, die 13b/igE gerade fordern. */
 const DOMESTIC_INPUT_KEYS: readonly string[] = ["8", "9", "18", "19"];
+/** Vorsteuer, die aus dem ausgewiesenen Satz folgt — nur sie hängt an § 33/35 UStDV (F572). */
+const RATE_BASED_INPUT_KEYS: readonly string[] = ["8", "9"];
 const ALL_INPUT_KEYS: readonly string[] = [...INPUT_VAT_TAX_KEYS];
 
 /** EU-Mitgliedstaaten (ISO 3166-1 alpha-2), Stand 2026 — deckungsgleich mit
- *  buchassi_booking_module.domain.tax_classification.EU_COUNTRIES. */
+ *  `_EU_COUNTRY_PREFIXES` im invoice-interpreter (vat_interpretation.py). */
 const EU_COUNTRIES: ReadonlySet<string> = new Set([
   "AT", "BE", "BG", "CY", "CZ", "DE", "DK", "EE", "ES", "FI", "FR",
   "GR", "HR", "HU", "IE", "IT", "LT", "LU", "LV", "MT", "NL", "PL",
@@ -88,7 +90,9 @@ export const FACT_SOURCE_FIELDS: Record<string, readonly string[]> = {
   vendor_vat_id_origin: ["client_source_docs_invoices.vendor_ust_id"],
   reverse_charge_case: [
     "client_source_docs_invoices.vendor_ust_id",
+    "client_source_docs_invoices.vendor_country_code",
     "client_business_partners.country_code",
+    "client_business_partners.country_source",
   ],
   foreign_currency: ["client_source_docs_invoices.currency", "client_source_docs_invoices.fx_currency"],
   reverse_charge_notice: ["client_source_docs_invoices.reverse_charge"],
@@ -155,6 +159,8 @@ export interface VatAssessmentInput {
      * wenn der Beleg keine USt-IdNr. trägt.
      */
     partnerCountryCode: string | null;
+    /** F472: Land am Partner von Kanzlei oder Agent bestätigt (`country_source` accounting/agent). */
+    partnerCountryConfirmed: boolean;
     /**
      * `client_source_docs_invoices.vendor_country_code` — das Land laut Beleg
      * (ISO-2 aus der Extraktion), drittes Sitzland-Signal (F224).
@@ -243,6 +249,8 @@ export interface ReverseChargeOrigin {
   vendorUstId: string | null;
   /** client_business_partners.country_code des verknüpften Partners. */
   partnerCountryCode: string | null;
+  /** F472: Land am Partner bestätigt (`country_source` accounting/agent) — nur dann kann es dem Beleg widersprechen. */
+  partnerCountryConfirmed: boolean;
   /** client_source_docs_invoices.vendor_country_code (F224) — das Land laut Beleg. */
   invoiceCountryCode: string | null;
 }
@@ -253,8 +261,9 @@ export interface ReverseChargeCaseResult {
   /** Warum — wörtlich verwendbar in Fakt-Rationale und Submit-Fehler. */
   rationale: string;
   /** `domestic`: Aussteller sitzt im Inland (Bauleistung u. a., nicht abgeleitet).
-   *  `unknown`: kein Sitzland-Signal. `conflict`: Beleg-Land ≠ Partner-Land
-   *  (F224) — der Server entscheidet nicht, die Kanzlei. Alle führen zu `code = null`. */
+   *  `unknown`: kein Sitzland-Signal. `conflict`: Beleg-Land ≠ bestätigtes
+   *  Partner-Land (F224, F472) — der Server entscheidet nicht, die Kanzlei.
+   *  Alle führen zu `code = null`. */
   gap: "domestic" | "unknown" | "conflict" | null;
 }
 
@@ -264,9 +273,10 @@ export interface ReverseChargeCaseResult {
  * gleichermaßen ab, DATEV unterscheidet sie erst über diesen Code (REW02191).
  *
  * Reihenfolge: USt-IdNr. am Beleg schlägt das Land (die IdNr. steht auf DEM
- * Beleg und ist eindeutig). Land laut Beleg (`vendor_country_code`, F224) und
- * Land am Geschäftspartner (Stammdatum) sind gleichrangig — widersprechen sie
- * sich, wird nicht gestempelt, sondern abgelehnt (`gap: "conflict"`). Die
+ * Beleg und ist eindeutig). Danach Land laut Beleg (`vendor_country_code`,
+ * F224), dann Land am Geschäftspartner. Ein Widerspruch (`gap: "conflict"`)
+ * entsteht nur gegen ein bestätigtes Stammdatum (F472) — ein ungeprüfter
+ * Importwert verliert gegen den Beleg. Die
  * OSS-Sondernummer `EU…` ist kein Sitzland-Signal (§ 18i UStG) — sie fällt auf
  * das Land zurück; §13b entsteht in dem Fall ohnehin nicht (VST-XB-5).
  */
@@ -295,7 +305,7 @@ export function deriveReverseChargeCase(origin: ReverseChargeOrigin): ReverseCha
 
   const inv = isoCountry(origin.invoiceCountryCode);
   const partner = isoCountry(origin.partnerCountryCode);
-  if (inv && partner && inv !== partner) {
+  if (inv && partner && inv !== partner && origin.partnerCountryConfirmed) {
     return {
       code: null,
       gap: "conflict",
@@ -304,7 +314,9 @@ export function deriveReverseChargeCase(origin: ReverseChargeOrigin): ReverseCha
   }
   const country = inv ?? partner;
   if (country) {
-    const source = inv ? `Land laut Beleg: ${country}` : `Land am Geschäftspartner: ${country}`;
+    const source = inv
+      ? `Land laut Beleg: ${country}${partner && partner !== inv ? ` (Stammdatum ${partner} ungeprüft)` : ""}`
+      : `Land am Geschäftspartner: ${country}`;
     if (country === "DE") {
       return {
         code: null,
@@ -454,6 +466,7 @@ export function deriveVatFacts(input: VatAssessmentInput): VatFact[] {
     const rcCase = deriveReverseChargeCase({
       vendorUstId: inv.vendorUstId,
       partnerCountryCode: inv.partnerCountryCode,
+      partnerCountryConfirmed: inv.partnerCountryConfirmed,
       invoiceCountryCode: inv.invoiceCountryCode,
     });
     out.push(
@@ -476,7 +489,7 @@ export function deriveVatFacts(input: VatAssessmentInput): VatFact[] {
     inv.currency == null && inv.fxCurrency == null
       ? fact("foreign_currency", "Fremdwährungsrechnung", "unknown", "Keine Währung extrahiert")
       : fw
-        ? fact("foreign_currency", "Fremdwährungsrechnung", "yes", `Währung ${inv.fxCurrency ?? inv.currency} — keine abziehbare deutsche VSt (VST-XB-6)`)
+        ? fact("foreign_currency", "Fremdwährungsrechnung", "yes", `Währung ${inv.fxCurrency ?? inv.currency} — Inlands-VSt gesperrt (BU 8/9/18/19); § 13b mit 94 oder 95 bleibt zulässig (VST-XB-6)`)
         : fact("foreign_currency", "Fremdwährungsrechnung", "no", "EUR-Rechnung"),
   );
 
@@ -592,7 +605,7 @@ const notApplicable = (reason: string): Omit<VatRuleResult, "code" | "title"> =>
 /**
  * Registry — Codes und Inhalte aus docs/knowledge/input-tax-deduction/
  * rule-catalog.md. Regeln OHNE evaluate sind Playbook-/Judge-Sache; sie sind
- * hier gelistet, damit get_vat_rule den ganzen Katalog beantworten kann.
+ * hier gelistet, damit help den ganzen Katalog beantworten kann.
  */
 export const VAT_RULES: readonly VatRuleDefinition[] = [
   {
@@ -617,7 +630,7 @@ export const VAT_RULES: readonly VatRuleDefinition[] = [
     statutes: ["§ 15 Abs. 2–4 UStG"],
     guidance:
       "Verwendung für steuerfreie Ausgangsumsätze ohne Option schließt den Abzug aus; Mischfälle sind " +
-      "aufzuteilen — der Schlüssel ist Kanzleientscheidung (raise_clarification, nie schätzen).",
+      "aufzuteilen — der Schlüssel ist Kanzleientscheidung (clarification_raise(to=\"accounting\"), nie schätzen).",
   },
   {
     code: "VST-USE-1",
@@ -633,7 +646,7 @@ export const VAT_RULES: readonly VatRuleDefinition[] = [
     statutes: ["§ 15 Abs. 1 Nr. 1 UStG", "§ 14 Abs. 4 Nr. 1 UStG"],
     guidance:
       "Die Rechnung muss auf den Mandanten lauten. mismatch/uncertain = Veto (B3.10): keine VSt, brutto auf " +
-      "Aufwand + raise_clarification. Kleinbetrag ≤ 250 € braucht keinen Empfänger.",
+      "Aufwand + clarification_raise. Kleinbetrag ≤ 250 € braucht keinen Empfänger.",
     evaluate: (facts) => {
       const inv = facts.get("invoice_present");
       if (inv?.value !== "yes") return notApplicable("Keine Rechnung am Ereignis — Empfänger-Regel greift dort nicht");
@@ -653,7 +666,7 @@ export const VAT_RULES: readonly VatRuleDefinition[] = [
     statutes: ["§ 15 Abs. 1 Nr. 1 UStG (je Einzelrechnung)"],
     guidance:
       "Aus einer Deck-/Summenseite darf keine VSt gezogen werden — PDF zerlegen und einzeln einspeisen, " +
-      "oder brutto auf Aufwand + raise_clarification (Auslöser 2026-0082).",
+      "oder brutto auf Aufwand + clarification_raise (Auslöser 2026-0082).",
     evaluate: (facts) => {
       const inv = facts.get("invoice_present");
       if (inv?.value !== "yes") return notApplicable("Keine Rechnung am Ereignis");
@@ -808,7 +821,8 @@ export const VAT_RULES: readonly VatRuleDefinition[] = [
     statutes: ["§ 33 UStDV", "§ 35 UStDV"],
     guidance:
       "Fünf Angaben genügen (kein Empfänger nötig); VSt aus dem Brutto herausrechnen (÷119×19 bzw. ÷107×7). " +
-      "OHNE angegebenen Steuersatz kein Abzug. Gilt nicht für § 13b/igE.",
+      "OHNE angegebenen Steuersatz kein Abzug nach Satz (8/9). Gilt nicht für § 13b/igE (§ 33 S. 4 UStDV) — " +
+      "dort bleibt 94/95 bzw. 18/19 offen.",
     evaluate: (facts) => {
       const f = facts.get("small_amount_invoice");
       if (f?.value !== "yes") return notApplicable("Keine Kleinbetragsrechnung (> 250 € oder kein Beleg)");
@@ -817,8 +831,10 @@ export const VAT_RULES: readonly VatRuleDefinition[] = [
         return {
           applies: true,
           result: "fail",
-          reason: `Kleinbetrag ohne erkennbaren Steuersatz — § 35 UStDV erlaubt den Abzug nur mit angegebenem Satz (${rate.rationale})`,
-          blockedTaxKeys: ALL_INPUT_KEYS,
+          reason:
+            `Kleinbetrag ohne erkennbaren Steuersatz — § 35 UStDV erlaubt den Abzug nur mit angegebenem Satz (${rate.rationale}); ` +
+            "§ 13b/igE (91/94 bzw. 95/92, 18/19) hängen nicht am Satz und bleiben zulässig (§ 33 S. 4 UStDV)",
+          blockedTaxKeys: RATE_BASED_INPUT_KEYS,
         };
       return { applies: true, result: "pass", reason: `Kleinbetrag mit Steuersatz — VSt herausrechnen (${rate.rationale})`, blockedTaxKeys: [] };
     },
@@ -861,37 +877,49 @@ export const VAT_RULES: readonly VatRuleDefinition[] = [
     statutes: ["§ 13b UStG", "§ 15 Abs. 1 Nr. 4 UStG"],
     guidance:
       "EU-Leistung/Drittlandsleistung/Bauleistung u. a.: der Mandant schuldet die Steuer selbst. Schlüssel " +
-      "94/91 nur bei Abzugsberechtigung, sonst 95/92 (Steuer wird Aufwand). Details: get_guideline('input_tax') Abschnitt 2.",
+      "94/91 nur bei Abzugsberechtigung, sonst 95/92 (Steuer wird Aufwand). Details: help(topic=\"vat\") Abschnitt 2.",
   },
   {
     code: "VST-XB-5",
-    title: "Ausländische USt ist nie deutsche Vorsteuer",
-    statutes: ["§ 15 Abs. 1 Nr. 1 UStG", "§§ 59 ff. UStDV"],
+    title: "Ausländische oder unberechtigt ausgewiesene USt ist nie deutsche Vorsteuer",
+    statutes: ["§ 15 Abs. 1 Nr. 1 UStG", "§§ 59 ff. UStDV", "§ 14c UStG"],
     guidance:
       "Ausgewiesene ausländische USt (inkl. OSS-`EU`-Nummern nach § 18i) ist in der UStVA nie abziehbar — " +
-      "brutto buchen; Vergütungsverfahren ist Kanzleientscheidung.",
+      "brutto buchen; Vergütungsverfahren ist Kanzleientscheidung. Ohne deutsche USt-IdNr. des Ausstellers ist " +
+      "ausgewiesene Steuer eines Auslandsausstellers nie abziehbar (§ 14c) — § 13b auf das Netto.",
     evaluate: (facts) => {
       const origin = facts.get("vendor_vat_id_origin");
       const shown = facts.get("vat_shown");
-      if (!origin || origin.value !== "no")
-        return notApplicable("Keine ausländische USt-IdNr. am Beleg erkannt");
+      const seat = facts.get("reverse_charge_case");
+      const foreignByVatId = origin?.value === "no";
+      // F572: ohne USt-IdNr. entscheidet das Sitzland; unknown (kein Land, F592-Widerspruch) bleibt notApplicable.
+      const foreignBySeat = origin?.value === "unknown" && seat?.value === "yes";
+      if (!foreignByVatId && !foreignBySeat)
+        return notApplicable("Aussteller nicht als ausländisch erkannt (deutsche USt-IdNr. oder Sitzland nicht ableitbar)");
       if (shown?.value !== "yes")
         return { applies: true, result: "pass", reason: "Ausländischer Aussteller ohne USt-Ausweis — 13b/igE-Pfad (VST-XB-1/2)", blockedTaxKeys: [] };
       return {
         applies: true,
         result: "fail",
-        reason: `${origin.rationale}; trotzdem Steuer ausgewiesen (${shown.rationale}) — keine deutsche VSt, kein igE aus dieser Rechnung`,
+        reason: foreignByVatId
+          ? `${origin!.rationale}; trotzdem Steuer ausgewiesen (${shown.rationale}) — keine deutsche VSt, kein igE aus dieser Rechnung`
+          : `Aussteller im Ausland ohne deutsche USt-IdNr. (${seat!.rationale}) weist Steuer aus (${shown.rationale}) — ` +
+            "nicht gesetzlich geschuldet (§ 14c UStG) bzw. ausländische Steuer: kein Vorsteuerabzug (8/9/18/19). " +
+            "§ 13b auf das Netto (94 mit, 95 ohne Abzugsrecht) oder Klärung an die Kanzlei. Trägt das PDF doch eine " +
+            "deutsche USt-IdNr. des Ausstellers, die Extraktion korrigieren (document_extraction_update, " +
+            "Aussteller-USt-IdNr. am Kopf — F582); Einschätzung und Vorschlag rechnen danach neu.",
         blockedTaxKeys: DOMESTIC_INPUT_KEYS,
       };
     },
   },
   {
     code: "VST-XB-6",
-    title: "Fremdwährungsrechnung: keine deutsche VSt",
+    title: "Fremdwährungsrechnung: keine Inlands-VSt, § 13b bleibt offen",
     statutes: ["Ludwig-Konvention (abgeleitet aus VST-XB-5)"],
     guidance:
-      "Eine FW-Rechnung kann keine abziehbare deutsche VSt tragen — Reverse-Charge-Behandlung (94/95); die " +
-      "FW-Steuer bleibt Audit-Trail und fließt nie in die EUR-Buchung.",
+      "Eine FW-Rechnung trägt keine abziehbare Inlands-VSt: BU 8/9/18/19 sind gesperrt. § 13b bleibt zulässig, " +
+      "94 mit und 95 ohne VSt-Abzug; die Wahl folgt dem Buchungsstil der Kanzlei. Die FW-Steuer bleibt " +
+      "Audit-Trail und fließt nie in die EUR-Buchung.",
     evaluate: (facts) => {
       const f = facts.get("foreign_currency");
       if (!f || f.value === "not_applicable")
@@ -922,7 +950,7 @@ export const VAT_RULES: readonly VatRuleDefinition[] = [
     statutes: ["§ 15 Abs. 1a S. 2 UStG"],
     guidance:
       "VSt voll abziehbar trotz 70/30-Split des Nettos — Voraussetzung ordnungsgemäßer Bewirtungsbeleg " +
-      "(Anlass + Teilnehmer); fehlt er → raise_clarification.",
+      "(Anlass + Teilnehmer); fehlt er → clarification_raise.",
   },
   {
     code: "VST-TIME-1",

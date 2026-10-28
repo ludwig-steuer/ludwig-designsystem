@@ -8,7 +8,7 @@
  */
 
 export interface ReopenFacts {
-  /** Belegstatus — zurück geht nur `done` (F289: `reopened`, done → bookable). */
+  /** Belegstatus — zurück geht `done` (F289: `reopened`, done → bookable) und seit Owner 2026-10-27 auch `bookable`. */
   status: string;
   supersededAt: string | null;
   /** Lebende Buchung über das Beleg-Ereignis ODER über `source_doc_id` am Satz (F163). */
@@ -19,7 +19,9 @@ export interface ReopenFacts {
 
 /** Warum der Beleg nicht zurück darf — `null` heißt: er darf. */
 export function reopenBlocker(f: ReopenFacts): string | null {
-  if (f.status !== "done") return "Der Beleg ist nicht erledigt — es gibt nichts zurückzusetzen.";
+  // Owner 2026-10-27: auch `bookable` (gelesen, nicht gebucht) geht mit Einwand zurück — Erledigt und Offen sind
+  // die beiden Zustände, in denen die Kanzlei Ludwig eine Anweisung mitgeben kann.
+  if (f.status !== "done" && f.status !== "bookable") return "Der Beleg liegt bei Ludwig — es gibt nichts zurückzugeben.";
   if (f.supersededAt !== null) {
     return "Der Beleg ist durch andere Belege ersetzt — fachlich gibt es ihn nicht mehr.";
   }
@@ -38,8 +40,7 @@ export function reopenBlocker(f: ReopenFacts): string | null {
 export function reopenHint(r: { note: string | null; previousReason: string | null }): string {
   const einwand = r.note ? `: „${r.note}“` : " (ohne Einwand)";
   const vorher = r.previousReason ? ` Verworfene Begründung: „${r.previousReason}“.` : "";
-  return (
-    `Die Kanzlei hat die Erledigung zurückgenommen${einwand}.${vorher} ` +
-    "Den Einwand umsetzen, nicht dieselbe Begründung erneut setzen."
-  );
+  // Ohne verworfene Begründung war der Beleg offen (bookable) — dann ist es eine Anweisung, keine Rücknahme.
+  const lead = r.previousReason ? "Die Kanzlei hat die Erledigung zurückgenommen" : "Die Kanzlei hat den Beleg zurückgegeben";
+  return `${lead}${einwand}.${vorher} ` + "Den Einwand umsetzen, nicht dieselbe Begründung erneut setzen.";
 }

@@ -99,7 +99,11 @@ export interface CaseDetail {
   createdByLabel: string | null;
   /** Erwarteter Abstand zweier Vorkommen bei Dauersachverhalten (ISO-Intervall). */
   expectedInterval: string | null;
-  /** Der Durchgang, aus dem der Sachverhalt stammt. */
+  /**
+   * Agent-Schritt, der den Sachverhalt angelegt hat (`agent_run_step_id`). Feldname
+   * bleibt `agentRunId`: DS-Vertrag (`CaseFactsVM` in CaseFacts.tsx) — Umbenennung nur im
+   * Gleichschritt mit dem Designsystem (F474 bewusst nicht).
+   */
   agentRunId: string | null;
   /** Der Stapel, in dem seine Buchungen nach DATEV gingen. */
   exportBatchId: string | null;

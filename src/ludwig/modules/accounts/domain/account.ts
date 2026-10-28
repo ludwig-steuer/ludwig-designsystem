@@ -47,7 +47,7 @@ export type AccountScope = (typeof ACCOUNT_SCOPES)[number];
 
 /**
  * SKR-Kontoklasse. Wird beim INSERT von Python aus ``classify_skr_class()``
- * (``apps/workflows/.../services/account_classification.py``) gesetzt;
+ * (``apps/pipeline/src/ludwig/workflows/.../services/account_classification.py``) gesetzt;
  * vorher (vor PR1, Migration 20260513130000) war es eine STORED GENERATED
  * Spalte aus der inzwischen gedroppten SQL-Funktion ``classify_account()``.
  * Reihenfolge entspricht der natürlichen Sortierung in der UI

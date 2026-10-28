@@ -1,4 +1,4 @@
-import { batchOwner, type BatchExportMethod, type BatchOwnerMeta } from "./batch-process";
+import { batchOwner, type BatchExportMethod, type BatchOwnerMeta } from "@/ludwig/modules/accounting-cases";
 
 /**
  * Die Staffel-Leiste (F114 §4.1, F119 §6): wo ist die Zeit hingegangen?
@@ -13,14 +13,14 @@ import { batchOwner, type BatchExportMethod, type BatchOwnerMeta } from "./batch
  * Audit, und ein zweiter Ort würde nur abweichen.
  */
 
-export interface ZustandsWechsel {
+export interface StateChange {
   /** ISO-Zeitstempel des Wechsels. */
   at: string;
   /** Der Zustand, in den der Stapel gewechselt ist. */
   state: string;
 }
 
-export interface StaffelSegment {
+export interface RelaySegment {
   owner: BatchOwnerMeta;
   state: string;
   from: string;
@@ -58,17 +58,17 @@ export function humanDuration(ms: number): string {
  * `until` ist der rechte Rand: bei einem laufenden Stapel „jetzt", bei einem
  * abgeschlossenen sein letzter Wechsel.
  */
-export function staffelSegmente(
-  wechsel: readonly ZustandsWechsel[],
+export function relaySegments(
+  wechsel: readonly StateChange[],
   until: string,
   openDocumentRequests = 0,
   exportMethod: BatchExportMethod = null,
-): StaffelSegment[] {
+): RelaySegment[] {
   if (wechsel.length === 0) return [];
   const sorted = [...wechsel].sort((a, b) => a.at.localeCompare(b.at));
   const end = new Date(until).getTime();
 
-  const raw: Array<Omit<StaffelSegment, "share">> = [];
+  const raw: Array<Omit<RelaySegment, "share">> = [];
   for (let i = 0; i < sorted.length; i++) {
     const cur = sorted[i]!;
     const next = sorted[i + 1];

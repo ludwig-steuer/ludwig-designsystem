@@ -16,6 +16,6 @@
  * Der Weg zum Personenkonto. `encodeURIComponent`, weil ein Konto mit Zusatz
  * sonst ein zweites Pfadsegment aufmachen würde.
  */
-export function personenkontoHref(accountsBasePath: string, personalAccount: string): string {
+export function personalAccountHref(accountsBasePath: string, personalAccount: string): string {
   return `${accountsBasePath}/${encodeURIComponent(personalAccount)}`;
 }

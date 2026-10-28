@@ -34,6 +34,8 @@ function detail(over: Partial<BusinessPartnerDetail> = {}): BusinessPartnerDetai
     addressLine1: "Musterstraße 12",
     postalCode: "12345",
     countryCode: null,
+    region: null,
+    countrySource: null,
     websiteUrl: null,
     businessDescription: "Verwaltung und Vermietung eigener Immobilien",
     vatNotes: null,

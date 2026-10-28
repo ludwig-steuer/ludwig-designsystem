@@ -1,5 +1,6 @@
 import { z } from "zod";
 import type { RawSearchParams } from "@/ludwig/shared";
+import type { PartnerCountrySource, VendorRegion } from "./vendor-region";
 
 /**
  * Umsatzsteuerliche Einordnung des Partners — Spiegel des DB-CHECK
@@ -89,6 +90,8 @@ export type OnboardingState = (typeof ONBOARDING_STATE)[number];
 export interface PartnerAccountRef {
   accountNumber: string;
   isInternal: boolean;
+  /** F417: Kontoname aus dem jüngsten Wirtschaftsjahr — nur in `getBusinessPartner` (Detail) gesetzt. */
+  accountName?: string | null;
 }
 
 /**
@@ -144,6 +147,10 @@ export interface BusinessPartnerDetail extends BusinessPartnerListItem {
   addressLine1: string | null;
   postalCode: string | null;
   countryCode: string | null;
+  /** F448/F472: Länderkategorie, folgt dem Land. */
+  region: VendorRegion | null;
+  /** F472: Herkunft des Landes; accounting/agent = bestätigt. */
+  countrySource: PartnerCountrySource | null;
   websiteUrl: string | null;
   businessDescription: string | null;
   vatNotes: string | null;

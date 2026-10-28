@@ -12,6 +12,10 @@ export interface ClientListItem {
    * siehe docs/topics/datev.md).
    */
   replayCutoffDate: string | null;
+  /** F516: Experiment-Kopie — Hauptmandant (`source_client_id`), Kennung (`E1`, …) und dessen DATEV-Nummer für die Anzeige `<Nr>-E<n>`. */
+  sourceClientId: string | null;
+  experimentLabel: string | null;
+  sourceDatevClientNumber: string | null;
   /** `platform_clients.is_active` — false = stillgelegt (Zwilling eines neu importierten Mandanten). */
   isActive: boolean;
   /**

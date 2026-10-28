@@ -10,16 +10,11 @@
 export const BOOKING_STYLES = ["creditor", "direct"] as const;
 export type BookingStyle = (typeof BOOKING_STYLES)[number];
 
-// ponytail: Übergangslesen F210-T210.3 für Code, der vor der Migration läuft; Ausbau ab 2026-10-12.
-const LEGACY_BOOKING_STYLES: Record<string, BookingStyle> = { kreditorisch: "creditor", direkt: "direct" }; // Altwerte, nur für parseBookingStyle
-
 /**
  * Der einzige Weg, die Spalte zu lesen. Unbekanntes wirft (fail fast) statt
  * still auf den Default zu fallen — ein stiller Default bucht falsch.
  */
 export function parseBookingStyle(raw: string): BookingStyle {
   if ((BOOKING_STYLES as readonly string[]).includes(raw)) return raw as BookingStyle;
-  const legacy = LEGACY_BOOKING_STYLES[raw];
-  if (legacy) return legacy;
   throw new Error(`Unbekannter booking_style: ${raw}`);
 }

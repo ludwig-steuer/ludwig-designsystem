@@ -2,9 +2,9 @@
  * Qualitäts-Metrik aus `client_journal_entry.acceptance_quality` (F05-T5.5):
  * Wie oft nimmt die Kanzlei einen Agent-Vorschlag **unverändert** ab?
  *
- * Reine Aggregations-/VM-Logik ohne DB — die SQL-Seite liefert Roh-Zählungen
- * je Mandant + Monat (`infrastructure/acceptance-quality-queries.ts`), hier
- * werden Anteile berechnet und Invarianten geprüft (fail fast statt NaN).
+ * Reine Aggregations-/VM-Logik ohne DB — der Aufrufer liefert Roh-Zählungen
+ * je Mandant + Monat, hier werden Anteile berechnet und Invarianten geprüft
+ * (fail fast statt NaN).
  */
 
 /** Roh-Zeile aus der Aggregations-Query: ein Mandant × Buchungs-Monat. */

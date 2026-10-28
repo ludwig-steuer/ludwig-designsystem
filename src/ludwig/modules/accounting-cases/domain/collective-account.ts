@@ -1,8 +1,8 @@
 /**
  * F299 — Sammelkonto nach Anfangsbuchstabe („Diverse A" … „Diverse U V W").
  *
- * Port von `_vendor_first_letter` / `_diverse_letter_set`
- * (`apps/workflows/.../diverse_creditor_pool_resolver.py`). Die Buckets kommen
+ * Port von `_vendor_first_letter` / `_diverse_letter_set` aus dem mit F392
+ * gelöschten Python-`diverse_creditor_pool_resolver.py`. Die Buckets kommen
  * aus den Kontenplan-**Namen** (DATEV-Stammdaten), nicht aus
  * `platform_clients.diverse_strategy`: bei 10160 steht die Strategie auf
  * `first_account`, der Kontenplan führt aber Buchstaben-Buckets, und die
@@ -11,7 +11,7 @@
  * Rein, ohne IO.
  */
 
-/** Erster Buchstabe A–Z, Umlaute transliteriert (Ä→A). Der Artikel zählt: „Die Kenner" → D. */
+/** Erster Buchstabe A–Z, Umlaute transliteriert (Ä→A). Der Artikel zählt: „Die Muster" → D. */
 export function counterpartyFirstLetter(name: string | null | undefined): string | null {
   if (!name) return null;
   const ascii = name.normalize("NFKD").replace(/\p{M}/gu, "");

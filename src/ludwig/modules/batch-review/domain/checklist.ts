@@ -1,9 +1,10 @@
-import type { BookingCycleKind } from "@/ludwig/modules/datev-export";
+import type { BookingCycleKind } from "@/ludwig/modules/accounting-cases";
 
 import type { CheckKind } from "./check-kinds";
+import { reviewStepLabel, type ReviewStepKey } from "./steps";
 
 /**
- * Die Freigabe-Checkliste (F109-8-Zusatz): Schritt 8 ist eine Checkliste und
+ * Die Freigabe-Checkliste (F109-8-Zusatz): das Prüfprotokoll ist eine Checkliste und
  * zwei Knöpfe.
  *
  * Drei Stufen, und die Aufteilung ist der ganze Punkt:
@@ -37,6 +38,7 @@ export type ChecklistLevel = "blocked" | "warn" | "info";
 export const CHECKLIST_ROW_KEYS = [
   "statements_complete",
   "documents_handled",
+  "documents_reviewed",
   "questions_answered",
   "cases_proposed",
   "entries_accepted",
@@ -77,6 +79,7 @@ export const CHECKLIST_ROW_SCOPE: Record<
 > = {
   statements_complete: { regular: true, clientBatch: false },
   documents_handled: { regular: true, clientBatch: false },
+  documents_reviewed: { regular: true, clientBatch: false },
   questions_answered: { regular: true, clientBatch: true },
   cases_proposed: { regular: true, clientBatch: false },
   entries_accepted: { regular: true, clientBatch: true },
@@ -111,14 +114,14 @@ export interface ChecklistRow {
   todo: string;
   done: number;
   total: number;
-  /** Wie viel offen ist, ungedeckelt — das zeigt „Stand" in Schritt 8. */
+  /** Wie viel offen ist, ungedeckelt — das zeigt „Stand" im Prüfprotokoll. */
   openCount: number;
   level: ChecklistLevel;
   /** Prüfschritt, auf den die Zeile springt (`null` = kein Sprung). */
-  jumpStep: number | null;
+  jumpStep: ReviewStepKey | null;
   /** Linktext des Sprungs, als Handlung. */
   jumpLabel: string | null;
-  /** Pfad-Suffix hinter `…/review/`, z. B. `4?bookings=1800` oder `3#without-proposal`. */
+  /** Pfad-Suffix hinter `…/review/`, z. B. `account-clearing?bookings=1800` oder `proposals?tab=without_proposal`. */
   jumpHref: string | null;
   /** Quittiert und noch gültig (Wert unverändert)? */
   acknowledged: boolean;
@@ -139,7 +142,7 @@ export interface ChecklistRow {
    */
   items: ChecklistItem[];
   /**
-   * Agenten-Sicht (Schritt 0): so viel hat der Agent erledigt — gebucht ODER
+   * Agenten-Sicht (Ergebnis des Stapels): so viel hat der Agent erledigt — gebucht ODER
    * gefragt. Fehlt, gilt `done`. Weicht nur ab, wo die Freigabe strenger
    * rechnet als die Agentenarbeit: eine Rückfrage statt Vorschlag, ein
    * Vorschlag, der nur noch auf die Freigabe wartet (F201).
@@ -183,14 +186,14 @@ export function releaseVerdict(rows: readonly ChecklistRow[]): ReleaseVerdict {
     canRelease: blocked.length === 0 && warn.length === 0,
     blockingReason: first
       ? `${first.label}: ${first.openCount} offen` +
-        (first.jumpStep === null ? "" : ` → Schritt ${first.jumpStep}`)
+        (first.jumpStep === null ? "" : ` → Schritt ${reviewStepLabel(first.jumpStep)}`)
       : null,
     openBlocked: blocked.length,
     openWarn: warn.length,
   };
 }
 
-/** Die Checkliste als Text — geht in Schritt 9 als Notiz an den Stapel. */
+/** Die Checkliste als Text — geht bei der Übergabe als Notiz an den Stapel. */
 export function checklistAsNote(rows: readonly ChecklistRow[]): string {
   return rows
     .map((r) => {

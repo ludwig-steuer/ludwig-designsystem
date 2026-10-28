@@ -22,6 +22,7 @@ import {
   type SourceDocStatus,
 } from "@/ludwig/modules/source-docs";
 import type { CollectionKind } from "@/ludwig/core/documents/collection-kind";
+import type { SegmentBoundary } from "@/ludwig/core/documents/segment-boundary";
 
 
 
@@ -41,6 +42,8 @@ export interface PageSegmentPlan {
     label: string;
     kind?: string | null;
   }>;
+  /** F441: je Seitenübergang die Entscheidung mit Konfidenz; fehlt bei Altbestand. */
+  boundaries?: ReadonlyArray<SegmentBoundary>;
 }
 
 export interface InboxEntry {
@@ -54,6 +57,8 @@ export interface InboxEntry {
   /** Übergabe-/Rückgabegrund, Prüfketten-Befund (F288). */
   reviewNote: string | null;
   classDocumentForm: string | null;
+  /** F497: Belegprofil der deterministischen Erkennung (`client_document_profiles.profile_key`); null = keins. */
+  classDocumentProfileKey: string | null;
   docDirection: string | null;
   classDocumentKind: string | null;
   classSummary: string | null;

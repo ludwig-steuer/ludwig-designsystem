@@ -14,6 +14,41 @@ gebraucht wird, kommt bis zum nächsten Lauf hierher.
 
 Nichts.
 
+## Erledigt mit dem Lauf vom 2026-10-29 (App `4fc2a63d`, E14)
+
+Owner-Ausnahme über llcto (2026-10-28: „Du bekommst Bescheid, sobald sie auf
+staging liegt, dann ziehst du den Spiegel“; Bescheid 2026-10-29). Gespiegelt
+aus dem **lokalen** App-Commit `4fc2a63d` auf `staging`, der `d0d0023d4`
+(E14) enthält. Zum Zeitpunkt des Laufs war er noch nicht auf origin/staging.
+
+- **E14, Achse `agent_run_banner`** (0225, Variante B): Die Laufleiste nimmt
+  Ton und Wort aller fünf Zustände aus der Registry. Ihre Wertemenge fehlt
+  noch, siehe L-375.
+- **Ein Monat ist mitgekommen** (seit `d7ac1f39`). Folgen im Set:
+  - `region` und `countrySource` sind an `BusinessPartnerDetail` Pflicht; die
+    Partner-Fixtures tragen sie jetzt.
+  - Die Achse `agent_run_outcome` heißt jetzt `agent_run_step_outcome`; das
+    Set nutzte sie nur in 0225.
+  - Das Lauf-Modell liegt jetzt in `modules/agent-runs/`;
+    `agent-run-end.ts` ist dorthin gezogen.
+  - `ReviewReason` trägt jetzt `kind` und `checkCode`, und `code` ist bei
+    Grundlast und Präzedenz `null`. `ReviewReasonCell` schlüsselt die
+    Summanden deshalb mit `${kind}:${checkCode}` (Befund ll-abnahme: doppelter
+    Schlüssel „null“ in der App).
+- **Skript:**
+  - `sync-ludwig.sh` spiegelt dazu vier reine Dateien aus `core/accounting/`
+    (`clarification-handling`, `pruefpunkte`, `reversal-note`,
+    `vat-by-rate`). Ohne sie fielen `overview-vm.ts`, `review-score.ts` und
+    `invoices/domain/vat-by-rate.ts` aus dem Spiegel, und mit ihnen sechs
+    Bausteine des Sets.
+  - `mirror-barrels.mjs` lässt jetzt auch Dateien aus, die einen App-Pfad
+    außerhalb des Spiegels importieren (`@/ui/navigation/…`, so
+    `command-palette`). Vorher galt so ein Pfad als fremdes Paket.
+- Nicht gespiegelt, weil das Set sie heute nicht braucht: die Dateien hinter
+  `core/errors`, `core/accounting/entry-kind`, `document-number-series`,
+  `credit-card-statement` und `shared/account-number-order`. Die Liste
+  „ausgelassen“ des Laufs nennt sie.
+
 ## Erledigt mit dem Lauf vom 2026-09-29 (App `d7ac1f39`, F316–F326)
 
 Owner-Ausnahme (Simon, 2026-09-29, im Chat: „Ja, jetzt spiegeln"). Gespiegelt

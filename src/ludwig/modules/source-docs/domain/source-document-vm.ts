@@ -105,7 +105,7 @@ export interface SourceDocumentVM {
   documentDate?: string | null;
   /**
    * NOT NULL. Eingang beim Mandanten — Perioden-Achse der Belegliste. Default
-   * ist der Upload-Tag; Intake und Agent (`update_source_doc`) setzen ihn.
+   * ist der Upload-Tag; Intake und Agent (`document_update`) setzen ihn.
    */
   receivedDate: string;
   /**
@@ -145,7 +145,7 @@ export interface SourceDocumentVM {
   classConfidence?: number | null;
   /**
    * Dateigröße in Bytes. Sie zählt an genau einer Stelle: über
-   * `MAX_UPLOAD_MB` (15 MB, `files/domain/upload-limits.ts`) scheitert die Übergabe.
+   * `MAX_UPLOAD_MB` (25 MB, `files/domain/upload-limits.ts`) scheitert die Übergabe.
    */
   byteSize?: number | null;
 
@@ -383,6 +383,15 @@ function seitenzahl(raw: string | undefined): number | null {
 /** F236: Buchungszustand eines Belegs — hängt ein lebender Satz dran (über sein Ereignis oder `source_doc_id`, F163)? */
 export const DOCUMENT_BOOKING_STATES = ["booked", "unbooked", "open"] as const;
 export type DocumentBookingState = (typeof DOCUMENT_BOOKING_STATES)[number];
+
+/**
+ * Eine Spanne als Wert der Spalte „Seiten" (DS 0212 G8): „5–7" bzw. „5" — ohne
+ * das Wort „Seiten", das steht im Kopf und im Titel der Zelle (F342).
+ */
+export function formatPageSpan(range: PageExcerpt | null): string | null {
+  if (!range) return null;
+  return range.to === undefined || range.to === range.from ? `${range.from}` : `${range.from}–${range.to}`;
+}
 
 /** F236: Seitenbereiche lesbar — sortiert, Überlappende und Angrenzende zusammengezogen. */
 export function formatPageRanges(ranges: readonly PageExcerpt[]): string {

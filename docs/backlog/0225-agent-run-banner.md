@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Status | Abnahme (Nachbesserung 2026-10-27: M1–M6 behoben, M7 mit Default, Frage an llcto) · vorher: in Arbeit (Abnahme 2026-10-27: M1–M7 offen) |
+| Status | fertig (Abnahme Variante B 2026-10-29: B1–B5 ✓, keine Mängel, Hinweise H7–H13) · vorher: Abnahme (Nachtrag 2026-10-29: Variante B über die Registry-Achse `agent_run_banner`, M7 entschieden) · davor: Abnahme (Nachbesserung 2026-10-27: M1–M6 behoben, M7 mit Default, Frage an llcto) · davor: in Arbeit (Abnahme 2026-10-27: M1–M7 offen) |
 | Stufe | `entities/agent-run/` |
 | Klassen-Test | „Ergäbe das auch in einer Versicherungs-App Sinn?" → nein, der Text nennt Ludwig und seinen Durchgang. |
 | Quelle | Owner 2026-10-26 über llcto (Zuruf 2026-10-27): Lauf-Leiste in der Buchhalter-Abnahme |
@@ -42,13 +42,13 @@ reicht die kurze Form ohne Knopf.
 
 | Prop | Typ | Pflicht | Bedeutung | Nachweis (Story) |
 |---|---|---|---|---|
-| `state` | `"running" \| "done" \| "failed"` | ja | läuft (blau, Hinweis-Stufe wie `run_outcome.running`) · erledigt (grün) · gescheitert (rot, nur was die Registry `danger` nennt: `run_outcome.blocked`; s. Nachbesserung, M7) | `States` |
-| `startedAt` | `string \| Date`; in `done`/`failed` `string \| Date \| null` | bei `running` ja | Start des Durchgangs. Die Leiste zählt ab hier minutengenau mit; als `title` steht der volle Zeitpunkt daneben (T7) | `Running`, `Ticking` |
+| `state` | `"running" \| "done" \| "stopped" \| "taken_over" \| "failed"` | ja | Ton und Wort jedes Zustands aus der Registry-Achse `agent_run_banner` (Variante B, Owner 2026-10-28): läuft (info, „läuft“) · fertig (neutral, „fertig“) · abgebrochen (warning, „abgebrochen“) · übernommen (neutral, „übernommen“) · Fehler (danger, „Fehler“, nur ein Lauf, der an einem roten Gate steckt). Die Zuordnung aus den Ausläufen macht die App (`agentRunBannerState`) | `States`, `Stopped` |
+| `startedAt` | `string \| Date`; nach dem Ende `string \| Date \| null` | bei `running` ja | Start des Durchgangs. Die Leiste zählt ab hier minutengenau mit; als `title` steht der volle Zeitpunkt daneben (T7) | `Running`, `Ticking` |
 | `startedBy` | `string \| null` | nein | „gestartet von Anna Berger"; ohne den Namen entfällt der Teil | `Running`, `RunningMinimal` |
 | `expectedMinutes` | `number \| null` | nein | „meist fertig nach etwa 12 Min"; den Wert liefert die App aus den bisherigen Läufen | `Running`, `Edge` |
 | `pass` | `number \| null` | nein | Nummer des Durchgangs im Stapel, „2. Durchgang" | `Running` |
-| `message` | `string` | bei `done`/`failed` ja | der Satz, im Wortlaut der App („Ludwig ist fertig: 2 neue Rückfragen") | `Done`, `Failed` |
-| `action` | `AgentRunAction \| null`, `AgentRunAction` = `{ label: string; href: string } \| { label: string; onClick: () => void }`; bei `running` nur `null` | nein | `done`: genau ein Hauptknopf rechts, Label und Ziel von der App. `failed`: derselbe Weg als Verweis hinter dem Satz. Bei `running` gibt es keinen | `Done`, `Failed`, `InUse` |
+| `message` | `string` | nach dem Ende ja | der Satz, im Wortlaut der App („Ludwig ist fertig: 2 neue Rückfragen") | `Done`, `Failed` |
+| `action` | `AgentRunAction \| null`, `AgentRunAction` = `{ label: string; href: string } \| { label: string; onClick: () => void }`; bei `running` nur `null` | nein | `done`: genau ein Hauptknopf rechts, Label und Ziel von der App. Jedes andere Ende (`stopped`, `taken_over`, `failed`): derselbe Weg als Verweis hinter dem Satz. Bei `running` gibt es keinen | `Done`, `Stopped`, `Failed`, `InUse` |
 
 `AgentRunCell` (Client-Komponente):
 
@@ -94,11 +94,13 @@ Die Dauer kommt aus `formatDuration`, also „6 Min" ohne Punkt wie überall im 
   Region, die schon mit Inhalt ins DOM kommt, lesen die meisten Screenreader
   nicht vor (H3). Wer den Lauf startet, bekommt die Rückmeldung von seiner
   Handlung; angesagt werden verlässlich fertig und gescheitert.
-- **Höhe:** Sie ist in allen drei Zuständen gleich, 42 px (Mindesthöhe über
+- **Höhe:** Sie ist in allen fünf Zuständen gleich, 42 px (Mindesthöhe über
   dem `sm`-Knopf: 30,2 + 2 × 4 + 2 × 1 = 40,2), damit beim Wechsel auf „fertig"
   nichts springt.
-- **Farbe nie allein:** Läuft hat Wort und Marke, erledigt und gescheitert haben
-  das Zeichen aus `StateIcon` und den Satz.
+- **Farbe nie allein:** Läuft hat Wort und Marke. Abgebrochen und Fehler haben
+  das Zeichen aus `StateIcon` (Name = Wort der Registry) und den Satz. Fertig
+  und übernommen sind neutral und haben **kein** Zeichen: Das Zeichen gehört
+  zur Stufe, und der leere Kreis hieße im Set „offen“. Das Wort trägt der Satz.
 - **Tastatur:** Knopf und Verweis sind gewöhnliche Fokusziele. Die Leiste
   selbst ist keins.
 
@@ -116,12 +118,13 @@ Titel `v3/Entitäten/Durchgang/AgentRun`.
 | `Running` | alle Angaben: Dauer, Erwartung, Starter, Durchgang |
 | `RunningMinimal` | nur `startedAt`, unter einer Minute |
 | `Ticking` | die Uhr springt im Browser von „weniger als 1 Min" auf „1 Min" |
-| `States` | `running` · `done` · `failed` untereinander, gleiche Höhe |
+| `States` | alle fünf Zustände untereinander, gleiche Höhe, Ton und Wort aus der Achse |
+| `Stopped` | Warnung mit Verweis, einmal „zwei Stunden still“ ohne Verweis |
 | `Done` | Satz und ein Hauptknopf, einmal mit `href`, einmal mit `onClick` |
-| `Failed` | roter Satz mit Verweis, einmal ohne Verweis |
+| `Failed` | roter Satz mit Verweis, einmal ohne Verweis (nur „steckt fest“) |
 | `Edge` | 2 Std 5 Min, über der Erwartung, langer Name, langer Satz bei 1280 px |
 | `Cell` | `AgentRunCell` in der Liste „Zu tun" einer Mandanten-Übersicht |
-| `InUse` | StepRail `bar`, darunter die Leiste, Rundlauf `running` → `done` → `failed` |
+| `InUse` | StepRail `bar`, darunter die Leiste, Schalter über alle fünf Zustände |
 
 ## Ausbau
 
@@ -161,14 +164,22 @@ Variabel (aus dieser Spec):
 - [ ] Die Uhr zählt im Browser ohne neue Props weiter (`Ticking`)
 - [ ] Unter einer Minute: „seit weniger als 1 Min", über einer Stunde: „2 Std 5 Min" (`RunningMinimal`, `Edge`)
 - [ ] `title` an der Dauer trägt den vollen Startzeitpunkt (`Running`)
-- [ ] `done`: grünes Zeichen mit Wort, Satz, genau ein Hauptknopf rechts (`Done`)
+- [ ] ~~`done`: grünes Zeichen mit Wort~~ → ersetzt durch B1 (Owner 2026-10-28); Satz, genau ein Hauptknopf rechts (`Done`)
 - [ ] `failed`: rotes Zeichen mit Wort, Satz, Verweis als Link (`Failed`)
-- [ ] Gleiche Höhe in allen drei Zuständen, gemessen (`States`)
+- [ ] Gleiche Höhe in allen fünf Zuständen, gemessen (`States`)
 - [ ] Marke steht bei `prefers-reduced-motion: reduce` still (`Running` mit Emulation)
 - [ ] Nur der Zustandswechsel wird angesagt, nicht die Minute (`role="status"` nur am Zustandssatz; `InUse`)
 - [ ] `AgentRunCell` mit derselben Marke, ohne Knopf, hält die Zeilenhöhe (`Cell`)
-- [ ] Kontrast Text ≥ 4,5:1 auf allen drei Flächen, Marke ≥ 3:1 zur Spur, gemessen
+- [ ] Kontrast Text ≥ 4,5:1 auf allen Flächen, Marke ≥ 3:1 zur Spur, gemessen
 - [ ] Bei 1280 px bricht ein langer Satz um, der Knopf bleibt rechts und ganz (`Edge`)
+
+Variante B (Nachtrag 2026-10-29, Owner 2026-10-28 über llcto):
+
+- [ ] B1 Ton (Klasse `v3run--<kind>`) und Wort (Name des Zeichens) jedes Zustands kommen aus `resolveStatus("agent_run_banner", state)`; keine Zuordnung von Ton oder Wort im Set (`States`)
+- [ ] B2 `stopped`: Warnfläche, Zeichen „abgebrochen“, Satz, Weg als Verweis wie bei `failed` (`Stopped`)
+- [ ] B3 `taken_over` und `done`: neutrale Fläche, kein Zeichen, Satz; `taken_over` mit Verweis, `done` mit Hauptknopf (`States`)
+- [ ] B4 `failed` rot mit Zeichen „Fehler“, in den Stories nur für einen Lauf, der fest steckt (`Failed`)
+- [ ] B5 Verweis ≥ 4,5:1 auf Warn- und neutraler Fläche, gemessen (`Stopped`, `States`)
 
 ## Abnahme
 
@@ -230,3 +241,69 @@ Abgenommen von / am: fremde Abnahme (Prüfsitzung, nicht die bauende), gemessen,
 | H2 Trefferfläche des Verweises | bleibt offen, set-weit in 0213 | — |
 
 `pnpm typecheck`, `check:contrast`, `check:when`, `check:language` grün; `check:classes` nur mit den vier Altklassen.
+
+### Nachtrag 2026-10-29: Variante B
+
+Owner-Entscheid 2026-10-28 über llcto: Die Leiste bekommt fünf Zustände, und
+Ton und Wort kommen aus einer eigenen Registry-Achse. Die Achse
+`agent_run_banner` hat ll-abnahme in der App gebaut (`d0d0023d4`, E14). Sie
+kommt mit dem Spiegellauf vom 2026-10-29 ins Set (App `4fc2a63d`,
+`docs/spiegel-vormerkungen.md`). Damit ist **M7 entschieden**: „abgebrochen“
+(`incomplete`, `abandoned`) ist eine Warnung und kein Fehler.
+
+| Punkt | Umsetzung | Nachweis |
+|---|---|---|
+| Zustände | `state` um `stopped` und `taken_over` erweitert. Die lokale Zuordnung auf `agent_run_outcome`/`run_outcome` ist gestrichen; `resolveStatus("agent_run_banner", state)` gilt für alle fünf, auch für `running` | `AgentRun.tsx` |
+| Ton | eine Klasse je Stufe (`v3run--info`, `--neutral`, `--warning`, `--danger`), nicht je Zustand; `info` ist die Grundfläche | `--states`, 1280 px: info · neutral · warning · neutral · danger, alle 42 px |
+| Zeichen | Stufe → `StateIcon`: warning → Warnung, danger → Fehler, info → Hinweis, success → erledigt. **Neutral ohne Zeichen**: Der leere Kreis heißt im Set „offen“ (`STATE_SIGNS`) und hätte einem beendeten Lauf widersprochen. Der Satz trägt das Wort | Zeichen-Namen gemessen: „fertig“ (entfällt), „abgebrochen“, „übernommen“ (entfällt), „Fehler“ |
+| Kontrast | Satz `--color-text` 12,71:1 auf `bg-soft`, `--color-warning` 4,78:1 auf `warning-bg`; Verweis `--color-primary` 10,08:1 auf `warning-bg`, 10,75:1 auf `bg-soft` | `pnpm check:contrast` |
+| Wertemenge | `AGENT_RUN_BANNER_STATES` liegt in `close-run-banner.ts`. Die Datei importiert einen Typ aus `accounting-cases/server` und fällt deshalb aus dem Spiegel. Bis dahin steht im Set eine lokale Vereinigung `EndedState` mit `ponytail:`-Vermerk → Befund **L-375** | `docs/befunde-app.md` |
+
+Die Leiste zeigt `done` damit nicht mehr grün: „fertig“ heißt, dass Ludwig
+durch ist. Erledigt ist der Stapel damit nicht, und die Kanzlei ist dran.
+
+### Abnahme Variante B (2026-10-29)
+
+Gemessene Abnahme: CDP über `scripts/cdp.mjs` (chrome-headless-shell 1247, ein Browser für alles) gegen den Dev-Server :6107, uncommitteter Stand auf `88946e0`, Spiegel App `4fc2a63d`. Story-IDs ohne Präfix `v3-entitäten-durchgang-agentrun`. Die Kontraste sind aus den berechneten Farben nach der WCAG-Formel selbst nachgerechnet und nicht aus den Kommentaren übernommen.
+
+| Kriterium | Nachweis (Story-ID · Befehl · Messung) | Ergebnis |
+|---|---|---|
+| B1 Ton und Wort aus `resolveStatus("agent_run_banner", state)`, keine Zuordnung im Set | `AgentRun.tsx`: Klasse `v3run--${status.kind}`, Zeichen `StateIcon title={status.label}`. Weder Komponente noch CSS ordnen einem Zustand Ton oder Wort zu (`.v3run--<kind>` je Stufe); `SIGN` ordnet nur der Stufe die Form des Zeichens zu. `--states` bei 1280 px: Klassen `info · neutral · warning · neutral · danger` = Registry für `running · done · stopped · taken_over · failed`; Zeichen (`role="img"`, `aria-label`) — · — · „abgebrochen“ · — · „Fehler“ = Registry-Labels. Story-Schalter in `--in-use`: H9 | ✓ |
+| B2 `stopped`: Warnfläche, Zeichen „abgebrochen“, Satz, Verweis wie bei `failed` | `--stopped` bei 1280 px: beide Leisten `v3run--warning`, Fläche `rgb(245, 238, 224)` = `--color-warning-bg`. Zeichen `TriangleAlert` mit Namen „abgebrochen“, Strich `--color-warning` 4,78:1, Satz `--color-warning` 600 4,78:1. Erste Leiste: Verweis `<a href="#log">` (`TextButton` → `.v2link`) hinter dem Satz, dieselbe Form wie bei `failed`. Zweite Leiste („zwei Stunden still“) ohne Verweis. Kein Knopf | ✓ |
+| B3 `taken_over` und `done`: neutral, kein Zeichen, Satz; `taken_over` mit Verweis, `done` mit Hauptknopf | `--states`, `--done`, `--in-use`: `v3run--neutral`, Fläche `--color-bg-soft`, 0 Zeichen, Satz `--color-text` 12,71:1. `taken_over` in `--states` mit Verweis `<a href="#log">`, in `--in-use` ohne. `done`: je Leiste genau ein `v2btn--primary v2btn--sm`, 13 px vom rechten Rand, einmal `<a href>`, einmal `<button>`; die Leiste ohne `action` hat keinen Knopf | ✓ |
+| B4 `failed` rot mit Zeichen „Fehler“, in den Stories nur ein Lauf, der fest steckt | `--failed`: beide `v3run--danger`, Zeichen „Fehler“ 4,99:1, Satz `--color-danger` 4,99:1, Verweis `<a href="#accounts">`, zweite Leiste ohne Verweis. Jeder `failed`-Satz in `States`, `Failed` und `InUse` beginnt mit „Ludwig steckt fest“; „abgebrochen“ und „still“ stehen nur bei `stopped`. Wortwahl „Gate“: H8 | ✓ |
+| B5 Verweis ≥ 4,5:1 auf Warn- und neutraler Fläche | `--stopped`, `--states`: `--color-primary` `rgb(26, 58, 92)` auf `rgb(245, 238, 224)` 10,08:1, auf `rgb(244, 246, 248)` 10,75:1 (auf `danger-bg` 9,59:1). Beim Zeigen kommt ein Unterstrich dazu, die Farbe bleibt. Fokus per Tab: Ring 2 px `--color-primary`, 10,08 · 10,75 · 9,59:1 | ✓ |
+| `pnpm typecheck` und `pnpm build` grün | `pnpm typecheck` Exit 0. `pnpm build` nach Auftrag nicht gelaufen, siehe H13 | ✓ |
+| Datei nach der Familie benannt, Story daneben, Titel in der richtigen Gruppe | unverändert `AgentRun.tsx` mit `AgentRun.stories.tsx`, Titel `v3/Entitäten/Durchgang/AgentRun`. Zum Wort „Durchgang“: H7 | ✓ |
+| Code englisch; `@when`/`@instead` an jedem Export | `pnpm check:language` und `check:when` Exit 0, beide `--test` Exit 0. Neue Kommentare und JSDoc englisch, deutsche Wörter nur zitiert | ✓ |
+| Kein Hex, kein px, keine lokale Label-Map; Status nur über Registry | TSX ohne Hex und px. Ton und Wort aus der Achse (B1), damit ist M7 erledigt. `check:contrast` Exit 0 (80 Angaben, darunter die neuen 4,78 · 12,71 · 10,08 · 10,75, alle oben nachgerechnet), `check:type` und `check:icons` Exit 0, alle `--test` Exit 0. `check:classes` Exit 1 mit genau `v3clt`, `v3clt__step`, `v2tbl__foot`, `cy-page`. Die lokale Vereinigung `EndedState` statt `AgentRunBannerState` ist benannt (`ponytail:`-Vermerk, L-375, Nachtrag) | ✓ |
+| Alle Stories oben vorhanden; ausgeschlossene Zustände begründet | 10 von 10, neu `Stopped`. Die Prop `state` belegen `States` und `Stopped`, die Prop `action` belegen `Done`, `Stopped`, `Failed` und `InUse`. Leer, lädt und Filter bleiben unter „Zustände“ begründet | ✓ |
+| Prüfliste `design-guidelines.md` §9 durchgegangen | Farbe nur als Stufe, Rot nur bei `failed`; jeder farbige Zustand hat Wort und Zeichen oder Marke; Kontrast und Fokus gemessen, der Knopf in `done` hat seinen Ring auf `bg-soft` mit 3,28:1; Verweis und Knopf antworten auf Zeigen (Unterstrich bzw. Fläche, Schrift 9,15:1); Zeichen Lucide 15 px, Strich 1,5; Schrift über `check:type`. Wie bisher offen: Trefferfläche des Verweises 16 px (H2, jetzt in drei Zuständen). Wörter: H7, H8 | ✓ |
+| Im Browser angesehen (Storybook), nicht nur gebaut | Alle 10 Stories bei 1280 px: Baustein vorhanden, kein Fehlerbild, kein Querlauf, 0 Einträge in Konsole und Log, auch in `--in-use` über alle Wechsel. Ebenfalls ohne Eintrag (Spiegel-Folgen): `seiten-geschäftspartner-detail--typical`, `v3-entitäten-geschäftspartner-businesspartnerfacts--filled`, `…-businesspartnerdrawer--filled`, `v3-entitäten-buchungssatz-journalentryreviewlist--grouped` | ✓ |
+| `done`: Satz, genau ein Hauptknopf rechts | siehe B3 | ✓ |
+| `failed`: rotes Zeichen mit Wort, Satz, Verweis als Link | siehe B4 | ✓ |
+| Gleiche Höhe in allen fünf Zuständen, gemessen | `--states` bei 1280 und 1920 px: fünfmal 42,0 px. `--in-use`, Rundlauf läuft → fertig → abgebrochen → übernommen → Fehler → läuft bei 1280 und 1920 px: durchweg 42,0 px, die Karte darunter bleibt bei 214,97 px. Bei 700 px: H10 | ✓ |
+| Kontrast Text ≥ 4,5:1 auf allen Flächen, Marke ≥ 3:1 zur Spur | Satz: läuft 5,04 · fertig und übernommen 12,71 · abgebrochen 4,78 · Fehler 4,99. Grundfarbe des Absatzes `--color-text-muted` 6,19 · 6,17 · 5,79 · 5,51. Zeichen 4,78 und 4,99. Verweis siehe B5. Die Marke ist unverändert | ✓ |
+| Nur der Zustandswechsel wird angesagt, nicht die Minute | `--in-use` bei 700, 1280 und 1920 px: eine Live-Region im Dokument, über alle sechs Wechsel derselbe DOM-Knoten, eine Mutation je Wechsel; Inhalt ist der Satz bzw. „Ludwig arbeitet“ | ✓ |
+| Marke steht bei `prefers-reduced-motion: reduce` still | `--running` und `--cell` mit `Emulation.setEmulatedMedia`: 0 Animationen, `animation-name: none`, Stück bei `translateX(9,6 px)` | ✓ |
+| Bei 1280 px bricht ein langer Satz um, der Knopf bleibt rechts und ganz | `--edge`: Satz 41,8 px (zwei Zeilen zu 20,9), Knopf 186,3 × 30,2 px, `nowrap`, 13 px vom rechten Rand; `scrollWidth` 1280 = `clientWidth` | ✓ |
+| Begründung in `docs/spiegel-vormerkungen.md` (2026-10-29) passt zum Diff | `sync-ludwig.sh` nimmt genau die vier Dateien aus `core/accounting/`. Importiert werden sie von `accounting-cases/domain/overview-vm.ts` (`reversal-note`), `review-score.ts` (`pruefpunkte`, `clarification-handling`) und `invoices/domain/vat-by-rate.ts`. Daran hängen sechs Bausteine: `SourceDocumentAside`, `ReviewReasonCell`, `JournalEntryReviewList`, `CaseFacts`, `CaseTimeline` und `CaseAmount`. In `mirror-barrels.mjs` gibt ein `@/…`-Pfad außerhalb von `@/ludwig/` jetzt `false`, vorher fiel er auf `return true` („external packages“). `close-run-banner.ts` fehlt im Spiegel, wie L-375 sagt. `agent_run_outcome` kommt im Set nicht mehr vor. Die Partner-Fixtures tragen `region` und `countrySource`. Nicht genannt ist H12 | ✓ |
+| **H7** „Durchgang“ ist im gespiegelten GLOSSARY nicht mehr das Wort für den Lauf | Seit dem Spiegel vom 2026-10-29 heißt der Eintrag „Agent run / Lauf“ (Anzeige `L-<n>`). „Durchgang“ steht dort als früheres Wort für den Agent-Schritt. Die Spec (Einordnung: „GLOSSARY ‚Agent run / Durchgang‘“), das JSDoc in `AgentRun.tsx`, die Storybook-Gruppe `Durchgang` und die sichtbaren Texte „2. Durchgang“, „Protokoll des Durchgangs öffnen“ und „Ludwigs Durchgang ist beendet“ verweisen auf einen Eintrag, den es so nicht mehr gibt. Die App sagt selbst noch „Durchgang“ (Registry `export_batch_state`, `batch-review/domain/gating.ts`, `step0-view.ts`). Welches Wort gilt, entscheidet der Owner. Es liegt außerhalb von Variante B | H |
+| **H8** „Gate“ in einem Satz für die Kanzlei | In `--failed` sagt die zweite Leiste: „Das Gate Bank ist rot, ein Auszug fehlt.“ Das GLOSSARY übersetzt `gate` mit „Prüfschritt“ (T3). Dasselbe Wort steht in der Registry-Beschreibung `agent_run_banner.failed` („an einem roten Gate“), die im (i) sichtbar wird. Das ist ein Kandidat für einen Befund an die App | H |
+| **H9** Story-Schalter mit eigenen Wörtern | `InUse` schreibt die fünf Registry-Wörter von Hand in die Optionen des `Segmented` („läuft“, „fertig“, „abgebrochen“, „übernommen“, „Fehler“). Heute stimmen sie überein, sind aber eine zweite Quelle im Set (B1, wie H6). `axisLegend("agent_run_banner")` liefert Schlüssel und Wort | H |
+| **H10** Unter 1280 px bricht die Leiste um | Bei 700 px (Leiste 668 px) stehen `running` und `taken_over` mit Verweis auf zwei Zeilen (51,84 px), die übrigen messen 42,0. In `--in-use` rückt die Karte beim Wechsel von läuft auf fertig um 9,84 px. Das liegt außerhalb von L1 (Desktop ab 1280 px) und war schon unter M3 vermerkt | H |
+| **H11** Kommentare hinter dem Code | Das JSDoc von `AgentRunAction` sagt „a reference when it failed“, gilt aber jetzt für jedes Ende außer `done`. Der Kopf des `.v3run`-Blocks nennt noch `--color-success` auf `success-bg`, nicht die neuen Paare; die stehen einzeln darunter. `.v3run--success` und `.v3run--success .v3run__lead` greifen mit dieser Achse nie, weil sie kein `success` kennt. Sie bleiben nur als Rückfall für `SIGN` | H |
+| **H12** `ReviewReasonCell.tsx` ist im Diff, steht aber in keiner Liste | Der Schlüssel der Zeilen wechselt von `r.code` auf `` `${r.kind}:${r.checkCode ?? ""}` ``. Laut Kommentar ist das eine Folge des gespiegelten `review-score.ts`, wo `code` bei Grundlast und Präzedenz `null` ist. Weder der Auftrag noch die Spiegel-Vormerkung nennen die Änderung. Beim Stagen bewusst zuordnen und in der Vormerkung unter „Folgen im Set“ nennen | H |
+| **H13** `pnpm build` nicht gelaufen | Nach Auftrag nicht gelaufen, weil der Dev-Server läuft. Vor dem Commit nachholen | H |
+
+Abgenommen von / am: fremde Abnahme (Prüfsitzung, nicht die bauende), gemessen, 2026-10-29 · Mängel: keine · Hinweise H7–H13. H2 (Trefferfläche des Verweises) bleibt set-weit in `0213-text-link-hit-area.md`.
+
+**Nach der Abnahme (bauende Sitzung, 2026-10-29):**
+
+- H8: Der Story-Satz sagt jetzt „Prüfschritt“. Die Registry-Beschreibung geht als **L-376** an die App.
+- H9: Die Wörter des `InUse`-Schalters kommen jetzt aus `resolveStatus("agent_run_banner", …)`.
+- H11: Das JSDoc von `AgentRunAction` und der CSS-Kopf sind nachgezogen. `.v3run--success` bleibt mit Begründung im Kopf stehen.
+- H12: Die Änderung ist in `docs/spiegel-vormerkungen.md` unter „Folgen im Set“ eingetragen.
+- H13: `storybook build` lief in ein eigenes Verzeichnis, Exit 0. `pnpm build` ist derselbe Befehl. `storybook-static/` bleibt unberührt.
+- H7 („Durchgang“ oder „Lauf“) ist eine Frage an llcto bzw. den Owner. H10 liegt außerhalb von L1.
+

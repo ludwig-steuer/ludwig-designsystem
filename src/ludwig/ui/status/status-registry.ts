@@ -63,6 +63,7 @@ export type StatusAxis =
   | "document_character"
   | "document_done_via"
   | "document_filing"
+  | "document_duo_upload"
   | "document_booking"
   | "document_stuck"
   | "file_basket"
@@ -86,6 +87,7 @@ export type StatusAxis =
   | "expectation_kind"
   | "case_account_balance"
   | "review_tab"
+  | "review_reason"
   // — Buchung & Export —
   | "journal_entry"
   | "export_batch"
@@ -97,7 +99,12 @@ export type StatusAxis =
   | "export_bucket"
   // — Buchungslauf —
   | "run_outcome"
-  | "agent_run_outcome"
+  | "agent_run_step_outcome"
+  | "agent_run_banner"
+  | "agent_run_step_end_cause"
+  | "agent_run_state"
+  | "agent_run_phase"
+  | "agent_run_stop_reason"
   | "run_gate"
   // — Stammdaten —
   | "business_partner"
@@ -123,8 +130,10 @@ export type StatusAxis =
   | "convention_origin"
   | "product_finding"
   | "product_finding_priority"
+  | "product_finding_document_kind"
   // — DATEV-Abgleich —
   | "statement_expectation"
+  | "payment_account_standing"
   | "open_item_settlement"
   | "open_item_line_kind"
   | "datev_link"
@@ -188,7 +197,7 @@ export interface StatusDescriptor {
  * Belegart (F289, belege.md R14). Wertebereich: DB-CHECK
  * `client_source_docs_status_check`, gespiegelt in `SOURCE_DOC_STATUSES`
  * (`modules/source-docs/domain/source-doc-status.ts`) und
- * `buchassi_shared.source_doc_status.SourceDocStatus`.
+ * `ludwig.shared.source_doc_status.SourceDocStatus`.
  *
  * Schreiber: TS nur über `transitionSourceDoc` (Routing nach der Einordnung,
  * Eingang, Retry, Erledigung, Reopen, Eskalation/Rückgabe, Korb-Freigabe,
@@ -224,9 +233,9 @@ const DOCUMENT_STATUS: Record<string, StatusDescriptor> = {
  * `client_source_docs_review_reason_check`, gespiegelt in
  * `SOURCE_DOC_REVIEW_REASONS`.
  *
- * `statement_account_missing` und `statement_check_failed` sind die benannten
- * System-Sonderfälle, die direkt an die Kanzlei gehen; alle anderen landen
- * zuerst beim Agenten.
+ * `statement_account_missing`, `statement_check_failed`, `not_bookkeeping`
+ * (F438) und `file_unreadable` (F439) sind die benannten System-Sonderfälle,
+ * die direkt an die Kanzlei gehen; alle anderen landen zuerst beim Agenten.
  */
 const DOCUMENT_REVIEW_REASON: Record<string, StatusDescriptor> = {
   classification_error: { label: "Einordnung gescheitert", kind: "danger", description: "Der Klassifikator ist gescheitert oder die Datei ist nicht lesbar. Ludwig korrigiert die Belegform oder stößt die Einordnung neu an." },
@@ -239,6 +248,8 @@ const DOCUMENT_REVIEW_REASON: Record<string, StatusDescriptor> = {
   processing_stuck: { label: "Verarbeitung hing", kind: "warning", description: "Beim Freigeben des Dateikorbs war der Beleg noch nicht durch. Ludwig bessert nach." },
   statement_account_missing: { label: "Bankkonto fehlt", kind: "warning", description: "Ein Kontoauszug, dessen Bankkonto nicht in der Datei steht. Die Kanzlei wählt das Konto am Beleg." },
   statement_check_failed: { label: "Kontoauszug geht nicht auf", kind: "danger", description: "Die Salden des Kontoauszugs gehen nicht auf. Die Kanzlei entscheidet: neue Datei anfordern, trotzdem importieren oder ablehnen." },
+  not_bookkeeping: { label: "Kein Buchhaltungsbeleg", kind: "warning", description: "Laut Einordnung gehört der Beleg nicht in die laufende Buchhaltung (z. B. private Unterlage, Unterlage zur privaten Steuererklärung, Werbung). Die Kanzlei entscheidet: zurück an Ludwig mit Kommentar, private Steuerunterlage, Jahresabschluss-Ablage oder irrelevant." },
+  file_unreadable: { label: "Datei nicht lesbar", kind: "danger", description: "Die Datei selbst ist nicht lesbar: beschädigt oder kennwortgeschützt (der genaue Grund steht in der Notiz). Ludwig hat dafür kein Werkzeug. Ausweg: die Datei neu anfordern bzw. das Kennwort entfernen lassen und neu hochladen." },
 };
 
 /**
@@ -325,7 +336,7 @@ const FILE_BASKET_WARNING: Record<string, StatusDescriptor> = {
   awaiting_input: { label: "Angabe fehlt", kind: "warning", description: "Zum Beispiel das Bankkonto eines Kontoauszugs — ohne sie wird nichts importiert." },
   unsplit_collection: { label: "Sammel-PDF nicht zerlegt", kind: "warning", description: "Ein Sammel-PDF hat noch keine Teilbelege." },
   partner_not_found: { label: "Partner unbekannt", kind: "warning", description: "Zum Absender oder Empfänger gibt es noch keinen Geschäftspartner." },
-  date_outside_open_batch: { label: "Datum außerhalb des Stapels", kind: "warning", description: "Das Belegdatum liegt außerhalb des offenen Buchungszeitraums." },
+  date_outside_open_batch: { label: "Datum außerhalb des Stapels", kind: "warning", description: "Das Belegdatum liegt nach dem offenen Buchungszeitraum oder vor dessen Wirtschaftsjahr." },
   client_batch_ambiguous: { label: "Zuordnung zum Mandantenstapel offen", kind: "warning", description: "Der Beleg passt zu mehreren Sätzen des Mandantenstapels, oder die Summe geht nicht auf — Ludwig ordnet zu." },
 };
 
@@ -334,7 +345,7 @@ const FILE_BASKET_WARNING: Record<string, StatusDescriptor> = {
  * orthogonale Achse neben `document_form` / `document_kind` / `doc_direction`.
  * Wertebereich: DB-CHECK `client_source_docs_doc_category_check`, gespiegelt
  * in `DOC_CATEGORIES` (`modules/source-docs/domain/document-form-mapping.ts`)
- * und `buchassi_shared.document_category.DocCategory`.
+ * und `ludwig.shared.document_category.DocCategory`.
  *
  * Schreiber: ausschließlich `processSourceDoc` — abgeleitet aus
  * `class_document_form` über die EINE Mapping-Tabelle. Nie vom LLM, nie
@@ -355,7 +366,7 @@ const FILE_BASKET_WARNING: Record<string, StatusDescriptor> = {
  *    Mahnung sind Leistungsbelege ohne Invoice-Subtyp. Wer die Rechnungs-
  *    daten braucht, prüft den Subtyp, nicht die Kategorie.
  *  - `report`-Belege gehen nach der Einordnung auf `bookable`; erledigt
- *    werden sie per `complete_doc` (F144).
+ *    werden sie per `document_transition(to=done)` (F144).
  */
 /**
  * `client_source_docs.collection_kind` — der Typ einer **Dokumentgruppe**
@@ -367,7 +378,7 @@ const FILE_BASKET_WARNING: Record<string, StatusDescriptor> = {
  * kein Verfahren.
  *
  * Schreiber: der `document-simple-classifier` beim Klassifizieren; korrigiert
- * wird über `override_classification`. **Nie vom Agenten gesetzt.**
+ * wird über `document_classify`. **Nie vom Agenten gesetzt.**
  *
  * Fallstricke:
  *  - **NULL heißt „kein Sammeldokument"**, nicht „Typ unbekannt". Ein Kind
@@ -587,7 +598,7 @@ const DOCUMENT_CHARACTER: Record<string, StatusDescriptor> = {
  * Wertebereich: DB-CHECK `client_source_docs_done_via_check`, gespiegelt in
  * `SOURCE_DOC_DONE_VIA`.
  *
- * Schreiber: `complete_doc`/`DocCompletionActions` im ⋯-Menü der Belegseite (`manual`), die Trigger
+ * Schreiber: `document_transition(to=done)`/`DocCompletionActions` im ⋯-Menü der Belegseite (`manual`), die Trigger
  * (`booking`, `no_booking_required`, `case_closed`, `superseded`), der Import
  * (`import`), die Entscheidung über einen nicht aufgehenden Kontoauszug
  * (`replaced`, `rejected`, F288).
@@ -651,7 +662,7 @@ const DOCUMENT_DONE_VIA: Record<string, StatusDescriptor> = {
  * `filing_failed_at` gesetzt → `failed`, sonst `pending`.
  *
  * Schreiber: ausschließlich das DUO-Sync-Werkzeug über
- * `POST /api/intake/v1/clients/{id}/filing-results`. Ludwig legt nichts
+ * `POST /api/intake/v2/clients/{id}/filing-results`. Ludwig legt nichts
  * selbst ab; die Achse zeigt, was das Werkzeug gemeldet hat.
  *
  * Fallstricke:
@@ -681,6 +692,42 @@ const DOCUMENT_FILING: Record<string, StatusDescriptor> = {
     kind: "danger",
     description:
       "Der letzte Ablage-Versuch des DUO-Werkzeugs ist gescheitert; die Meldung steht daneben. Der Beleg bleibt in der Warteschlange.",
+  },
+};
+
+/**
+ * Upload nach DUO (F547) — abgeleitet (`documentDuoUploadState`) aus
+ * `client_source_docs.ludwig_bedi_guid`, `datev_ref_*`, `duo_uploaded_at` und
+ * `duo_upload_failed_at`. `null` = für diesen Beleg ist kein Upload vorgesehen.
+ *
+ * Schreiber: die Vergabe (Trigger `issue_ludwig_bedi_guid` beim ersten
+ * Buchungssatz eines Belegs ohne DATEV-Referenz) und das DUO-Werkzeug über
+ * `POST /api/intake/v2/clients/{id}/duo-upload-results`.
+ *
+ * Fallstricke:
+ *  - `failed` ist nicht endgültig: der Beleg bleibt in der Upload-Queue, das
+ *    Werkzeug versucht es beim nächsten Lauf unter derselben GUID erneut.
+ *  - Ersetzt ein anderer Weg die datev_ref (PATCH, Agent, Bridge), fällt der
+ *    Beleg aus der Achse — er liegt nicht mehr unter Ludwigs GUID.
+ *  - Farben nach A7: `failed` = Fehler, `pending` = Hinweis, `uploaded` = neutral.
+ */
+const DOCUMENT_DUO_UPLOAD: Record<string, StatusDescriptor> = {
+  pending: {
+    label: "Upload nach DUO steht aus",
+    kind: "info",
+    description:
+      "Ludwig hat dem Beleg eine BEDI-ID gegeben; das DUO-Werkzeug lädt ihn beim nächsten Lauf in den Posteingang von DUO.",
+  },
+  uploaded: {
+    label: "In DUO",
+    kind: "neutral",
+    description: "Das DUO-Werkzeug hat den Beleg unter der BEDI-ID von Ludwig nach DUO hochgeladen.",
+  },
+  failed: {
+    label: "Upload gescheitert",
+    kind: "danger",
+    description:
+      "Der letzte Upload-Versuch des DUO-Werkzeugs ist gescheitert; die Meldung steht daneben. Der Beleg bleibt in der Warteschlange.",
   },
 };
 
@@ -744,8 +791,8 @@ const DOCUMENT_STUCK: Record<string, StatusDescriptor> = {
  * (`modules/accounting-cases/domain/case.ts`), DB-CHECK zuletzt in
  * `20260721130000_case_waiting_for_documents.sql`.
  *
- * Schreiber: Reviewer-Klick (`booking-actions.ts`, `close-actions.ts`),
- * MCP-Agent (`raise_clarification`, `expect_document`, `merge_cases`) und die
+ * Schreiber: Reviewer-Klick (`journal-entry-review-core.ts`, `case-acceptance-core.ts`),
+ * MCP-Agent (`clarification_raise`, `expectation_create`, `case_merge`) und die
  * eine Neuberechnung `recomputeCaseLifecycle` (`expectation-core.ts`) nach
  * jeder Änderung an Klärungen oder Erwartungen.
  *
@@ -793,7 +840,7 @@ const ACCOUNTING_CASE_LIFECYCLE: Record<string, StatusDescriptor> = {
  *
  * Schreiber: die elf TS-Anlagepfade über `accountingCaseInsert` (Pflichtfeld,
  * kein Default) und die Umstufung (`setCaseDocumentNumberMode`, MCP
- * `update_case` bzw. die Sachverhaltsansicht).
+ * `case_update` bzw. die Sachverhaltsansicht).
  *
  * Warum hier und nicht bei `CASE_KIND_LABEL`: die Achse hat Übergänge
  * (single → multiple, begründungspflichtig) und braucht einen
@@ -805,7 +852,7 @@ const ACCOUNTING_CASE_LIFECYCLE: Record<string, StatusDescriptor> = {
  *    Anlagen und Korrekturbelege mit derselben Nummer sind erlaubt.
  *  - Zwei SCHREIBWEISEN derselben Nummer sind auch bei `single` normal
  *    (`2024/07` vs. `2024-07`) — welche gilt, entscheidet
- *    `update_case(decidedDocumentNumber)`, nicht der Modus.
+ *    `case_update(decided_document_number)`, nicht der Modus.
  *  - Bestandsfälle wurden auf `single`/`multiple` zurückgesetzt;
  *    `per_period` entsteht nur vorwärts.
  */
@@ -942,9 +989,9 @@ const DISPOSITION: Record<string, StatusDescriptor> = {
  *  - Ab der dritten Verschiebung darf nur noch ein Mensch verschieben.
  */
 const CLARIFICATION_STATUS: Record<string, StatusDescriptor> = {
-  open: { label: "Offen", kind: "warning", description: "Wartet auf eine Antwort und steht auf der Arbeitsliste." },
+  open: { label: "Offen", kind: "info", description: "Wartet auf eine Antwort und steht auf der Arbeitsliste." },
   deferred: { label: "Zurückgestellt", kind: "neutral", description: "Bewusst nicht jetzt dran — kommt am Wiedervorlage-Tag von selbst zurück. Nicht erledigt." },
-  answered: { label: "Beantwortet", kind: "success", description: "Beantwortet oder als gegenstandslos aufgelöst." },
+  answered: { label: "Beantwortet", kind: "success", description: "Beantwortet oder anderweitig geklärt." },
 };
 
 /**
@@ -1036,9 +1083,37 @@ const EXPECTATION_KIND: Record<string, StatusDescriptor> = {
  * Verdikt dagegen schon. Ein importierter Mandantenstapel
  * (`origin='client_import'`) bekommt den eigenen Reiter.
  */
+/**
+ * Prüfgrund (F355/F357) — der stärkste Grund aus dem Prüfbedarf-Score als ein
+ * Wort in der Zeile; Codes und Rangfolge `REVIEW_REASON_CODES`
+ * (`accounting-cases/domain/review-reason.ts`). Abgeleitet, keine Spalte.
+ *
+ * Ton nach A7: Warnung nur, wo der Score allein die Schwelle reißt (roter
+ * Prüfpunkt, Judge beanstandet oder fehlt, Ludwig unsicher, Generalumkehr) — nie die
+ * Fehlerfarbe, die bleibt dem, was die Freigabe sperrt. Alles andere ist
+ * Hinweis. Bei `check_*` und `tax_sensitive` steht in der Zeile das Kurzwort
+ * des Prüfpunkts (`PRUEFPUNKT_KURZWORT`), nicht das Label hier.
+ */
+const REVIEW_REASON: Record<string, StatusDescriptor> = {
+  check_red: { label: "Prüfung rot", kind: "warning", description: "Eine Prüfung ist rot — der Satz ist so nicht richtig. Das Wort in der Zeile nennt die Prüfung." },
+  general_reversal: { label: "Generalumkehr", kind: "warning", description: "Hebt eine Buchung auf, die schon in DATEV steht. Wird mit dem Sachverhalt freigegeben; ein Fall mit Generalumkehr steht immer in „Bitte anschauen“ (F348)." },
+  judge_flag: { label: "Beanstandet", kind: "warning", description: "Der Judge hat den Vorschlag beanstandet." },
+  judge_missing: { label: "Nicht gegengeprüft", kind: "warning", description: "Für diesen Vorschlag gibt es noch kein Judge-Urteil." },
+  confidence_red: { label: "Ludwig unsicher", kind: "warning", description: "Ludwig ist sich bei diesem Vorschlag unsicher (Konfidenz rot)." },
+  reverse_charge: { label: "§13b", kind: "info", description: "Umkehr der Steuerschuld — Schlüssel und Sachverhalt wollen geprüft sein." },
+  special_tax_key: { label: "Sonderschlüssel", kind: "info", description: "Ein besonderer Steuerschlüssel (z. B. innergemeinschaftlicher Erwerb) ist gesetzt." },
+  tax_sensitive: { label: "Steuerlich heikel", kind: "info", description: "Eine steuerlich heikle Prüfung (GWG, Privatanteil, USt-IdNr.) ist auffällig. Das Wort in der Zeile nennt sie." },
+  judge_adjust: { label: "Korrigiert", kind: "info", description: "Der Judge hat den Vorschlag korrigiert." },
+  check_yellow: { label: "Prüfung gelb", kind: "info", description: "Eine Prüfung ist auffällig. Das Wort in der Zeile nennt die Prüfung." },
+  confidence_low: { label: "Ludwig nicht ganz sicher", kind: "info", description: "Ludwig ist sich nicht ganz sicher (Konfidenz gelb oder orange)." },
+  judge_note: { label: "Hinweis vom Judge", kind: "info", description: "Der Judge hat bestätigt, aber einen Hinweis hinterlassen oder nur den Text angepasst." },
+  first_time: { label: "Erstmals so gebucht", kind: "info", description: "Noch keine gleiche Buchung bei dieser Gegenpartei. Steht nur, wenn sonst kein Grund vorliegt — dann erklärt er „Bitte anschauen“." },
+};
+
 const REVIEW_TAB: Record<string, StatusDescriptor> = {
   needs_review: { label: "Bitte anschauen", kind: "warning", description: "Score ab 50: beanstandet, unsicher oder steuerlich heikel." },
   likely_correct: { label: "Wahrscheinlich richtig", kind: "success", description: "Bestätigt, unauffällig oder schon mehrfach so gebucht." },
+  parked: { label: "Geparkt (Klärung)", kind: "info", description: "Auf dem Klärungskonto des Mandanten geparkt (Einstellung „Umgang mit Klärungsfällen“) — Konto und Steuer sind offen; übernehmen, wenn Betrag, Datum und Gegenkonto stimmen." },
   client_batch: { label: "Mandantenstapel", kind: "info", description: "Vom Mandanten selbst gebucht (Stapel-Import) — nicht von Ludwig vorgeschlagen, kein Judge-Verdikt." },
 };
 
@@ -1107,7 +1182,7 @@ const JOURNAL_ENTRY_STATUS: Record<string, StatusDescriptor> = {
  * `exported_at` + Spiegel-Kante (`entryMirroredSql`: 1:1 oder Rückkante bei
  * Aufteilung). Linearisiert den eindeutigen Weg
  * Vorschlag → Freigegeben → Exportiert → In DATEV bestätigt fürs UI.
- * Seit F158 liefert `get_case` die Stufe je Satz als `datevStage`.
+ * Seit F158 liefert `case_context` die Stufe je Satz als `datevStage`.
  *
  * Fallstricke:
  *  - **Exportiert ≠ angekommen** (Live-Learning: DATEV-Push antwortet 204,
@@ -1136,13 +1211,14 @@ const JOURNAL_ENTRY_DATEV_STAGE: Record<string, StatusDescriptor> = {
  *    in `acceptance_quality` (`ai_edited`).
  *  - `recurring_rule`-Sätze werden vom DATEV-Export ausgeschlossen und bleiben
  *    unmarkiert.
- *  - `system_reversal` ist vorgesehen, der Flow existiert noch nicht.
+ *  - `system_reversal` — Generalumkehr eines exportierten Satzes oder eines
+ *    DATEV-Spiegel-Satzes (F263/F268), Freigabe mit dem Sachverhalt (F348).
  */
 const JOURNAL_ENTRY_ORIGIN: Record<string, StatusDescriptor> = {
   ai_proposed: { label: "Vorschlag von Ludwig", kind: "info", description: "Von Ludwig vorgeschlagen und unverändert übernommen." },
   manual: { label: "Manuell", kind: "neutral", description: "Von Hand erfasst — oder ein Vorschlag, den jemand korrigiert hat." },
   recurring_rule: { label: "Regelwerk", kind: "info", description: "Vom Regelwerk wiederkehrender Buchungen erzeugt. Wird nicht nach DATEV exportiert." },
-  system_reversal: { label: "Storno", kind: "neutral", description: "Automatische Gegenbuchung zu einer stornierten Buchung." },
+  system_reversal: { label: "Generalumkehr", kind: "neutral", description: "Vom Server abgeleitete Gegenbuchung, die eine bereits an DATEV übergebene Buchung aufhebt (F263/F268). Wird mit dem Sachverhalt freigegeben und als DATEV-Generalumkehr exportiert." },
   client_import: { label: "Mandantenstapel", kind: "info", description: "Aus dem Buchungsstapel des Mandanten importiert (F69) — er hat in seiner eigenen Software gebucht, die Kanzlei nimmt ab. Kein Vorschlag von Ludwig, kein Judge-Verdikt." },
 };
 
@@ -1167,12 +1243,12 @@ const CONFIDENCE: Record<string, StatusDescriptor> = {
 };
 
 /**
- * Judge-Verdikt zu einem Buchungsvorschlag. **Keine Spalte** — der Judge
- * hängt sein Ergebnis als JSON-Element an
- * `client_journal_entry.proposal_rationale->'judge'[]` an.
+ * Judge-Verdikt zu einem Buchungsvorschlag. Seit F540 eine Zeile je Urteil in
+ * `client_judge_reviews` (Vokabular `confirmed`/`note`/`returned`); die Leser
+ * übersetzen über `LEGACY_JUDGE_VERDICT` in die Werte hier.
  *
  * Fallstricke:
- *  - Das Array wird **angehängt, nie ersetzt** — mehrere Verdikte pro Satz
+ *  - Urteile werden **angehängt, nie ersetzt** — mehrere Verdikte pro Satz
  *    sind der Normalfall.
  *  - Die bestehenden Lese-Queries filtern auf `verdict = 'flag'`; der so
  *    gelesene Wert ist also nur `flag` oder NULL, NICHT das letzte Verdikt.
@@ -1226,7 +1302,7 @@ const EXPORT_BUCKET: Record<string, StatusDescriptor> = {
 /**
  * Ausgang eines Buchungslaufs — **rein abgeleitet, keine Spalte**
  * (`runOutcome` in `accounting-cases/application/agent-runs-view.ts`).
- * Gespeichert werden nur `started_at`, `finished_at`, `current_step_code`
+ * Gespeichert werden nur `started_at`, `finished_at`, `current_gate_code`
  * und das Step-Log; der Ausgang wird daraus pro Anzeige frisch gerechnet.
  *
  * Ableitung (in dieser Reihenfolge): `finished_at` + Abschluss-Spuren
@@ -1248,7 +1324,7 @@ const EXPORT_BUCKET: Record<string, StatusDescriptor> = {
  *    „für immer fest": wird das Gate grün, geht es genau dort weiter.
  */
 const RUN_OUTCOME: Record<string, StatusDescriptor> = {
-  completed: { label: "Durchgelaufen", kind: "success", description: "Alle Teilschritte bis 4a grün — der Lauf hat mit finish_agent_run abgeschlossen und einen Übergabebericht hinterlassen." },
+  completed: { label: "Durchgelaufen", kind: "success", description: "Alle Teilschritte bis 4a grün — der Lauf wurde regulär abgeschlossen und hat einen Übergabebericht hinterlassen." },
   incomplete: { label: "Unvollständig abgeschlossen", kind: "warning", description: "Abgeschlossen, aber mindestens ein Teilschritt trägt kein grünes Ergebnis — Arbeit für den nächsten Lauf oder einen Menschen." },
   superseded: { label: "Abgebrochen (Folgelauf)", kind: "warning", description: "Nie abgeschlossen; der Start des nächsten Laufs hat den Lauf automatisch geschlossen. Kein Bericht, keine Kennzahlen." },
   blocked: { label: "Steckengeblieben", kind: "danger", description: "Der letzte Übergangsversuch scheiterte an einem roten Gate. Sobald die offenen Posten aufgelöst sind, geht es genau dort weiter." },
@@ -1257,33 +1333,129 @@ const RUN_OUTCOME: Record<string, StatusDescriptor> = {
 };
 
 /**
- * `client_agent_runs.outcome` (F284) — wie ein Lauf endete, gespeichert statt
- * abgeleitet. NULL = offen oder Altbestand vor F284. Wertebereich:
- * `AGENT_RUN_ENDS` (`accounting-cases/domain/agent-run-end.ts`), DB-CHECK
- * `client_agent_runs_outcome_check`.
+ * `client_agent_run_steps.outcome` (F284, F474) — wie ein Agent-Schritt
+ * endete, gespeichert statt abgeleitet. NULL = offen oder Altbestand vor F284.
+ * Wertebereich: `AGENT_RUN_ENDS` (`accounting-cases/domain/agent-run-end.ts`),
+ * DB-CHECK `client_agent_run_steps_outcome_check`.
  *
- * Schreiber: `finish_agent_run` (complete | incomplete), das Auto-Ende nach
+ * Schreiber: `step_finish` (complete | incomplete), das Auto-Ende nach
  * Stille `closeStalledAgentRuns` (incomplete), `takeOverBatchReview`
- * (taken_over), der Start eines Folgelaufs (superseded).
+ * (taken_over), ein direkter Start (superseded), der Claim ohne bereiten
+ * Stapel und der Token-Ablauf-Reaper (failed, F426).
  */
-const AGENT_RUN_OUTCOME: Record<string, StatusDescriptor> = {
-  complete: { label: "Abgeschlossen", kind: "success", description: "Ludwig hat den Lauf regulär mit finish_agent_run beendet; der Stapel ist bereit für die Kanzlei." },
-  incomplete: { label: "Unvollständig beendet", kind: "warning", description: "Ludwig hat abgebrochen (technisches Hindernis, mit Begründung) oder war zwei Stunden still. Der Stapel liegt zur Prüfung bei der Kanzlei: übernehmen oder mit Notiz zurück an Ludwig." },
-  taken_over: { label: "Von der Kanzlei übernommen", kind: "warning", description: "Die Kanzlei hat die Prüfung übernommen, weil Ludwig still war; sein Lauf wurde dabei beendet." },
-  superseded: { label: "Vom Folgelauf geschlossen", kind: "neutral", description: "Nie abgeschlossen; der Start des nächsten Laufs am Mandanten hat ihn geschlossen." },
+const AGENT_RUN_STEP_OUTCOME: Record<string, StatusDescriptor> = {
+  complete: { label: "Abgeschlossen", kind: "success", description: "Ludwig hat den Schritt regulär beendet; der Stapel ist bereit für die Kanzlei." },
+  incomplete: { label: "Unvollständig beendet", kind: "warning", description: "Ludwig hat abgebrochen (technisches Hindernis, mit Begründung) oder war zwei Stunden still. Der Stapel liegt zur Prüfung bei der Kanzlei: übernehmen oder mit Notiz zurück an Ludwig. Nach Stille bleibt er für die eine Wiederholung bei Ludwig und geht erst an die Kanzlei, wenn keine mehr folgt." },
+  taken_over: { label: "Von der Kanzlei übernommen", kind: "warning", description: "Die Kanzlei hat die Prüfung übernommen, weil Ludwig still war; sein Schritt wurde dabei beendet." },
+  superseded: { label: "Durch Direktstart geschlossen", kind: "neutral", description: "Nie abgeschlossen; ein direkter Start am Mandanten hat den Schritt geschlossen." },
+  failed: { label: "Fehlgeschlagen", kind: "danger", description: "Bei der Übernahme gab es nichts zu tun (kein Buchungszyklus bei Ludwig), das Token lief ab, bevor eine Session den Schritt übernahm, der Versand an den Runner scheiterte, oder der Runner meldete einen Absturz bzw. das Zeitlimit. Die Ursache steht am Schritt (Spalte Ursache auf der Lauf-Seite)." },
 };
 
 /**
- * `client_agent_run_steps.gate_result` — wie eine Step-Log-Zeile ausging.
+ * E14 (Owner 2026-10-28, DS 0225 Variante B) — der Zustand der Lauf-Leiste über der Abnahme. Reine UI-Achse ohne
+ * Spalte und ohne DB-CHECK; Wertebereich `AGENT_RUN_BANNER_STATES` (`batch-review/domain/close-run-banner.ts`).
+ *
+ * Zuordnung `agentRunBannerState` aus Lauf-Auslauf (`run_outcome`) und Schritt-Ende (`agent_run_step_outcome`):
+ * complete/completed → done · incomplete/abandoned/superseded → stopped · taken_over → taken_over ·
+ * blocked/failed → failed · running → running. Endet der letzte Schritt mit `taken_over`, gilt „übernommen",
+ * was immer der Lauf-Auslauf sagt.
+ */
+const AGENT_RUN_BANNER: Record<string, StatusDescriptor> = {
+  running: { label: "läuft", kind: "info", description: "Ludwig arbeitet am Stapel; die Leiste zeigt, seit wann und wie lange es meist dauert." },
+  done: { label: "fertig", kind: "neutral", description: "Ludwig ist mit dem Lauf durch; die Leiste nennt den nächsten Schritt in der Abnahme." },
+  stopped: { label: "abgebrochen", kind: "warning", description: "Ludwig hat vor dem Ende aufgehört (unvollständig beendet, still geworden oder durch einen neuen Start geschlossen). Der Stapel liegt bei der Kanzlei." },
+  taken_over: { label: "übernommen", kind: "neutral", description: "Die Kanzlei hat die Prüfung übernommen, während Ludwig noch dran war; sein Schritt wurde dabei beendet." },
+  failed: { label: "Fehler", kind: "danger", description: "Der Lauf ist an einem roten Gate steckengeblieben oder technisch gescheitert. Der Support ist informiert." },
+};
+
+/**
+ * F477 — `client_agent_run_steps.end_cause`: warum ein Agent-Schritt endete —
+ * fachlich (Ludwig hat ihn mit `step_finish` beendet) oder technisch. NULL =
+ * Altbestand oder ein Ende ohne eigene Ursache (Claim ohne Stapel, Ablösung,
+ * Übernahme). Wertebereich: DB-CHECK `client_agent_run_steps_end_cause_check`,
+ * gespiegelt in `AGENT_RUN_STEP_END_CAUSES`.
+ *
+ * Schreiber: `step_finish` (agent), Runner-Meldung `step_usage_report`
+ * (harness_exit, timeout), Token-Ablauf-Reaper (never_claimed), Stille-Reaper
+ * (stalled), Versand (dispatch_failed). Technische Ursachen lösen einmal je
+ * Phase einen Wiederholungs-Schritt aus.
+ */
+const AGENT_RUN_STEP_END_CAUSE: Record<string, StatusDescriptor> = {
+  agent: { label: "von Ludwig beendet", kind: "neutral", description: "Ludwig hat den Schritt selbst abgeschlossen (step_finish) — fachliches Ende, keine Wiederholung." },
+  harness_exit: { label: "Agent-Prozess abgebrochen", kind: "danger", description: "Der Prozess im Runner endete mit einem Fehler-Code, bevor Ludwig den Schritt abschloss. Der Schritt wird einmal wiederholt." },
+  timeout: { label: "Zeitlimit erreicht", kind: "danger", description: "Der Runner hat den Prozess nach dem Zeitlimit beendet. Der Schritt wird einmal wiederholt." },
+  never_claimed: { label: "nie gestartet", kind: "warning", description: "Kein Runner hat den Schritt übernommen, bevor sein Token ablief. Der Schritt wird einmal wiederholt." },
+  stalled: { label: "ohne Fortschritt beendet", kind: "warning", description: "Ludwig war zwei Stunden still; der Server hat den Schritt geschlossen. Der Schritt wird einmal wiederholt." },
+  dispatch_failed: { label: "Versand gescheitert", kind: "danger", description: "Der Schritt ließ sich nicht an den Runner zustellen. Der Schritt wird einmal wiederholt." },
+};
+
+/**
+ * F473/F474 — `client_agent_runs.state`: der Lauf (Belege → Buchen →
+ * Prüfung → Reparatur → Nachprüfung) als eigene Entität. Wertebereich:
+ * DB-CHECK `client_agent_runs_state_check`, gespiegelt in `AGENT_RUN_STATES`
+ * (`accounting-cases/domain/agent-run.ts`).
+ *
+ * Schreiber: `requestAgentRun` legt den Lauf an (`running`), der
+ * Fortschalt-Kern `advanceAgentRun` (booking-v2) beendet ihn — nach jedem
+ * terminalen Schritt-Ende, als Netz auch aus dem Worker-Sweep. Kein „wartet":
+ * ein Schritt-Ende legt sofort den nächsten Schritt an oder beendet den Lauf.
+ */
+const AGENT_RUN_STATE: Record<string, StatusDescriptor> = {
+  running: { label: "Läuft", kind: "info", description: "Ein Agent-Schritt des Laufs ist angelegt, übernommen oder aktiv. Endet er, legt der Server sofort den nächsten an oder beendet den Lauf mit Grund." },
+  done: { label: "Durchgelaufen", kind: "success", description: "Der Lauf ist von selbst zu Ende: der letzte Schritt endete regulär und es gab nichts mehr zu tun." },
+  stopped: { label: "Angehalten", kind: "neutral", description: "Beendet mit Grund (Spalte Grund) — keine Arbeit, Reparatur-Zyklus verbraucht, Runner-Queue fehlt, abgelöst, Wiederholung gescheitert. Ein neuer Anstoß oder „Erneut versuchen\" startet einen neuen Lauf." },
+  failed: { label: "Fehlgeschlagen", kind: "danger", description: "Ein Schritt des Laufs ist gescheitert, er kann nicht weiter. Was schiefging, steht am Schritt (Schritt-Ende und Zusammenfassung)." },
+};
+
+/**
+ * F473/F474 — `client_agent_runs.phase`: wo der Lauf steht bzw. zuletzt
+ * stand (Belege → Buchen → Prüfung → Reparatur → Nachprüfung). NULL = der
+ * Lauf endete vor seinem ersten Schritt (z. B. keine Arbeit). Wertebereich:
+ * DB-CHECK `client_agent_runs_phase_check`, gespiegelt in
+ * `AGENT_RUN_PHASES`. Die Phase eines Schritts leitet `phaseOfStep` aus
+ * Rolle und Trigger ab (Reparatur und Nachprüfung tragen trigger 'repair').
+ */
+const AGENT_RUN_PHASE: Record<string, StatusDescriptor> = {
+  documents: { label: "Belege", kind: "neutral", description: "Beleg-Schritt: Ludwig liest und repariert die Belege im Reparatur-Korb, bevor gebucht wird." },
+  booking: { label: "Buchen", kind: "neutral", description: "Buchungs-Schritt: Ludwig bildet Sachverhalte und schlägt Buchungen für den Stapel des Laufs vor." },
+  review: { label: "Prüfung", kind: "neutral", description: "Zweitprüfung: der Judge urteilt über jeden Vorschlag, bevor die Kanzlei abnimmt." },
+  repair: { label: "Reparatur", kind: "neutral", description: "Ludwig schlägt die vom Judge zurückgegebenen Sätze neu vor — höchstens einmal je Lauf." },
+  review_after_repair: { label: "Nachprüfung", kind: "neutral", description: "Der Judge prüft die reparierten Sätze. Bleiben Rückgaben offen, endet der Lauf (Reparatur-Zyklus verbraucht)." },
+  final_review: { label: "End-Gate", kind: "neutral", description: "Der zweite Judge der Kanzlei prüft alle Sätze des Laufs blind als letzte Prüfung. Seine Rückgaben repariert der nächste Lauf." },
+};
+
+/**
+ * F473/F474 — `client_agent_runs.stop_reason`: warum ein Lauf endete.
+ * NULL bei `done` und bei aus dem Altbestand übernommenen Läufen.
+ * Wertebereich: DB-CHECK `client_agent_runs_stop_reason_check`,
+ * gespiegelt in `AGENT_RUN_STOP_REASONS`; neue Gründe nur per Migration.
+ */
+const AGENT_RUN_STOP_REASON: Record<string, StatusDescriptor> = {
+  no_work: { label: "Keine Arbeit", kind: "neutral", description: "Kein Beleg im Reparatur-Korb und kein Stapel bei Ludwig mit offenen Aufgaben — bewusst kein Leerlauf. Auch: Rückgaben offen, aber der Stapel liegt zur Prüfung bei der Kanzlei." },
+  repair_cycle_done: { label: "Reparatur verbraucht", kind: "warning", description: "Nach der Nachprüfung sind noch Rückgaben offen; der eine Reparatur-Zyklus je Lauf ist verbraucht. Der Rest wartet auf den nächsten Anstoß." },
+  queue_not_configured: { label: "Runner-Queue fehlt", kind: "warning", description: "In dieser Umgebung ist die Runner-Queue nicht konfiguriert (AGENT_RUNNER_QUEUE_CONNECTION, AGENT_MCP_PUBLIC_URL) — es wurde kein Schritt gestartet." },
+  dispatch_failed: { label: "Nicht zugestellt", kind: "danger", description: "Der Schritt ließ sich nicht an den Runner zustellen; er wurde sofort als fehlgeschlagen geschlossen." },
+  run_failed: { label: "Schritt gescheitert", kind: "danger", description: "Ein Schritt des Laufs ist fehlgeschlagen, z. B. weil bei der Übernahme kein Stapel bei Ludwig lag." },
+  superseded: { label: "Abgelöst", kind: "neutral", description: "Ein direkter Start (run_start) oder die Übernahme durch die Kanzlei hat den Lauf beendet." },
+  stalled: { label: "Nie übernommen", kind: "warning", description: "Ein Schritt wurde nie gestartet — sein Token lief ab, bevor der Runner ihn übernahm." },
+  no_judge_model: { label: "Kein Judge-Modell", kind: "warning", description: "Keine Zweitprüfung: der Aufgabe judge ist kein Modell zugeordnet (Admin → Agentenläufe → Einstellungen)." },
+  judge_not_allowed: { label: "Judge nicht freigegeben", kind: "warning", description: "Keine Zweitprüfung: das zugeordnete judge-Backend ist für diesen Mandanten nicht freigegeben (externe Backends nur für Testmandanten)." },
+  retry_exhausted: { label: "Wiederholung gescheitert", kind: "danger", description: "Technischer Abbruch, auch die Wiederholung scheiterte: ein Schritt brach technisch ab und sein Wiederholungs-Schritt in derselben Phase ebenfalls. Die Admins haben eine Mail; „Erneut versuchen\" startet einen neuen Lauf am Datenstand." },
+};
+
+/**
+ * `client_agent_run_step_gates.gate_result` — wie eine Step-Log-Zeile ausging.
  * NULL = Schritt betreten und noch offen (genau eine Zeile pro Lauf darf so
- * stehen). Wertebereich: die Schreiber in `agent-run-steps-core.ts` /
+ * stehen). Wertebereich: die Schreiber in `agent-run-steps.ts` /
  * `agent-run-core.ts` (kein DB-CHECK, kein Domain-Enum).
  *
- * Schreiber: `enter_step` schreibt `blocked` (abgelehnter Übergang) und
+ * Schreiber: `gate_enter` schreibt `blocked` (abgelehnter Übergang) und
  * `overridden` (begründete Ausnahme) sofort komplett; beim Verlassen wird die
- * offene Zeile auf `passed` gestempelt; `finish_agent_run` stempelt nie
+ * offene Zeile auf `passed` gestempelt; `step_finish` stempelt nie
  * betretene grüne Schritte `auto_passed` und beim Abschluss noch rote
- * `unresolved` (lückenloses Step-Log, 2026-08-15).
+ * `unresolved` (lückenloses Step-Log, 2026-08-15). 4a/4b eines
+ * Orchestrator-Schritts mit Judge-Schritt stempelt der Server beim Weitergehen
+ * und beim Abschluss `auto_passed` mit Übergabe-Notiz (F500).
  *
  * Fallstricke:
  *  - **`blocked` ist kein Endzustand des Laufs**, sondern ein Protokolleintrag:
@@ -1292,12 +1464,40 @@ const AGENT_RUN_OUTCOME: Record<string, StatusDescriptor> = {
  */
 const RUN_GATE: Record<string, StatusDescriptor> = {
   passed: { label: "Bestanden", kind: "success", description: "Ludwig hat im Schritt gearbeitet und ihn grün verlassen." },
-  auto_passed: { label: "Automatisch grün", kind: "success", description: "Nichts zu tun: der Server hat das Gate aus den Daten heraus als erfüllt gerechnet. Erledigt, nicht übersprungen." },
+  auto_passed: { label: "Automatisch grün", kind: "success", description: "Vom Server abgehakt, ohne Arbeit in diesem Schritt: aus den Daten erfüllt, durch eine Ausnahme am Stapel gedeckt oder — 4a/4b im Buchen- und Reparatur-Schritt — an den Judge-Schritt des Laufs übergeben. Die Notiz sagt, welches." },
   blocked: { label: "Blockiert", kind: "danger", description: "Übergang abgelehnt — das Gate war zu diesem Zeitpunkt rot. Zweimal dasselbe Gate = Eskalation an den Menschen. Kein Endzustand: wird das Gate grün, geht es weiter." },
   overridden: { label: "Ausnahme", kind: "warning", description: "Mit begründeter Ausnahme passiert; jeder offene Fall musste exakt benannt werden." },
   unresolved: { label: "Beim Abschluss rot", kind: "danger", description: "Beim Lauf-Abschluss war das Gate noch rot — der Lauf ist ein unvollständiger Abschluss, kein Durchlauf." },
   running: { label: "Läuft", kind: "info", description: "Schritt betreten und noch offen (DB-Wert: NULL)." },
 };
+
+/**
+ * F500 — Variante von `auto_passed`: 4a/4b, die der Server im Buchen- oder Reparatur-Schritt an den Judge-Schritt
+ * des Laufs übergeben hat. Erkannt an der Notiz (Schreiber `judgeStepNote` in `agent-run-steps.ts`); der DB-Wert
+ * bleibt `auto_passed`, ein eigener Gate-Status ist Ausblick.
+ */
+const JUDGE_STEP_HANDOVER_NOTE = "Übergabe an den Judge-Schritt";
+const RUN_GATE_JUDGE_STEP_HANDOVER: StatusDescriptor = {
+  label: "An Judge-Schritt übergeben",
+  kind: "success",
+  description: "Kein Arbeits-Gate in diesem Schritt: der Judge-Schritt des Laufs prüft die offenen Sätze nach step_finish.",
+};
+
+/** F500 — ist diese Step-Log-Zeile die Übergabe an den Judge-Schritt? */
+export function isJudgeStepHandover(gateResult: string | null, gateNote: string | null): boolean {
+  return gateResult === "auto_passed" && gateNote?.startsWith(JUDGE_STEP_HANDOVER_NOTE) === true;
+}
+
+/** Gate-Ergebnis einer Step-Log-Zeile für die Anzeige — mit der Übergabe-Variante (F500). */
+export function resolveRunGateStatus(gateResult: string | null, gateNote: string | null): StatusDescriptor {
+  if (isJudgeStepHandover(gateResult, gateNote)) return RUN_GATE_JUDGE_STEP_HANDOVER;
+  return resolveStatus("run_gate", gateResult ?? "running");
+}
+
+/** F500 — Tooltip der Übergabe-Zeile mit der offenen Zahl. */
+export function judgeStepHandoverHint(openCount: number | null | undefined): string {
+  return `${openCount ?? "?"} Sätze offen — der Judge-Schritt dieses Laufs prüft sie nach step_finish.`;
+}
 
 // ══════════════════════════════════════════════════════════════════════
 // STAMMDATEN
@@ -1312,7 +1512,7 @@ const RUN_GATE: Record<string, StatusDescriptor> = {
  * Schreiber (2026-08-14): der DATEV-Onboarding-Import schreibt direkt
  * `confirmed` (Stammsatz ist vom Mandanten bestätigt; das LLM-Enrichment
  * ändert NUR Profil-Felder, nicht den Status). Agent-Neuanlage
- * (`accept-proposal-core`) und manuelle Neuanlage schreiben `proposed`;
+ * (`create-partner-core`) und manuelle Neuanlage schreiben `proposed`;
  * der Bestätigen-Klick hebt `proposed` → `confirmed`.
  *
  * Fallstricke:
@@ -1637,6 +1837,7 @@ const PRODUCT_FINDING: Record<string, StatusDescriptor> = {
 /**
  * `platform_product_feedback.priority` — wie dringend der Befund ist. NULL, bis
  * ein Mensch draufgeschaut hat; der meldende Agent setzt sie nie (F106 §6).
+ * `immediate` („Sofort“) setzt und ändert nur der Mensch im Admin-UI (F565).
  *
  * Zusammen mit `status = backlog` ist sie die Arbeitsreihenfolge: `critical` und
  * `high` sind das, was als nächstes drankommt, `low` das Zurückgestellte. Genau
@@ -1647,10 +1848,22 @@ const PRODUCT_FINDING: Record<string, StatusDescriptor> = {
  * überall sonst (Fehler → Warnung → Hinweis → beiläufig).
  */
 const PRODUCT_FINDING_PRIORITY: Record<string, StatusDescriptor> = {
+  immediate: { label: "Sofort", kind: "danger", description: "Vom Menschen gesetzt: vor allem anderen. Nur im Admin-UI wählbar." },
   critical: { label: "Sehr hoch", kind: "danger", description: "Blockiert den Buchungslauf oder erzeugt falsche Buchungen — vor allem anderen." },
   high: { label: "Hoch", kind: "warning", description: "Kostet in jedem Lauf Zeit oder Genauigkeit — kommt als nächstes dran." },
   medium: { label: "Mittel", kind: "info", description: "Echter Mangel, aber mit Umweg lebbar." },
   low: { label: "Niedrig", kind: "neutral", description: "Zurückgestellt — irgendwann, nicht bald." },
+};
+
+/**
+ * `platform_product_feedback_documents.kind` (F567): was ein am Befund abgelegtes Dokument ist. Wertebereich
+ * des DB-CHECK `platform_product_feedback_documents_kind_check`, Enum `PRODUCT_FEEDBACK_DOCUMENT_KINDS`.
+ * Keine Kritikalität — die Art ist eine Einordnung, deshalb überall `neutral` (A7).
+ */
+const PRODUCT_FINDING_DOCUMENT_KIND: Record<string, StatusDescriptor> = {
+  spec: { label: "Spec", kind: "neutral", description: "Die Umsetzungs-Spec (F<n>) zum Befund — Lesefassung über den technischen Zugang; die Repo-Datei bleibt die Arbeitsfassung." },
+  source: { label: "Quelle", kind: "neutral", description: "Partner- oder Owner-Vorlage, aus der der Befund stammt (Vorschlag, Mail, Konzept)." },
+  note: { label: "Notiz", kind: "neutral", description: "Eine Notiz zum Befund, die nicht in den Bericht gehört." },
 };
 
 /**
@@ -1660,9 +1873,10 @@ const PRODUCT_FINDING_PRIORITY: Record<string, StatusDescriptor> = {
  * `20260806120000_onboarding_review_and_datev_bank_accounts.sql` (`review`).
  * Kein TS-Enum — der Test spiegelt den CHECK.
  *
- * Schreiber: `create_client` legt `created` an, der Bridge-Poll setzt
+ * Schreiber: `client_create` legt `created` an, der Bridge-Poll setzt
  * `importing`, die Onboarding-Pipeline `processing` → `review`, der
- * Review-Abschluss `ready`, jeder Abbruch `failed`.
+ * Review-Abschluss `ready`, „Review erneut öffnen" (Admin, F359) `ready` →
+ * `review`, jeder Abbruch `failed`.
  *
  * Fallstricke:
  *  - **Nicht mit dem Verdict verwechseln** (`client_onboarding_verdict`):
@@ -1673,8 +1887,8 @@ const PRODUCT_FINDING_PRIORITY: Record<string, StatusDescriptor> = {
  *    für BEIDE Zustände „Erneut versuchen" an.
  *  - `review` blockiert das Buchen (`assertCtxOnboardingReady` lässt nur
  *    `ready` durch), sieht aber wie ein Erfolg aus. Deshalb `warning`.
- *  - `ready` ⇄ `review`: ein Re-Onboarding wirft den Mandanten zurück in den
- *    Review, der Zustand ist also nicht terminal.
+ *  - `ready` ⇄ `review`: ein Re-Onboarding oder „Review erneut öffnen" wirft
+ *    den Mandanten zurück in den Review, der Zustand ist also nicht terminal.
  */
 const CLIENT_ONBOARDING: Record<string, StatusDescriptor> = {
   created: { label: "Angelegt", kind: "neutral", description: "Mandant existiert in Ludwig, das Onboarding hat noch nicht begonnen — wartet auf den nächsten Bridge-Poll." },
@@ -1686,7 +1900,7 @@ const CLIENT_ONBOARDING: Record<string, StatusDescriptor> = {
 };
 
 /**
- * Verdict aus `get_onboarding_status` — **abgeleitet, keine Spalte**
+ * Verdict aus `onboarding_status` — **abgeleitet, keine Spalte**
  * (`onboarding/application/get-onboarding-status-core.ts`). Die pollbare
  * Agenten-Sicht: „darf ich mit dem Mandanten arbeiten, und wenn nein, woran
  * liegt es?" Wertebereich: `OnboardingStatusVerdict`.
@@ -1761,9 +1975,9 @@ const CLIENT_OPERATION: Record<string, StatusDescriptor> = {
  */
 const RECURRING_CASE_ADOPTION: Record<string, StatusDescriptor> = {
   uebernehmen: { label: "übernehmen", kind: "success", description: "Vorselektiert — die Freigabe legt Dauersachverhalt und Regel an." },
-  bereits_angelegt: { label: "bereits angelegt", kind: "info", description: "Eine Regel mit dieser Belegnummer existiert schon (Re-Onboarding) — wird übersprungen." },
+  bereits_angelegt: { label: "bereits angelegt", kind: "info", description: "Eine Regel zu dieser Vorlage (Belegnummer oder Reihe) existiert schon (Re-Onboarding) — wird übersprungen." },
   beendet_erkannt: { label: "beendet erkannt", kind: "neutral", description: "Lücke von drei Intervallen oder mehr zum jüngsten festgeschriebenen Monat — wird nicht angelegt." },
-  nicht_uebernehmbar: { label: "nicht übernehmbar", kind: "warning", description: "Unbrauchbare Belegnummer oder kein Template ableitbar — kommt gegebenenfalls später über den Beleg-Weg." },
+  nicht_uebernehmbar: { label: "nicht übernehmbar", kind: "warning", description: "Kein Template ableitbar oder WK ohne Personenkonto (`buchung-offen` P48) — kommt gegebenenfalls später über den Beleg-Weg." },
 };
 
 /**
@@ -1797,6 +2011,17 @@ const STATEMENT_EXPECTATION: Record<string, StatusDescriptor> = {
   required: { label: "Pflicht", kind: "success", description: "Fehlt der Auszug im Zeitraum, blockt Gate 1a den Buchungslauf (mit Begründung überspringbar) und die Abnahme zeigt rot. Die Ableitung setzt Pflicht, wenn das Konto bebucht ist und seine IBAN als Bankverbindung in den DATEV-Stammdaten steht." },
   expected: { label: "Sollte kommen", kind: "info", description: "Auszüge kommen, oft verspätet. Fehlt einer, ist das ein gelber Hinweis in der Abnahme und eine Zeile im Block „Kontoauszüge“ der Belegnachforderung; der Buchungslauf blockt nicht. Setzt nur ein Mensch." },
   none: { label: "Keine", kind: "neutral", description: "Kein Auszug erwartet — Verrechnungs-, Geldtransit- und Kassenkonten, ruhende Konten. In Schritt 1 der Abnahme eingeklappt unter „Weitere Zahlungskonten“." },
+};
+
+/**
+ * Kontozustand eines bestätigten Zahlungskontos (F372, `bank.md` R15g) —
+ * berechnet zum Stichtag der Zahlungskonten-Liste, keine Spalte.
+ */
+const PAYMENT_ACCOUNT_STANDING: Record<string, StatusDescriptor> = {
+  current: { label: "aktuell", kind: "success", description: "In den letzten drei Monaten bewegt. Ein geschuldeter Kontoauszug reicht bis zum Ende des letzten vollen Monats; bei Kreditkarten fehlt nach einer Abbuchung keine Abrechnung." },
+  statement_overdue: { label: "Auszug ausstehend", kind: "warning", description: "Das Konto steht auf „Sollte kommen“, der Auszug reicht aber nicht bis zum Ende des letzten vollen Monats. Der Buchungslauf läuft weiter, der fehlende Auszug steht in der Belegnachforderung." },
+  statement_missing: { label: "Auszug fehlt", kind: "danger", description: "Das Konto steht auf „Pflicht“, der Auszug reicht aber nicht bis zum Ende des letzten vollen Monats (bei Kreditkarten: die Abrechnung des Vormonats fehlt, obwohl die Abbuchung gebucht ist). Der nächste Buchungslauf hält hier an. Wird nie ausgeblendet." },
+  dormant: { label: "ruht", kind: "neutral", description: "Seit drei Monaten weder eine Buchung auf dem Sachkonto noch eine Auszugszeile, oder das Konto ist abgeschaltet. Saldovorträge zählen nicht als Bewegung. In der Liste standardmäßig ausgeblendet." },
 };
 
 /**
@@ -1842,6 +2067,7 @@ const OPEN_ITEM_LINE_KIND: Record<string, StatusDescriptor> = {
  */
 const DATEV_LINK: Record<string, StatusDescriptor> = {
   opos_source: { label: "Quelle OPOS-Vortrag", kind: "neutral", description: "Diese Spiegel-Buchung ist die Sollstellung des offenen Postens." },
+  corrected_mirror: { label: "Korrigierter DATEV-Satz", kind: "neutral", description: "Diesen DATEV-Satz korrigiert der Sachverhalt — angelegt auf Anweisung der Kanzlei (F344)." },
   link_invoice: { label: "Klammer: Rechnung", kind: "neutral", description: "Rechnungsseite der Ausgleichs-Zuordnung (F77)." },
   link_payment: { label: "Klammer: Zahlung", kind: "neutral", description: "Zahlungsseite der Ausgleichs-Zuordnung (F77)." },
   ludwig_ref: { label: "DATEV-Rückverweis", kind: "neutral", description: "DATEV führt die Buchung mit dieser Sachverhalts-Nummer (LudwigAI-Zusatzinfo)." },
@@ -2365,6 +2591,7 @@ export const STATUS_REGISTRY: Record<StatusAxis, Record<string, StatusDescriptor
   document_character: DOCUMENT_CHARACTER,
   document_done_via: DOCUMENT_DONE_VIA,
   document_filing: DOCUMENT_FILING,
+  document_duo_upload: DOCUMENT_DUO_UPLOAD,
   document_booking: DOCUMENT_BOOKING,
   document_stuck: DOCUMENT_STUCK,
   file_basket: FILE_BASKET,
@@ -2387,6 +2614,7 @@ export const STATUS_REGISTRY: Record<StatusAxis, Record<string, StatusDescriptor
   case_account_balance: CASE_ACCOUNT_BALANCE,
   expectation_kind: EXPECTATION_KIND,
   review_tab: REVIEW_TAB,
+  review_reason: REVIEW_REASON,
   journal_entry: JOURNAL_ENTRY_STATUS,
   journal_entry_datev_stage: JOURNAL_ENTRY_DATEV_STAGE,
   journal_entry_origin: JOURNAL_ENTRY_ORIGIN,
@@ -2396,7 +2624,12 @@ export const STATUS_REGISTRY: Record<StatusAxis, Record<string, StatusDescriptor
   export_bucket: EXPORT_BUCKET,
   export_batch: EXPORT_BATCH,
   run_outcome: RUN_OUTCOME,
-  agent_run_outcome: AGENT_RUN_OUTCOME,
+  agent_run_step_outcome: AGENT_RUN_STEP_OUTCOME,
+  agent_run_banner: AGENT_RUN_BANNER,
+  agent_run_step_end_cause: AGENT_RUN_STEP_END_CAUSE,
+  agent_run_state: AGENT_RUN_STATE,
+  agent_run_phase: AGENT_RUN_PHASE,
+  agent_run_stop_reason: AGENT_RUN_STOP_REASON,
   run_gate: RUN_GATE,
   business_partner: BUSINESS_PARTNER_STATE,
   ledger_account: LEDGER_ACCOUNT_STATUS,
@@ -2414,6 +2647,7 @@ export const STATUS_REGISTRY: Record<StatusAxis, Record<string, StatusDescriptor
   convention_origin: CONVENTION_ORIGIN,
   product_finding: PRODUCT_FINDING,
   product_finding_priority: PRODUCT_FINDING_PRIORITY,
+  product_finding_document_kind: PRODUCT_FINDING_DOCUMENT_KIND,
   client_onboarding: CLIENT_ONBOARDING,
   client_onboarding_verdict: CLIENT_ONBOARDING_VERDICT,
   bank_match_stage: BANK_MATCH_STAGE,
@@ -2422,6 +2656,7 @@ export const STATUS_REGISTRY: Record<StatusAxis, Record<string, StatusDescriptor
   batch_commit: BATCH_COMMIT,
   datev_check: DATEV_CHECK,
   statement_expectation: STATEMENT_EXPECTATION,
+  payment_account_standing: PAYMENT_ACCOUNT_STANDING,
   open_item_settlement: OPEN_ITEM_SETTLEMENT,
   open_item_line_kind: OPEN_ITEM_LINE_KIND,
   datev_link: DATEV_LINK,
@@ -2675,6 +2910,20 @@ export const STATE_MACHINES: Record<string, StateMachine> = {
     ],
   },
 
+  document_duo_upload: {
+    axis: "document_duo_upload",
+    description:
+      "Ob ein Beleg, dem Ludwig eine BEDI-ID gegeben hat, schon in DUO liegt (F547). Die Achse beginnt mit dem " +
+      "ersten Buchungssatz eines Belegs ohne DATEV-Referenz; die BEDI-ID ist ab da Beleglink im DATEV-Export. " +
+      "`failed` ist kein Endzustand — der Beleg bleibt in der Upload-Queue.",
+    transitions: [
+      { from: null, to: "pending", trigger: "bedi_guid_issued", label: "erster Buchungssatz des Belegs, Ludwig vergibt die BEDI-GUID", by: "system" },
+      { from: "pending", to: "uploaded", trigger: "duo_upload_reported", label: "das Werkzeug meldet uploaded", by: "api" },
+      { from: "pending", to: "failed", trigger: "duo_upload_failed", label: "das Werkzeug meldet failed mit Grund", by: "api" },
+      { from: "failed", to: "uploaded", trigger: "duo_upload_reported", label: "erneuter Versuch gelungen", by: "api" },
+    ],
+  },
+
   /* ── Sachverhalt und Buchung ────────────────────────────────────────── */
 
   accounting_case: {
@@ -2717,6 +2966,19 @@ export const STATE_MACHINES: Record<string, StateMachine> = {
     ],
   },
 
+  agent_run: {
+    axis: "agent_run_state",
+    description:
+      "Der Lauf (F473/F474): ein „Lauf starten\"-Anstoß legt ihn an, der Fortschalt-Kern beendet ihn. " +
+      "Dazwischen gibt es keinen Wartezustand — jedes Schritt-Ende legt sofort den nächsten Agent-Schritt an oder beendet den Lauf.",
+    transitions: [
+      { from: null, to: "running", trigger: "run_started", label: "Anstoß (Korb-Freigabe, Admin, Rückgabe an Ludwig, vorgemerkter Anstoß) oder direkter Start", by: "system" },
+      { from: "running", to: "done", trigger: "run_finished", label: "letzter Schritt regulär beendet, nichts mehr zu tun", by: "system" },
+      { from: "running", to: "running", trigger: "step_retried", label: "Schritt technisch abgebrochen — einmal je Phase ein Wiederholungs-Schritt, zugestellt nach 10 Minuten", by: "system" },
+      { from: "running", to: "stopped", trigger: "run_stopped", label: "beendet mit Grund — keine Arbeit, Reparatur verbraucht, Queue fehlt, abgelöst, nie übernommen, Wiederholung gescheitert", by: "system" },
+      { from: "running", to: "failed", trigger: "run_failed", label: "ein Schritt des Laufs ist gescheitert", by: "system" },
+    ],
+  },
   export_batch: {
     axis: "export_batch",
     description:
@@ -2885,6 +3147,7 @@ export const AXIS_LABEL: Record<StatusAxis, string> = {
   document_character: "Beleg-Charakter",
   document_done_via: "Erledigt durch",
   document_filing: "DUO-Ablage",
+  document_duo_upload: "Upload nach DUO",
   document_booking: "Buchung am Beleg",
   document_stuck: "Beleg-Zustand",
   file_basket: "Dateikorb",
@@ -2907,6 +3170,7 @@ export const AXIS_LABEL: Record<StatusAxis, string> = {
   case_account_balance: "Kontostand",
   expectation_kind: "Erwartet",
   review_tab: "Prüfbedarf",
+  review_reason: "Prüfgrund",
   journal_entry: "Buchung",
   journal_entry_datev_stage: "Weg nach DATEV",
   journal_entry_origin: "Herkunft",
@@ -2915,7 +3179,12 @@ export const AXIS_LABEL: Record<StatusAxis, string> = {
   export_case: "DATEV-Export",
   export_bucket: "DATEV-Export",
   run_outcome: "Buchungslauf",
-  agent_run_outcome: "Lauf-Ende",
+  agent_run_step_outcome: "Schritt-Ende",
+  agent_run_banner: "Lauf-Leiste",
+  agent_run_step_end_cause: "Ursache",
+  agent_run_state: "Lauf-Zustand",
+  agent_run_phase: "Phase",
+  agent_run_stop_reason: "Grund",
   run_gate: "Gate",
   business_partner: "Geschäftspartner",
   ledger_account: "Konto",
@@ -2933,6 +3202,7 @@ export const AXIS_LABEL: Record<StatusAxis, string> = {
   convention_origin: "Herkunft",
   product_finding: "Produktbefund",
   product_finding_priority: "Dringlichkeit",
+  product_finding_document_kind: "Dokumentart",
   client_onboarding: "Onboarding",
   client_onboarding_verdict: "Onboarding-Urteil",
   bank_match_stage: "DATEV-Historie",
@@ -2942,6 +3212,7 @@ export const AXIS_LABEL: Record<StatusAxis, string> = {
   batch_commit: "Festschreibung",
   datev_check: "DATEV-Prüfung",
   statement_expectation: "Kontoauszug",
+  payment_account_standing: "Kontozustand",
   open_item_settlement: "Ausgleich",
   open_item_line_kind: "Zeilenart",
   datev_link: "Verknüpfung",
@@ -2977,6 +3248,7 @@ export const AXIS_SOURCE: Record<StatusAxis, string> = {
   document_character: "client_source_docs.class_document_kind",
   document_done_via: "client_source_docs.done_via (+ done_at, done_reason)",
   document_filing: "client_source_docs.filed_at / filing_failed_at (F216)",
+  document_duo_upload: "client_source_docs.ludwig_bedi_guid / duo_uploaded_at / duo_upload_failed_at (F547)",
   document_booking: "berechnet — lebender Satz über Ereignis oder journal_entry.source_doc_id, sonst status done (F236)",
   document_stuck: "berechnet — hasInvoiceRow + Listen-Variante (ephemer)",
   file_basket: "client_file_baskets.state",
@@ -2998,7 +3270,8 @@ export const AXIS_SOURCE: Record<StatusAxis, string> = {
   expectation_maturity: "berechnet aus client_accounting_case_expectation.due_date / escalation_level / resolved_at",
   case_account_balance: "abgeleitet — gate/stay-Einstufung des Kontos und sein Saldo im Sachverhalt (domain/case.ts caseAccountBalance, keine Spalte)",
   expectation_kind: "client_accounting_case_expectation.kind",
-  review_tab: "abgeleitet — Summe aus Tragweite, Judge-Urteil, Konfidenz, schlechtestem Prüfpunkt und Präzedenz; ab 50 bitte anschauen (domain/review-score.ts, keine Spalte)",
+  review_tab: "abgeleitet — Summe aus Tragweite, Judge-Urteil, Konfidenz, schlechtester Prüfung und Präzedenz; ab 50 bitte anschauen (domain/review-score.ts, keine Spalte)",
+  review_reason: "abgeleitet — stärkster Grund des Prüfbedarf-Scores, bei Gleichstand nach Rangfolge (domain/review-reason.ts topReviewReason, keine Spalte)",
   journal_entry: "client_journal_entry.status",
   journal_entry_datev_stage: "abgeleitet — status + exported_at + datev_mirror_entry_id (keine Spalte)",
   journal_entry_origin: "client_journal_entry.origin",
@@ -3007,8 +3280,13 @@ export const AXIS_SOURCE: Record<StatusAxis, string> = {
   export_case: "abgeleitet — deriveCaseExportStatus (keine Spalte)",
   export_bucket: "abgeleitet — bucketOf in export-status-core.ts",
   run_outcome: "abgeleitet — runOutcome in agent-runs-view.ts (keine Spalte)",
-  agent_run_outcome: "client_agent_runs.outcome (NULL = offen/Altbestand)",
-  run_gate: "client_agent_run_steps.gate_result (NULL = Schritt noch offen)",
+  agent_run_step_outcome: "client_agent_run_steps.outcome (NULL = offen/Altbestand)",
+  agent_run_banner: "abgeleitet — agentRunBannerState in batch-review/domain/close-run-banner.ts (keine Spalte)",
+  agent_run_step_end_cause: "client_agent_run_steps.end_cause (NULL = offen, Altbestand oder Ende ohne Ursache)",
+  agent_run_state: "client_agent_runs.state",
+  agent_run_phase: "client_agent_runs.phase (NULL = vor dem ersten Schritt beendet)",
+  agent_run_stop_reason: "client_agent_runs.stop_reason (NULL = von selbst zu Ende oder Altbestand)",
+  run_gate:"client_agent_run_step_gates.gate_result (NULL = Schritt noch offen)",
   business_partner: "client_business_partners.onboarding_state",
   ledger_account: "client_ledger_accounts.status",
   ledger_account_datev_sync: "client_ledger_accounts.datev_sync_state",
@@ -3025,6 +3303,7 @@ export const AXIS_SOURCE: Record<StatusAxis, string> = {
   convention_origin: "client_agent_notes.origin",
   product_finding: "platform_product_feedback.status",
   product_finding_priority: "platform_product_feedback.priority (NULL = ungesichtet)",
+  product_finding_document_kind: "platform_product_feedback_documents.kind",
   client_onboarding: "platform_clients.onboarding_state",
   client_onboarding_verdict: "abgeleitet — get-onboarding-status-core.ts (keine Spalte)",
   bank_match_stage: "client_bank_transactions.match_stage (NULL = Kaskade nicht gelaufen)",
@@ -3034,6 +3313,7 @@ export const AXIS_SOURCE: Record<StatusAxis, string> = {
   batch_commit: "client_datev_sequences.is_committed (boolean)",
   datev_check: "client_datev_sequences.inspection_status",
   statement_expectation: "client_payment_accounts.statement_expectation (Hand: statement_expectation_manual)",
+  payment_account_standing: "berechnet — paymentAccountStanding in bank-transactions/domain/payment-account-standing.ts (keine Spalte)",
   open_item_settlement: "berechnet — OPOS-Bestand zum Stichtag (ephemer)",
   open_item_line_kind: "berechnet — Ausgleichs-Klammer F77 (ephemer)",
   datev_link: "berechnet — VIA_LABEL in modules/datev-truth (ephemer)",

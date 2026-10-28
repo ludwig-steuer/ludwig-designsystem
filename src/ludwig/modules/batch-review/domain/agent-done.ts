@@ -1,10 +1,11 @@
 import { rowSettled, type ChecklistRow, type ChecklistRowKey } from "./checklist";
+import type { ReviewStepKey } from "./steps";
 
 /**
  * F219 — „Ist der Agent fertig?" liest **dieselbe** Freigabe-Checkliste wie
- * Schritt 8; keine zweite Berechnung von „offen". Agentenarbeit sind die
- * Zeilen, die in einen Prüfschritt 0–7 springen — Übergabe (9) und Nachlese
- * (10) sind es nicht.
+ * das Prüfprotokoll; keine zweite Berechnung von „offen". Agentenarbeit sind
+ * die Zeilen, die in einen Prüfschritt vor dem Prüfprotokoll springen —
+ * Übergabe, Nachlese und die Buchungen des Mandanten sind es nicht.
  *
  * Fertig heißt: jeder Posten ist **gebucht oder hat eine Rückfrage**
  * (Owner 2026-09-18). Deshalb rechnet eine Zeile hier mit `agentDone`, wo die
@@ -18,7 +19,7 @@ import { rowSettled, type ChecklistRow, type ChecklistRowKey } from "./checklist
  * dann nie wahr gewesen.
  *
  * `statements_complete` gehört dazu: einen fehlenden Auszug kann der Agent
- * nicht beschaffen — die Lücke ist Vollständigkeit (Schritt 1 / Freigabe),
+ * nicht beschaffen — die Lücke ist Vollständigkeit (Prüfschritt / Freigabe),
  * keine Agentenarbeit (Owner 2026-09-21).
  */
 const REVIEWER_ROWS: ReadonlySet<ChecklistRowKey> = new Set<ChecklistRowKey>([
@@ -28,10 +29,25 @@ const REVIEWER_ROWS: ReadonlySet<ChecklistRowKey> = new Set<ChecklistRowKey>([
   "conventions_decided",
 ]);
 
-/** Die Zeilen, die Agentenarbeit messen — Schritt 0 zeigt sie als Checkliste. */
+const AGENT_WORK_STEPS: ReadonlySet<ReviewStepKey> = new Set<ReviewStepKey>([
+  "result",
+  "completeness",
+  "clarifications",
+  "proposals",
+  "account-clearing",
+  "open-items",
+  "plausibility",
+  "conventions",
+]);
+
+/** Die Zeilen, die Agentenarbeit messen — das Ergebnis des Stapels zeigt sie als Checkliste. */
 export function agentRows(rows: readonly ChecklistRow[]): ChecklistRow[] {
   return rows.filter(
-    (r) => r.level !== "info" && r.jumpStep !== null && r.jumpStep <= 7 && !REVIEWER_ROWS.has(r.key),
+    (r) =>
+      r.level !== "info" &&
+      r.jumpStep !== null &&
+      AGENT_WORK_STEPS.has(r.jumpStep) &&
+      !REVIEWER_ROWS.has(r.key),
   );
 }
 

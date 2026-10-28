@@ -10,7 +10,8 @@
  * Erkennung ist HERKUNFTS-AGNOSTISCH (Owner §2.2): wird eine Belegnummer
  * regelmäßig sollgestellt, ist sie Kandidat — egal ob per WK-Stapel oder von
  * Hand gebucht. `mark_of_origin='WK'` ist nur Konfidenz-Signal (Badge).
- * Die Belegnummer ist die Identität des DSV (§2.3).
+ * Identität des DSV (§2.3, F366): die Belegnummer — bei leerer/`0`/`diverse`
+ * Nummer die Reihe (Personenkonto + Sachkonto:Brutto je Satz).
  */
 
 import {
@@ -18,6 +19,7 @@ import {
   kindFromWireWidth,
   type AccountKind,
 } from "@/ludwig/core/datev/account-number";
+import { postingRecordKey } from "@/ludwig/core/datev/posting-record-key";
 import { DATEV_TAX_KEYS } from "@/ludwig/core/datev/tax-keys";
 
 import type { RuleDirection, RuleExpectedInterval } from "./rule";
@@ -31,6 +33,12 @@ export interface RecurringDerivationConfig {
   financeAccountNumbers: ReadonlySet<string>;
   /** Logische Nummern der VSt-/USt-Konten (framework-spezifisch). */
   taxAccountNumbers: ReadonlySet<string>;
+  /**
+   * DATEV-Automatikkonten (`datev_tax_rate` gesetzt): dort rechnet DATEV die
+   * Steuer selbst, die Vorlage bekommt keinen BU-Schlüssel — sonst lehnt der
+   * Regel-Guard (`core/datev/automatic-account.ts`) die Anlage ab.
+   */
+  automaticAccountNumbers: ReadonlySet<string>;
 }
 
 export const RECURRING_CANDIDATE_CLASSES = [
@@ -52,8 +60,14 @@ export interface RecurringCandidateTemplateLine {
 }
 
 export interface RecurringCandidate {
-  /** Belegnummer (Belegfeld 1, getrimmt) — Identität des DSV. */
-  documentNumber: string;
+  /** Belegnummer (Belegfeld 1, getrimmt); null bei Reihen ohne brauchbare Nummer (F366). */
+  documentNumber: string | null;
+  /**
+   * Identität des Kandidaten = `import_reference` der Regel (F366):
+   * `datev-wk:<Belegnummer>`, `datev-wk-series:<Konto>/<Sachkonto>:<Brutto>[+…]`
+   * oder `datev-wk-none:<Buchungstext>` (WK ohne Personenkonto, nie übernehmbar).
+   */
+  importReference: string;
   klass: RecurringCandidateClass;
   /** Maschinen-Grund bei beendet_erkannt / nicht_uebernehmbar. */
   reason: string | null;
@@ -161,6 +175,8 @@ export function standardTaxKeyForRate(
 
 interface Leg {
   row: DatevPostingRow;
+  /** Prima-Nota-Satz (`postingRecordKey`), null ohne Posting-ID. */
+  recordKey: string | null;
   date: string; // YYYY-MM-DD
   month: string; // YYYY-MM
   account: string; // logisch
@@ -260,8 +276,10 @@ export function deriveRecurringCandidates(
       const accountKind = kindFromWireWidth(rawAccount, config.accountNumberLength);
       const rawContra = str(row.contra_account_number);
       const contraKind = rawContra ? kindFromWireWidth(rawContra, config.accountNumberLength) : null;
+      const postingId = str(row.id);
       leg = {
         row,
+        recordKey: postingId ? postingRecordKey(postingId) : null,
         date,
         month,
         account: fromDatevWire(rawAccount, config.accountNumberLength, accountKind),
@@ -292,18 +310,152 @@ export function deriveRecurringCandidates(
   }
 
   const candidates: RecurringCandidate[] = [];
+  const unusableLegs: Leg[] = [];
   for (const [doc, legs] of legsByDoc) {
     if (isUnusableDocumentNumber(doc)) {
-      candidates.push({
-        documentNumber: doc === "" ? "(leer)" : doc,
-        klass: "nicht_uebernehmbar",
-        reason: "belegnummer_unbrauchbar",
+      unusableLegs.push(...legs);
+      continue;
+    }
+    const candidate = deriveGroup(
+      { documentNumber: doc, importReference: `datev-wk:${doc}` },
+      legs,
+      latestCommittedMonth!,
+      config,
+    );
+    if (candidate) candidates.push(candidate);
+  }
+  if (unusableLegs.length > 0) {
+    candidates.push(...deriveSeriesCandidates(unusableLegs, latestCommittedMonth!, config, notes));
+  }
+  candidates.push(...deriveNoPersonalAccountCandidates([...legsByDoc.values()].flat()));
+
+  candidates.sort((a, b) => a.importReference.localeCompare(b.importReference, "de"));
+  return { candidates, latestCommittedMonth, notes };
+}
+
+function groupByRecord(legs: Leg[]): Map<string, Leg[]> {
+  const byRecord = new Map<string, Leg[]>();
+  for (const leg of legs) {
+    if (!leg.recordKey) continue;
+    const bucket = byRecord.get(leg.recordKey);
+    if (bucket) bucket.push(leg);
+    else byRecord.set(leg.recordKey, [leg]);
+  }
+  return byRecord;
+}
+
+/**
+ * F366: Buchungen ohne brauchbare Belegnummer (leer/`0`/`diverse`) — je Reihe
+ * ein Kandidat statt eines Sammel-Eintrags. Eine DATEV-WK-Vorlage bucht jeden
+ * Monat denselben Satz; wiedererkennbar ist er nur am Inhalt: Personenkonto +
+ * die Personenkonto-Legs des Satzes (Sachkonto:Brutto, bei Split mehrere).
+ * Der Topf enthält auch Handbuchungen — Reihen ohne WK-Kennzeichen werden
+ * deshalb zur Prüfung markiert.
+ */
+function deriveSeriesCandidates(
+  legs: Leg[],
+  latestCommittedMonth: string,
+  config: RecurringDerivationConfig,
+  notes: string[],
+): RecurringCandidate[] {
+  const withoutId = legs.filter((l) => !l.recordKey).length;
+  if (withoutId > 0) {
+    notes.push(`${withoutId} Zeilen ohne Posting-ID übersprungen (Buchungen ohne brauchbare Belegnummer).`);
+  }
+
+  const series = new Map<string, { legs: Leg[]; netRecordsByMonth: Map<string, number> }>();
+  for (const [recordKey, recordLegs] of groupByRecord(legs)) {
+    const personalLegs = recordLegs.filter(
+      (l) =>
+        l.accountKind === "personal" &&
+        l.contraKind === "general" &&
+        l.contra != null &&
+        !config.financeAccountNumbers.has(l.contra) &&
+        !config.taxAccountNumbers.has(l.contra),
+    );
+    if (personalLegs.length === 0) continue; // Zahlung, Sachkonto-WK (P48) o. Ä.
+    const accounts = [...new Set(personalLegs.map((l) => l.account))];
+    if (accounts.length > 1) {
+      notes.push(
+        `Satz ${recordKey} bucht an mehrere Personenkonten (${accounts.join(", ")}) — nicht übernommen.`,
+      );
+      continue;
+    }
+    const key =
+      `${accounts[0]}/` +
+      personalLegs
+        .map((l) => `${l.contra}:${Math.abs(l.amount).toFixed(2)}`)
+        .sort()
+        .join("+");
+    const entry = series.get(key) ?? { legs: [], netRecordsByMonth: new Map<string, number>() };
+    entry.legs.push(...recordLegs);
+    // Generalumkehr zählt gegen ihr Original — Storno + Neubuchung ist kein Doppel.
+    const month = personalLegs[0]!.month;
+    const delta = personalLegs.every((l) => l.reversal) ? -1 : 1;
+    entry.netRecordsByMonth.set(month, (entry.netRecordsByMonth.get(month) ?? 0) + delta);
+    series.set(key, entry);
+  }
+
+  const out: RecurringCandidate[] = [];
+  for (const [key, entry] of series) {
+    const candidate = deriveGroup(
+      { documentNumber: null, importReference: `datev-wk-series:${key}` },
+      entry.legs,
+      latestCommittedMonth,
+      config,
+    );
+    if (!candidate) continue;
+    for (const [month, count] of [...entry.netRecordsByMonth].sort()) {
+      if (count > 1) {
+        candidate.reviewFlag = true;
+        candidate.notes.push(`Reihe ${key} zweimal im Monat ${month} — zwei gleiche Vorlagen?`);
+      }
+    }
+    if (!entry.legs.some((l) => l.markOfOrigin === "WK")) {
+      candidate.reviewFlag = true;
+      candidate.notes.push("Reihe ohne WK-Kennzeichen — von Hand gebucht, bitte prüfen");
+    }
+    out.push(candidate);
+  }
+  return out;
+}
+
+/**
+ * F366 / `buchung-offen` P48: WK-Sätze ohne Personenkonto (Sachkonto an
+ * Sachkonto, z. B. Kfz-Nutzung 1 %) tragen keine Sollstellung und werden kein
+ * Regelsachverhalt — sie erscheinen als „nicht übernehmbar", statt still zu
+ * verschwinden.
+ */
+function deriveNoPersonalAccountCandidates(legs: Leg[]): RecurringCandidate[] {
+  const groups = new Map<string, { months: Set<string>; latest: Leg }>();
+  for (const recordLegs of groupByRecord(legs).values()) {
+    if (!recordLegs.some((l) => l.markOfOrigin === "WK")) continue;
+    if (recordLegs.some((l) => l.accountKind === "personal" || l.contraKind === "personal")) continue;
+    const description = recordLegs.find((l) => l.description)?.description ?? "";
+    const group = groups.get(description) ?? { months: new Set<string>(), latest: recordLegs[0]! };
+    for (const leg of recordLegs) {
+      group.months.add(leg.month);
+      if (leg.date > group.latest.date) group.latest = leg;
+    }
+    groups.set(description, group);
+  }
+
+  return [...groups]
+    .filter(([, group]) => group.months.size >= RECURRING_MIN_RUN)
+    .map(([description, group]) => {
+      const doc = str(group.latest.row.document_field1) ?? "";
+      const sollMonths = [...group.months].sort();
+      return {
+        documentNumber: isUnusableDocumentNumber(doc) ? null : doc,
+        importReference: `datev-wk-none:${description}`,
+        klass: "nicht_uebernehmbar" as const,
+        reason: "no_personal_account",
         reviewFlag: false,
-        wkBadge: legs.some((l) => l.markOfOrigin === "WK"),
+        wkBadge: true,
         personalAccountNumber: null,
         direction: null,
         interval: null,
-        sollMonths: [],
+        sollMonths,
         lastSollMonth: null,
         gapIntervals: null,
         templateMonth: null,
@@ -312,17 +464,12 @@ export function deriveRecurringCandidates(
         expectedDayOfMonth: null,
         validFrom: null,
         documentLink: null,
-        description: legs[0]?.description ?? null,
-        notes: [`${legs.length} Buchungszeilen ohne brauchbare Belegnummer.`],
-      });
-      continue;
-    }
-    const candidate = deriveGroup(doc, legs, latestCommittedMonth!, config);
-    if (candidate) candidates.push(candidate);
-  }
-
-  candidates.sort((a, b) => a.documentNumber.localeCompare(b.documentNumber, "de"));
-  return { candidates, latestCommittedMonth, notes };
+        description: description || null,
+        notes: [
+          `WK ohne Personenkonto in ${sollMonths.length} Monaten — keine Sollstellung, kein Regelsachverhalt (buchung-offen P48).`,
+        ],
+      };
+    });
 }
 
 /**
@@ -349,7 +496,7 @@ function netMonth(legs: Leg[], groupNotes: string[]): Leg[] {
 }
 
 function deriveGroup(
-  doc: string,
+  identity: { documentNumber: string | null; importReference: string },
   legs: Leg[],
   latestCommittedMonth: string,
   config: RecurringDerivationConfig,
@@ -482,7 +629,9 @@ function deriveGroup(
           accountNumber,
           grossAmount: Number(entry.gross.toFixed(2)),
           taxRatePercent: rate,
-          taxKey: standardTaxKeyForRate(rate, direction),
+          taxKey: config.automaticAccountNumbers.has(accountNumber)
+            ? null
+            : standardTaxKeyForRate(rate, direction),
           description: entry.description,
         };
       });
@@ -491,7 +640,7 @@ function deriveGroup(
 
   if (!templateMonth || templateLines.length === 0 || !personalAccountNumber) {
     return {
-      documentNumber: doc,
+      ...identity,
       klass: "nicht_uebernehmbar",
       reason: "kein_template_ableitbar",
       reviewFlag: false,
@@ -545,7 +694,7 @@ function deriveGroup(
   const grossTotal = Number(templateLines.reduce((s, l) => s + l.grossAmount, 0).toFixed(2));
 
   return {
-    documentNumber: doc,
+    ...identity,
     klass,
     reason,
     reviewFlag,

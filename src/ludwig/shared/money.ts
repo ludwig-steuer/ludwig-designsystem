@@ -31,6 +31,16 @@ export function addMoney(a: Money, b: Money): Money {
   return { amount: a.amount.plus(b.amount), currency: a.currency };
 }
 
+/** `1234.5` → `1.234,50 €` (no currency lookup, always €). */
+export function fmtEuro(n: number): string {
+  return (
+    n.toLocaleString("de-DE", {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+    }) + " €"
+  );
+}
+
 export function formatMoney(m: Money, locale = "de-DE"): string {
   return new Intl.NumberFormat(locale, {
     style: "currency",

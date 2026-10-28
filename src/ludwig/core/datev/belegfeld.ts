@@ -68,9 +68,12 @@ const AFFIX_WHITELIST = new Set([
 /** Mindestlänge des Ziffern-Skeletts — kurze Zahlen sind kein Beleg-Beweis. */
 const MIN_DIGIT_SKELETON = 5;
 
+/** Leer- und Trennzeichen, die kein Beleg-Merkmal sind. */
+const SEPARATORS = /[\s.,\-_/]/g;
+
 /** Großschreibung; Leer- und Trennzeichen `.,-_/` entfernen. */
 function normalizeForAcceptance(value: string): string {
-  return value.toUpperCase().replace(/[\s.,\-_/]/g, "");
+  return value.toUpperCase().replace(SEPARATORS, "");
 }
 
 /**
@@ -106,6 +109,51 @@ export function acceptanceEqual(
   const skeleton = digitSkeleton(x);
   if (skeleton.length < MIN_DIGIT_SKELETON || skeleton !== digitSkeleton(y)) return false;
   return alphaCore(x) === alphaCore(y);
+}
+
+/* ── F577: Belegnummer im Text finden (Kandidatensuche, nicht Schreiben) ────── */
+
+/** Mindestlänge des trennzeichenfreien Vergleichs — kürzere Werte stecken zufällig in jedem Text (#122). */
+export const MIN_DOCUMENT_NUMBER_MATCH_LENGTH = 5;
+
+/** Großschreibung; Leer- und Trennzeichen `.,-_/` entfernen (= die Normalisierung der Akzeptanzregel). */
+export function compactDocumentNumber(value: string): string {
+  return normalizeForAcceptance(value);
+}
+
+const escapeRegex = (s: string) => s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+
+/**
+ * Nennt der Text diese Belegnummer? Tolerant gegen Trennzeichen und führende Nullen:
+ * aus der Nummer wird ein Muster — Buchstabenläufe wörtlich, jeder Ziffernlauf ohne führende Nullen
+ * und mit `0*` davor — und im trennzeichenfreien Text gesucht. `2026/641` trifft `2026000641`,
+ * `02326` trifft `2326`, `20260023` steckt in `RNR 20260023-7`. Kürzer als 5 Zeichen (kompakt) → false.
+ *
+ * Die Läufe werden VOR dem Entfernen der Trennzeichen geschnitten — aus `2026/641` werden `2026` und
+ * `641`, sonst wäre es ein Lauf `2026641`, der `2026000641` nicht trifft. Die Akzeptanzregel fürs
+ * Schreiben (`acceptanceEqual`) bleibt zeichengleich (Owner 2026-08-25); das hier ist nur die Suche.
+ */
+export function mentionsDocumentNumber(haystack: string, documentNumber: string): boolean {
+  const text = compactDocumentNumber(haystack);
+  if (compactDocumentNumber(documentNumber).length < MIN_DOCUMENT_NUMBER_MATCH_LENGTH) return false;
+  if (text.length < MIN_DOCUMENT_NUMBER_MATCH_LENGTH) return false;
+  const pattern = documentNumber
+    .toUpperCase()
+    .split(SEPARATORS)
+    .flatMap((part) => part.match(/\d+|\D+/g) ?? [])
+    .map((token) => (/^\d+$/.test(token) ? `0*${token.replace(/^0+(?=\d)/, "")}` : escapeRegex(token)))
+    .join("");
+  return new RegExp(pattern).test(text);
+}
+
+/**
+ * Skelett für den GLEICHHEITS-Vergleich (F63-Dublettencheck, F577): ohne Trennzeichen und ohne führende
+ * Nullen je Ziffernlauf — `02326` ≡ `2326`, `2.326` ≡ `2326`. Nullen innerhalb eines Laufs bleiben
+ * (`2026000641` ≠ `2026/641`), Präfixe auch (`RE-2326` ≠ `2326`): dort entscheiden Betrag, Datum und
+ * Gegenpartei, ein Abbau der Affixe brächte riskantere Fehltreffer (llcto 2026-10-28).
+ */
+export function documentNumberSkeleton(value: string): string {
+  return compactDocumentNumber(value).replace(/(^|[^0-9])0+(?=\d)/g, "$1");
 }
 
 /* ── F85: Betreff als TEMPORÄRE Belegnummern-Quelle ─────────────────────────

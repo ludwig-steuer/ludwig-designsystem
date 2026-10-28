@@ -8,8 +8,8 @@
  * und ein anderes Wort.
  *
  * Der Wertebereich ist **nicht** hier zu Hause: die Bänder und ihre Schwellen
- * gehören `buchassi_shared.confidence_to_band`
- * (`apps/shared/src/buchassi_shared/interpretation.py`, GLOSSARY
+ * gehören `ludwig.shared.confidence_to_band`
+ * (`apps/pipeline/src/ludwig/shared/interpretation.py`, GLOSSARY
  * „Confidence band"). Diese Datei ist der TypeScript-Spiegel davon. Ändern
  * sich die Schwellen, ändern sie sich dort zuerst.
  *

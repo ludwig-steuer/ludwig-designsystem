@@ -1,6 +1,6 @@
 /**
  * Vertrags-Typen für das Web-UI. Werte-Achse von `contractType` spiegelt
- * `buchassi_shared.ContractType` und den DB-CHECK auf
+ * `ludwig.shared.ContractType` und den DB-CHECK auf
  * `client_source_docs_contracts.contract_type`.
  */
 

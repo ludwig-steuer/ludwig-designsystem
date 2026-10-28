@@ -86,7 +86,7 @@ Seit dem Datenmodell-Review 2026-07-11 gilt zusätzlich:
 | Klammer | `client_accounting_case` | Sachverhalt / Geschäftsvorfall | Rename ex `btx` | Fachliche Klammer um zusammengehörige Ereignisse. Bleibt als Regel- oder laufender Sachverhalt (`kind=rule|running`) offen über mehrere Realisierungen. |
 | Buchung (Header) | `client_journal_entry` | Buchungssatz | Rename + Refactor ex `client_bookkeeping_entries` | Pro Ereignis genau eine Buchung. `status` ∈ {proposed, accepted, posted, reversed}. |
 | Buchung (Lines) | `client_journal_entry_line` | Buchungszeile | neu (heute am Header) | Side-Pattern (`side ∈ {debit, credit}`, `amount > 0`). Sum-Constraint pro Header. |
-| Klärung | `client_accounting_case_clarification` | Klärungsfrage | Rename ex `btx_clarifications` | Hängt am Sachverhalt. `severity='required'` blockiert die Buchung bis zur Antwort (die früheren `blocks_*`-Spalten sind seit Migration 20260705113000 entfernt — nie befüllt, F11-T11.5). Fragesteller: `raised_by_kind` + `raised_by_user_id` (Vokabular `actor_kind`, NULL = Altbestand). |
+| Klärung | `client_accounting_case_clarification` | Klärungsfrage | Rename ex `btx_clarifications` | Hängt am Sachverhalt. `severity='required'` blockiert die Buchung bis zur Antwort (die früheren `blocks_*`-Spalten sind seit Migration 20260705113000 entfernt — nie befüllt, F11-T11.5). Fragesteller: `raised_by_kind` + `raised_by_user_id` (Vokabular `actor_kind`, NULL = Altbestand). Adressat `audience` = Partei (`agent` = Ludwig, abgearbeitet nur vom Senior-Agenten; `accounting` = Kanzlei), keine Rolle (`buchung.md` R21). |
 
 **Naming-Trennung am Source-Doc:**
 
@@ -136,7 +136,7 @@ Seit dem Datenmodell-Review 2026-07-11 gilt zusätzlich:
 
 - English: `tenant user`, `Stb-User`
 - German: `Kanzlei-Mitarbeiter`, `Steuerberater-User`
-- Definition: A platform user with `kind = 'tenant_user'`. Belongs to **exactly one** Kanzlei and sees all Mandanten of that Kanzlei — enforced in `listClientsForSession` (Drizzle bypasses RLS, R9).
+- Definition: A platform user with `kind = 'tenant_user'`. Belongs to **exactly one** Kanzlei and sees all Mandanten of that Kanzlei — enforced in `listClientsForSession` (no RLS, isolation in app code, R28).
 - Data type: entity (`ludwig.platform_tenant_users` row, FK to `ludwig.platform_tenants` and `ludwig.platform_users`); `unique(user_id)` enforces the 1:1 cardinality between Stb-User and Kanzlei.
 - Example: `{ tenant_id: …, user_id: …, role: "owner", status: "active" }`
 - Notes: Was previously called just „User" / „Mitarbeiter". The classifier on `platform_users.kind` makes the type explicit; the trigger `enforce_tenant_user_kind` blocks Client-Users from being inserted here. The tenant role `role` ∈ `owner | admin | member` (`TENANT_ROLES`, `modules/auth/domain/role.ts`) is **display-only today**: no guard evaluates it and it grants no permission (F148 decision 7) — there is no tenant self-service yet. A later spec adds a `minTenantRole` to the permission catalog; staff rights never come from a membership.
@@ -145,8 +145,8 @@ Seit dem Datenmodell-Review 2026-07-11 gilt zusätzlich:
 
 - English: `locked account`
 - German: `Account sperren`, `gesperrter Account`
-- Definition: A platform user who may not sign in: `platform_users.status = 'disabled'` **plus** a Supabase ban (`ban_duration`), so running sessions end too. Responsibilities and memberships stay.
-- Data type: state (`platform_users.status`) + Supabase-Auth ban.
+- Definition: A platform user who may not sign in: `platform_users.status = 'disabled'` **plus** a GoTrue ban (`ban_duration`), so running sessions end too. Responsibilities and memberships stay.
+- Data type: state (`platform_users.status`) + GoTrue ban.
 - Notes: Write core `setUserLocked` (F262, permission `user.manage`, card „Account" on the user page). Unlocking only turns `disabled` back into `active`; an invited user stays `invited`. Not the same as deleting (`deleteUserAccount`: login and platform rows gone, the audit log stays).
 
 ### Client user
@@ -164,7 +164,7 @@ Seit dem Datenmodell-Review 2026-07-11 gilt zusätzlich:
 - German: `Mandanten-Portal`
 - Definition: The web view for `Client user`s (route `/(app)/portal/[clientSlug]`, module `apps/web/src/modules/client-portal/`): lists their accounting cases with `disposition = 'client'`, lets them answer open clarification questions with `audience = 'client'`, and upload documents onto a case. Shows exclusively `client_text` — `professional_text` never reaches the portal.
 - Data type: web module / route (no own tables; reads `client_accounting_case` + `client_accounting_case_clarification`, writes via the `answerClarification` core and the document-inbox upload flow).
-- Notes: The Mandant participates in the loop as a **human with a real Supabase login** — deliberately no client-side agent (owner decision 2026-07-04). A portal answer to an agent question auto-routes the case back to `disposition = 'agent'` (F01-T1.4). Access is enforced app-side via `canAccessClientPortal` (client membership / same-tenant Kanzlei / platform admin) — see `docs/topics/architektur-offen.md` → "Mandanten-Portal" for what is *not* enforced yet.
+- Notes: The Mandant participates in the loop as a **human with a real login (GoTrue)** — deliberately no client-side agent (owner decision 2026-07-04). A portal answer to an agent question auto-routes the case back to `disposition = 'agent'` (F01-T1.4). Access is enforced app-side via `canAccessClientPortal` (client membership / same-tenant Kanzlei / platform admin) — see `docs/topics/architektur-offen.md` → "Mandanten-Portal" for what is *not* enforced yet.
 
 ### Platform staff
 
@@ -172,7 +172,7 @@ Seit dem Datenmodell-Review 2026-07-11 gilt zusätzlich:
 - German: `Ludwig-Team`
 - Definition: A platform user with `kind = 'platform_staff'` — operators of Ludwig itself, not customers. Carries **exactly one** staff role in `platform_users.staff_role` (see „Staff role"); what the user may do follows from that role via the permission catalog. May appear in `platform_tenant_users` and `platform_client_users` simultaneously (for testing, supporting, debugging) without violating the exclusivity rule.
 - Data type: a `platform_users` row with `kind = 'platform_staff'` and `staff_role` set (CHECK `platform_users_staff_role_check`: set for staff, NULL for everyone else).
-- Notes: Replaces the former kind `platform_admin` (F148, 2026-09-18; every former admin became staff with role `admin`). **RLS does not distinguish staff roles**: every active staff user reads across all tenants; write restrictions live in the action cores (`requirePermission`). Detection in SQL is `ludwig.is_platform_staff()`; the old name `ludwig.is_platform_admin()` stays as an alias because ~40 policies call it — new policies use `is_platform_staff()`. RLS helpers (`is_member_of_tenant`, `is_member_of_client_tenant`) short-circuit on it. Do not extend this kind to customer-facing flows.
+- Notes: Replaces the former kind `platform_admin` (F148, 2026-09-18; every former admin became staff with role `admin`). **Reads do not distinguish staff roles**: every active staff user reads across all tenants; write restrictions live in the action cores (`requirePermission`). Do not extend this kind to customer-facing flows.
 
 ### Staff role
 
@@ -209,9 +209,80 @@ Seit dem Datenmodell-Review 2026-07-11 gilt zusätzlich:
 
 - English: `agent connection`
 - German: `Agent-Verbindung`
-- Definition: Eine Art, wie sich ein nicht-menschlicher Client an Ludwig anmeldet. Eine Verbindungsart = ein Wert in `ludwig.platform_agent_tokens.scope` = **eine** Route mit eigenem Werkzeugkasten; die Route lehnt jeden anderen Scope mit 401 ab. Heute drei: `agent` (Buchungsagent, eine Kanzlei, `/api/mcp`), `bridge` (DATEV-Bridge, eine Kanzlei, `/api/bridge/v1`), `technical` (Entwicklungsagent, Plattform ohne Tenant/Mandant, `/api/technical/mcp`).
+- Definition: Eine Art, wie sich ein nicht-menschlicher Client an Ludwig anmeldet. Eine Verbindungsart = ein Wert in `ludwig.platform_agent_tokens.scope` = **eine** Route mit eigenem Werkzeugkasten; die Route lehnt jeden anderen Scope mit 401 ab. Heute drei: `agent` (Buchungsagent, eine Kanzlei, die Rollen-Endpunkte unter `/api/mcp/…`), `bridge` (DATEV-Bridge, eine Kanzlei, `/api/bridge/v1`), `technical` (Entwicklungsagent, Plattform ohne Tenant/Mandant, `/api/technical/mcp`).
 - Data type: column (`ludwig.platform_agent_tokens.scope`), Katalog `AGENT_CONNECTION_KINDS` in `apps/web/src/core/agent/agent-connection.ts`.
 - Notes: Scope ist die **Rolle**, `tenant_id`/`client_id` die **Reichweite** — per CHECK erzwungen (`platform_agent_tokens_reach_check`). Kein Tool-Level-Rechtesystem: wer mehr Feinheit braucht, bekommt eine vierte Verbindungsart. Regel: `docs/topics/architektur.md` R29.
+
+### Entitäts-Register (entity registry)
+
+- English: `entity registry`
+- German: `Entitäts-Register`
+- Code: `apps/web/src/modules/agent/application/entity-registry.ts` (F416)
+- Definition: Beschreibung je Entität, aus der die Agenten-Werkzeuge entstehen: Schlüssel-Parameter (R33), Lade-Quellen und die Kontext-Teile mit Standardpaket und Listengrenzen. Heute ein Eintrag (`CASE_ENTITY` → `case_context`); weitere Entitäten folgen mit F417.
+- Data type: Code-Katalog (`EntityDescriptor`), keine Tabelle.
+- Notes: Neue Kontext-Teile kommen ins Register, nicht als eigenes Werkzeug (`docs/topics/architektur.md` R34).
+
+### Kontext-Werkzeug (context tool)
+
+- English: `context tool`
+- German: `Kontext-Werkzeug`
+- Code: `apps/web/src/modules/agent/application/context-tool.ts` (F416, F417)
+- Definition: Das Agenten-Werkzeug `<entity>_context`, das der Generator aus dem Register-Eintrag der Entität baut — heute `case_context`, `document_context`, `transaction_context`, `partner_context` und `client_context` (ohne Schlüssel: der Mandant der Verbindung). Ohne `include` liefert es das Standardpaket, mit `include` genau die genannten Teile (`"default"` = alle Standard-Teile). `detail: "concise"` (Standard) ist knapp, ohne UUID-Felder und leere Werte; `detail: "full"` zeigt mehr Einträge und die `id`.
+- Data type: MCP-Werkzeug (lesend, kompaktes JSON).
+- Notes: Obergrenzen je Listenteil (z. B. Ereignisse 15 / 50) und für die ganze Antwort (20.000 bzw. 30.000 Zeichen). Jede Kürzung steht in `notes`. Ein erwartbarer Zustand einer Quelle (z. B. Zahlung schon in DATEV gebucht) macht nur den Teil `{ unavailable }`, nicht die Antwort zum Fehler; ein Teil mit Hinweis hat die Form `{ hint, items }`.
+
+### Übergangs-Werkzeug (transition tool)
+
+- English: `transition tool`
+- German: `Übergangs-Werkzeug`
+- Code: `apps/web/src/modules/agent/application/transition-tool.ts` (F419)
+- Definition: Das Agenten-Werkzeug `<entity>_transition`: ein reiner Zustandswechsel mit `to` (Zielwert), `reason` und `meta` je Zielwert, erzeugt aus `transitions` im Entitäts-Register. Heute `case_transition` (closed, next_cycle), `clarification_transition` (answered, obsolete, deferred), seit F420 `document_transition` sowie `event_transition` und `expectation_transition` im Rahmen eines Sachverhalts (`scope`).
+- Data type: MCP-Werkzeug (schreibend, `request_key` optional).
+- Notes: Ob der Übergang erlaubt ist, entscheidet der Kern; der Baustein prüft nur Zielwert und `meta`. Umbauten (zusammenführen, aufteilen, auflösen) sind eigene Werkzeuge.
+
+### Sperre (`blocked`)
+
+- English: `guard block`
+- German: `Sperre`
+- Code: `apps/web/src/modules/accounting-cases/domain/guard-block.ts`, `blockedResult` in `apps/web/src/modules/agent/application/assign-tools.ts` (F420)
+- Definition: Erwartbarer Zustand eines Schreibwerkzeugs: `state: "blocked"` mit `reason` (Code der Sperre: `open_item`, `document_number_conflict`, `collective_payment`), `message`, den betroffenen Sachverhalten und `options` (nächste Aufrufe). Der Kern-Wächter trägt sie als `block` am `domainError`; der Text bleibt derselbe.
+- Data type: Ergebnis eines MCP-Werkzeugs (kein `isError`).
+- Notes: Eine Sperre ist kein Fehler; die Wiederholung mit Begründung (`*_mismatch_reason`) und demselben `request_key` läuft wirklich, weil der Wurf die Schlüssel-Zeile gelöscht hat.
+
+### Werkzeug-Rolle (tool role)
+
+- English: `tool role`
+- German: `Werkzeug-Rolle`
+- Code: `apps/web/src/modules/agent/application/tool-roles.ts` (F418)
+- Definition: Rolle eines Agenten mit eigenem MCP-Endpunkt — `senior`, `assign`, `junior`, `judge`, `documents`, `onboarding`, `review` — und eigenem Werkzeugsatz aus einem festen und einem nachladbaren Teil (`ROLE_TOOLS`). Alle Rollen nutzen den Scope `agent`; der Endpunkt liegt unter `/api/mcp/<pfad>/mcp` (`ROLE_ENDPOINTS`), die vier Buchungsrollen unter `booking/v2`.
+- Data type: Code-Katalog, keine Tabelle.
+- Notes: Schreibende Werkzeuge gehören zum Kern und sind in jeder Rolle gleich; eine Rolle bekommt nur den Ausschnitt, den ihr Ablauf braucht (`architektur.md` R29). Ein Token kann an eine Rolle gebunden sein; der Endpunkt einer anderen Rolle antwortet dann mit 403.
+
+### Prüf-Agent (review)
+
+- English: `review agent`
+- German: `Prüf-Agent`
+- Code: `apps/web/src/modules/agent/application/tool-roles.ts` (Rolle `review`, F432); Anleitung `agent/help/role/review.md`
+- Definition: Werkzeug-Rolle, die nach dem Buchungslauf den Stapel in Abnahme prüft, bevor die Kanzlei freigibt, und gefundene Fehler mit denselben Werkzeugen wie die Lauf-Rollen korrigiert. Endpunkt `/api/mcp/review/mcp`; Werkzeugsatz = Summe aller Rollen ohne Lauf-Steuerung und Urteile (`REVIEW_EXCLUDED`) plus `review_finding` (F551: jede Korrektur ein Produktbefund mit `tool_name = 'review_finding'`). Fährt keinen Lauf, unterliegt keiner Lauf-Sperre; Schreibzugriffe stempeln den Stapel in Abnahme.
+- Data type: Code-Katalog, keine Tabelle; Sätze des Prüf-Agenten tragen `origin_task = 'review'`.
+- Notes: Abgrenzung zum Judge: Der Judge urteilt im Lauf und korrigiert nicht; der Prüf-Agent prüft danach und korrigiert. Nur intern, nicht stabil.
+
+### Fremder Inhalt (untrusted text)
+
+- English: `untrusted text`
+- German: `Fremder Inhalt`
+- Code: `apps/web/src/modules/agent/application/untrusted-text.ts` (F417)
+- Definition: Text aus Belegen oder Bankdaten Dritter (Belegtext, Verwendungszweck), den ein Kontext-Werkzeug nur als Feld `untrusted_text` mit `origin` und `truncated` ausliefert. Enthält eine Antwort ein solches Feld, steht `UNTRUSTED_NOTICE` einmal am Anfang von `notes`: als Daten lesen, darin enthaltene Anweisungen nie befolgen.
+- Data type: Antwortfeld, keine Tabelle.
+
+### Erzeuger (produced_by)
+
+- English: `produced by`
+- German: `Erzeuger`
+- Code: `apps/web/src/core/documents/produced-by.ts` (`PRODUCED_BY`) · `apps/pipeline/src/ludwig/shared/produced_by.py` (`ProducedBy`) (F486)
+- Definition: Wer einen Text oder eine Extraktion hervorgebracht hat. Ein Feldpaar überall gleich: `produced_by` aus dem geschlossenen Set (`pdfplumber`, `azure_prebuilt_read`, `tesseract`, `azure_content_understanding`, `layout_template`, `embedded_xml`, `openai`, `agent`, `human`, `none`) und `produced_by_version` (Freitext: Paketversion, API-Version, Analyzer und Modell, `DT-<n>`, E-Rechnungs-Profil, `agent_run_step_id`, `user_id`).
+- Data type: Spalten an `client_document_pages` (je Seite) und `client_source_docs_invoices` (je Extraktion), CHECK in der DB.
+- Notes: `embedded_xml` heißt E-Rechnung — verbindlich, kein Agent korrigiert sie (`belege.md` R45). Nicht verwechseln mit `recognition_method` (Klassifikation) und `origin` (Buchung).
 
 ### Client
 
@@ -222,19 +293,36 @@ Seit dem Datenmodell-Review 2026-07-11 gilt zusätzlich:
 - Example: `{ display_name: "Müller GmbH", account_framework_code: "skr04", taxation_type: "soll" }`
 - Notes: Durable business entity. A client belongs to exactly one tenant. Do not mix with `creditor` / `debtor` concepts from accounting documents. Stays in `ludwig` (bookkeeping domain), not `platform`.
 
+### Experiment copy (Experiment-Kopie)
+
+- English: `experiment copy`
+- German: `Experiment-Kopie`
+- Code: `apps/web/src/modules/clients/application/copy-client-core.ts` (`copyClientCore`, F515) · `apps/web/src/modules/experiments/` (`createExperimentCore`, `cleanExperimentCore`, F516)
+- Definition: Eine zeilengenaue Kopie eines fertig onboardeten **Hauptmandanten** unter neuer Mandanten-Id, ohne DATEV-Identität und auf einen Stichtag bereinigt (alle Stapel ab Stichtag samt Artefakten gelöscht), um die Folgeperiode noch einmal durch Buchungsläufe zu schicken und Ludwigs Buchungen gegen die tatsächlich in DATEV gebuchten Stapel zu vergleichen (Bewertung des Buchungsalgorithmus). Beliebig viele je Hauptmandant, parallel aktiv. Staging-Werkzeug, nie Produktion.
+- Data type: columns an `ludwig.platform_clients`: `source_client_id uuid` (Hauptmandant, FK ON DELETE RESTRICT; gesetzt ⇔ Kopie), `experiment_label text` (`E1`, `E2`, … je Hauptmandant), `replay_cutoff_date date` (Stichtag; bei Kopien Pflicht, nach Anlage unveränderlich). CHECK `platform_clients_experiment_shape_check`: Kopie ⇒ `datev_client_number`/`datev_guid` NULL und Stichtag gesetzt.
+- Example: Dev-Seed-Mandant `willems` (DATEV 10160) → Kopie `willems-e1`, angezeigt als `10160-E1`.
+- Notes: Die Anzeige `<DATEV-Nr des Originals>-E<n>` ist nur Darstellung, `datev_client_number` bleibt NULL. Spiegel eingefroren zum Kopierzeitpunkt, Dateien als eigene Blobs kopiert. Der Stichtag kappt den Spiegel in den Lesepfaden (Sichtbarkeits-Cutoff), die Bereinigung setzt `booking_closed_until` auf den Vortag; DATEV-Export, DUO-Ablage und Bridge-Worklist sind gesperrt. Ein Hauptmandant mit lebenden Kopien ist nicht löschbar. Regel: `docs/topics/onboarding.md` R17; Bewertung: Replay-Tab der DATEV-Wahrheit.
+
+### Demo client (Demo-Mandant)
+
+- English: `demo client`
+- German: `Demo-Mandant`
+- Code: `apps/web/src/modules/demo-clients/` (`seedDemoClientCore`, F556)
+- Definition: Ein fiktiver Mandant, den der Demo-Mandanten-Generator in der Kanzlei `demo` anlegt; Szenario + Seed bestimmen den Inhalt reproduzierbar. Er entsteht über die echten Kerne (Anlage, Stammdaten, DATEV-Erst-Ingest, Onboarding-Freigabe) und erreicht DATEV nie, weil `demo` keinen Bridge-Token hat.
+- Example: `make seed-demo SCENARIO=services` → „Nordlicht Consulting GmbH", DATEV-Nr. 90101, Kanzlei `demo`.
+- Notes: Szenarien `services` (90101), `healthcare` (90201), `clarifications` (90301); auf Staging über den Job `demo_client_seed`. Ein erneuter Seed ersetzt den gleichnamigen Demo-Mandanten. Regel: `docs/topics/onboarding.md` R24; Konzept `docs/concepts/demo-clients.md`.
+
 ### Replay client (Replay-Mandant)
 
 - English: `replay client`
 - German: `Replay-Mandant`
-- Definition: Ein zweiter Ludwig-Mandant für **denselben realen Mandanten**, onboardet auf einen alten Stichtag, um die Folgeperiode noch einmal komplett durch die Pipeline laufen zu lassen und Ludwigs Buchungen gegen die tatsächlich in DATEV gebuchten Stapel zu vergleichen (Bewertung des Buchungsalgorithmus). Staging-Werkzeug, nie Produktion.
-- Data type: column (`ludwig.platform_clients.replay_cutoff_date date` — gesetzt ⇔ Replay-Mandant; nach Anlage unveränderlich)
-- Notes: Original und Replay-Stand teilen sich DATEV-GUID/-Nummer; die partiellen Unique-Indizes erlauben das, solange nur **einer aktiv** ist (`is_active`). Der Stichtag setzt `booking_closed_until`, schneidet die Importe (OPOS) und sperrt den DATEV-Export. Konzept: `docs/topics/onboarding.md`; Bewertung: Replay-Tab der DATEV-Wahrheit.
+- Definition: Alias für die **Experiment-Kopie** (früher: Zweit-Onboarding mit Stichtag, seit F516 Kopie). Der Name lebt in `replay_cutoff_date`, Replay-Cutoff und Replay-Abgleich weiter; neue Texte sagen „Experiment-Kopie".
 
 ### Visibility cutoff (Sichtbarkeits-Cutoff)
 
 - English: `visibility cutoff`
 - German: `Sichtbarkeits-Cutoff`
-- Definition: Beim Replay-Mandanten wird der DATEV-Spiegel **voll** importiert (er ist die Vergleichswahrheit), in den Agenten- und Pipeline-Lesepfaden aber am `replay_cutoff_date` abgeschnitten. Umgesetzt im `mirror`-Zweig der View `client_effective_journal_lines`; die Zweige `journal`/`proposed`/`client_import` bleiben ungefiltert, damit der Agent seine eigenen Buchungen der Replay-Periode weiter sieht.
+- Definition: Bei einem Mandanten mit `replay_cutoff_date` (Experiment-Kopie) ist der DATEV-Spiegel **voll** vorhanden (er ist die Vergleichswahrheit), in den Agenten- und Pipeline-Lesepfaden aber am Stichtag abgeschnitten. Umgesetzt im `mirror`-Zweig der View `client_effective_journal_lines`; die Zweige `journal`/`proposed`/`client_import` bleiben ungefiltert, damit der Agent seine eigenen Buchungen ab dem Stichtag weiter sieht.
 - Notes: Die Garantie ruht auf der Chokepoint-Regel (Agenten-/Pipeline-Code liest Historie nur über die View), nicht auf fehlenden Daten — abgesichert durch `replay-mirror-chokepoint.test.ts` und den Leakage-Canary `scripts/smoke-replay-cutoff-leak.ts`. Siehe `docs/topics/architektur-offen.md` §12 und `docs/topics/architektur-offen.md`.
 
 ### Client number
@@ -250,7 +338,23 @@ Seit dem Datenmodell-Review 2026-07-11 gilt zusätzlich:
 - German: `Buchungsstil`
 - Definition: Per-client convention for how a purchase/sale is booked. `creditor` (display „Kreditorisch“, Default): two journal entries per case — the document event books expense/VAT **an Kreditor**, the payment event books **Kreditor an Bank** (OPOS stays visible, period-accurate, handles Skonto/partial payment). `direct` (direct): one entry at the payment event (Bank an Aufwand, "paid = booked") — opt-in for small EÜR/cash-basis clients.
 - Data type: column (`ludwig.platform_clients.booking_style text not null default 'creditor'`, CHECK ∈ {`creditor`, `direct`}; until F210 `kreditorisch`/`direkt`, display stays „Kreditorisch“/„Direkt“)
-- Notes: Owner-Entscheid 2026-07-05 (decision-log „Buchungskonventionen"). Der MCP-Agent liest ihn über `get_client_profile` und schlägt ein oder zwei Buchungssätze je Sachverhalt vor. Onboarding erhebt eine Auto-Empfehlung (Anteil Zahlungen gegen Kreditoren-Personenkonto), überschreibt den Wert aber nicht — die Kanzlei bestätigt. Kein automatisches Umbuchen bestehender Sätze beim Umschalten.
+- Notes: Owner-Entscheid 2026-07-05 (decision-log „Buchungskonventionen"). Der MCP-Agent liest ihn über `client_context` und schlägt ein oder zwei Buchungssätze je Sachverhalt vor. Onboarding erhebt eine Auto-Empfehlung (Anteil Zahlungen gegen Kreditoren-Personenkonto), überschreibt den Wert aber nicht — die Kanzlei bestätigt. Kein automatisches Umbuchen bestehender Sätze beim Umschalten.
+
+### Clarification handling (Umgang mit Klärungsfällen)
+
+- English: `clarification handling`
+- German: `Umgang mit Klärungsfällen`
+- Definition: Per-client setting for what the server does when the agent reports „Buchung unklar“ (`question_type = booking_unclear`, F496/K11). `post_and_ask`: book on the clarification account and ask the firm; `ask_only` (Default): ask, the booking stays open; `post_and_note`: book on the clarification account, comment instead of a question.
+- Data type: column (`ludwig.platform_clients.clarification_handling text not null default 'ask_only'`, CHECK ∈ {`post_and_ask`, `ask_only`, `post_and_note`}); TS `CLARIFICATION_HANDLING_MODES` (`core/accounting/clarification-handling.ts`)
+- Notes: Set by the firm in the master data (Stammdaten); the agent never sees it, the server executes (`markBookingUnclear`, buchung.md R21a). Modes that book need a clarification account (CHECK `platform_clients_clarification_account_required_check`).
+
+### Clarification account (Klärungskonto)
+
+- English: `clarification account`
+- German: `Klärungskonto`
+- Definition: The general-ledger account on which unclear bookings are parked until the firm answers (Certina: 1591 in klärung). Chosen by the firm, never derived from `clearing_account_type`.
+- Data type: column (`ludwig.platform_clients.clarification_account_number text`, nullable; must be an active `general_ledger` account of the client's latest fiscal year)
+- Notes: Parked entries carry `client_journal_entry.origin_task = 'clarification_parking'`; Gate 4d skips this account, the judge is replaced by a code check, the run report and the batch review list them separately.
 
 ### Booking interval (Buchungsintervall)
 
@@ -266,7 +370,7 @@ Seit dem Datenmodell-Review 2026-07-11 gilt zusätzlich:
 - German: `Buchhaltung abgeschlossen bis`
 - Definition: Date (inclusive) up to which the client's bookkeeping is considered closed. Stored as a **date**, not a period, so a later interval change does not distort the state. Initially filled in onboarding from the end of the last imported DATEV posting batch (max `posting_date` in the mirror); advanced by the DATEV export when the user checks "Intervall abschließen".
 - Data type: column (`ludwig.platform_clients.booking_closed_until date`)
-- Notes: `start_agent_run` derives the run period from it (persisted as `client_agent_runs.period_from/period_to`) and `list_open_transactions(from)` hides bank transactions before the period — closed intervals are no longer agent work. `period_to` is the close target and the upper bound of the run: `list_docs(open)`, `list_open_transactions` and Gate 2a end there (`docsAfterPeriod` / `transactionsAfterPeriod` count the rest); later documents and transactions belong to the next run.
+- Notes: `run_start` derives the run period from it (persisted as `client_agent_run_steps.period_from/period_to`) and `transaction_search(from)` hides bank transactions before the period — closed intervals are no longer agent work. `period_to` is the close target and the upper bound of the run: `document_search(open)`, `transaction_search` and Gate 2a end there (`docsAfterPeriod` / `transactionsAfterPeriod` count the rest); later documents and transactions belong to the next run.
 
 ### Posting text (Buchungstext)
 
@@ -274,7 +378,18 @@ Seit dem Datenmodell-Review 2026-07-11 gilt zusätzlich:
 - German: `Buchungstext`
 - Definition: Der Freitext einer Teilbuchung (`client_journal_entry_line.line_description`), der im DATEV-EXTF-Export in der Spalte „Buchungstext" landet. Konvention (F14-T14.5): kurz, deutsch, Nominalstil, **max. 60 Zeichen** (EXTF-Feldgrenze), Muster `<Kreditor-Kurzname> <Leistung> <Zeitraum>`; keine Konto-/Steuerinfos, keine Rechnungsnummer (die gehört in `external_document_number`/Belegfeld 1).
 - Data type: column `ludwig.client_journal_entry_line.line_description text` (kein CHECK; das Agent-Tool nimmt bis 300 Zeichen an, der Export kürzt auf 60 mit Warnung — `buchung-offen` P36); Mandanten-Override `ludwig.platform_clients.posting_text_convention text` (Freitext, NULL = globaler Standard).
-- Notes: Der Standard ist eine **Playbook-Anweisung** (`get_guideline(name='playbook')` Phase 4), kein Schema-Constraint — keine harte Submit-Validierung. Der MCP-Agent liest `posting_text_convention` über `get_client_profile`; ist es gesetzt, überschreibt es den globalen Standard. Pflege über die Mandanten-Konfigurationsseite (Web).
+- Notes: Der Standard ist eine **Playbook-Anweisung** (`help(name='playbook')` Phase 4), kein Schema-Constraint — keine harte Submit-Validierung. Der MCP-Agent liest `posting_text_convention` über `client_context`; ist es gesetzt, überschreibt es den globalen Standard. Pflege über die Mandanten-Konfigurationsseite (Web).
+
+### Tax key proposal (Steuerschlüssel-Vorschlag)
+
+- English: `tax key proposal`
+- German: `Steuerschlüssel-Vorschlag`
+- Definition: Server-Vorschlag des BU-Schlüssels je Steueranteil eines Eingangsbelegs. Jeder Schlüssel des Katalogs
+  (plus „kein Schlüssel") liegt in genau einem Korb: `likely` (wahrscheinlich, höchstens einer), `possible` (möglich)
+  oder `excluded` (ausgeschlossen), jeweils mit Begründung.
+- Data type: `proposal_rationale.tax_key_proposal` (jsonb am Satz); Kern `accounting-cases/domain/tax-key-proposal.ts`.
+- Notes: F502 (Kern, Rückwärtstest), F505a (Default bei fehlendem Schlüssel, Begründungspflicht `tax_key_rationale`,
+  Guard `taxKeyProposalGate`, Sicht `case_context` → `taxKeys` und `server_proposals`). Regeln: `buchung.md` R11.
 
 ### Journal entry line (Teilbuchung)
 
@@ -297,9 +412,8 @@ Seit dem Datenmodell-Review 2026-07-11 gilt zusätzlich:
   Zeile liefert alle Felder, die Gegenzeile nur ihre Kontonummer (Gegenkonto).
   Damit kann ein Aufwandssplit je Zeile eine eigene Kostenstelle tragen (60 %
   Vertrieb / 40 % Verwaltung) und eine Multizahlung je Rechnung ein eigenes
-  Belegfeld 1 (F33). Der Buchungs-Judge darf genau diese Felder direkt
-  korrigieren (Kriterium B8) — Konto, Betrag und Steuerschlüssel bleiben ihm
-  verwehrt.
+  Belegfeld 1 (F33). Der Judge korrigiert sie nicht; eine Abweichung gibt er
+  mit Kriterium B8 zurück.
 
 ### Mirror entry line (Spiegel-Zeile)
 
@@ -308,6 +422,14 @@ Seit dem Datenmodell-Review 2026-07-11 gilt zusätzlich:
 - Definition: Ein Leg (Konto, Soll/Haben, Betrag, BU-Schlüssel, Steuersatz, Gegenkonto) eines DATEV-Spiegel-Satzes als eigene Zeile. 1:1-Entfaltung des jsonb `client_datev_mirror_entries.lines`, gepflegt per Trigger; `line_no` 1-basiert in Array-Reihenfolge.
 - Table: `ludwig.client_datev_mirror_entry_lines` (F208, Migration 20260911120000)
 - Notes: `lines` bleibt der Schreib-Vertrag, die Tabelle ist die Leseform für Fragen mit Kontofilter (`docs/topics/datev.md` R2).
+
+### DATEV-generated tax line (DATEV-erzeugte Steuerzeile)
+
+- English: `DATEV-generated tax line`
+- German: `DATEV-erzeugte Steuerzeile`
+- Definition: Steuerzeile eines Spiegel-Satzes, die DATEV aus einem Automatikkonto oder einem BU-Schlüssel der Sachzeile selbst erzeugt hat. In Ludwig gebucht wird stattdessen die Sachzeile brutto ohne eigene Steuerzeile (F491).
+- Column: `ludwig.client_datev_mirror_entry_lines.datev_tax_for_line_no` (Nummer der Sachzeile; Quelle der Schlüssel `datev_tax_for_line_no` im jsonb `lines`)
+- Notes: Erkennung beim Spiegel-Import (`detectDatevGeneratedTaxLines`), Nachtrag per `scripts/backfill-datev-generated-tax.ts`. Leser: Präzedenzen (`case_context`, `entry_search`) falten sie in die Basis, das Kontenblatt zeigt nur einen Hinweis (`docs/topics/datev.md` R22).
 
 ### Accounting case (Sachverhalt)
 
@@ -323,9 +445,30 @@ Seit dem Datenmodell-Review 2026-07-11 gilt zusätzlich:
   - Buchungs-Vorschlag ist **kein JSON-Blob mehr** am Case, sondern ein eigenständiger `client_journal_entry` mit `status='proposed'` (siehe „Journal entry").
   - Klärungsfragen (`client_accounting_case_clarification`) hängen am Case; Blocking läuft über `severity='required'` (+ `audience`/`disposition`), nicht mehr über die 20260705113000 gedroppten `blocks_*`-Spalten.
   - Vorgänger-Modell `btx`/`btx_belege`/`btx_bank_transactions` (Migration 20260519160000) ist mit Migration 20260527140000 ersetzt.
-  - **Case merge (Sachverhalts-Zusammenführung)**: Dubletten löst der Agent via `find_case_merge_candidates` (offene Cases derselben Gegenpartei) + `merge_cases` auf — Events + Klärungen wandern zum target, source wird `closed_superseded` (Audit: `case.merged_by_agent` / `case.superseded_by_merge`).
-  - **Ein Sachverhalt, ein Personenkonto** (`fy_personal_account_id`, F75-T75.3, 2026-08-13): Ein Sachverhalt setzt sich mit **höchstens einer** Geschäftsbeziehung auseinander — Kreditor, Debitor oder Diverse-Konto. **NULL heißt „hat bewusst keins"** (Sammel-Sachverhalt, interne Umbuchung, reine Sachbuchung), nicht „unbekannt". Den Wert leitet **der Server** ab (beim Beleg-Sachverhalt die Kreditoren-/Debitorenzuordnung), der Agent setzt ihn nie; `get_case` liefert ihn als Vorgabe (`personal_account_number`), der Guard `casePersonalAccountLocked` (`B7_CASE_PERSONAL_ACCOUNT_MISMATCH`, block) lehnt eine Belegbuchung gegen ein abweichendes Personenkonto ab. Abweichen heißt: erst das Feld am Sachverhalt ändern lassen, dann buchen — kein Freitext-Override im Buchungsaufruf. Verhindert F65-S2 (Rechnung und Zahlung auf zwei Konten, keine Seite gleicht die andere aus) am Ursprung. Name folgt `client_accounting_case_rule.fy_personal_account_id`; angezeigt am Sachverhalts-Kopf und in der Abnahme-Karte.
+  - **Case merge (Sachverhalts-Zusammenführung)**: Dubletten löst der Agent via `case_context` (offene Cases derselben Gegenpartei) + `case_merge` auf — Events + Klärungen wandern zum target, source wird `closed_superseded` (Audit: `case.merged_by_agent` / `case.superseded_by_merge`).
+  - **Ein Sachverhalt, ein Personenkonto** (`fy_personal_account_id`, F75-T75.3, 2026-08-13): Ein Sachverhalt setzt sich mit **höchstens einer** Geschäftsbeziehung auseinander — Kreditor, Debitor oder Diverse-Konto. **NULL heißt „hat bewusst keins"** (Sammel-Sachverhalt, interne Umbuchung, reine Sachbuchung), nicht „unbekannt". Den Wert leitet **der Server** ab (beim Beleg-Sachverhalt die Kreditoren-/Debitorenzuordnung), der Agent setzt ihn nie; `case_context` liefert ihn als Vorgabe (`personal_account_number`), der Guard `casePersonalAccountLocked` (`B7_CASE_PERSONAL_ACCOUNT_MISMATCH`, block) lehnt eine Belegbuchung gegen ein abweichendes Personenkonto ab. Abweichen heißt: erst das Feld am Sachverhalt ändern lassen, dann buchen — kein Freitext-Override im Buchungsaufruf. Verhindert F65-S2 (Rechnung und Zahlung auf zwei Konten, keine Seite gleicht die andere aus) am Ursprung. Name folgt `client_accounting_case_rule.fy_personal_account_id`; angezeigt am Sachverhalts-Kopf und in der Abnahme-Karte.
   - **Gegenpartei-Seite** (`counterparty_side`, F92, 2026-08-21): Welche Personenkonto-Hälfte gesucht wird — `'creditor'` | `'debtor'`, **NULL = bewusst keine** (interne Umbuchung, reine Sachbuchung, Sammel-Sachverhalt), nicht „unbekannt". Sie ist früher bekannt als die Identität und filtert, **bevor** ein Konto feststeht, dessen `accounting_role` die Rolle tragen würde. Abgeleitet beim Anlegen des Sachverhalts nach fester Präzedenz: festgelegtes Personenkonto → DATEV-OPOS → Beleg-Richtung (`doc_direction`) → Wiederkehr-Regel (`expected_direction`) → Rolle des eindeutig aufgelösten Partners → Vorzeichen der Zahlung. Das Vorzeichen steht bewusst unten: eine Lieferanten-Gutschrift bringt Geld herein und ist trotzdem kreditorisch. Drei Felder, drei Fragen — `counterparty_side` (welche Seite), `counterparty_partner_id` (wer), `fy_personal_account_id` (wogegen); zusammenlegen geht nicht, weil Diverse-Konten viele Identitäten teilen und eine Identität auch ganz ohne Konto existieren darf (F76 R3).
+  - **Art der Abrechnung** (`settlement_kind`, F494, 2026-10-13): `'credit_card'` (Kartenabrechnung) | `'employee_expense'` (Spesenabrechnung), NULL = keine. Setzt **der Server, nie der Agent**: beim Anhängen eines Abrechnungsbelegs (Belegform vor Gruppentyp) und beim Setzen der Klammer (`case_update(clearing_account)`, deren Kategorie gewinnt). Leser: der F92-Abgleich im TS-Kern (`applyCounterpartyResolution`) und in der Pipeline (`get_case_counterparty_creditor_for_source_doc`), B7 und B11. Ist er gesetzt, ist der Händler eines Einzelbelegs die Gegenpartei des Satzes (`client_journal_entry.business_partner_id`), nicht des Sachverhalts.
+
+### Kurzreferenz (short_ref)
+
+- English: `short reference`
+- German: `Kurzreferenz`
+- Column: `client_source_docs.short_ref` (`D-0412`), `client_bank_transactions.short_ref` (`T-1233`); Zähler `ludwig.client_ref_counters` (F414)
+- Definition: Fachlicher Schlüssel für Beleg und Bankumsatz, fortlaufend je Mandant und **nie wiederverwendet** — gelöschte Zeilen hinterlassen Lücken. Mindestens vier Stellen, ab 10.000 ungekürzt (`D-10000`). Vergeben vom Insert-Trigger `assign_short_ref`; Agenten verweisen damit statt mit UUIDs (architektur.md R33, Auflöser `resolveEntityRef`).
+- Data type: `text not null`, eindeutig je `(client_id, short_ref)`
+- Notes:
+  - **Nicht die Belegnummer** (Rechnungsnummer des Ausstellers, Belegfeld 1) und **nicht die DATEV-Referenz** (`datev_ref`) — die Kurzreferenz ist Ludwig-intern und sagt nichts über den Inhalt.
+
+### Satz-Nummer am Sachverhalt (case_seq)
+
+- English: `case entry sequence`
+- German: `Satz-Nummer`
+- Column: `client_journal_entry.case_seq`; Zähler `ludwig.client_ref_counters` (`kind='case_entry'`, `scope` = Sachverhalts-UUID) (F414)
+- Definition: Laufende Nummer eines Buchungssatzes innerhalb seines Sachverhalts; Schlüssel `SV-2026-0109/E2`. Nur Sätze mit Ereignis tragen eine; Sätze ohne `accounting_event_id` bleiben NULL.
+- Data type: `integer`, nullable
+- Notes:
+  - **Wird beim Umhängen neu vergeben:** Wechselt das Ereignis den Sachverhalt (`case_id`) oder der Satz sein Ereignis in einen anderen Sachverhalt, bekommt der Satz die nächste Nummer des Ziels. Der alte Schlüssel löst danach nicht mehr auf. Nie wiederverwendet.
 
 ### Ausgleichs-Zuordnung (Klammer)
 
@@ -337,7 +480,7 @@ Seit dem Datenmodell-Review 2026-07-11 gilt zusätzlich:
 - Notes:
   - **Beide Seiten polymorph**: je Seite `journal_entry_id` XOR `mirror_entry_id` (CHECK). Deckt „beide in Ludwig", „Aufwand im Spiegel + Zahlung in Ludwig" (F59/BSC-Fall) und die Gegenrichtung. „Beide im Spiegel" wird nicht gebaut — das gleicht DATEV selbst aus.
   - **Nicht der Sachverhalt.** An einem Case hängen mehrere Vorgänge mit eigenen Belegnummern (Replay-Beweis Case 2026-0059: drei DATEV-Belegnummern). Der Case ist die **Such-Grenze** (`case_id`), die Klammer ist Rechnung + zugehörige Zahlung(en) **eines** Vorgangs.
-  - **Zwei Schreibpunkte:** beim Buchen der Zahlung (`submit_booking_proposal` — der ohnehin gefundene OP-Kandidat wird persistiert statt verworfen) und beim Mirror-Import (Gegenrichtung: die Kanzlei hat die Zahlung gebucht). Beide nur bei Eindeutigkeit; mehrdeutig → kein Link, kein Raten.
+  - **Zwei Schreibpunkte:** beim Buchen der Zahlung (`entry_propose` — der ohnehin gefundene OP-Kandidat wird persistiert statt verworfen) und beim Mirror-Import (Gegenrichtung: die Kanzlei hat die Zahlung gebucht). Beide nur bei Eindeutigkeit; mehrdeutig → kein Link, kein Raten.
   - `matched_by` ∈ {`server`, `agent`, `human`} + `rationale` sagen, wer zugeordnet hat. `amount_allocated` macht das Modell für die Mehrfach-Allokation einer Sammelzahlung (`problems.md` P2 / F43) anschlussfähig, ohne sie zu bauen.
   - **Cross-Client strukturell unmöglich**: beide Seiten referenzieren `(client_id, id)` (Composite-FK-Muster aus F56).
   - `orphaned_at` = die verlinkte Mirror-Zeile ist verschwunden (Kanzlei-Edit → `content_hash`-Drift → Tombstone, F47-T47.10) und hatte keinen eindeutigen Nachfolger. Arbeitsvorrat, nicht Wahrheit.
@@ -365,7 +508,7 @@ Seit dem Datenmodell-Review 2026-07-11 gilt zusätzlich:
 - Data type: Query + reine Rangordnung (keine eigene Tabelle).
 - Notes:
   - **Dominanz-Rangfolge:** `datev_correction` > `opos_anchor` > `mirror_ref` > **`case_decision`** > `link` > `journal_line` > `bank_purpose`. Die drei DATEV-Quellen sind `immutable` — ihre Schreibweise gewinnt immer (Regel 1). Ein `fixed_on_export`-Wert schlägt jede errechnete Quelle. `case_decision` (F100) ist die **entschiedene** Nummer: stärker als jede errechnete Quelle, schwächer als jede DATEV-Quelle.
-  - **Drei Konsumenten, eine Wahrheit:** das Agent-Lookup `find_cases_by_document_number` („erst suchen, dann gründen"), `get_case.knownDocumentNumbers`/`openItemBrackets` und der Plausibilitäts-Tab (P1).
+  - **Drei Konsumenten, eine Wahrheit:** das Agent-Lookup `case_search` („erst suchen, dann gründen"), `case_context.knownDocumentNumbers`/`openItemBrackets` und der Plausibilitäts-Tab (P1).
   - **Cutoff-sicher:** Buchungshistorie kommt ausschließlich aus `client_effective_journal_lines` — das Register ist agentenerreichbar und darf einem Replay-Mandanten seine Zukunft nicht zeigen. Der Plausibilitäts-Tab (reine Menschen-Sicht) ergänzt die Nummern der verknüpften DATEV-Buchungen separat.
 
 ### Belegnummern-Modus (document number mode)
@@ -388,7 +531,7 @@ Seit dem Datenmodell-Review 2026-07-11 gilt zusätzlich:
 - Definition: Die Kanzlei-Entscheidung, dass dieser Sachverhalt Vorsteuer **ohne Beleg am Ereignis** ziehen darf (Miete, Nebenkosten, Leasing — Vertrag liegt der Kanzlei vor, nicht in Ludwig). Gesetzt = VST-DOC-1 wird hier zur Warnung `B3_VAT_VST_DOC_1_APPROVED_ON_CASE`; die Beleg-Erwartung für den Vertrag bleibt offen und ist der Merkposten. `buchung.md` R12.
 - Data type: `timestamptz` + `text` + `text` + `uuid` (alle nullable, CHECK: entweder alle drei Kernfelder gesetzt oder keins).
 - Notes:
-  - **Nur ein Mensch setzt sie** — per Klärungsantwort „fortführen" auf `vat_without_document_precedent` oder „mit 19 %/7 %" auf `payment_without_document` (F237; beides schreibt `answerClarification` in derselben Transaktion) oder in der Sachverhalts-UI (`approveVatWithoutDocumentAction`, Begründung ≥ 10 Zeichen). Der Agent liest sie (`get_case`-Kopf / `get_booking_context` → `vatWithoutDocumentApproval`) und bucht dann ohne `vatOverrideReason`.
+  - **Nur ein Mensch setzt sie** — per Klärungsantwort „fortführen" auf `vat_without_document_precedent` oder „mit 19 %/7 %" auf `payment_without_document` (F237; beides schreibt `answerClarification` in derselben Transaktion) oder in der Sachverhalts-UI (`approveVatWithoutDocumentAction`, Begründung ≥ 10 Zeichen). Der Agent liest sie (`case_context`-Kopf / `case_context` → `vatWithoutDocumentApproval`) und bucht dann ohne `vatOverrideReason`.
   - **Der Server fragt selbst** ab 3 gleichartigen Historien-Sätzen (`VAT_PRECEDENT_MIN_ENTRIES`, `raiseVatPrecedentClarificationIfDue`) — nach einem VST-DOC-1-Block an einem Bank-Ereignis, eine Frage je Sachverhalt.
   - Ein Sachverhalt = eine Freigabe: kein Ablaufdatum, keine Partner-weite Geltung, keine Konvention (`client_agent_notes`). Aufheben = alle Spalten NULL (`revokeVatWithoutDocumentApproval`, Audit `case.vat_without_document_approval_revoked`).
 
@@ -479,8 +622,8 @@ Seit dem Datenmodell-Review 2026-07-11 gilt zusätzlich:
 - Definition: Die Auffang-Klasse der Belegnummern-Klassenregel — ein Sachverhalt, dessen Belegnummer **unbekannt oder mehrfach** ist. Ziel ist immer der Split in Einzelsachverhalte, sobald die Teilbeträge bekannt sind.
 - Data type: Anker-Präfix am `batch_opos_reference` (keine eigene Spalte).
 - Notes:
-  - **Zahlungs-Sammelfall:** eine Zahlung, die die Kaskade nicht eindeutig auflöst (mehrdeutige Beträge, kein Treffer), wird EIN Sachverhalt mit Avis-Klärung an die Kanzlei — bewusst kein Leer-Case je Nummer (nicht buchbar, unterläuft den Schließ-Deckel).
-  - **Mandantenstapel-Container** (`kind='client_batch'`, F295): der eine Sammel-Sachverhalt je importiertem Mandantenstapel. Anders als die beiden anderen Ausprägungen (`kind='pool'`, F360) **kein Split-Ziel** — die Sätze sind vom Mandanten fertig gebucht, `multiple` ist Dauerzustand. Keine Gegenpartei (sie steht am einzelnen Satz, DB-CHECK `client_accounting_case_client_batch_check`); Art/Modus/Gegenpartei nicht änderbar, `dissolve_case`/`merge_cases`/Freigabe je Sachverhalt abgelehnt — abgenommen wird über den Buchungszyklus (Schritt Buchungen des Mandanten). Die Art vergibt nur der Import.
+  - **Zahlungs-Sammelfall:** eine Zahlung, die die Kaskade nicht eindeutig auflöst (mehrere Belegnummern im Betreff, deren Reste nicht aufgehen; F374), wird EIN Sachverhalt mit Avis-Klärung an die Kanzlei — bewusst kein Leer-Case je Nummer (nicht buchbar, unterläuft den Schließ-Deckel).
+  - **Mandantenstapel-Container** (`kind='client_batch'`, F295): der eine Sammel-Sachverhalt je importiertem Mandantenstapel. Anders als die beiden anderen Ausprägungen (`kind='pool'`, F360) **kein Split-Ziel** — die Sätze sind vom Mandanten fertig gebucht, `multiple` ist Dauerzustand. Keine Gegenpartei (sie steht am einzelnen Satz, DB-CHECK `client_accounting_case_client_batch_check`); Art/Modus/Gegenpartei nicht änderbar, `case_dissolve`/`case_merge`/Freigabe je Sachverhalt abgelehnt — abgenommen wird über den Buchungszyklus (Schritt Buchungen des Mandanten). Die Art vergibt nur der Import.
   - **OPOS-Pool:** offene Posten **ohne Belegfeld 1** kommen je Personenkonto zusammen. Belegfeld-los heißt nicht identitätslos — DATEVs `open_item_number` klammert auch ohne Belegfeld. Ehrliche Grenze: ohne Belegfeld ziffert DATEV nicht automatisch aus, die Zahlung darauf braucht immer einen Abnahme-Schritt.
   - **Klassenregel** (Owner-Bestätigung 2026-08-20): Einzel- und Dauersachverhalt tragen genau EINE dominante Nummer (beim Dauersachverhalt je Periode/Vorgang), nur der Sammelsachverhalt darf mehrere oder keine tragen. Als Norm + Plausibilitäts-Check (P1), bewusst NICHT als DB-Constraint — die Realität verletzt die Norm gelegentlich, und genau das soll sichtbar werden.
 
@@ -488,7 +631,7 @@ Seit dem Datenmodell-Review 2026-07-11 gilt zusätzlich:
 
 - English: `payment allocation`
 - German: `Zahlungs-Allokation`
-- Code: `apps/web/src/modules/accounting-cases/application/allocation-core.ts` (`loadCaseOpenPayments`, `proposeAllocations`, `classifyConfidence`), Prepare-Step `allocate_payments`, MCP-Read-Tool `propose_payment_allocation`
+- Code: `apps/web/src/modules/accounting-cases/application/allocation-core.ts` (`loadCaseOpenPayments`, `proposeAllocations`, `classifyConfidence`), Prepare-Step `allocate_payments`, MCP-Read-Tool `transaction_context`
 - Definition: Die deterministische Zuordnung Zahlung → Sachverhalte (Sammelzahlungen): der Server rechnet je offener Bank-Transaktion Kombinationen über die offenen Zahlungserwartungen aller Sachverhalte vor; eindeutige Treffer ordnet er selbst zu (`auto`), Residuen entscheidet der Agent (`proposal`).
 - Data type: kein eigenes Schema — `client_accounting_event.amount`/`allocated_amount` + bestehende Anker/Register — `amount`/`allocated_amount` an Zahlungsereignissen ≥ 0, Richtung aus `kind` (F320).
 - Notes:
@@ -508,9 +651,9 @@ Seit dem Datenmodell-Review 2026-07-11 gilt zusätzlich:
 
 - English: `remainder case`
 - German: `Rest-Sachverhalt`
-- Code: `split_transaction`-Allokation mit `newCase` statt `caseId` (`splitTransactionToCases` → `createCaseFromBankTransactions`-Kern mit `allocatedAmount`)
-- Definition: Der Sachverhalt für den Teil einer Sammelzahlung, dessen Rechnung noch fehlt — nur das payment-Event über den Teilbetrag, kein Beleg, disposition `agent`. Kommt der Beleg später: `attach_source_doc_to_case`; deckt der Rest mehrere Rechnungen: `dissolve_case` → Betrag wird wieder unallokierter Teil-Rest der Transaktion → neu splitten.
-- Notes: `dissolve_case` ist der Rückwärtsgang des Zuschnitts (Close-Grund `dissolved` im Audit); verweigert bei accepted/posted-Sätzen, Exportstapel-Claim und beantworteten Klärungen.
+- Code: `transaction_split`-Allokation mit `newCase` statt `caseId` (`splitTransactionToCases` → `createCaseFromBankTransactions`-Kern mit `allocatedAmount`)
+- Definition: Der Sachverhalt für den Teil einer Sammelzahlung, dessen Rechnung noch fehlt — nur das payment-Event über den Teilbetrag, kein Beleg, disposition `agent`. Kommt der Beleg später: `case_link`; deckt der Rest mehrere Rechnungen: `case_dissolve` → Betrag wird wieder unallokierter Teil-Rest der Transaktion → neu splitten.
+- Notes: `case_dissolve` ist der Rückwärtsgang des Zuschnitts (Close-Grund `dissolved` im Audit); verweigert bei accepted/posted-Sätzen, Exportstapel-Claim und beantworteten Klärungen.
 
 ### Dokumentgruppe (document group)
 
@@ -521,7 +664,7 @@ Seit dem Datenmodell-Review 2026-07-11 gilt zusätzlich:
 - Data type: Enum-Spalte (CHECK), NULL erlaubt. Status-Registry-Achse `collection_kind`.
 - Notes:
   - **Der Typ ist keine Beschriftung, sondern das Verfahren.** Aus ihm leitet der Code die **Klammer-Familie** ab (`clearing` · `partner` · `annex` · `none`) — nicht separat gepflegt. Nur `not_connected` hat kein Verfahren: dort ist jedes Kind ein eigener Vorgang.
-  - **Eigene Spalte, keine JSONB-Ableitung**: der Wert wird korrigiert (`override_classification`), überlebt eine Neuklassifikation und ist Filterachse. Der Split-Plan behält sein `collectionKind` als Plan-Metadatum, ist aber nicht mehr die Quelle für Buchungslogik.
+  - **Eigene Spalte, keine JSONB-Ableitung**: der Wert wird korrigiert (`document_classify`), überlebt eine Neuklassifikation und ist Filterachse. Der Split-Plan behält sein `collectionKind` als Plan-Metadatum, ist aber nicht mehr die Quelle für Buchungslogik.
   - **Der Parent bleibt Anker**, solange die Gruppe eine Klammer hat — superseded wird nur bei `not_connected` (`belege.md` R13/R25).
   - Buchungszustand der Teile: Status-Achse `document_booking` (F236).
   - **Reisekosten sind kein eigener Typ** — sie laufen als `expense_report`; der Unterschied wirkt am Einzelbeleg, nicht an der Gruppe.
@@ -531,13 +674,13 @@ Seit dem Datenmodell-Review 2026-07-11 gilt zusätzlich:
 
 - English: `expense settler`
 - German: `Abrechner`
-- Tables: `ludwig.client_ledger_accounts.business_partner_id` (F76) + `clearing_account_type` (F103); MCP-Tool `link_expense_partner` (F104)
+- Tables: `ludwig.client_ledger_accounts.business_partner_id` (F76) + `clearing_account_type` (F103); MCP-Tool `partner_create` (F104)
 - Definition: Eine Person, die für den Mandanten auslegt oder eine Firmenkarte führt und über ein **Verrechnungskonto** abrechnet. Sie ist Geschäftspartner **ohne eigene Kontonummer**: ihr Kreditor *ist* das Auslagenkonto.
 - Notes:
   - **Kein Partner-Typ „Mitarbeiter"**: die Eigenschaft steckt in `clearing_account_type` des verknüpften Kontos — eine Achse, ein Ort.
-  - **Kein zweites Konto.** `create_creditor` lehnt einen Abrechner ab; zwei Nummern für dieselbe Person gleichen sich nie aus (`konten.md` R20/R23).
+  - **Kein zweites Konto.** `partner_create` lehnt einen Abrechner ab; zwei Nummern für dieselbe Person gleichen sich nie aus (`konten.md` R20/R23).
   - Die Klammer ist **n:1**: eine Person trägt im Regelfall mehrere Ausgleichskonten (Karte + Spesen, zwei Karten). Welches für einen Vorgang gilt, filtert der Gruppentyp; bleibt mehr als eines übrig, wählt der Agent anhand der Kennung.
-  - Zwei Wege, ein Zielzustand: Onboarding-Vorschlag aus dem Kontonamen (`onboarding.md` R23) und `link_expense_partner` zur Laufzeit — derselbe Schreibkern.
+  - Zwei Wege, ein Zielzustand: Onboarding-Vorschlag aus dem Kontonamen (`onboarding.md` R23) und `partner_create` zur Laufzeit — derselbe Schreibkern.
   - **Personendaten:** nur Name, Schreibvarianten, Kontobezug. Keine Adresse, keine Bankverbindung aus der Lohnbuchhaltung.
 
 ### Verrechnungskonto (clearing account)
@@ -551,7 +694,7 @@ Seit dem Datenmodell-Review 2026-07-11 gilt zusätzlich:
   - **Zwei abgeleitete Achsen, nicht je Konto gepflegt**: *Zielsaldo null* (`payroll`, `suspense`, `money_transit` dauerhaft, `credit_card`/`employee_expense`/`payment_gateway`/`central_settlement` je Abrechnung) steuert die Verprobung im Buchungslauf; `shareholder` und `payroll_liability` tragen bis zur Zahlung zu Recht einen Saldo und bleiben draußen. `payroll_liability` = „Lohn-Zahlungskreis (offene Posten)“: Lohn-/LSt-/SV-Verbindlichkeiten und die Erstattungsforderungen an die Krankenkasse (AAG, U1/U2). *Zahlungsfähig* (`credit_card`, `employee_expense`, `payment_gateway`) entscheidet, ob ein `client_payment_accounts`-Eintrag entstehen darf.
   - **`central_settlement` = Zentralregulierer** (DZB, ZEG, F206): die Lieferantenrechnungen stehen einzeln auf den Kreditoren, die Sammellastschrift geht gegen das Konto, die Abrechnung löst es je Position auf. Kein Zahlungskonto; ein Saldo ist in der Abnahme ein Mangel, kein Hinweis.
   - **Die Kategorie schlägt die DATEV-Kontenfunktion in beide Richtungen**: `1360 Geldtransit` wird trotz Kontenfunktion 10 kein Zahlungskonto, `1617 Corporate Card` wird trotz Kontenfunktion 13 eines.
-  - **Vorgeschlagen, vom Menschen bestätigt, nie vom Agenten gesetzt.** Einziger Schreibpfad: `confirmClearingAccounts`; Einstiege sind das Onboarding-Review und der Tab „Verrechnungskonten" in den Mandanteneinstellungen. Der Agent liest sie über `list_clearing_accounts`.
+  - **Vorgeschlagen, vom Menschen bestätigt, nie vom Agenten gesetzt.** Einziger Schreibpfad: `confirmClearingAccounts`; Einstiege sind das Onboarding-Review und der Tab „Verrechnungskonten" in den Mandanteneinstellungen. Der Agent liest sie über `client_context`.
   - **Jahresgebunden** wie der Kontenplan (F64): beim Anlegen eines neuen WJ übernimmt der Konten-Upsert die Kategorie aus dem Vorjahr, wo das Zieljahr noch keine trägt — eine Übernahme, keine Bestätigung.
   - **Buchbar wird das Konto über `client_payment_accounts`** (F102), nicht über die Kategorie: `credit_card` → `kind='credit_card'`, `employee_expense` → `kind='employee_clearing'`. Der `kind` wird beim Promoten aus der Kategorie abgeleitet, nie zusätzlich gepflegt (`konten.md` R22). Ein Aufwand gegen ein `employee_clearing`-Konto zählt im Buchungsstapel als Eingangsrechnung, nicht als Bankbuchung.
   - **Kennung** (das Analogon zur IBAN) steht in `external_account_id`, der Aussteller in `bank_name`. Sie hat keine feste Länge; der Vergleich prüft, ob die gespeicherte Kennung das Ende der auf der Abrechnung genannten Nummer ist. Eine vollständige Kartennummer wird nie gespeichert.
@@ -566,7 +709,7 @@ Seit dem Datenmodell-Review 2026-07-11 gilt zusätzlich:
 - Notes:
   - **Kontenrolle statt Nummernliste**: `payroll_role` hängt am Referenz-Katalog (SKR03 1740/1741/1742/1755, SKR04 3720/3730/3740/3790); Mandanten-Konten erben sie über `client_ledger_accounts.account_framework_entry_id`.
   - **Zahlungsart** (`wage_net` | `social_insurance` | `wage_tax` | null) leitet `classifyPayrollPayment` aus Empfänger + Verwendungszweck eines Bank-**Abgangs** ab. Kein Treffer = Residuum für den Agenten; geraten wird nicht. Bewusst **keine Mitarbeiter-Stammliste** (fluktuiert, wäre am ersten Arbeitstag falsch).
-  - **Gebucht wird serverseitig** im `prepare_accounting_month`-Step `book_payroll_payments` — über denselben Kern wie `submit_booking_proposal` (gleiche Guards), Belegfeld 1 = Monatsnummer `YYYYMM`, kein Steuerschlüssel.
+  - **Gebucht wird serverseitig** im `prepare_accounting_month`-Step `book_payroll_payments` — über denselben Kern wie `entry_propose` (gleiche Guards), Belegfeld 1 = Monatsnummer `YYYYMM`, kein Steuerschlüssel.
 
 ### Billing mode (Rechnungsmodus / Dauerrechnung-Flag)
 
@@ -575,8 +718,8 @@ Seit dem Datenmodell-Review 2026-07-11 gilt zusätzlich:
 - Table: `ludwig.client_source_docs_invoices.billing_mode` (Migration 20260821090000)
 - Definition: Azure-CU-Klassifikation des Analyzers `ludwig_invoiceunderstanding_v1` am Rechnungsbeleg: `recurring` = **Dauerrechnung** — einmal ausgestellt, gilt für viele künftige Perioden (Miete, Leasing, Wartungsvertrag); `regular` = normale Einzelrechnung (auch monatlich wiederkehrende Einzelrechnungen wie Telekom/Abo); `unknown` = am Text nicht bestimmbar; NULL = nicht extrahiert (Altdaten/älterer Analyzer).
 - Notes:
-  - Buchungsfolge: `recurring` eröffnet einen **Dauersachverhalt** ([[Recurring rule]], `create_recurring_case`) mit `valid_from`/`valid_until` aus der Beleg-Laufzeit (`service_period`), auf den die Monatszahlungen gebucht werden — keine Einzelbuchung je Periode. Playbook-Regel im `buchungsvorschlag`-Agenten.
-  - Die Analyzer-ID ist versionierte Code-Config (`apps/invoice-preprocessor/.../settings.py`), nicht ENV — Feld-Schema und Code wechseln im selben Commit.
+  - Buchungsfolge: `recurring` eröffnet einen **Dauersachverhalt** ([[Recurring rule]], `rule_create`) mit `valid_from`/`valid_until` aus der Beleg-Laufzeit (`service_period`), auf den die Monatszahlungen gebucht werden — keine Einzelbuchung je Periode. Playbook-Regel im `buchungsvorschlag`-Agenten.
+  - Die Analyzer-ID ist versionierte Code-Config (`apps/pipeline/src/ludwig/invoice_preprocessor/.../settings.py`), nicht ENV — Feld-Schema und Code wechseln im selben Commit.
 
 ### Recurring rule (Wiederkehr-Regel)
 
@@ -587,10 +730,10 @@ Seit dem Datenmodell-Review 2026-07-11 gilt zusätzlich:
 - Notes:
   - Historie: Audit-Ereignisse mit `resource_kind = 'recurring_rule'` — Agent (`case.rule_*_by_agent`) und Kanzlei (`case.rule_created`, `case.rule_updated`, `case.rule_matching_note_updated`, `case.rule_deleted`), `payload.caseId` verweist auf den Fall.
   - **Split-Vorlage** (`template_lines`, jsonb, 2026-07-10): N Gegenkonto-Zeilen mit festen Beträgen + 1 Bank-Zeile (z. B. Miete/NK/Heizung/Garage gegen einen Kreditor). Gesetzt → `fy_template_counter_account_id` wird ignoriert; Vorschlag entsteht nur, wenn die Zeilensumme den Zahlbetrag deckt. DATEV kann Splits nur als parallele Buchungssätze mit gemeinsamem Beleglink ausdrücken; Korrekturen macht Agent/UI am Vorschlag.
-  - `expected_interval`/`expected_day_of_month`: Fälligkeits-Erwartung für `list_overdue_recurring` und Fälligkeits-Anker der Sollstellung.
-  - **Booking mode / Sollstellung** (`booking_mode`, 2026-07-10): `book_on_payment` (Default) bucht erst bei Zahlung gegen die Vorlage; `accrue_then_settle` stellt zur Fälligkeit soll — `prepare_accounting_month` (MCP) ruft `realizeDueRecurringCharges` auf: `accrual`-Event + Vorschlag „Aufwand an Personenkonto“ / „Personenkonto an Erlös“ (`personal_account_id` an der Regel); die Zahlung bucht der Rescan dann Personenkonto ⇄ Bank. Idempotent per DB-Unique auf `client_accounting_event (recurring_rule_id, accrual_period)` — eine Sollstellung je Regel und Monat, Lauf beliebig oft triggerbar (Agent, UI, später Cron).
+  - `expected_interval`/`expected_day_of_month`: Fälligkeits-Erwartung für `client_context` und Fälligkeits-Anker der Sollstellung.
+  - **Booking mode / Sollstellung** (`booking_mode`, 2026-07-10): `book_on_payment` (Default) bucht erst bei Zahlung gegen die Vorlage; `accrue_then_settle` stellt zur Fälligkeit soll — `prepare_accounting_month` (MCP) ruft `realizeDueRecurringCharges` auf: `accrual`-Event + Vorschlag „Aufwand an Personenkonto“ / „Personenkonto an Erlös“ (`personal_account_id` an der Regel); den Ausgleich (Personenkonto ⇄ Bank) bucht `bookRecurringSettlements` gegen die älteste offene Periode (`buchung.md` R23c). Idempotent per DB-Unique auf `client_accounting_event (recurring_rule_id, accrual_period)` — eine Sollstellung je Regel und Monat, Lauf beliebig oft triggerbar (Agent, UI, später Cron). DATEV-Entsprechung je Modus: `buchung.md` R23.
   - `valid_from`/`valid_until` (2026-07-10): Laufzeit der Regel (Beginn-/Enddatum der DATEV-WK), rein informativ; abgelaufene WK importiert der DATEV-Import mit `is_active=false`.
-  - **DATEV recurring booking import** (F91, 2026-08-21 — ersetzt die frühere ASCII-Import-Lane komplett): das Onboarding leitet LDSV-Kandidaten deterministisch aus der DATEV-Buchungshistorie ab (`derive-recurring-candidates`, pure function über `account-postings` + festgeschriebene `accounting-sequences` des jüngsten WJ; on-read aus `ops_datev_ingest_staging`, keine Kandidaten-Persistenz). Bestätigte Kandidaten legt das Review über den `create_recurring_case`-Kern an — Case + Regel in einem Schritt, `booking_mode='accrue_then_settle'`, idempotent über `import_reference = 'datev-wk:<Belegnummer>'` (unique je Mandant; Re-Run → `alreadyExists`). Die Belegnummer steht als `datev_document_number` an der Regel und geht bei Sollstellungs-/Settle-Vorschlägen als `external_document_number` in Belegfeld 1 (OPOS-Ausgleich); die DMS-GUID (`datev_document_link_*`) ist reine Beleg-Referenz. Personenkonto-Seite (Debitor → `payment_in`, Kreditor → `payment_out`) bestimmt Richtung und Gegenpartei.
+  - **DATEV recurring booking import** (F91, 2026-08-21 — ersetzt die frühere ASCII-Import-Lane komplett): das Onboarding leitet LDSV-Kandidaten deterministisch aus der DATEV-Buchungshistorie ab (`derive-recurring-candidates`, pure function über `account-postings` + festgeschriebene `accounting-sequences` des jüngsten WJ; on-read aus `ops_datev_ingest_staging`, keine Kandidaten-Persistenz). Bestätigte Kandidaten legt das Review über den `rule_create`-Kern an — Case + Regel in einem Schritt, `booking_mode='accrue_then_settle'`, idempotent über `import_reference = 'datev-wk:<Belegnummer>'` bzw. — bei einer Vorlage ohne brauchbare Belegnummer (leer/`0`/`diverse`, F366) — `'datev-wk-series:<Konto>/<Sachkonto>:<Brutto>[+…]'` (unique je Mandant; Re-Run → `alreadyExists`). Eine DATEV-WK-Vorlage = ein Regelsachverhalt. Die Belegnummer steht als `datev_document_number` an der Regel (Vorlagen ohne Nummer: NULL, `period_key`) und geht in Belegfeld 1 nur bei `document_number_strategy='fixed'` (`buchung.md` R23b); die DMS-GUID (`datev_document_link_*`) ist reine Beleg-Referenz. Personenkonto-Seite (Debitor → `payment_in`, Kreditor → `payment_out`) bestimmt Richtung und Gegenpartei.
 
 ### Dauersachverhalt mit wiederkehrenden Buchungen (LDSV mit WK)
 
@@ -600,7 +743,7 @@ Seit dem Datenmodell-Review 2026-07-11 gilt zusätzlich:
 - Definition: Ein LDSV, dessen Aufwands-/Erlösbuchungen **ohne neuen Beleg** entstehen — Grundlage ist eine Dauerrechnung ([[Billing mode]] `recurring`), in DATEV typischerweise als monatlicher WK-Stapel unter derselben Belegnummer gebucht. Beim Onboarding werden LDSV mit WK deterministisch aus der DATEV-Buchungshistorie abgeleitet (F91); die Erkennung ist herkunfts-agnostisch (auch handgebuchte regelmäßige Sollstellungen zählen, der WK-Marker ist nur Konfidenz-Signal). Im laufenden Betrieb legt der Agent neue LDSV mit WK bei Eingang einer Dauerrechnung an.
 - Notes:
   - Das DATEV-Herkunfts-Kennzeichen `SV` in `mark_of_origin` bedeutet „Stapelverarbeitung" — genau wegen solcher Kollisionen tragen Ludwig-Kürzel das L-Präfix. Beobachtete Herkunfts-Werte: `RE` (manuell), `WK` (wiederkehrend), `SV` (Stapel/Import — auch der „Ludwig-Export"-Stapel), `JA` (Jahresabschluss), `AN` (Anlagen), `KS` (KSt).
-  - **Die Belegnummer ist die Identität — aber nur beim LDSV MIT WK** (F94-T94.6, Präzisierung 2026-08-21): dort gibt es eine Dauerrechnung mit konstanter Nummer. Bei einem LDSV mit **Monatsbelegen** (Leasing, Miete mit Einzelrechnung) ist die Rechnungsnummer die Identität des **Ereignisses**, nicht des Sachverhalts — sie wechselt ja monatlich. Die Identität des Sachverhalts ist dort der **Vertrag** (`client_accounting_case_rule.match_contract_number`) bzw. die Gegenpartei. Was die Monatsrechnung an den bestehenden LDSV bindet, ist das **Regelwerk** (F94: `matchSourceDoc`, ausgeführt im deterministischen Übergang 1→2), nicht die Nummer.
+  - **Identität beim LDSV MIT WK: die Belegnummer der DATEV-WK-Vorlage, ohne brauchbare Nummer die Reihe** (F94-T94.6, Präzisierung 2026-08-21; Reihe seit F366: Personenkonto + Sachkonto:Brutto je Satz): dort gibt es eine Dauerrechnung mit konstanter Nummer bzw. eine Vorlage mit konstantem Inhalt. Bei einem LDSV mit **Monatsbelegen** (Leasing, Miete mit Einzelrechnung) ist die Rechnungsnummer die Identität des **Ereignisses**, nicht des Sachverhalts — sie wechselt ja monatlich. Die Identität des Sachverhalts ist dort der **Vertrag** (`client_accounting_case_rule.match_contract_number`) bzw. die Gegenpartei. Was die Monatsrechnung an den bestehenden LDSV bindet, ist das **Regelwerk** (F94: `matchSourceDoc`, ausgeführt im deterministischen Übergang 1→2), nicht die Nummer.
   - Ändert sich die Belegnummer eines LDSV MIT WK (z. B. neue Dauerrechnungs-Nummern zum Jahreswechsel), entsteht über den Beleg-Pfad ein neuer Sachverhalt — es gibt bewusst keine automatische Verkettung von Sachverhalten (`successor`): eine Kette bricht bei jeder Lücke (ausgelassener Monat, Storno, Nachberechnung), und „alle Vorgänge dieses Leasings" wäre ein Traversal statt einer Query. Der Stern über das dauerhafte Objekt (LDSV + Regel) ist robuster.
 
 ### Fiscal year (Entität)
@@ -630,8 +773,48 @@ Seit dem Datenmodell-Review 2026-07-11 gilt zusätzlich:
 - English: `onboarding_run`
 - German: `Onboarding-Lauf (Job)`
 - Definition: `ops_jobs`-Job-Typ (F48-T48.1) für den durablen, asynchronen Onboarding-Lauf eines Mandanten (import → cycles → payment-tagging → rollen → embeddings → enrichment → readiness-gate). Ersetzt die frühere Inline-Ausführung in Vercel-Functions (`maxDuration`-Riss). Vom **TS-Worker** (`apps/web/src/worker`) geclaimt — NICHT vom Python-Worker (der claimt nur seine Typen wie `invoice_ingest`).
-- Payload (snake_case Wire-Contract): `{ client_id, tenant_id, source: 'bridge'|'mcp', fiscal_year?, as_of?, bundle_prefix? }`. `source=bridge` → Datasets aus `ops_datev_ingest_staging`; `source=mcp` → aus dem S3-Bundle (`archiveOnboardingBundle`). Dedup: `onboarding_run:<client_id>` (höchstens ein offener Lauf/Mandant).
-- Notes: Status kommt aus `platform_clients.onboarding_state` + `getClientReadiness` (kein `result`-Feld im Job). Der Agent pollt `get_onboarding_status`. Siehe decision-log 2026-07-31.
+- Payload (snake_case Wire-Contract): `{ client_id, tenant_id, source: 'bridge'|'mcp', fiscal_year?, as_of?, bundle_prefix? }`. `source=bridge` → Datasets aus `ops_datev_ingest_staging`; `source=mcp` → aus dem gespeicherten Bundle (`archiveOnboardingBundle`). Dedup: `onboarding_run:<client_id>` (höchstens ein offener Lauf/Mandant).
+- Notes: Status kommt aus `platform_clients.onboarding_state` + `getClientReadiness` (kein `result`-Feld im Job). Der Agent pollt `onboarding_status`. Siehe decision-log 2026-07-31.
+
+### doc_classify (Job-Typ)
+
+- English: `doc_classify`
+- German: `Beleg-Klassifikation (Job)`
+- Definition: Python-Job (Spur `batch`), klassifiziert einen Beleg mit demselben Service wie die Route `…/classify`. Der TS-Job `doc_process` reiht ihn ein und wartet (`runJobAndWait`, 150 s) — den Belegstatus setzt allein der TS-Kern.
+- Payload (snake_case Wire-Contract): `{ client_id, source_doc_id, client_display_name, expected_year }`. Result = Klassifikationsfelder der Belegzeile. Dedup: `doc_classify:<source_doc_id>`.
+- Notes: F390 (PT-94 Schritt 5), Vertrag `apps/pipeline/src/ludwig/workflows/api/jobs/doc_classify.py`.
+
+### invoice_register (Job-Typ)
+
+- English: `invoice_register`
+- German: `Rechnung anlegen (Job)`
+- Definition: Python-Job (Spur `batch`), legt den Rechnungs-Stub für eine bestätigte Datei an (SHA-256-Dedup). Aufrufer `doc_process` wartet und reiht danach `invoice_run_flow` ein.
+- Payload (snake_case Wire-Contract): `{ client_id, source_doc_id, file_upload_id, target_cycle_id }`. Result `{ invoice_id, client_id, status, duplicate_detected }`. Dedup: `invoice_register:<source_doc_id>`.
+- Notes: F390, Vertrag `apps/pipeline/src/ludwig/workflows/api/jobs/invoice_register.py`.
+
+### Job error kind
+
+- English: `job error kind`
+- German: `Fehlerart (Job)`
+- Definition: Fehlerart eines gescheiterten `ops_jobs`-Jobs — `permanent` (fachlich, deterministisch, Text für Agent und Nutzer, darf nach außen; `PermanentJobError`/`isUserFacing`) oder `unexpected` (alles andere; nach außen nur „Ludwig konnte das nicht berechnen (Job …)").
+- Data type: `ludwig.ops_jobs.error_kind` (CHECK), nur bei `status='failed'`.
+- Notes: F385 (PT-94 Schritt 0), beide Worker schreiben sie; `result jsonb` daneben ist das Ergebnis bei `succeeded`, Schreiber ab Schritt 4/5.
+
+### Job lane
+
+- English: `job lane`
+- German: `Job-Spur`
+- Definition: Menge der `ops_jobs`-Typen, die ein Worker-Prozess claimt — `batch` (lange Beleg-Jobs, Timeout 300 s), `interactive` (Antwort, auf die Agent oder Mensch wartet; Timeout 60 s), `all` (lokal, beide).
+- Data type: `--lane` des Python-Workers, `ops_worker_heartbeats.lane`
+- Notes: `architektur.md` R7b, kein Prioritätsfeld — zwei Prozesse, zwei Typ-Mengen; der TS-Worker trägt `worker-ts`. F389 (PT-94 Schritt 4).
+
+### Worker heartbeat
+
+- English: `worker heartbeat`
+- German: `Worker-Lebenszeichen`
+- Definition: eine Zeile je Worker-Prozess (`worker_id = hostname:pid`), Upsert alle 15 s, mit Spur (`lane`), Job-Typen, Commit/Release, laufendem Job und der Konfiguration des Prozesses als `capabilities`.
+- Data type: table `ludwig.ops_worker_heartbeats`
+- Notes: Nicht der Job-Lock — der erneuert `ops_jobs.locked_at` des gehaltenen Jobs (PT-49), der Heartbeat ist die Prozess-Zeile, auch im Leerlauf. Health gilt eine Spur ab 45 s ohne Lebenszeichen als `error`, der Deploy-Abgleich verlangt je Spur eine Zeile < 60 s mit dem Deploy-Commit. `lane` = Job-Spur, Werte `batch`, `interactive` (F389), `all`, `worker-ts`. Tabelle F385, Schreiber und Leser F386; seit F391 die einzige Lebenszeichen-Quelle der Python-Seite — einen `/health`-Endpunkt gibt es dort nicht mehr.
 
 ### Bank import batch
 
@@ -678,16 +861,36 @@ Seit dem Datenmodell-Review 2026-07-11 gilt zusätzlich:
 - English: `agent work queue`
 - German: `Arbeitsvorrat des Agenten`
 - Definition: Zustandsbasierte Antwort auf „Gibt es Arbeit?": die **Buchungszyklen, bei denen der Agent dran ist** (`batches`, Reihenfolge Nachlese → Nachtrag → regulär), dazu Belege ohne Sachverhalt, Bank-Transaktionen ohne Event, frisch beantwortete Klärungen (Case wieder beim Agenten), failed-Belege ohne Case — plus Kontextzahlen (offene Beleg-Nachforderungen, wartende Vorschläge). Ist `batches` leer, ist `hasWork` false, egal wie voll der Rest ist: der Zyklus liegt dann bei der Kanzlei oder ist unterwegs nach DATEV. Umgekehrt (F117): trägt ein Zyklus `returned: true` — sein jüngstes Zustands-Ereignis ist `export_batch.returned_to_agent` —, ist `hasWork` wahr **ohne** jeden Vorrat; `returnNote` trägt die Notiz der Kanzlei. Ein neuer Durchgang überschreibt das Ereignis.
-- Data type: MCP-Tool `get_agent_work_queue` (`agent-run-core.ts`), reine Query, kein LLM.
+- Data type: MCP-Tool `step_status` (`modules/booking-v2/application/agent-run-core.ts`), reine Query, kein LLM.
 - Notes: Kosten-Gate für getriggerte Läufe (F26/F29): erst dieses Tool, teure Agent-Session nur bei `hasWork=true`. Zustandsbasiert statt since-Deltas — idempotent abfragbar.
 
-### Agent run / Durchgang
+### Agent run / Lauf
 
-- English: `agent run`, `pass`
-- German: `Agent-Durchgang` (kurz: **Durchgang**)
-- Definition: EINE protokollierte Session des Buchungs-Agenten **innerhalb eines Buchungszyklus** — von `start_agent_run` bis `finish_agent_run`. Ein Zyklus (*Buchungszyklus / Stapel*) hat n Durchgänge: jeder Rücklauf aus der Kanzlei-Prüfung startet einen neuen im selben Stapel. Der Abschluss rechnet die Handover-Statistik serverseitig, vergleicht sie mit dem Vorgänger (`handover_changed`) und **stellt den Zyklus bereit** (Stapel → `prepared`, F117): ein weiterer Durchgang braucht ein neues Signal — die Freigabe des nächsten *Dateikorbs* oder „Zurück an Ludwig".
-- Data type: `ludwig.client_agent_runs` (trigger manual/cron/routine, stats jsonb, handover_changed, summary, `export_batch_id` = der Zyklus, `agent_token_id` = das haltende Agent-Token, `outcome` = wie er endete: `complete` · `incomplete` · `taken_over` · `superseded`, NULL = offen/Altbestand, F284); Audit-Events `agent_run.completed` / `agent_run.finished_incomplete`; Aufrufprotokoll je Tool-Call `ludwig.ops_mcp_call_logs.agent_run_id` (F211).
-- Notes: Der Durchgang wählt seinen Zeitraum nicht — er nimmt den ersten Stapel aus der Queue (`get_agent_work_queue`) und übernimmt dessen. Statistik kommt NIE vom LLM (deterministische Queries). `handover_changed=false` ⇒ keine Benachrichtigung (kein Event-Spam bei Leerläufen). **Nicht** „Buchungslauf" sagen, wenn der Zyklus gemeint ist: der Lauf ist die Session, der Zyklus die Klammer. Gegenstück auf der Kanzlei-Seite ist die *Abnahme-Runde* — der Agent fährt Durchgänge, die Kanzlei Runden.
+- English: `agent run` (in code `agentRun`; the step level is `agentRunStep`)
+- German: `Lauf` (Anzeige `L-<n>`)
+- Definition: Die Folge der Agent-Schritte, die ein „Lauf starten"-Event auslöst (Korb-Freigabe, Admin-Klick, „Zurück an Ludwig"): Belege → Buchen → Zweitprüfung → ggf. Reparatur → Nachprüfung. Der nächste Schritt entsteht erst, wenn der vorige endet (`advanceAgentRun`), nie vorab. Owner 2026-10-10: „runs und run_steps — das sind die verschiedenen Agents, die nacheinander laufen."
+- Data type: `ludwig.client_agent_runs` (`run_number`, `source`, `state` running · done · stopped · failed, `phase` documents · booking · review · repair · review_after_repair, `stop_reason`, `rerun_requested_at`, `export_batch_id`, `file_basket_id`). Höchstens ein laufender Lauf je Mandant. Registry-Achsen `agent_run_state` / `agent_run_phase` / `agent_run_stop_reason` (F477: `retry_exhausted`); Audit-Ressource `agent_run`.
+- Notes: Fortschalt-Tabelle und Zustandsmaschine: `docs/concepts/agent-run-execution.md` §4.8. Der direkte Start (`run_start`) ist ein Lauf mit einem Schritt. Admin: eine Zeile je Lauf (`/admin/agent-runs`), Lauf-Detailseite mit seinen Schritten. **Nicht** „Buchungslauf" sagen, wenn der Zyklus gemeint ist: der Lauf arbeitet in einem Buchungszyklus (Stapel), der Zyklus ist die Klammer. Introduced 2026-10-09 (F468 abgeleitet, F473 als Entität „Lauf-Kette", F474 heißt er Lauf).
+
+### Agent step / Agent-Schritt
+
+- English: `agent run step`, `step` (früher `agent run` / `pass`)
+- German: `Agent-Schritt` (kurz: **Schritt**; früher „Durchgang")
+- Definition: EIN Durchgang eines Agenten in einem Lauf — eine Rolle (`documents` · `orchestrator` · `judge`), ein Einmal-Token, ein Ergebnis; von `run_start`/`step_claim` bis `step_finish`. Seit F475 heißt er auch für den Agenten so: `step_claim`, `step_status`, `step_finish`, `step_usage_report`; nur `run_start` startet einen Lauf. Antworten tragen `stepId` (Schritt) und `runId` (Lauf). Der Abschluss rechnet die Handover-Statistik serverseitig, vergleicht sie mit dem Vorgänger (`handover_changed`) und **stellt den Zyklus bereit** (Stapel → `prepared`, F117). `end_cause` sagt, warum er endete (`agent` = fachlich; `harness_exit` · `timeout` · `never_claimed` · `stalled` · `dispatch_failed` = technisch); ein technisches Ende wird einmal je Phase durch einen **Wiederholungs-Schritt** (`retry_of_step_id`) wiederholt (F477).
+- Data type: `ludwig.client_agent_run_steps` (`agent_run_id` = der Lauf, `previous_step_id`, role, trigger, stats jsonb, handover_changed, summary, `export_batch_id` = der Zyklus, `agent_token_id` = das haltende Token, `outcome` `complete` · `incomplete` · `taken_over` · `superseded` · `failed`, `current_gate_code`); Stempel an Artefakten `agent_run_step_id`; Aufrufprotokoll `ops_mcp_call_logs.agent_run_step_id` (F211); Audit-Ressource `agent_run_step`, Registry-Achse `agent_run_step_outcome`.
+- Notes: Der Schritt wählt seinen Zeitraum nicht — er nimmt den Stapel seines Laufs bzw. den ersten der Queue. Statistik kommt NIE vom LLM. `handover_changed=false` ⇒ keine Benachrichtigung. Gegenstück auf der Kanzlei-Seite ist die *Abnahme-Runde*. Admin: `/admin/agent-runs/<lauf>/steps/<schritt>`.
+
+### Gate / Prüfschritt
+
+- English: `gate`
+- German: `Prüfschritt` (Codes `1a`…`4b`, Übergangs-Codes `t…`)
+- Definition: Ein Arbeitsschritt mit Server-Gate innerhalb eines Agent-Schritts (z. B. `2a` Zuordnen, `4a` Judge). Der Server rechnet je Gate, was offen ist; erst ein grünes oder begründet übergangenes Gate gibt den nächsten frei.
+- Data type: `ludwig.client_agent_run_step_gates` (`agent_run_step_id`, `gate_code`, entered_at, completed_at, gate_result, gate_open_count, override_reason).
+- Notes: Agenten-Werkzeuge seit F475: `gate_enter(gate=…)`, `step_status` liefert `gates[]` mit `gateCode` und `nextGate`; Konstante `AGENT_RUN_GATE_CODES`. Tabelle hieß bis F474 `client_agent_run_steps`; `client_journal_entry.gate_code` stempelt das Gate, in dem ein Satz entstand.
+
+### Run chain / Lauf-Kette
+
+- Siehe **Agent run / Lauf** — „Lauf-Kette" (F473, Anzeige `LK-<n>`) heißt seit F474 Lauf (`L-<n>`).
 
 ### Notification subscription
 
@@ -697,21 +900,21 @@ Seit dem Datenmodell-Review 2026-07-11 gilt zusätzlich:
 - Data type: `ludwig.client_notification_subscriptions` (`unique(client_id, user_id, event_type)`); UI: Mandanten-Konfiguration → Tab „Benachrichtigungen"; Versand via `getMailer()` (`LUDWIG_EMAIL_TRANSPORT`).
 - Notes: Ausgelöst nur bei `handover_changed` (F27). Belegwege bleiben Portal-/Kanzlei-Upload + DATEV-Import — Ludwig liest keine E-Mails (BelegBox ist ein separates Projekt).
 
-### Review item (Prüfpunkt)
+### Review item (Prüfung)
 
 - English: `review item`
-- German: `Prüfpunkt`
+- German: `Prüfung` (bis 2026-10-27 „Prüfpunkt“; Owner über llcto, DS 0232)
 - Definition: Eine Frage, die ein Buchungssatz an die Prüferin stellt — „Stimmt der Steuerschlüssel zum Beleg?", „Trägt das Personenkonto ein Belegfeld?". Serverseitig abgeleitet aus dem, was ohnehin geladen ist; kein eigener Read je Satz.
 - Data type: fester Katalog **P-SUMME … P-JUDGE** (23 Codes) in `apps/web/src/core/accounting/pruefpunkte.ts`. Quittungen: `ludwig.client_review_checks` mit `check_kind='proposal_checkpoint'`.
 - Notes: **Vier Zustände**, und der vierte ist der wichtige: `green` geprüft und in Ordnung · `yellow` auffällig, freigeben nach Quittung · `red` so nicht richtig · **`open` nicht geprüft, weil die Angabe fehlt**. Ein Prüfpunkt, der mangels Belegdaten grün wird, ist eine Lüge. Bestandene Punkte stehen zusammengefasst in **einer** Zeile; eine eigene Zeile bekommt nur, was noch eine Entscheidung braucht. Zu unterscheiden von der *Klärung* — die geht an einen Menschen, der Prüfpunkt an die Prüferin selbst. Nicht zu verwechseln mit dem *Check point* der Stapelabnahme (gleicher deutscher Name, `web-ui-offen.md` P45).
 
-### Check point (Prüfpunkt der Stapelabnahme)
+### Check point (Prüfung der Stapelabnahme)
 
 - English: `check point` (`CHECKPOINT_TEXTS`, `BANK_CHECK_LABELS`)
-- German: `Prüfpunkt`
+- German: `Prüfung` (bis 2026-10-27 „Prüfpunkt“; Owner über llcto, DS 0232)
 - Definition: Eine Zeile des Prüfprotokolls der *Stapelabnahme* — „Kontoauszüge lückenlos", „Jede Auszugszeile ist gebucht" usw. Derselbe Name steht in dem Schritt, der seine Befunde zeigt (Schritt Kontenausgleich: die Bank-Prüfpunkte wortgleich). Je Prüfpunkt: Stand (was offen ist), was zu tun ist (Kanzlei-Satz + Link) und die aufklappbaren Befunde.
 - Data type: Zeilen-Key `ChecklistRowKey` (`batch-review/domain/checklist.ts`); Texte in `batch-review/domain/checkpoint-texts.ts`; Quittung gelber Zeilen in `ludwig.client_review_checks` (`check_kind` = Zeilen-Key).
-- Notes: Nicht das *Review item* am Buchungssatz (P-SUMME…P-JUDGE), auch wenn beide „Prüfpunkt" heißen (Doppelbelegung offen, `web-ui-offen.md` P45). Der Agenten-Text eines Befunds (`problem`) erscheint im Prüfprotokoll nie (F246).
+- Notes: Nicht das *Review item* am Buchungssatz (P-SUMME…P-JUDGE), auch wenn beide „Prüfung" heißen (Doppelbelegung offen, `web-ui-offen.md` P45). Der Agenten-Text eines Befunds (`problem`) erscheint im Prüfprotokoll nie (F246).
 
 ### Review score (Prüfbedarf)
 
@@ -749,7 +952,7 @@ Seit dem Datenmodell-Review 2026-07-11 gilt zusätzlich:
 
 - English: `clarification question`
 - German: `Klärungsfrage`
-- Definition: A structured question a stateless processing module emits when it cannot decide on its own and needs a tax advisor or client to answer something. Defined as a Pydantic DTO in `buchassi_shared.processing`.
+- Definition: A structured question a stateless processing module emits when it cannot decide on its own and needs a tax advisor or client to answer something. Defined as a Pydantic DTO in `ludwig.shared.processing`.
 - Data type: entity (Pydantic `ClarificationQuestion`, table `ludwig.client_accounting_case_clarification` — *vormals `client_invoice_clarifications`*)
 - Example: `{ question_type: "bicycle_resale_or_expense", severity: "required", answer_kind: "single_choice", answer_options: [{code: "resale", label: "Wird weiterverkauft"}, {code: "expense", label: "Eigene Nutzung"}], source_module: "booking-module" }`
 - Notes: Carries two phrasings — `professional_text` for tax advisors (fachsprachlich) and `client_text` for clients (laienverständlich). `severity == "required"` blocks booking until answered. Catalog of allowed `question_type` values lives in `docs/topics/buchung.md`. Distinct from `Review item` (machine-flagged check) and `Bookkeeping context` (durable accounting metadata).
@@ -762,6 +965,24 @@ Seit dem Datenmodell-Review 2026-07-11 gilt zusätzlich:
 - Data type: columns on `ludwig.client_accounting_case_clarification` (`deferred_until`, `deferred_reason`, `deferred_by_kind`, `deferred_by_clarification_id`, `deferred_count`)
 - Example: `{ deferred_until: "2026-09-10", deferred_reason: "Mandant ist bis Monatsende im Urlaub", deferred_by_kind: "agent", deferred_count: 1 }`
 - Notes: The counterweight to the hard gate on agent-directed questions (`docs/topics/sachverhalt.md` S10–S12) — a gate you cannot clear gets worked around, so gate and deferral ship together. At most 30 days ahead (one monthly run), reason required, and from the third deferral onwards only a human may defer. Ends early when its cause does: if it hangs on a counter-question (`deferred_by_clarification_id`), answering that one reopens it immediately. A case whose only remaining questions are deferred does **not** close. Distinct from `Expectation`, which is resolved by an *event* rather than by an answer.
+
+### Follow-up clarification
+
+- English: `follow-up clarification`
+- German: `Nachfrage`
+- Definition: A clarification the agent raises on a case **after** one of its own questions there was answered — it points at that answered question. Derived display: "Nachfrage · <title>" with the previous answer quoted.
+- Data type: column `ludwig.client_accounting_case_clarification.follows_clarification_id` (self-FK, nullable), set by the server in `raiseCaseClarification`
+- Example: `{ title: "Beleg zur o2-Zahlung", follows_clarification_id: "<id of the answered question>" }`
+- Notes: Never set by the agent and never guessed from timestamps; rows raised before F395 stay `NULL`. Distinct from a *Deferral* counter-question (`deferred_by_clarification_id`), which points the other way — from the question that waits to the one it waits for.
+
+### Prior-period finding (Altlast Vormonat)
+
+- English: `prior-period finding`
+- German: `Altlast Vormonat`
+- Definition: A finding on a case that a booking from an earlier month stands twice in DATEV. Ludwig neither books nor asks; the firm corrects it in DATEV.
+- Data type: row in `ludwig.client_accounting_case_clarification` with `type='comment'`, `question_type='prior_period_duplicate'` (`PRIOR_PERIOD_DUPLICATE_FINDING`), `audience='accounting'`, `facts_json` one fact per DATEV entry (`source='mirror:<entry id>'`)
+- Example: `{ type: "comment", question_type: "prior_period_duplicate", facts_json: [{ label: "DATEV-Satz vom 15.07.2026", source: "mirror:<id>" }, …] }`
+- Notes: Written by `reportPriorPeriodFinding` via `case_comment(finding="prior_period_duplicate", datev_entries=[…])` (F498); read by the review step "Offene Posten", tab "Aus Vormonaten". Resolved by derivation, never stored: once the mirror shows one of its entries deleted or reversed (rule "Korrektur im Spiegel", `reversesMirrorEntry`). One finding per entry set and client across runs.
 
 ### Expectation
 
@@ -779,14 +1000,14 @@ Seit dem Datenmodell-Review 2026-07-11 gilt zusätzlich:
 - Definition: The **user-facing word** for the list of open document expectations a client still owes — what the firm "requests" by mail (F39), what the portal card shows, what the cycle badge counts. It is not a data type of its own: technically these are the rows in `ludwig.client_accounting_case_expectation` with `kind='document'`, `resolved_at is null` and (for the client-facing list) `audience='client'`.
 - Data type: derived view over [[Expectation]] — no table, no column, no status
 - Example: „3 Nachforderungen, fällig 12.07." am Buchungszyklus; „Rechnung von o2 über 23,80 € benötigt" als Portal-Karte
-- Notes: Kept as vocabulary because the firm and the client genuinely say „nachfordern". In code and schema the word is `expectation`; only labels, mail text and reports say Nachforderung. Since F125 there is no `document_missing` clarification and no `document_upload` answer kind behind it — a request is not answered, it is resolved by the arriving document. MCP: `expect_document` opens one, `list_document_expectations` lists them, `resolve_expectation` cancels one.
+- Notes: Kept as vocabulary because the firm and the client genuinely say „nachfordern". In code and schema the word is `expectation`; only labels, mail text and reports say Nachforderung. Since F125 there is no `document_missing` clarification and no `document_upload` answer kind behind it — a request is not answered, it is resolved by the arriving document. MCP: `expectation_create` opens one, `client_context` lists them, `expectation_transition(to=resolved)` cancels one.
 
 ### Invoice log entry (Finding)
 
 - English: `invoice log entry` / `finding`
 - German: `Beleg-Log-Eintrag` / `Befund`
 - Definition: A structured record emitted by a stateless processing module when it applied a special bookkeeping rule to a document — e.g. defaulted a VAT rate, virtually merged split-batch invoices, deterministically corrected the LLM's classification (`Classification override`).
-- Data type: entity (Pydantic `InvoiceLogEntry` in `buchassi_shared.processing`). **Seit F49 WP10 persistiert als `step_kind='finding'`-Zeile in `client_invoice_traces`** (`payload_json.rule_code` trägt den Katalog-Code); die eigene Tabelle `client_invoice_log_entries` ist weg.
+- Data type: entity (Pydantic `InvoiceLogEntry` in `ludwig.shared.processing`). **Seit F49 WP10 persistiert als `step_kind='finding'`-Zeile in `client_invoice_traces`** (`payload_json.rule_code` trägt den Katalog-Code); die eigene Tabelle `client_invoice_log_entries` ist weg.
 - Example: `{ rule_code: "classifier_override_accounting_role", description: "accounting_role: korrigiert von incoming_invoice auf receipt …", source_module: "document-simple-classifier" }`
 - Notes: Used for audit trails, not control flow. Persisted per invoice by workflows. Catalog of allowed `rule_code` values is the emitting code itself (grep `rule_code`) — see `docs/topics/belege.md` (R20).
 
@@ -819,7 +1040,7 @@ Konsolidierung auf eine Beleg-Detail-Log wiegt schwerer als die Trennung, und
 - Definition: Ein Eintrag der durchgehenden **Prozess-Spur** eines Belegs über
   alle Pipeline-Module hinweg (ADR 2026-05-03): welcher Schritt lief in welchem
   Modul, mit welchem Ergebnis. Append-only, durable.
-- Data type: table `ludwig.client_invoice_traces`
+- Data type: table `ludwig.client_invoice_traces`; Anker `invoice_id` oder `source_doc_id`
 - Example: `{ module: "preprocessor", step_kind: "extraction_completed", summary: "…", payload_json: {…}, confidence: 0.91 }`
 - Notes: Trägt reichen Kontext, den ein Log-Entry nicht hat — `payload_json`,
   `confidence` und die Buchungs-Anker (`journal_entry_id`,
@@ -828,7 +1049,8 @@ Konsolidierung auf eine Beleg-Detail-Log wiegt schwerer als die Trennung, und
   zurückverfolgt. Seit F49 WP10 lebt auch der
   [Invoice log entry / Finding](#invoice-log-entry-finding) hier — als
   `step_kind='finding'`-Zeile. Kurz: Trace-Step = Ablauf, Finding = Befund,
-  **eine Tabelle**.
+  **eine Tabelle**. Seit F381 schreibt auch der Orchestrator
+  (`WorkflowLogRepository`) hierher — Schritt-Grenzen als `level='verbose'`.
 
 ### Rule code
 
@@ -862,7 +1084,7 @@ Konsolidierung auf eine Beleg-Detail-Log wiegt schwerer als die Trennung, und
 - English: `answer option`
 - German: `Antwortoption`
 - Definition: One pre-defined answer choice on a `Clarification question`.
-- Data type: entity (Pydantic `AnswerOption` in `buchassi_shared.processing`)
+- Data type: entity (Pydantic `AnswerOption` in `ludwig.shared.processing`)
 - Example: `{ code: "resale", label: "Wird weiterverkauft" }`
 - Notes: `code` is the stable, machine-readable identifier (persisted when the user picks the option); `label` is the German UI label and may be re-translated freely without breaking history.
 
@@ -871,7 +1093,7 @@ Konsolidierung auf eine Beleg-Detail-Log wiegt schwerer als die Trennung, und
 - English: `answer kind`
 - German: `Antwortform`
 - Definition: The shape of the answer expected for a `Clarification question`. Drives UI rendering. Values: `yes_no`, `single_choice`, `multi_choice`, `free_text`.
-- Data type: enum value (`Literal` in `buchassi_shared.processing.AnswerKind`)
+- Data type: enum value (`Literal` in `ludwig.shared.processing.AnswerKind`)
 - Example: `single_choice` for "Wird das Fahrrad weiterverkauft oder als Aufwand erfasst?"
 - Notes: For `*_choice` / `yes_no`, `answer_options` is non-empty. For `free_text`, `answer_options` is empty. `allow_free_text` may additionally enable a "Sonstiges …" field alongside the choices.
 
@@ -880,7 +1102,7 @@ Konsolidierung auf eine Beleg-Detail-Log wiegt schwerer als die Trennung, und
 - English: `question severity`
 - German: `Frageschwere`
 - Definition: Whether a `Clarification question` blocks booking. Values: `required` (workflow must pause until answered), `optional` (recorded for review, non-blocking).
-- Data type: enum value (`Literal` in `buchassi_shared.processing.QuestionSeverity`)
+- Data type: enum value (`Literal` in `ludwig.shared.processing.QuestionSeverity`)
 - Example: `required` for "Soll dieses Fahrrad als Anlagegut bilanziert oder als Aufwand erfasst werden?"
 - Notes: Choose `required` only when the booking would otherwise be objectively wrong without the answer. `optional` is for soft data-quality follow-ups.
 
@@ -889,7 +1111,7 @@ Konsolidierung auf eine Beleg-Detail-Log wiegt schwerer als die Trennung, und
 - English: `source module`
 - German: `Quellmodul`
 - Definition: Who produced an `Invoice log entry` or `Clarification question` — the five stateless pipeline modules plus two non-pipeline origins: `agent` (MCP agent) and `web` (a firm employee asking a question by hand through the UI).
-- Data type: enum value (`Literal` in `buchassi_shared.processing.SourceModule`); the DB CHECK on `client_accounting_case_clarification.source_module` carries the two extra origins.
+- Data type: enum value (`Literal` in `ludwig.shared.processing.SourceModule`); the DB CHECK on `client_accounting_case_clarification.source_module` carries the two extra origins.
 - Example: `document-simple-classifier`
 - Notes: A typed Literal so adding a module is a deliberate PR (extend the Literal + glossary entry + import in the new module). On clarification questions the value is load-bearing, not descriptive: `replace_clarifications` only wipes questions whose origin is a pipeline module, and `answerClarification` routes the case back to whoever asked (`agent` → agent queue, `web` → the firm). Workflows also uses it to attribute audit entries to the responsible module.
 
@@ -897,10 +1119,10 @@ Konsolidierung auf eine Beleg-Detail-Log wiegt schwerer als die Trennung, und
 
 - English: `shared contracts package`
 - German: `gemeinsames Datentyp-Paket`
-- Definition: The single repo location (`apps/shared`, Python package `buchassi_shared`) for cross-cutting Pydantic DTOs and `Literal` aliases used by more than one stateless processing module.
+- Definition: The single repo location (`apps/pipeline/src/ludwig/shared`, Python package `ludwig.shared`) for cross-cutting Pydantic DTOs and `Literal` aliases used by more than one stateless processing module.
 - Data type: schema (Python package)
-- Example: `buchassi_shared.llm.LLMCallRecord`, `buchassi_shared.processing.InvoiceLogEntry`.
-- Notes: Strict scope — pure data types, no DB code, no settings, no SDK dependencies, no business logic. See `apps/shared/MODULE_CONTEXT.md`. Dependency direction is one-way: every other `apps/*` package may import `buchassi_shared`; `buchassi_shared` imports nothing from `apps/*`. This is the *only* shared library in the repo; the previous TS-Contracts approach was deliberately removed and is **not** to be reintroduced (see `docs/topics/architektur.md`).
+- Example: `ludwig.shared.llm.LLMCallRecord`, `ludwig.shared.processing.InvoiceLogEntry`.
+- Notes: Strict scope — pure data types, no DB code, no settings, no SDK dependencies, no business logic. See `apps/pipeline/src/ludwig/shared/MODULE_CONTEXT.md`. Dependency direction is one-way: every other `apps/*` package may import `ludwig.shared`; `ludwig.shared` imports nothing from `apps/*`. This is the *only* shared library in the repo; the previous TS-Contracts approach was deliberately removed and is **not** to be reintroduced (see `docs/topics/architektur.md`).
 
 ### Proposed posting
 
@@ -914,7 +1136,7 @@ Konsolidierung auf eine Beleg-Detail-Log wiegt schwerer als die Trennung, und
 - English: `acceptance quality`
 - German: `Abnahme-Qualität`
 - Definition: How a journal entry was finally accepted relative to the agent's proposal — the success signal of the agent loop. Values on `client_journal_entry.acceptance_quality`: `ai_unmodified` (proposal accepted untouched), `ai_edited` (proposal edited before accept), `manual_only` (booked without a proposal), `imported` (DATEV history).
-- Notes: Set by the accept paths (`booking-actions.ts`, `close-actions.ts`) and the editor path (`saveEventBooking`). Aggregated per client + booking month (shares, proposal count, median `proposal_confidence` accepted vs. rejected) in `acceptance-quality-queries.ts`; admin view `/admin/acceptance-quality`. See F05-T5.5.
+- Notes: Set by the accept paths (`journal-entry-review-core.ts`, `case-acceptance-core.ts`) and the editor path (`saveEventBookingCore` in `manual-booking-core.ts`). Aggregated per client + booking month (shares, proposal count, median `proposal_confidence` accepted vs. rejected) in `acceptance-quality-queries.ts`; admin view `/admin/acceptance-quality`. See F05-T5.5.
 
 ### Rationale source
 
@@ -944,7 +1166,7 @@ Konsolidierung auf eine Beleg-Detail-Log wiegt schwerer als die Trennung, und
 - English: `received date`
 - German: `Eingangsdatum`
 - Table/column: `ludwig.client_source_docs.received_date` (date, NOT NULL, default `current_date`)
-- Definition: Tag, an dem der Beleg **beim Mandanten eingegangen** ist — die Perioden-Achse der Belegliste und der Dashboard-Kennzahlen. Default ist der Upload-Tag; der DATEV-Metadaten-Import (`Belege_Meta_*.csv`, Spalte „Eingangsdatum") überschreibt ihn mit dem Wert aus DATEV Unternehmen Online.
+- Definition: Tag, an dem der Beleg **beim Mandanten eingegangen** ist — die Perioden-Achse der Belegliste und der Dashboard-Kennzahlen. Default ist der Upload-Tag; Intake bzw. DUO-Ablage bringen den Wert aus DATEV Unternehmen Online mit, der Agent setzt ihn über `document_update`.
 - **Abgrenzung zu den beiden anderen Datums-Achsen am Beleg:**
   - **Belegdatum** (`client_source_docs.document_date`, bei Rechnungen `client_source_docs_invoices.invoice_date`) — das Datum, das **auf dem Beleg steht**. Nullable: unbekannt bleibt unbekannt, es wird **nicht** ersatzweise mit dem Upload-Tag gefüllt.
   - **Ludwig-Eingang** (`uploaded_at`, timestamptz, VM-Feld `uploadedAt`) — wann die Datei in Ludwig landete. Setzt nur Ludwig, nichts überschreibt ihn. Die Belegliste zeigt ihn als Spalte „Ludwig-Eingang"; das Eingangsdatum bleibt die Perioden-Achse und steht in der Detailansicht als „Eingang lt. DATEV", wo der DATEV-Import es gesetzt hat. Die UI zeigt die beiden nie unter demselben Label.
@@ -964,6 +1186,23 @@ Konsolidierung auf eine Beleg-Detail-Log wiegt schwerer als die Trennung, und
   4. **Nicht jede Belegart bekommt einen Subtyp.** Container-Belegarten — Kontoauszug (`bank_statement_pdf`), Kreditkartenabrechnung (`credit_card_statement`), Reisekostenabrechnung (`travel_expense_report`) — tragen keine eigenen Fachfelder, sondern klammern andere: ihre Struktur liegt am Import-Batch (`client_bank_import_batches`: Zeitraum, Anfangs-/Endsaldo, Auszugsnummer, Zeilenzahl) bzw. an den Kind-Belegen der Dokumentgruppe (`parent_source_doc_id` + `collection_kind`, `belege.md` R25). Für sie ist eine Subtyp-Tabelle ausdrücklich nicht vorgesehen. Der Renderer-Registry-Eintrag „Container/Deckblatt" hängt an der Gruppen-Relation, nicht an der Belegart — die Registry je Belegart führt nur Rechnung und Vertrag. (Owner-Rückfrage Design-System B2, 2026-09-04.)
 - Notes: Konkretisiert die „Datenmodell-Schichten"-Tabelle oben (Zeile „Quelle (Dokument)" / „Quelle (Subtyp Rechnung)"). Owner-Entscheidung 2026-06-03: Beleg ↔ Rechnung sprachlich/UI-seitig sauber als Oberbegriff ↔ Ausprägung führen.
 
+### Document page facts (Beleg-Seiten-Fakten)
+
+- English: `document page facts`
+- German: `Beleg-Seiten-Fakten`
+- Table/column: `ludwig.client_document_pages` (eine Zeile je `stored_file_id` + `page_number`)
+- Definition: Was technisch auf einer Seite einer Datei steht — Text, Lesemethode (`pdf_text_layer`, `local_ocr`, `none`), Qualität (`ok`, `sparse`) und die Wörter mit Box, normiert auf 0..1 (Ursprung oben links). Einmal gelesen vom Paket `document-reader`, abgelegt von `workflows`, genutzt von den folgenden Stufen (Classifier per `pre_extracted`). Ein Split-Kind erbt die Seiten seines Bereichs von der Mutter, neu ab 1 nummeriert, unter seiner eigenen Datei.
+- Data type: Tabelle; DTO `ludwig.shared.document_pages.DocumentPageFacts` / `PageWord` (F437).
+- Notes: Nicht verwechseln mit `PageFactsGateway` im Classifier — das ist die LLM-Seitenart-Erkennung der Sammel-PDF-Segmentierung, keine technische Lese-Fakten. Zielbild: `docs/concepts/document-processing.md` §3 P1.
+
+### Source doc file representation (Datei-Repräsentation)
+
+- English: `source doc file representation`
+- German: `Datei-Repräsentation`
+- Table/column: `ludwig.client_source_doc_files` (`source_doc_id`, `stored_file_id`, `role`, `page_range`)
+- Definition: Welche Datei in welcher Rolle zu einem Beleg gehört: `original` (genau eine je Beleg; bei einem Split-Kind die Datei der Mutter mit `page_range`), `derived_cut` (das Schnitt-PDF des Kindes), `visualization`, `attachment`. Ein Trigger auf `client_source_docs` legt `original` und `derived_cut` für jeden Schreiber an (F437).
+- Data type: Tabelle, `role` text CHECK (4 Werte), `page_range` im Format `"5-7"` wie `split_page_range`.
+
 ### Document status (Belegstatus)
 
 - English: `document status`
@@ -971,22 +1210,22 @@ Konsolidierung auf eine Beleg-Detail-Log wiegt schwerer als die Trennung, und
 - Table/column: `ludwig.client_source_docs.status` (+ `review_reason`, `review_note`, `done_at`, `done_via`, `done_reason`)
 - Definition: **Eine** State-Machine am Beleg bis „erledigt" (F289, belege.md R14): `pending` (Einordnung läuft/steht an) → `extracting` (Auslese läuft; bei Rechnungen ist `processing_stage` die Unterstufe) → `bookable` (fertig, bereit für Sachverhalt und Buchung) → `done` (erledigt); dazu die Prüfstufen `agent_review` und `human_review` und `deleted` (Soft-Delete). Die DB erzwingt die erlaubten Übergänge (Trigger `zz_guard_source_doc_status`); TS schreibt nur über `transitionSourceDoc`.
 - Data type: text CHECK (7 Werte), Default `pending` (Migration 20260925100000).
-- Notes: Ersetzt seit F289 den Inbox-Status (`classified` …), den Pipeline-Status am Invoice-Subtyp, die Review-Disposition und die Nachbesserungsspalte am Beleg. Kein Retry an `done` — zurück nur über `reopened` (done → bookable, `reopen_doc`). Registry-Achse `document_status`. Nach außen (Intake-API v3) weiter als `verdict`/`docStatus` abgebildet (`intake/domain/legacy-doc-verdict.ts`).
+- Notes: Ersetzt seit F289 den Inbox-Status (`classified` …), den Pipeline-Status am Invoice-Subtyp, die Review-Disposition und die Nachbesserungsspalte am Beleg. Kein Retry an `done` — zurück nur über `reopened` (done → bookable, `document_transition(to=reopened)`). Registry-Achse `document_status`. Nach außen (Intake-API v2) weiter als `verdict`/`docStatus` abgebildet (`intake/domain/legacy-doc-verdict.ts`).
 
 ### Agent review (Agent-Prüfung)
 
 - English: `agent review`
 - German: `Agent-Prüfung` / Label „Ludwig prüft"
 - Table/column: `client_source_docs.status='agent_review'` + `review_reason`
-- Definition: Unsere Verfahren sind an diesem Beleg gescheitert — **immer zuerst der Agent** ist dran. `review_reason` sagt woran: `classification_error`, `unknown_form`, `unsplit_collection`, `manual_extraction`, `extraction_error`, `open_findings`, `job_failed`, `processing_stuck`. Die Menge ist `list_docs(bucket='repair')`, die Nachbesserungsliste des Agenten; Gate 1b zählt sie mit.
-- Notes: Hinaus: lösen/korrigieren → `bookable`, erledigen → `done`, Retry → `pending`/`extracting`, nicht lösbar → `escalate_doc_review` (→ *Kanzlei-Prüfung*). Registry-Achse `document_review_reason`.
+- Definition: Unsere Verfahren sind an diesem Beleg gescheitert — **immer zuerst der Agent** ist dran. `review_reason` sagt woran: `classification_error`, `unknown_form`, `unsplit_collection`, `manual_extraction`, `extraction_error`, `open_findings`, `job_failed`, `processing_stuck`. Die Menge ist `document_search(bucket='repair')`, die Nachbesserungsliste des Agenten; Gate 1b zählt sie mit.
+- Notes: Hinaus: lösen/korrigieren → `bookable`, erledigen → `done`, Retry → `pending`/`extracting`, nicht lösbar → `document_transition(to=human_review)` (→ *Kanzlei-Prüfung*). Registry-Achse `document_review_reason`.
 
 ### Human review (Kanzlei-Prüfung)
 
 - English: `human review`
 - German: `Kanzlei-Prüfung` / „Kanzlei prüft"
 - Table/column: `client_source_docs.status='human_review'` + `review_reason` + `review_note`
-- Definition: Der Beleg liegt bei der Kanzlei. Hinein führt nur der Agent (`escalate_doc_review`, Pflicht-Grund in `review_note`) oder ein **benannter System-Sonderfall** direkt aus `pending`: `statement_account_missing` (Bankkonto eines Kontoauszugs fehlt) und `statement_check_failed` (Prüfkette des Auszugs gerissen, Befund in `review_note`). Aus `extracting` oder `bookable` führt kein Weg dorthin.
+- Definition: Der Beleg liegt bei der Kanzlei. Hinein führt nur der Agent (`document_transition(to=human_review)`, Pflicht-Grund in `review_note`) oder ein **benannter System-Sonderfall** direkt aus `pending`: `statement_account_missing` (Bankkonto eines Kontoauszugs fehlt) und `statement_check_failed` (Prüfkette des Auszugs gerissen, Befund in `review_note`). Aus `extracting` oder `bookable` führt kein Weg dorthin.
 - Notes: Zurück an Ludwig nur mit Pflicht-Grund (`returnSourceDocToAgent`). Ein neuer Sonderfall ist ein neuer `review_reason`-Code.
 
 ### Document completion (Beleg-Erledigung)
@@ -994,10 +1233,10 @@ Konsolidierung auf eine Beleg-Detail-Log wiegt schwerer als die Trennung, und
 - English: `document completion`
 - German: `Beleg-Erledigung` / `erledigt`
 - Table/column: `ludwig.client_source_docs.status='done'` + `done_at` (Trigger-Stempel) + `done_via` + `done_reason`
-- Definition: Der Beleg ist **fachlich durch** — es ist nichts mehr an ihm zu tun. `done_via` sagt wodurch: `booking` (lebende Buchung), `no_booking_required` (Verzicht an jedem Beleg-Ereignis), `case_closed` (Sachverhalt ohne Buchung geschlossen), `superseded` (durch andere Belege ersetzt), `import` (EXTF-Lieferung, Kontoauszug-Import), `manual` (`complete_doc` / von Hand, Pflicht-Begründung; auch Textdublette R36), `replaced` / `rejected` (nicht aufgehender Kontoauszug, F288). Bewusst am **Supertyp**: auch Belege ohne Invoice-Zeile werden erledigt.
+- Definition: Der Beleg ist **fachlich durch** — es ist nichts mehr an ihm zu tun. `done_via` sagt wodurch: `booking` (lebende Buchung), `no_booking_required` (Verzicht an jedem Beleg-Ereignis), `case_closed` (Sachverhalt ohne Buchung geschlossen), `superseded` (durch andere Belege ersetzt), `import` (EXTF-Lieferung, Kontoauszug-Import), `manual` (`document_transition(to=done)` / von Hand, Pflicht-Begründung; auch Textdublette R36), `replaced` / `rejected` (nicht aufgehender Kontoauszug, F288). Bewusst am **Supertyp**: auch Belege ohne Invoice-Zeile werden erledigt.
 - Notes:
   - `booking`, `no_booking_required`, `case_closed`, `superseded` setzen **DB-Trigger**; `booking`/`no_booking_required` nehmen sie auch zurück (done → bookable), wenn die Ursache fällt.
-  - Zurück in die Arbeit nur über `reopened` (done → bookable): Kanzlei („Wieder öffnen", „Zurück an Ludwig") oder Agent (`reopen_doc`), ein Kern `reopenSourceDocCompletion` (belege.md R14d).
+  - Zurück in die Arbeit nur über `reopened` (done → bookable): Kanzlei („Wieder öffnen", „Zurück an Ludwig") oder Agent (`document_transition(to=reopened)`), ein Kern `reopenSourceDocCompletion` (belege.md R14d).
   - Textdublette (belege.md R36): `duplicate_of_source_doc_id` gesetzt + nicht `done` = ein Mensch hat wieder geöffnet, nie wieder automatisch.
   - Registry-Achse `document_done_via`.
 
@@ -1006,14 +1245,14 @@ Konsolidierung auf eine Beleg-Detail-Log wiegt schwerer als die Trennung, und
 - English: `open finding`
 - German: `Offener Befund`
 - Table/column: `ludwig.client_source_docs_invoices.open_findings` (jsonb, `[{code, field?, severity, message, source_module, detail}]`)
-- Definition: Reparierbarer Interpreter-Befund (F18: `missing_required_field`, `summary_line_mismatch`), der den Ingest NICHT mehr auf `failed` blockiert — der Beleg läuft durch und steht auf `agent_review/open_findings` (Stage `interpreted`); das Offene steht strukturiert am Beleg. Agent/Mensch trägt gezielt nach (`update_invoice_extraction`, inkl. `currency`); die Korrektur wird SYNCHRON OCR-/LLM-frei re-validiert (`POST …/invoices/{id}/revalidate` → `InvoiceRevalidationService`, nur `check_integrity`) — aufgelöste Befunde verschwinden sofort, bei leerer Liste geht der Beleg auf `bookable` (Antwort `documentStatusAfter`). Seit F167 gilt das auch aus `extraction_error`/`extracting` heraus — die Prüfung entscheidet, nicht der alte Status. Korrigierte Kopfwerte tragen ihre Herkunft in `client_source_docs_invoices.field_overrides` und überstehen jeden Re-Extract (`user` schlägt `agent`); Positionen nicht (belege.md R31). Leer = nichts nachzutragen.
-- Notes: Severity bleibt `error` (Audit-Wahrheit); recoverable-Marker in `detail.recoverable`. Nicht-reparierbare Criticals (`no_open_cycle_for_date`, `totals_mismatch`, `validity_*`) failen weiterhin hart. `list_docs(bucket='repair')` zeigt sie mit `reviewReason='open_findings'`; `attach_source_doc_to_case` verlangt Datum/Brutto/Währung auch dann. CLI: `revalidate-invoice <id>`. Siehe decision-log 2026-07-17 + 2026-07-20.
+- Definition: Reparierbarer Interpreter-Befund (F18: `missing_required_field`, `summary_line_mismatch`), der den Ingest NICHT mehr auf `failed` blockiert — der Beleg läuft durch und steht auf `agent_review/open_findings` (Stage `interpreted`); das Offene steht strukturiert am Beleg. Agent/Mensch trägt gezielt nach (`document_extraction_update`, inkl. `currency`); die Korrektur wird SYNCHRON OCR-/LLM-frei re-validiert (`POST …/invoices/{id}/revalidate` → `InvoiceRevalidationService`, nur `check_integrity`) — aufgelöste Befunde verschwinden sofort, bei leerer Liste geht der Beleg auf `bookable` (Antwort `documentStatusAfter`). Seit F167 gilt das auch aus `extraction_error`/`extracting` heraus — die Prüfung entscheidet, nicht der alte Status. Korrigierte Kopfwerte tragen ihre Herkunft in `client_source_docs_invoices.field_overrides` und überstehen jeden Re-Extract (`user` schlägt `agent`); Positionen nicht (belege.md R31). Leer = nichts nachzutragen.
+- Notes: Severity bleibt `error` (Audit-Wahrheit); recoverable-Marker in `detail.recoverable`. Nicht-reparierbare Criticals (`no_open_cycle_for_date`, `totals_mismatch`, `validity_*`) failen weiterhin hart. `document_search(bucket='repair')` zeigt sie mit `reviewReason='open_findings'`; `case_link` verlangt Datum/Brutto/Währung auch dann. CLI: `revalidate-invoice <id>`. Siehe decision-log 2026-07-17 + 2026-07-20.
 
 ### Pipeline supervision (Pipeline-Supervision)
 
 - English: `pipeline supervision`
 - German: `Pipeline-Supervision`
-- Definition: Der MCP-Agent überwacht die Beleg-Pipeline und sorgt dafür, dass kein Beleg still liegen bleibt: `list_docs(bucket='in_pipeline')` liefert die Belege auf `pending`/`extracting` mit Buckets `in_flight` (arbeitet) und `stuck` (keine Bewegung seit >30 min — Zombie-Verdacht), Gescheitertes steht auf `agent_review` (`list_docs(bucket='repair')`); `retry_doc_processing` stößt gezielt einen Neu-Lauf an (ohne Invoice-Zeile → Klassifizierung, mit → `run-flow?force`). Bleibt der Beleg kaputt, schließt der Agent ihn selbst ab: PDF via `get_download_url` lesen, Extraktion korrigieren, Case anlegen/anhängen — der Case-Attach setzt einen gescheiterten Beleg mit vollständigen Kopfdaten als **Seiteneffekt** auf `bookable` (Audit `doc.completed_manually_by_agent`). Kein freies `set_status`-Tool.
+- Definition: Der MCP-Agent überwacht die Beleg-Pipeline und sorgt dafür, dass kein Beleg still liegen bleibt: `document_search(bucket='in_pipeline')` liefert die Belege auf `pending`/`extracting` mit Buckets `in_flight` (arbeitet) und `stuck` (keine Bewegung seit >30 min — Zombie-Verdacht), Gescheitertes steht auf `agent_review` (`document_search(bucket='repair')`); `document_transition(to=reprocess)` stößt gezielt einen Neu-Lauf an (ohne Invoice-Zeile → Klassifizierung, mit → `run-flow?force`). Bleibt der Beleg kaputt, schließt der Agent ihn selbst ab: PDF via `document_context` lesen, Extraktion korrigieren, Case anlegen/anhängen — der Case-Attach setzt einen gescheiterten Beleg mit vollständigen Kopfdaten als **Seiteneffekt** auf `bookable` (Audit `doc.completed_manually_by_agent`). Kein freies `set_status`-Tool.
 - Notes: Der Retry-Counter ist das Audit-Event `doc.pipeline_retried_by_agent` (max. 3 ohne `force`). Ablauf: Playbook „Pipeline-Supervision" (`agent-playbooks.md`); Entscheidung: decision-log 2026-07-06. Orthogonal zur *Kanzlei-Prüfung* (wer korrigiert, wenn der Agent nicht weiterkommt) — hier geht es um Pipeline-Durchsatz, nicht um Werte-Qualität.
 
 ### Document axes guard (REQ-004 #3)
@@ -1056,14 +1295,22 @@ Konsolidierung auf eine Beleg-Detail-Log wiegt schwerer als die Trennung, und
 - German: `Richtungszeile`
 - Definition: Deterministisch gerenderte Kopfzeile über der Beleg-Zusammenfassung, abgeleitet ausschließlich aus verifizierten strukturierten Feldern (`doc_direction` + Gegenpartei + Betrag), z.B. `Eingangsrechnung von Telekom · 119,00 EUR` / `Ausgangsrechnung an Musterholding Management · 20.000,00 EUR`. Fehlt `doc_direction`, gibt es KEINE Zeile — lieber nichts als geraten (Owner 2026-08-14).
 - Data type: pure Funktion `renderDocDirectionLine` / `prefixSummaryWithDirectionLine` in `apps/web/src/modules/source-docs/domain/doc-direction-line.ts`.
-- Example: `get_case`-Events und `list_docs(open)` liefern die Summary mit vorangestellter Richtungszeile; die Invoice-Detailansicht (GlanceCard) zeigt sie fett über der `document_summary`.
+- Example: `case_context`-Events und `document_search(open)` liefern die Summary mit vorangestellter Richtungszeile; die Invoice-Detailansicht (GlanceCard) zeigt sie fett über der `document_summary`.
 - Notes: Hintergrund: Die Classifier-`summary` ist Orientierungs-Info und trifft seit dem Prompt-Update 2026-08-14 bewusst keine Richtungsaussagen mehr (Vorfall: Summaries dreier SCV-Ausgangsrechnungen behaupteten die falsche Richtung, das strukturierte Feld war korrekt). Richtung kommt ausschließlich aus dem verifizierten Rollen-Feld.
+
+### Document profile (Belegprofil)
+
+- English: `document profile`
+- German: `Belegprofil`
+- Definition: Benannte Belegsorte innerhalb einer Form, die den Verarbeitungsweg bestimmt (Konzept §3 P2/P6): die Form sagt, was ein Beleg ist, das Profil, wie er gelesen und weitergereicht wird.
+- Table: `ludwig.client_document_profiles` (Key je Scope, `status` draft/active), am Beleg `client_source_docs.class_document_profile_key` (F446).
+- Notes: Keys englisch in kebab-case (`ebay-settlement-report`). Erstes aktives Profil `ebay-settlement-report` (F497): Marker im Classifier, Auslese per Job `statement_extract`, Import als Auszug des Zahlungskontos. Die übrigen System-Profile sind `draft`.
 
 ### Document form
 
 - English: `document form`
 - German: `Belegform`
-- Definition: One axis of `Document classification`. Describes the formal shape of the document, which drives the downstream pipeline choice. Values: `commercial_invoice`, `fuel_receipt`, `hospitality_receipt`, `cash_receipt`, `bank_statement`, `credit_card_statement`, `cash_register_closing`, `payment_reminder`, `payroll_slip`, `expense_report`, `delivery_note`, `contract`, `tax_assessment`, `tax_filing_summary`, `accounting_report`, `document_collection`, `other`, `unknown`. **Erweiterbare** Achse — ein neuer Wert braucht einen typed PR, eine Migration UND eine Zeile in der Mapping-Quelle (`docs/topics/belege.md` § 5); der Deckungsgleichheits-Test erzwingt das.
+- Definition: One axis of `Document classification`. Describes the formal shape of the document, which drives the downstream pipeline choice. Values: `commercial_invoice`, `fuel_receipt`, `hospitality_receipt`, `cash_receipt`, `transport_ticket`, `own_receipt`, `bank_statement`, `credit_card_statement`, `cash_register_closing`, `payment_reminder`, `payroll_slip`, `expense_report`, `third_party_settlement`, `delivery_note`, `contract`, `tax_assessment`, `tax_filing_summary`, `accounting_report`, `not_bookkeeping`, `document_collection`, `other`, `unknown`. **Erweiterbare** Achse — ein neuer Wert braucht einen typed PR, eine Migration UND eine Zeile in der Mapping-Quelle (`docs/topics/belege.md` § 5); der Deckungsgleichheits-Test erzwingt das.
 - Data type: enum value (Python `DocumentForm`)
 - Example: `fuel_receipt` for a Tankquittung.
 - Notes: Each form maps to a distinct downstream handler:
@@ -1079,6 +1326,10 @@ Konsolidierung auf eine Beleg-Detail-Log wiegt schwerer als die Trennung, und
   - `tax_assessment` → Steuerbescheid einer Behörde. Nachweisbeleg, **kein** Umsatzbeleg: kein Invoice-Subtyp, keine Richtung. Neu mit F87 (war ein P8-Phantom: der Interpreter kannte den Wert, der Classifier konnte ihn nicht vergeben, also liefen Bescheide als Rechnung durch).
   - `tax_filing_summary` → eigene Steuererklärung / Voranmeldung (USt-VA, ZM, ELSTER-Protokoll). Wie `tax_assessment`. Zweites P8-Phantom.
   - `accounting_report` → DATEV-Eigenauswertung (USt-Werteblatt, SuSa, BWA, Kontennachweis). **Kein Beleg** — wird automatisch erledigt. Bewusst EINE Sammel-Form: kein Folgeprozess unterscheidet die Auswertungsarten. Neu mit F87/O7.
+  - `transport_ticket` → Fahrausweis (Bahnticket, ÖPNV, Flugschein; § 34 UStDV). Leistungsbeleg mit Invoice-Flow, analog `fuel_receipt`. Neu mit F438.
+  - `own_receipt` → Eigenbeleg/Ersatzbeleg des Mandanten. Invoice-Flow (Betrag/Datum werden ausgelesen); kein Vorsteuerabzug ist Buchungs-, nicht Pipeline-Sache. Neu mit F438.
+  - `third_party_settlement` → Abrechnung eines Dritten über viele Vorgänge (KV/KZV-Bescheid, PVS-Honorarauszug, Krankenkassen-Abrechnung, PSP-/Marktplatz-Settlement, Zentralregulierung, Hausverwaltung). Oberform — Differenzierung und Positionslisten-Extraktion folgen mit Profil-Registry (W3) und W5. Kategorie `internal`, wird wie Lohn als Sachverhalt gebucht. Neu mit F438. eBay-Abrechnungsbericht: Profil mit Auszug, F497 — als Kontoauszug des eBay-Zahlungskontos eingelesen.
+  - `not_bookkeeping` → gehört nicht in die laufende Buchhaltung (private Unterlage, private Steuererklärungs-Unterlage, Werbung). Routing `human_review/not_bookkeeping` — Disposition Kanzlei, nicht Agent. Neu mit F438.
 
   **`document_form` ist bewusst nicht in `document_type` umbenannt** (entschieden 2026-05-14). „Form" beschreibt die **visuelle/Verarbeitungs-Form** des Belegs — die Achse, an der der `invoice-preprocessor` formspezifische Vereinfachungen aufhängt (Tankbeleg-Layout vs. Bewirtungsbeleg-Layout vs. Rechnungs-Layout). Den **fachlichen Belegtyp** (Eingangs- vs. Ausgangsrechnung) trägt orthogonal `doc_direction`, den **Folgeprozess** `doc_category`. Die Felder bleiben getrennt: ein und derselbe `fuel_receipt` (Form) kann je nach UStID-Lage `inbound` ODER `outbound` sein — die Kategorie ist in beiden Fällen `performance`.
 
@@ -1095,12 +1346,12 @@ Konsolidierung auf eine Beleg-Detail-Log wiegt schwerer als die Trennung, und
   | `payment` | Zahlungsbeleg | tatsächlicher Geldfluss auf einem Geldkonto | kein Subtyp, Agent-Bucket |
   | `foundation` | Nachweisbeleg | rechtliche Nachweis-/Berechnungsgrundlage ohne eigene Rechnungsstellung | Kontext-Zweig; Contract-Extract nur bei Form `contract` |
   | `internal` | Interner Beleg | selbst erstellt (GoBD-Eigenbelegprinzip) | Agent-Bucket |
-  | `report` | Auswertung | **kein Beleg** — Bericht über bereits gebuchte Vorgänge | `bookable` + Hinweis; der Agent quittiert per `complete_doc` mit festem Grund |
+  | `report` | Auswertung | **kein Beleg** — Bericht über bereits gebuchte Vorgänge | `bookable` + Hinweis; der Agent quittiert per `document_transition(to=done)` mit festem Grund |
   | NULL | Unklassifiziert | Auffang (`other`/`unknown`), Container (`document_collection`) oder noch nicht klassifiziert | Agent-Bucket — nie stilles Raten |
 
 - Data type: text, CHECK `client_source_docs_doc_category_check` (Migration `20260820160000`)
 - Example: `tax_assessment` → `foundation` (kein Invoice-Subtyp, keine Richtungszeile); `accounting_report` → `report` (sofort erledigt).
-- **Wer sie schreibt:** ausschließlich der Classify-Writer bzw. `processSourceDoc`, **deterministisch aus `document_form`** über genau eine Mapping-Quelle — `apps/web/src/modules/source-docs/domain/document-form-mapping.ts` und ihr Python-Spiegel `buchassi_shared.document_category`. Nie das LLM, nie händisch. Ein Override der Belegform zieht die Kategorie automatisch nach.
+- **Wer sie schreibt:** ausschließlich der Classify-Writer bzw. `processSourceDoc`, **deterministisch aus `document_form`** über genau eine Mapping-Quelle — `apps/web/src/modules/source-docs/domain/document-form-mapping.ts` und ihr Python-Spiegel `ludwig.shared.document_category`. Nie das LLM, nie händisch. Ein Override der Belegform zieht die Kategorie automatisch nach.
 - **Verhältnis zu `source_doc_type` (C5):** die Kategorie liegt **über** dem Diskriminator, ersetzt ihn nicht. Beide kommen aus derselben Mapping-Zeile und können deshalb nicht auseinanderlaufen. n:1 von Typ zu Kategorie, nie 1:n. Listen filtern auf die Kategorie (fachlich stabil), Renderer auf den Typ.
 - **Subtyp-Gate:** `client_source_docs_invoices` entsteht nur noch bei `doc_category='performance'`. Umgekehrt gilt das nicht — Lieferschein und Mahnung sind Leistungsbelege ohne Invoice-Zeile.
 - Notes: Ersetzt vier historisch getrennt gepflegte Formen-Listen, die nachweislich auseinandergelaufen waren (P8/B21) — eine davon enthielt Werte, die der Classifier gar nicht vergeben konnte. Darstellung über die Status-Registry-Achse `document_category`. Vollständige Achsen-Tabelle, MECE-Nachweis und Owner-Entscheide: `docs/topics/belege.md`; Herleitung des Modells: git-Historie von `docs/concepts/belegkategorien-vier-saeulen.md`.
@@ -1112,7 +1363,7 @@ Konsolidierung auf eine Beleg-Detail-Log wiegt schwerer als die Trennung, und
 - Definition: `Document form`-Wert (`document_collection`) für ein PDF, das **mehrere eigenständige Teildokumente** enthält (z. B. Kreditkartenabrechnung + dahinter die Einzelbelege). Abgrenzung: eine mehrseitige Einzelrechnung (eine Rechnungsnummer, fortlaufende Seiten) ist KEIN `document_collection`.
 - Data type: enum value (Python `DocumentForm`; eingeführt mit F16)
 - Example: 24-Seiten-PDF: Seiten 1–4 American-Express-Abrechnung, Seiten 5–24 Einzelbelege.
-- Notes: Qualifiziert nie für den Invoice-Flow; mappt auf `source_doc_type='other'`. Seit F71 (decision-log 2026-08-12) zerlegt der **Server** das PDF: der Classifier liefert den Split-Plan maschinenlesbar als `Page segments`, ein `source_doc_split`-Job schneidet und speist jeden Teil regulär ein. Nur wenn das Gate nicht greift (Konfidenz < 0.8, kein/verworfener Plan), landet das Original auf `agent_review/unsplit_collection` (`list_docs(bucket='repair')`) beim lokalen Agenten (Playbook „Sammel-PDF zerlegen"). Die Kette Original → Teilbelege trägt `parent_source_doc_id` + `split_page_range`; das zerlegte Original wird per `supersede_source_doc` abgehakt (superseded, nicht deleted — Spur bleibt).
+- Notes: Qualifiziert nie für den Invoice-Flow; mappt auf `source_doc_type='other'`. Seit F71 (decision-log 2026-08-12) zerlegt der **Server** das PDF: der Classifier liefert den Split-Plan maschinenlesbar als `Page segments`, ein `source_doc_split`-Job schneidet und speist jeden Teil regulär ein. Nur wenn das Gate nicht greift (Konfidenz < 0.8, kein/verworfener Plan), landet das Original auf `agent_review/unsplit_collection` (`document_search(bucket='repair')`) beim lokalen Agenten (Playbook „Sammel-PDF zerlegen"). Die Kette Original → Teilbelege trägt `parent_source_doc_id` + `split_page_range`; das zerlegte Original wird per `document_transition(to=superseded)` abgehakt (superseded, nicht deleted — Spur bleibt).
 
 ### Page segments
 
@@ -1140,6 +1391,16 @@ Konsolidierung auf eine Beleg-Detail-Log wiegt schwerer als die Trennung, und
   | `refund` | Aufwandsminderung auf Ursprungskonto (Aussteller erstattet Mandanten) | Erlösminderung auf Ursprungskonto (Mandant erstattet Kunden) | **ja** |
 
   Das deutsche Wort „Gutschrift" ist mehrdeutig: Storno-Gutschrift = `credit_note`, §14-UStG-Selbstabrechnung = `self_billing`, Rückzahlung ohne Storno-Bezug = `refund`. Eine `credit_note` oder `self_billing` **ist** ein Rechnungsdokument: steht daneben eine Zahlungsbeleg-Form, korrigiert `reconcile_form_with_kind` die Form auf `commercial_invoice` (`belege.md` R7b) — `refund` bewusst nicht, eine Erstattung kann legitim auf einem Kontoauszug stehen. Der Classifier-Prompt entscheidet anhand Vorzeichen + Wortlaut + Aussteller-Rolle + periodisches Abrechnungs-Schema. `reimbursement` (Auslagenersatz / Reisekosten) wird hier NICHT modelliert — Signal lebt in `DocumentForm.expense_report`. Stand 2026-05-14 sind im Booking-Modul nur `original` und `self_billing` als Buchungs-Pfad implementiert; `credit_note` und `refund` parken auf Review, bis der Vorzeichen-Flip-Pfad steht.
+
+### Recognition method
+
+- English: `recognition method`
+- German: `Erkennungsmethode`
+- Table/column: `ludwig.client_source_docs.recognition_method` (text, nullable, CHECK)
+- Definition: Wie die Einordnung (`class_document_form` + Achsen) zustande kam — macht die Eskalationsleiter des Zielbilds messbar (`docs/concepts/document-processing.md` §3 P2). Werte: `marker` (deterministische Regel vor dem LLM, z. B. DUO-Platzhalter) · `template` · `structured_source` · `llm_strong` (alle drei noch ohne Schreiber, Open/Closed) · `llm` (LLM-Klassifikation) · `agent` (MCP-Override `document_classify`) · `human` (Web-Override der Kanzlei). NULL = Altdaten oder noch nicht klassifiziert.
+- Data type: text, CHECK `client_source_docs_recognition_method_check` (Migration `20261008220000`)
+- Example: `marker` für einen DUO-Platzhalter; `human` nach einer Belegform-Korrektur im Web.
+- Notes: Schreiber sind der Classify-Writer (`update_classification`, aus `DocumentClassificationResult.recognition_method`) und der EINE Override-Write (`updateClassificationOverride`, unterschieden über den Aufrufer). Die E-Rechnungs-Darstellungs-Marke (P37) klassifiziert nicht und lässt den Wert auf `llm`. Neu mit F438.
 
 ### Company mention
 
@@ -1207,7 +1468,7 @@ Konsolidierung auf eine Beleg-Detail-Log wiegt schwerer als die Trennung, und
 - Definition: Per-client rule for which collective creditor account (`Sammelpersonenkonto`) a document **without a resolved creditor** is booked against. `first_account` (default) always uses the configured `diverse_creditor_account_number` (e.g. 70000). `first_letter` ("Standard DATEV") routes to the `Diverse X` account whose letter bucket contains the first letter of the raw OCR `vendor_name` (e.g. `Müller` → `Diverse M`), falling back to the configured account when no bucket matches (Q/X/Y/Z, no `vendor_name`, or a client without letter accounts).
 - Data type: `ludwig.platform_clients.diverse_strategy` — text enum (`'first_account' | 'first_letter'`, default `'first_account'`)
 - Example: client with `diverse_strategy='first_letter'`; invoice `vendor_name='Saturn'` with `creditor_id IS NULL` → booked against `Diverse ST` (account 71700).
-- Notes: The `Diverse X` accounts (`Diverse A`, `Diverse I/J`, `Diverse ST`, `Diverse UVW`, …) come from the DATEV onboarding import as collective-account partners (`client_business_partners.datev_is_various_account = true`; DATEV-API-Entsprechung: `accounting_information.is_various_account`). `is_collective_account` ist die **einzige** Wahrheit — die frühere Denormalisierung `client_ledger_accounts.account_role='collective_creditor'` ist mit Migration 20260729270000 entfernt (W1, Datenmodell-Review 2026-07-29). Resolution lives in `DiverseCreditorPoolResolver.resolve()` / `match_diverse_account()`. Uses the raw `vendor` term (not `creditor`) because it acts pre-resolution — see the vendor vs. creditor convention under **Creditor**. **Known limitation:** the downstream collective-pool services (`CreditorBulkProposalService`, `CreditorInvoiceRebookService`) still key off the single configured account and do not yet scan letter-bucketed bookings — see `docs/topics/konten.md` (Diverse-Strategie). Der TS-Guard `B11_COLLECTIVE_ACCOUNT_LETTER` (F299) liest die Buckets aus den Kontenplan-Namen (`client_ledger_accounts.account_name` „Diverse X"), nicht aus `diverse_strategy` — sie gelten bei ≥ 2 Buckets unabhängig von der Strategie.
+- Notes: The `Diverse X` accounts (`Diverse A`, `Diverse I/J`, `Diverse ST`, `Diverse UVW`, …) come from the DATEV onboarding import as collective-account partners (`client_business_partners.datev_is_various_account = true`; DATEV-API-Entsprechung: `accounting_information.is_various_account`). `is_collective_account` ist die **einzige** Wahrheit — die frühere Denormalisierung `client_ledger_accounts.account_role='collective_creditor'` ist mit Migration 20260729270000 entfernt (W1, Datenmodell-Review 2026-07-29). Den Buchstaben-Bucket bestimmt `resolveCollectiveAccount()` (`apps/web/src/modules/accounting-cases/domain/collective-account.ts`, F299); das Konto wählt der Buchungsagent, der Guard prüft es (der Python-Resolver ist mit F392 weg). Uses the raw `vendor` term (not `creditor`) because it acts pre-resolution — see the vendor vs. creditor convention under **Creditor**. Der TS-Guard `B11_COLLECTIVE_ACCOUNT_LETTER` (F299) liest die Buckets aus den Kontenplan-Namen (`client_ledger_accounts.account_name` „Diverse X"), nicht aus `diverse_strategy` — sie gelten bei ≥ 2 Buckets unabhängig von der Strategie.
 
 ### Debtor
 
@@ -1241,7 +1502,7 @@ Konsolidierung auf eine Beleg-Detail-Log wiegt schwerer als die Trennung, und
 - German: `Buchung`
 - Definition: One double-entry posting — the durable output of every bookkeeping workflow, whether imported from a historical DATEV journal, AI-proposed, or entered manually. Belongs to exactly one `FiscalYear`.
 - Data type: `ludwig.client_journal_entry` (Header) + `ludwig.client_journal_entry_line` (Side-Pattern). *(Vormals `client_bookkeeping_entries` — Refactor 2026-05-27.)*
-- Notes: Carries an explicit `origin` (`ai_proposed` | `manual` | `system_reversal` | `recurring_rule` | `client_import`) that audits where the row came from — `system_reversal` = vom Server abgeleitete Generalumkehr eines exportierten Satzes (F263) oder eines Satzes aus dem DATEV-Spiegel (`reverses_mirror_entry_id`, F268), `recurring_rule` = vom Regelwerk wiederkehrender Buchungen erzeugt, `client_import` = aus dem **Buchungsstapel des Mandanten** importiert (F69, seit 2026-08-11: der Mandant hat in seiner eigenen Software gebucht, Ludwig ist der Weg nach DATEV — eigener Zweig in `client_effective_journal_lines`, kein Judge-Pass, Löschschutz gegen `submit_booking_proposal`, Herkunfts-Label „Mandantenstapel"). Der frühere Wert `datev_import` ist mit K11 (2026-08-05) **entfallen**: `client_journal_entry` ist per Definition „bei uns", DATEV-Fremdbuchungen leben im Spiegel (`client_datev_mirror_entries`). Eine manuelle Korrektur eines Agent-/Regel-Vorschlags flippt auf `manual` und schreibt `created_by_user_id` (Ersteller/Korrigierer; NULL bei Agent/Regelwerk/Import). Plus a separate `status` lifecycle (`proposed` | `accepted` | `posted` | `reversed`). `business_partner_id` am Header (F76: ein Feld statt `creditor_id`/`debtor_id`) ist bewusste Denormalisierung für OPOS-Queries (Wahrheit: die Lines). See `docs/topics/konten.md`.
+- Notes: Carries an explicit `origin` (`ai_proposed` | `manual` | `system_reversal` | `recurring_rule` | `client_import`) that audits where the row came from — `system_reversal` = vom Server abgeleitete Generalumkehr eines exportierten Satzes (F263) oder eines Satzes aus dem DATEV-Spiegel (`reverses_mirror_entry_id`, F268), `recurring_rule` = vom Regelwerk wiederkehrender Buchungen erzeugt, `client_import` = aus dem **Buchungsstapel des Mandanten** importiert (F69, seit 2026-08-11: der Mandant hat in seiner eigenen Software gebucht, Ludwig ist der Weg nach DATEV — eigener Zweig in `client_effective_journal_lines`, kein Judge-Pass, Löschschutz gegen `entry_propose`, Herkunfts-Label „Mandantenstapel"). Der frühere Wert `datev_import` ist mit K11 (2026-08-05) **entfallen**: `client_journal_entry` ist per Definition „bei uns", DATEV-Fremdbuchungen leben im Spiegel (`client_datev_mirror_entries`). Eine manuelle Korrektur eines Agent-/Regel-Vorschlags flippt auf `manual` und schreibt `created_by_user_id` (Ersteller/Korrigierer; NULL bei Agent/Regelwerk/Import). Plus a separate `status` lifecycle (`proposed` | `accepted` | `posted` | `reversed`). `business_partner_id` am Header (F76: ein Feld statt `creditor_id`/`debtor_id`) ist bewusste Denormalisierung für OPOS-Queries (Wahrheit: die Lines). See `docs/topics/konten.md`.
 
 ### Bookkeeping invoice
 
@@ -1369,7 +1630,7 @@ Konsolidierung auf eine Beleg-Detail-Log wiegt schwerer als die Trennung, und
 - German: `DATEV-Sync-Zustand`
 - Definition: Zustandsmaschine eines Kontos gegenüber DATEV (F76; ersetzt `needs_datev_creation` + den impliziten 89xxxx-Platzhalter-Test): `local_only` (Ludwig kennt es, DATEV nicht — ggf. 89xxxx-Platzhalter) → `creation_pending` (Anlage an die Bridge übergeben) → `synced` (Nummer + ggf. `datev_account_id` stehen, Writeback erledigt); `disappeared` = ein Re-Import kennt das Konto nicht mehr.
 - Data type: `ludwig.client_ledger_accounts.datev_sync_state` — text enum, NOT NULL, default `'synced'`.
-- Example: `create_creditor` legt das 89xxxx-Konto mit `datev_sync_state='local_only'` an; der Bridge-Writeback (`setPersonalAccountDatev`) stellt auf `'synced'`.
+- Example: `partner_create` legt das 89xxxx-Konto mit `datev_sync_state='local_only'` an; der Bridge-Writeback (`setPersonalAccountDatev`) stellt auf `'synced'`.
 - Notes: Orthogonal zu `status` (aktiv/inaktiv — fachliche Aussage, keine Sync-Aussage). Die Zustandsmaschine gehört ans KONTO, nicht an den Partner: Neuanlage ist ein Konto-Vorgang; der Partner behält nur `onboarding_state`. Status-Registry-Achse `ledger_account_datev_sync`.
 
 ### Mandanten-Profil
@@ -1394,10 +1655,10 @@ Konsolidierung auf eine Beleg-Detail-Log wiegt schwerer als die Trennung, und
 
 - English: `payment account`
 - German: `Zahlungs-/Bankkonto des Mandanten`
-- Definition: Eigenes Bank-, Kassen-, Kreditkarten- oder PayPal-Konto des Mandanten mit IBAN/BIC. Über `auto_assign_payment_method` kann das Konto als Auto-Routing-Ziel für genau eine Zahlungsart markiert werden — dann bucht der Picker bezahlte Belege dieser Zahlungsart direkt gegen dieses Konto (`via_payment_account`). Ohne Markierung läuft die Buchung über das Kreditor-Personenkonto (`via_creditor`).
-- Data type: entity (`ludwig.client_payment_accounts` row, uuid PK). Optional FK auf `client_ledger_accounts`. Spalte `auto_assign_payment_method` (TEXT NULL) ist UNIQUE pro `(client_id, auto_assign_payment_method) WHERE auto_assign_payment_method IS NOT NULL`.
+- Definition: Eine Zeile in `client_payment_accounts`, die ein Mensch als Zahlungskonto bestätigt hat (F362, `confirmed_at is not null`): Bank, Kasse, Karte, Zahlungsdienstleister, Mitarbeiter-Auslagen. Die Tabelle selbst ist das Register der Geldkonten — eine Zeile je DATEV-Geldkonto, automatisch angelegt; ohne Bestätigung ist eine Zeile frei bebuchbar und erwartet keinen Auszug. Über `auto_assign_payment_method` kann das Konto als Auto-Routing-Ziel für genau eine Zahlungsart markiert werden — dann bucht der Picker bezahlte Belege dieser Zahlungsart direkt gegen dieses Konto (`via_payment_account`). Ohne Markierung läuft die Buchung über das Kreditor-Personenkonto (`via_creditor`).
+- Data type: entity (`ludwig.client_payment_accounts` row, uuid PK). Optional FK auf `client_ledger_accounts`. `confirmed_at` (timestamptz NULL, F362): Zeitpunkt der Bestätigung als Zahlungskonto, NULL = Geldkonto aus dem Kontenplan. Spalte `auto_assign_payment_method` (TEXT NULL) ist UNIQUE pro `(client_id, auto_assign_payment_method) WHERE auto_assign_payment_method IS NOT NULL`.
 - Example: `{ kind: 'bank', display_name: 'Sparkasse München Hauptkonto', iban: 'DE...', ledger_account_number: '1800', auto_assign_payment_method: null }` (klassische Hauptbank, kein Auto-Routing — Überweisungen laufen über Kreditor). `{ kind: 'paypal', display_name: 'PayPal', ledger_account_number: '1820', auto_assign_payment_method: 'paypal' }` (Direktbuchung für PayPal-Belege).
-- Notes: `kind` ist nur UI-Kategorisierung (IBAN-Feld, Icon), nicht Routing-Trigger. Pflege via `mandant.yaml` Block `payment_accounts` oder Web-UI. Frühere Kombi `kind + is_default` ist seit 2026-05-22 obsolet, ersetzt durch die explizite `auto_assign_payment_method`-Markierung.
+- Notes: Beziehung zum DATEV-Geldkonto: jedes Sachkonto mit Kontenfunktion 10 bekommt eine Zeile (Register); Zahlungskonto wird sie erst durch Bestätigung (`konten.md` R22). `kind` ist nur UI-Kategorisierung (IBAN-Feld, Icon), nicht Routing-Trigger und sagt nicht „das ist eine Bank". Pflege via `mandant.yaml` Block `payment_accounts` oder Web-UI. Frühere Kombi `kind + is_default` ist seit 2026-05-22 obsolet, ersetzt durch die explizite `auto_assign_payment_method`-Markierung.
 
 ### Mirror classification (Spiegel-Klassifikation)
 
@@ -1406,7 +1667,7 @@ Konsolidierung auf eine Beleg-Detail-Log wiegt schwerer als die Trennung, und
 - Definition: Was ein Eintrag der DATEV-Buchungshistorie für Ludwig **bedeutet** — abgeleitet aus dem Bestand, nie gespeichert. Sechs Werte in dieser Vorrang-Reihenfolge: `ludwig` (Ludwig hat den Vorgang gebucht) · `technisch` (ein Leg auf einem Vortrags-/Statistikkonto 9xxx — Saldenvortrag, EB-Wert, Umbuchung) · `opos_vortrag` (trifft einen offenen Posten auf demselben Personenkonto, hat seinen Weg über `foundOposCases`) · `zugeordnet` (in DATEV mit einem Beleg verknüpft, `document_link_guid`) · `historisch` (vor dem ersten von Ludwig bearbeiteten Zeitraum) · `fremd_offen` (der Rest: eine Buchung der Kanzlei im Arbeitszeitraum, die niemand gesichtet hat).
 - Data type: abgeleitet in `datev-mirror/infrastructure/reporting-queries.ts` (`MIRROR_CLASSIFICATIONS`, `getMirrorClassificationCounts`, `listMirrorEntriesByClassification`); keine Spalte, kein Backfill.
 - Example: Staging 2026 über beide Mandanten — 16.085 `opos_vortrag`, 3.977 `zugeordnet`, 3.586 `historisch`, 1.838 `technisch`, 214 `ludwig` und **638 `fremd_offen`**; letztere sind der eigentliche Sichtungs-Vorrat, den die rohe Zahl 25.806 verdeckte.
-- Notes: Abgrenzung zum `match_state` (`matched_ludwig`, `new_unprocessed`, `unclear`, `disappeared*`): der ist die **Achse des Abgleichs** und wird persistiert; die Klassifikation ist die **Lesart** darüber und wird jedes Mal neu gerechnet. Der Agent sichtet mit `list_datev_foreign_bookings`; nachgebucht wird nichts — was in DATEV steht, ist gebucht (`datev.md` R6a/R7). Introduced 2026-08-29 (W8/P4).
+- Notes: Abgrenzung zum `match_state` (`matched_ludwig`, `new_unprocessed`, `unclear`, `disappeared*`): der ist die **Achse des Abgleichs** und wird persistiert; die Klassifikation ist die **Lesart** darüber und wird jedes Mal neu gerechnet. Der Agent sichtet mit `ledger_get(view=datev_mirror)`; nachgebucht wird nichts — was in DATEV steht, ist gebucht (`datev.md` R6a/R7). Introduced 2026-08-29 (W8/P4).
 
 ### Statement expectation (Auszugserwartung)
 
@@ -1415,7 +1676,7 @@ Konsolidierung auf eine Beleg-Detail-Log wiegt schwerer als die Trennung, und
 - Definition: Die Antwort auf „welches Konto muss Kontoauszüge liefern — und wie hart?" in drei Stufen: **Pflicht** (fehlt der Auszug, blockt Gate 1a), **Sollte kommen** (Konto liefert oft verspätet; fehlt der Auszug, ist das ein Hinweis und eine Zeile in der Belegnachforderung), **Keine**. Abgeleitet wird nur Pflicht oder Keine, „Sollte kommen" setzt ein Mensch. Abgeleitet Pflicht genau dann, wenn eine **Bankverbindung des Mandanten aus den DATEV-Stammdaten** (`addressees` → `platform_clients.datev_bank_accounts`) über die IBAN ein Zahlungskonto trifft, **dessen Sachkonto in der Buchungshistorie bebucht ist**. Beides ist nötig: `kind='bank'` allein sagt nichts, weil die DATEV-Kontenfunktion 10 Kasse, PSP und Verrechnungskonten mitzählt und `tagPaymentAccounts` deshalb den ganzen SKR-Bankblock promotet (Staging: 80 Konten `kind='bank'`, davon 5 mit IBAN; 61015 hat 61 promotete und faktisch eine Bank).
 - Data type: `client_payment_accounts.statement_expectation` (text, CHECK `required`/`expected`/`none`, effektiv) + `statement_activity_from` / `statement_activity_to` (date), geschrieben von `syncStatementExpectations` (`clients/application/payment-account-activity-core.ts`) nach jedem DATEV-Abgleich **und nach jeder Änderung am Zahlungskonto**, idempotent und non-fatal. Daneben `statement_expectation_manual` (text, nullable): NULL = Ableitung gilt, sonst hat ein Mensch im Stammdaten-Form entschieden und die Ableitung fasst das Konto nicht mehr an. `expects_statements` (boolean) bleibt als Spiegel „Stufe ≠ Keine" (CHECK) für Leser, die nur „erwartet überhaupt?" fragen; `expects_statements_manual` ist abgelöst und wird weder gelesen noch geschrieben. Typ und Werte: `core/accounting/statement-expectation.ts`.
 - Example: 61015 — `1211 Commerzbank` (IBAN in den Stammdaten, 3757 Spiegel-Legs) erwartet Auszüge; die 60 weiteren promoteten Bankkonten (Kasse, Paypal, Ebay, Geldtransit) nicht.
-- Notes: Die Zuordnung Bankverbindung ↔ Fibu-Konto liefert DATEVconnect **nicht** (geprüft 2026-08-25 gegen die Kanzlei-Installation und beide OpenAPI-Specs — sie lebt im Zahlungsverkehr-Teil, den das Desktop-PlugIn nicht exponiert); die IBAN ist deshalb die einzige Kante. Das Aktivitätsfenster ist der Rahmen jeder Lückenprüfung — außerhalb ist ein fehlender Auszug keine Lücke. Abgrenzung zur [[Payment account retirement]]: die Abschaltung ist eine Entscheidung über die **Zukunft** eines Kontos, die Auszugserwartung eine Aussage über den **Nachweis**, den es im Zeitraum schuldet. Das Feld bindet Gate 1a des Buchungslaufs: bei Pflicht ist ein fehlender Auszug ein Blocker, bei Sollte kommen ein Hinweis (nicht quittierpflichtig in der Abnahme), bei Keine eine Warnung „ruht". Introduced 2026-08-29 (W8/P10, `bank.md` R15a); Hand-Override, Sichtbarkeit und Gate-Bindung 2026-08-30 (`bank.md` R15b) — die reine Ableitung hatte CLIENT-61015 auf 24 von 24 Konten „keine Erwartung" gestellt, weil die IBAN erst nach dem Onboarding von Hand nachgetragen wird.
+- Notes: Die Zuordnung Bankverbindung ↔ Fibu-Konto liefert DATEVconnect **nicht** (geprüft 2026-08-25 gegen die Kanzlei-Installation und beide OpenAPI-Specs — sie lebt im Zahlungsverkehr-Teil, den das Desktop-PlugIn nicht exponiert); die IBAN ist deshalb die einzige Kante. Das Aktivitätsfenster ist der Rahmen jeder Lückenprüfung — außerhalb ist ein fehlender Auszug keine Lücke. Abgrenzung zur [[Payment account retirement]]: die Abschaltung ist eine Entscheidung über die **Zukunft** eines Kontos, die Auszugserwartung eine Aussage über den **Nachweis**, den es im Zeitraum schuldet. Das Feld bindet Gate 1a des Buchungslaufs: bei Pflicht ist ein fehlender Auszug ein Blocker, bei Sollte kommen ein Hinweis (nicht quittierpflichtig in der Abnahme), bei Keine eine Warnung „ruht". Introduced 2026-08-29 (W8/P10, `bank.md` R15a); Hand-Override, Sichtbarkeit und Gate-Bindung 2026-08-30 (`bank.md` R15b) — die reine Ableitung hatte CLIENT-61015 auf 24 von 24 Konten „keine Erwartung" gestellt, weil die IBAN erst nach dem Onboarding von Hand nachgetragen wird. Eine gültige Firmen-Bankverbindung ohne Zahlungskonto erwartet ebenfalls einen Auszug (Gate 1a `bank_connection_unassigned`), außer die Kanzlei hat sie im Onboarding-Review als „kein Konto in der Buchhaltung" vermerkt (`platform_clients.ignored_bank_ibans`, F364).
 
 ### Statement regime (Auszugs-Regime)
 
@@ -1429,10 +1690,18 @@ Konsolidierung auf eine Beleg-Detail-Log wiegt schwerer als die Trennung, und
 
 - English: `payment account retirement`
 - German: `Zahlungsweg-Abschaltung`
-- Definition: Ein Zahlungskonto per `client_payment_accounts.valid_until` befristen, damit der Buchungslauf dafür keine Kontoauszugs-Deckung mehr anfordert (typisch: Alt-Kassen/Nebenkassen ohne jede Bewegung und ohne IBAN). Der Server leitet deterministisch die **letzte Bewegung** je Konto ab (max aus letztem Buchungsdatum des verknüpften Sachkontos in `client_effective_journal_lines` — Chokepoint-View, respektiert den Replay-Cutoff — und letztem `posting_date` in `client_bank_transactions`) und schlägt Abschaltung vor, wenn das Konto nie bebucht ist oder die letzte Bewegung länger als 12 Monate (`RETIREMENT_INACTIVITY_MONTHS`) vor dem Beginn des offenen Buchungszyklus liegt. Abgeschaltet wird ausschließlich nach menschlicher Bestätigung (Checkbox im Review-Block „Zahlungswege" auf der Bankkonten-Konfigurationsseite bzw. im Onboarding-Review) — nie automatisch.
+- Definition: Ein Zahlungskonto per `client_payment_accounts.valid_until` befristen, damit der Buchungslauf dafür keine Kontoauszugs-Deckung mehr anfordert (typisch: Alt-Kassen/Nebenkassen ohne jede Bewegung und ohne IBAN). Der Server leitet deterministisch die **letzte Bewegung** je Konto ab (max aus letztem Buchungsdatum des verknüpften Sachkontos in `client_effective_journal_lines` — Chokepoint-View, respektiert den Replay-Cutoff — und letztem `posting_date` in `client_bank_transactions`) und schlägt Abschaltung vor, wenn das Konto nie bebucht ist oder die letzte Bewegung länger als 12 Monate (`RETIREMENT_INACTIVITY_MONTHS`) vor dem Beginn des offenen Buchungszyklus liegt. Abgeschaltet wird ausschließlich nach menschlicher Bestätigung (Checkbox im Review-Block „Zahlungswege" unter Konfiguration → Geldkonten bzw. im Onboarding-Review) — nie automatisch.
 - Data type: Spalte `ludwig.client_payment_accounts.valid_until` (date, inklusiv); Ableitung + Schreibpfad in `apps/web/src/modules/clients/application/payment-account-activity-core.ts`.
-- Example: Nebenkasse 1601, letzte Buchung 10.05.2023, offener Zyklus ab 01.01.2026 → Vorschlag `valid_until = 2023-05-10` mit Begründung „letzte Buchung 10.05.2023 auf Konto 1601"; nie bebuchte Kasse → `valid_until = Zyklusbeginn − 1 Tag`, „keine einzige Buchung in der Historie".
+- Example: Nebenkasse 1601, letzte Buchung 10.05.2023, offener Zyklus ab 01.01.2026 → Vorschlag `valid_until = 2023-05-10` mit Begründung „letzte Buchung 10.05.2023 auf Konto 1601"; nie bebuchte Kasse → `valid_until = Zyklusbeginn − 1 Tag`, „keine Buchung in der Historie (Saldovorträge zählen nicht)". Saldovorträge (EB-Wert, Gegenkonto 9000–9009) sind keine Bewegung.
 - Notes: Abgelehnter Vorschlag (Haken raus) = Konto bleibt unbefristet aktiv, es wird nichts geschrieben. Audit-Action `payment_account.retirements_confirmed`.
+
+### Payment account standing (Kontozustand)
+
+- English: `payment account standing` — `current` · `statement_overdue` · `statement_missing` · `dormant`
+- German: `Kontozustand` — aktuell · Auszug ausstehend · Auszug fehlt · ruht
+- Definition: Ob ein bestätigtes Zahlungskonto zum Stichtag lebt und belegt ist: schuldet es einen Auszug und reicht der Nachweis nicht bis zum Ende des letzten vollen Monats, heißt es „Auszug fehlt" (Pflicht) bzw. „Auszug ausstehend" (Sollte kommen); sonst „ruht" nach drei Monaten ohne Bewegung oder wenn abgeschaltet; sonst „aktuell" (`bank.md` R15g).
+- Data type: berechnet in `bank-transactions/domain/payment-account-standing.ts` (`paymentAccountStanding`), keine Spalte.
+- Notes: F372. Abgrenzung zur [[Payment account retirement]]: die Abschaltung entscheidet ein Mensch, „ruht" stellt Ludwig fest.
 
 ### Payment channel resolution
 
@@ -1451,6 +1720,15 @@ Konsolidierung auf eine Beleg-Detail-Log wiegt schwerer als die Trennung, und
 - Data type: entity (`ludwig.client_bank_transactions` row, uuid PK; FK `payment_account_id` → `client_payment_accounts`).
 - Example: `{ posting_date: '2026-04-15', amount: '-89.90', currency: 'EUR', purpose: 'Telekom Festnetz', source: 'qonto', external_transaction_id: 'tx_abc123' }`.
 - Notes: Originalwährung wird gespeichert, EUR-Wert in `amount_eur` (Phase 1: nur EUR). Sichere Duplikate via partial unique index `(payment_account_id, external_transaction_id)`. Vergangene Zeiträume sind immutable — Re-Imports werden auf max(`posting_date`) cutoff-gefiltert.
+
+### Zahlungsart (bank_tx_kind)
+
+- English: `payment kind`
+- German: `Zahlungsart`
+- Code: `apps/web/src/modules/bank-transactions/domain/bank-tx-kind.ts` (F489)
+- Definition: Wie das Geld eines Bankumsatzes floss, aus dem Transaktionscode der Bank (GVC, ISO-BTC, Qonto-Kategorie, SWIFT-Code), sonst aus den SEPA-Tags: `transfer_in`, `transfer_out`, `standing_order`, `direct_debit`, `direct_debit_return`, `card`, `cash`, `charges_interest`, `collective`, `other`; `null` = unbekannt.
+- Data type: text-Spalte von `ludwig.client_bank_transactions` mit CHECK auf diese Werte; dazu `bank_tx_code` (Code mit Präfix der Quelle) und `purpose_code` (ISO-Purpose).
+- Notes: Signal für den Buchungstyp (docs/concepts/booking-types.md), nicht die Buchung selbst. Nicht zu verwechseln mit der Lohn-Zahlungsart `classifyPayrollPayment` (wage_net …), die aus Empfänger und Zweck abgeleitet wird.
 
 ### Import run
 
@@ -1530,7 +1808,7 @@ Konsolidierung auf eine Beleg-Detail-Log wiegt schwerer als die Trennung, und
 - German: `Ingest`, `Beleg-Verarbeitung`
 - Definition: The end-to-end production pipeline for a single Beleg: OCR → structuring → interpretation → creditor/debtor match → booking proposal. Triggered per Beleg via CLI (`ingest-invoice`) or HTTP, not as part of onboarding.
 - Data type: workflow (`InvoiceIngestWorkflow.ingest`). Writes to `ops_stored_files`, `client_invoices`, `client_invoice_line_items`, `client_invoice_traces`, and ultimately a `booking_proposal_payload_json` on the invoice row.
-- Example: `python3 -m buchassi_workflows.cli ingest-invoice <pdf> --client-id <uuid> --cycle-id <uuid> --year 2025`.
+- Example: `python3 -m ludwig.workflows.cli ingest-invoice <pdf> --client-id <uuid> --cycle-id <uuid> --year 2025`.
 - Notes: **Distinct from onboarding backfill** — Ingest produces booking proposals; backfill only enriches stem data. Both touch OCR but for very different purposes. Naming aligned 2026-05-14.
 
 ### Creditor number prefix range
@@ -1548,6 +1826,13 @@ Konsolidierung auf eine Beleg-Detail-Log wiegt schwerer als die Trennung, und
 - German: `Buchung`
 - Definition: A single bookkeeping posting or accounting entry in structured bookkeeping data.
 - Notes: Use `journal entry` or `journal entries` in code and data file naming. Avoid raw German naming in code-facing structures. `reviewed_by_user_id` = der Mensch, der angenommen hat; NULL = Altbestand vor F323.
+
+### Origin method
+
+- English: `origin method`
+- German: `Herkunft (Entstehungsweg einer Buchung)`
+- Definition: How a journal entry was decided: confirmed rule, program derivation, single model call, model agent, human, or import.
+- Notes: Column `client_journal_entry.origin_method`, set once (buchung.md R37). Not the channel — that is `origin`.
 
 ### Imported dataset
 
@@ -1569,8 +1854,8 @@ Konsolidierung auf eine Beleg-Detail-Log wiegt schwerer als die Trennung, und
 
 - English: `contract`
 - German: `Vertrag der Systemschnittstelle` or `Schnittstellenvertrag`
-- Definition: The explicit request/response boundary for the `workflows` HTTP API.
-- Notes: During the prototype, the Pydantic models in `apps/workflows/src/buchassi_workflows/api/` are the single source of truth. A TypeScript contract package existed earlier and was removed to avoid dual-maintenance drift. **Disambiguation:** the *legal* contract document is a separate concept — see „Contract document" below.
+- Definition: The explicit payload/result boundary of an `ops_jobs` job type between Python and TS.
+- Notes: The Pydantic models in `apps/pipeline/src/ludwig/workflows/contracts/jobs/` are the single source of truth, transported as jsonb (`ops_jobs.payload`/`result`), no HTTP since F391. A TypeScript contract package existed earlier and was removed to avoid dual-maintenance drift. **Disambiguation:** the *legal* contract document is a separate concept — see „Contract document" below.
 
 ### Contract document
 
@@ -1583,7 +1868,7 @@ Konsolidierung auf eine Beleg-Detail-Log wiegt schwerer als die Trennung, und
 
 - English: `contract type`, `contract_type`
 - German: `Vertragstyp (buchhalterisch)`
-- Definition: The bookkeeping type of a contract that drives account selection. Enum (`buchassi_shared.ContractType`, mirrored by the DB CHECK on `client_source_docs_contracts.contract_type`): `loan` (Darlehen), `rent` (Miete), `lease` (Leasing), `recurring_invoice` (Dauerrechnung), `service` (Dienstleistung), `other`.
+- Definition: The bookkeeping type of a contract that drives account selection. Enum (`ludwig.shared.ContractType`, mirrored by the DB CHECK on `client_source_docs_contracts.contract_type`): `loan` (Darlehen), `rent` (Miete), `lease` (Leasing), `recurring_invoice` (Dauerrechnung), `service` (Dienstleistung), `other`.
 - Notes: Enumerated in code like `DocumentForm`; extending it is a typed PR + migration. Deliberately separate from the free-text contract subject.
 
 ### Contract subject
@@ -1597,7 +1882,7 @@ Konsolidierung auf eine Beleg-Detail-Log wiegt schwerer als die Trennung, und
 
 - English: `contract extractor`
 - German: `Vertragsextraktion`
-- Definition: The stateless module (`apps/contract-extractor`) that extracts structured contract data (type, subject, term, summary, primary amount, booking facts, clarifications) from a contract PDF and normalises the term to canonical (start date + duration).
+- Definition: The stateless module (`ludwig.contract_extractor`) that extracts structured contract data (type, subject, term, summary, primary amount, booking facts, clarifications) from a contract PDF and normalises the term to canonical (start date + duration).
 - Notes: Sibling of invoice-preprocessor/interpreter and document-simple-classifier. Only `workflows` imports it; v1 uses the PDF text layer only (no OCR fallback).
 
 ### Processing service
@@ -1628,19 +1913,12 @@ Konsolidierung auf eine Beleg-Detail-Log wiegt schwerer als die Trennung, und
 - Definition: The stateless module that enriches extracted invoice data with semantic interpretation.
 - Notes: Conceptual only for now. All context must be passed in explicitly.
 
-### Booking module
-
-- English: `booking module`
-- German: `Buchungsmodul`
-- Definition: The stateless module that derives a booking proposal from enriched invoice data and explicit accounting context. Decides DATEV tax key, picks the debit account per line, merges into split postings, and emits an `overall_confidence` plus structured review reasons.
-- Notes: Lives in `apps/booking-module`. Must not access durable state directly — all context flows in via `BookingModuleRequest`. Persistence and candidate retrieval are owned by `workflows` (`booking_proposal_workflow.py`). See [`docs/topics/buchung.md`](./docs/topics/buchung.md) for data flow and decision logic.
-
 ### Document simple classifier
 
 - English: `document simple classifier`
 - German: `einfacher Belegklassifikator`
 - Definition: The stateless module that runs a cheap first pass on every incoming PDF. Extracts plain text (PDF text layer or local Tesseract OCR), produces a German-language summary, classifies the document on two fixed axes (`document_form`, `document_kind`), and lists every company name found on the document. Direction (Eingangs- vs. Ausgangsrechnung) ist bewusst NICHT mehr Teil der Klassifikation — sie wird im Workflow deterministisch via UStID-Match aufgelöst (siehe `Accounting role`).
-- Data type: schema (Python package `apps/document-simple-classifier/`)
+- Data type: schema (Python package `ludwig.document_simple_classifier`)
 - Example: input `Tankquittung.pdf` → `document_form=fuel_receipt, document_kind=original`, plus summary and `[ALLGUTH GmbH]` as `vendor`. Direction (inbound/outbound) entscheidet danach der Workflow-Resolver via UStID-Match, mit `fuel_receipt` als Heuristik-Stufe falls keine UStID matched.
 - Notes: Sits BEFORE `invoice-preprocessor` in the pipeline so `workflows` can route documents based on the cheap classification (e.g. fuel and hospitality receipts skip line-item splitting). Stateless: must not access durable state. Cost-controlled: one structured-output LLM call per document, optionally a second one for `expected bookkeeping year` re-verification.
 
@@ -1650,6 +1928,13 @@ Konsolidierung auf eine Beleg-Detail-Log wiegt schwerer als die Trennung, und
 - German: `Hauptanwendung`
 - Definition: The future user-facing application that will own authentication, user-visible workflows, and review orchestration.
 - Notes: No main app exists during the prototype. `workflows` currently holds data that will eventually belong to a main app.
+
+### Security class
+
+- English: `security class`, `security_class`
+- German: `Sicherheitsklasse`
+- Definition: Which model backends may process a firm's client data (F517). Closed set, ordered strict → open: `production` („Produktion": only processors with AVV and EU processing — Azure, Hetzner, WeberCloud) < `trusted` („Vertrauenswürdig": plus Mistral, OpenAI, Anthropic) < `exploration` („Exploration": any backend, dev only).
+- Notes: Set per firm (`platform_tenants.security_class`, default `production`); each environment has a ceiling (`LUDWIG_SECURITY_CLASS_CEILING` / `WORKFLOWS_SECURITY_CLASS_CEILING`, staging/prod `trusted`, missing = `production`). Effective class = the stricter of both. Every backend carries its class in `apps/agent-runner/providers.mjs`, mirrored in `apps/web/src/core/security-class/`.
 
 ### System of record
 
@@ -1663,7 +1948,7 @@ Konsolidierung auf eine Beleg-Detail-Log wiegt schwerer als die Trennung, und
 - English: `tenant membership`
 - German: `Kanzleimitgliedschaft`
 - Definition: The relationship between a user and a tenant, including role and status.
-- Notes: Security-critical concept. Keep naming exact across DB, RLS, and app code.
+- Notes: Security-critical concept. Keep naming exact across DB and app code.
 
 ### Database schema
 
@@ -1672,7 +1957,7 @@ Konsolidierung auf eine Beleg-Detail-Log wiegt schwerer als die Trennung, und
 - Definition: A namespace inside one Postgres database used to group tables, enums, functions, and other database objects.
 - Data type: Postgres schema object (created via `create schema <name>`).
 - Example: `ludwig` (all domain tables), `ludwig_private` (trigger helpers).
-- Notes: All domain tables live in the single `ludwig` schema, grouped by **prefix bucket** (`platform_*`, `client_*`, `reference_*`, `ops_*`) — not by schema. See 2026-04-23 decision-log entry "Consolidate into single buchassi schema with prefix buckets".
+- Notes: All domain tables live in the single `ludwig` schema, grouped by **prefix bucket** (`platform_*`, `client_*`, `reference_*`, `ops_*`) — not by schema. See 2026-04-23 decision-log entry "Consolidate into single `ludwig` schema with prefix buckets".
 
 ### Platform prefix (`platform_*`)
 
@@ -1689,7 +1974,7 @@ Konsolidierung auf eine Beleg-Detail-Log wiegt schwerer als die Trennung, und
 - German: `Mandanten-Präfix`
 - Definition: The naming bucket for per-mandant bookkeeping data — everything scoped to a concrete `client_id`. This is the durable, archivwürdige business truth.
 - Data type: Table-name prefix within `ludwig`. Contains e.g. `client_fiscal_years`, `client_journal_entry(_line)`, `client_ledger_accounts`, `client_business_partners`, `client_payment_accounts`, `client_source_docs(_invoices/_invoice_lines/_contracts)`, `client_accounting_case/_event`, `client_datev_*`.
-- Notes: Every `client_*` table carries a `client_id` FK to `ludwig.platform_clients`. RLS uses the helper `ludwig.is_member_of_client_tenant(client_id)`.
+- Notes: Every `client_*` table carries a `client_id` FK to `ludwig.platform_clients`. Isolation lives in the app code and the composite FKs on `(…, client_id)` (R28); there is no RLS (F537).
 
 ### Reference prefix (`reference_*`)
 
@@ -1811,7 +2096,7 @@ The project rule is English names for all code, schemas, and columns (see decisi
 - Definition: Two free-text fields on every DATEV posting. Convention: `Belegfeld 1` usually holds the invoice/document number; `Belegfeld 2` is a secondary reference (often open-item number, due date, or discount info — not strictly specified).
 - Data type: `ludwig.client_journal_entry_line.external_document_number` (max. 36) und `external_document_number_2` (max. 12) — `text`, nullable. **Zeilen-Ebene**, siehe [Journal entry line](#journal-entry-line-teilbuchung).
 - Example: `external_document_number = "RE-2026-0042"`.
-- Notes: DATEV-exception. The semantics are loose by design; a generic English name (`reference_1`, `document_number`) would either mislead or require an enforced interpretation DATEV does not give. Belegfeld 1 hängt an der **Teilbuchung**, nicht am Satz — eine Multizahlung trägt je Rechnung eine eigene Nummer (F33).
+- Notes: DATEV-exception. The semantics are loose by design; a generic English name (`reference_1`, `document_number`) would either mislead or require an enforced interpretation DATEV does not give. Belegfeld 1 hängt an der **Teilbuchung**, nicht am Satz — eine Multizahlung trägt je Rechnung eine eigene Nummer (F33). Auf Bank-/Sachbuchungen mit genau einem Sachkonto kommt der Wert aus dem Historienmuster des Sachkontos (F505b), `belegfeldSource = history_pattern`.
 
 ### Buchungstext
 
@@ -1820,7 +2105,7 @@ The project rule is English names for all code, schemas, and columns (see decisi
 - Definition: Free-text description of a bookkeeping entry (≤ 60 chars in DATEV export format).
 - Data type: `ludwig.client_journal_entry_line.line_description` — `text`, nullable. **Zeilen-Ebene**, siehe [Journal entry line](#journal-entry-line-teilbuchung).
 - Example: `line_description = "Telefon Januar 2026"`.
-- Notes: DATEV-exception. `posting_text` / `narrative` would be valid English, but the DATEV term is so universally used in the Kanzlei domain that Anglicizing just adds translation overhead. Der Text hängt an der **Teilbuchung**; ein Satz-Kopffeld gibt es nicht. Der Agent muss ihn am Stil der Konto-Historie ausrichten (`search_past_bookings(accountNumber=…)`), der Judge prüft und korrigiert das (B8); bei eigenem Personenkonto legt der Server die letzten zehn DATEV-Sätze als `personalAccountHistory` vor (F182/F301) — gesetzt wird der Text nie vom Server. Mandanteneigene Konvention: `posting_text_convention` am Client-Profil.
+- Notes: DATEV-exception. `posting_text` / `narrative` would be valid English, but the DATEV term is so universally used in the Kanzlei domain that Anglicizing just adds translation overhead. Der Text hängt an der **Teilbuchung**; ein Satz-Kopffeld gibt es nicht. Der Agent muss ihn am Stil der Konto-Historie ausrichten (`entry_search(accountNumber=…)`), der Judge prüft das (B8) und gibt bei Abweichung zurück; bei eigenem Personenkonto legt der Server die letzten zehn DATEV-Sätze als `personalAccountHistory` vor (F182/F301) — gesetzt wird der Text nie vom Server. Mandanteneigene Konvention: `posting_text_convention` am Client-Profil.
 
 ### Provision (Rückstellung)
 
@@ -1847,7 +2132,7 @@ The project rule is English names for all code, schemas, and columns (see decisi
 - Definition: One- or two-digit DATEV code on a posting that signals the VAT treatment to the booking system. Determines whether VSt is deducted, the rate, and special cases like Reverse Charge or innergemeinschaftlicher Erwerb.
 - Data type: `ludwig.client_journal_entry_line.tax_key` — `text`, nullable (*vormals `client_bookkeeping_entries.vat_key`*).
 - Example: `vat_key = '9'` (Vorsteuer 19% Inland), `'8'` (Vorsteuer 7%), `'0'` (steuerfrei / Kleinunternehmer), `'94'` (§13b Reverse Charge), `'19'` / `'18'` (innergemeinschaftlicher Erwerb 19% / 7%).
-- Notes: DATEV-exception. The booking module emits these from `apps/booking-module/src/buchassi_booking_module/domain/tax_classification.py`. The codes shown are SKR04 convention; SKR03 uses largely the same set. The full mapping treatment → key lives next to the decision tree in `tax_classification.py:52–61`.
+- Notes: DATEV-exception. The agent sets them per posting line from the catalog in `apps/web/src/modules/accounting-cases/domain/tax-keys.ts`; the decision follows `help(name='input_tax')`. The codes are the same in SKR03 and SKR04.
 
 ### Sachverhalt L+L (§ 13b case code)
 
@@ -1874,14 +2159,14 @@ The project rule is English names for all code, schemas, and columns (see decisi
 - Definition: Optional pointer, set at upload/ingest, saying a Beleg already lives in a DATEV filing system — **BEDI** (Belege digital) or **DDMS** (DATEV DMS). There is always exactly **one** id plus the folder it belongs to. Only relevant at export time: id present → reference the existing DATEV document; id absent → attach the file itself. May be unknown at upload and supplied later.
 - Data type: `ludwig.client_source_docs.datev_ref_system` (`text`, `∈ {bedi, ddms}`), `.datev_ref_folder` (`text`), `.datev_ref_id` (`text`) — all nullable. DB-CHECK `client_source_docs_datev_ref_complete`: either all three NULL, or `system` + `id` set together (folder optional).
 - Example: `datev_ref_system = 'ddms'`, `datev_ref_folder = 'Eingangsrechnungen 2026'`, `datev_ref_id = '4711'`.
-- Notes: **External reference, not a DB foreign key** — DATEV is an external system. Distinct from the *BEDI hash* (import Beleglink, DATEV → us); this is the reverse direction (export, us → DATEV). Ingest carriers: Web `finalizeDocumentUpload` (`datevRef`) → `insertInboxEntry`, Intake-API `PATCH /documents/{id}` (`applyIntakeMetadata`), und MCP `ingest_uploaded_file` (`datevRef` direkt am Upload, seit 2026-07-22). **Nachtragen an bestehenden Belegen**: MCP-Tool `update_source_doc` (`updateSourceDoc` in `agent-ingest-core.ts`; `datevRef=null` entfernt die Referenz) — ein Tool für alle Beleg-Metadaten statt eines pro Feld, siehe *Beleg-Metadaten (Agent)*. **Anzeige**: generischer `SourceDocView` (Belegdaten, „DATEV-Ablage") und Rechnungs-`PipelineTab` (Sektion „DATEV-Ablage", via `getInvoice`-Join auf den Supertyp). **Export-Pfad** (F24-T24.1): `loadExportableJournalEntries` löst die Referenz über den Sachverhalt auf (journal_entry → accounting_event.case_id → source_docs mit `datev_ref_id`) und der EXTF-Writer schreibt sie als Feld 20 „Beleglink" (`BEDI "<id>"`/`DDMS "<id>"`); genau ein referenzierter Beleg füllt das Feld, keiner bleibt still leer, mehrere → leer + Warnung (siehe *Buchungsstapel (EXTF)*). Introduced 2026-07-10.
+- Notes: **External reference, not a DB foreign key** — DATEV is an external system. Distinct from the *BEDI hash* (import Beleglink, DATEV → us); this is the reverse direction (export, us → DATEV). Ingest carriers: Web `finalizeDocumentUpload` (`datevRef`) → `insertInboxEntry`, Intake-API `PATCH /documents/{id}` (`applyIntakeMetadata`), und MCP `document_ingest` (`datevRef` direkt am Upload, seit 2026-07-22). **Nachtragen an bestehenden Belegen**: MCP-Tool `document_update` (`updateSourceDoc` in `source-doc-intake-core.ts`; `datevRef=null` entfernt die Referenz) — ein Tool für alle Beleg-Metadaten statt eines pro Feld, siehe *Beleg-Metadaten (Agent)*. **Anzeige**: generischer `SourceDocView` (Belegdaten, „DATEV-Ablage") und Rechnungs-`PipelineTab` (Sektion „DATEV-Ablage", via `getInvoice`-Join auf den Supertyp). **Export-Pfad** (F24-T24.1): `loadExportableJournalEntries` löst die Referenz über den Sachverhalt auf (journal_entry → accounting_event.case_id → source_docs mit `datev_ref_id`) und der EXTF-Writer schreibt sie als Feld 20 „Beleglink" (`BEDI "<id>"`/`DDMS "<id>"`); genau ein referenzierter Beleg füllt das Feld, keiner bleibt still leer, mehrere → leer + Warnung (siehe *Buchungsstapel (EXTF)*). Introduced 2026-07-10.
 
 ### Agent repair (Nachbesserung)
 
 - English: `agent repair`
 - German: `Nachbesserung` (durch den Agenten)
 - Table: `client_source_docs.status='agent_review'` (seit F289; die frühere eigene Spalte ist entfallen)
-- Definition: Die Nachbesserungsliste des Agenten = alle Belege auf *Agent-Prüfung* (`list_docs(bucket='repair')`, Gate 1b `repairOpen`). Belege, die beim Freigeben ihres *Dateikorbs* noch in `pending`/`extracting` hingen, kommen als `agent_review/processing_stuck` hinzu (`markRepairRequired`, belege.md R38).
+- Definition: Die Nachbesserungsliste des Agenten = alle Belege auf *Agent-Prüfung* (`document_search(bucket='repair')`, Gate 1b `repairOpen`). Belege, die beim Freigeben ihres *Dateikorbs* noch in `pending`/`extracting` hingen, kommen als `agent_review/processing_stuck` hinzu (`markRepairRequired`, belege.md R38).
 - Example: Ein Scan hängt in der Auslese; der Korb `K-2026-0003` gibt nach 24 h trotzdem frei, der Beleg steht auf `agent_review/processing_stuck`. Der Agent stößt ihn neu an und bucht ihn.
 
 ### File basket (Dateikorb)
@@ -1908,16 +2193,32 @@ The project rule is English names for all code, schemas, and columns (see decisi
 - German: `DUO-Ablage`, `Ablage in Unternehmen Online`
 - Definition: After a Stapel's DATEV receipt, the DUO sync tool moves every document of the Stapel in DATEV Unternehmen Online to a path **the server dictates**: `Buchführung` · `Ludwig <fiscal year>` · `<Stapel description>` for booked documents, `Buchführung` · `Ludwig <fiscal year>` · `nicht gebucht` for the rest (one register per year). The register **is** the Stapel; its name is its identity. No folder-tree sync, no DUO ids, no choice in Ludwig (owner decision 2026-09-14, F216).
 - Data type: `ludwig.client_datev_export_batches.filing_path text[]` (frozen on `confirmed`, `freezeBatchFilingPath`); `ludwig.client_source_docs.filed_at timestamptz` (filed/skipped reported — final), `.filing_failed_at timestamptz` + `.filing_failed_message text` (last failed report, document stays in the queue). Status axis `document_filing` (`pending · filed · failed`, derived).
-- Notes: Endpoints `GET /api/intake/v1/clients/{id}/filing-queue` and `POST …/filing-results` (`intake/application/filing-core.ts`); the tool polls, no webhook. Queue = documents whose Stapel is `confirmed|mirrored|closed` with a `filing_path`, carrying a BEDI GUID, not deleted, `filed_at is null`; `outcome = booked` if an accepted/posted entry hangs on the document or one of its parts. Stapel confirmed before F216 have no path and are never filed (no backfill). Client documentation: `docs/reference/intake-api_v3.md` §6. See datev.md R35.
+- Notes: Endpoints `GET /api/intake/v2/clients/{id}/filing-queue` and `POST …/filing-results` (`intake/application/filing-core.ts`); the tool polls, no webhook. Queue = documents whose Stapel is `confirmed|mirrored|closed` with a `filing_path`, carrying a BEDI GUID, not deleted, `filed_at is null`; `outcome = booked` if an accepted/posted entry hangs on the document or one of its parts. Stapel confirmed before F216 have no path and are never filed (no backfill). Client documentation: `docs/reference/intake-api_v3.md` §6. See datev.md R35.
+
+### Ludwig-issued BEDI GUID (Ludwig-BEDI-GUID)
+
+- English: `Ludwig-issued BEDI GUID`
+- German: `Ludwig-BEDI-GUID`, `von Ludwig vergebene BEDI-ID`
+- Definition: A BEDI GUID that Ludwig generates itself for a document that did not come from DUO, at the moment the first journal entry for the document is created. It becomes the document's `datev_ref` immediately, so the entry carries its Beleglink to DATEV; the DUO sync tool uploads the document under exactly this GUID later (owner decision 2026-10-20, F547).
+- Data type: `ludwig.client_source_docs.ludwig_bedi_guid uuid` (unique, never changed; equal to `datev_ref_id` as long as no other path replaced the ref); switch and cut-off `ludwig.platform_clients.duo_upload_from date`. Issued by `ludwig_private.issue_ludwig_bedi_guid(entry_id)` via three triggers (entry insert, `client_journal_entry.source_doc_id` update, `client_accounting_event.source_doc_id` update).
+- Notes: Only for clients with `duo_upload_from`, documents received on or after it, no existing `datev_ref`, not contracts/statements/EXTF files, not client-batch entries with their own link. Back-fill and revoke: `setDuoUploadFrom` / `revokeLudwigBediGuids` (`onboarding/application/duo-upload-from-core.ts`, script `set-duo-upload-from.ts`). See datev.md R39.
+
+### DUO upload queue (Upload-Queue nach DUO)
+
+- English: `DUO upload queue`, `DUO upload results`
+- German: `Upload-Queue nach DUO`, `Upload nach DUO`
+- Definition: The documents with a Ludwig-issued BEDI GUID whose upload to the DUO inbox has not been reported yet. The DUO sync tool downloads each file, uploads it into the DUO inbox under the given GUID and reports `uploaded` (final) or `failed` (stays in the queue); filing follows via the DUO filing queue.
+- Data type: `ludwig.client_source_docs.duo_uploaded_at`, `.duo_upload_failed_at`, `.duo_upload_failed_message`; status axis `document_duo_upload` (`pending · uploaded · failed`, derived by `documentDuoUploadState`). `documentType` values `incoming_invoice · outgoing_invoice · cash · other` (DUO label set by the tool).
+- Notes: Endpoints (v2 only) `GET /api/intake/v2/clients/{id}/duo-upload-queue`, `GET …/duo-upload-queue/{sourceDocId}/file`, `POST …/duo-upload-results` (`intake/application/duo-upload-core.ts`). Client documentation: `docs/reference/intake-api_v3.md` §5.11–5.13, §7. See datev.md R39.
 
 ### Beleg-Metadaten (Agent)
 
 - English: `source doc metadata`
 - German: `Beleg-Metadaten`
 - Definition: Die drei Felder, die der Agent am Beleg selbst setzen darf, weil sie nicht aus der Datei hervorgehen: *DATEV-Ablage-Referenz*, *Eingangsdatum* und der *Agent-Kommentar* (Freitext-Kontext für die spätere Buchung — was der Mandant mündlich gesagt hat, Abgrenzung zu einem anderen Beleg). Alles andere am Beleg (Belegform, Rolle, Betragsdaten) bestimmt der Server aus dem Dokument.
-- Data type: `ludwig.client_source_docs.datev_ref_*`, `.received_date` (`date`, NOT NULL, Default `current_date`), `.agent_comment` (`text`, nullable). Schema: `SourceDocMetadataSchema` in `agent-ingest-core.ts`.
+- Data type: `ludwig.client_source_docs.datev_ref_*`, `.received_date` (`date`, NOT NULL, Default `current_date`), `.agent_comment` (`text`, nullable). Schema: `SourceDocMetadataSchema` in `source-doc-intake-core.ts`.
 - Example: `{ datevRef: { system: "bedi", refId: "A1B2…", folder: "Rechnungseingang" }, receivedDate: "2026-07-09", agentComment: "Mandant: privat mitveranlasst, 50 % Kürzung" }`
-- Notes: **Ein Schreibpfad, zwei Türen** — direkt am Upload (`ingest_uploaded_file`, spart den zweiten Call) oder nachträglich (`update_source_doc`). Dreiwertige Semantik: Feld weglassen = unverändert, `null` = löschen; sonst würde ein Referenz-Nachtrag den Kommentar leerräumen. `received_date` ist NOT NULL und lässt sich nur überschreiben, nicht leeren. Am Kontoauszug sind die Felder ein Fehler (kein source_doc) und werden abgewiesen, nicht still verworfen. Der Kommentar erscheint für den Agenten in `get_case` (Event-Join auf den Supertyp) und `list_docs`. Abgegrenzt von `rationale` (Audit-Begründung einer einzelnen Aktion, landet im Audit-Log, nicht am Beleg). Deckt dieselben Felder ab wie der CSV-Pfad *DATEV-Metadaten-Import* (`Belege_Meta_*.csv`), der für Bulk-Nachträge bestehen bleibt. Introduced 2026-07-22.
+- Notes: **Ein Schreibpfad, zwei Türen** — direkt am Upload (`document_ingest`, spart den zweiten Call) oder nachträglich (`document_update`). Dreiwertige Semantik: Feld weglassen = unverändert, `null` = löschen; sonst würde ein Referenz-Nachtrag den Kommentar leerräumen. `received_date` ist NOT NULL und lässt sich nur überschreiben, nicht leeren. Am Kontoauszug sind die Felder ein Fehler (kein source_doc) und werden abgewiesen, nicht still verworfen. Der Kommentar erscheint für den Agenten in `case_context` (Event-Join auf den Supertyp) und `document_search`. Abgegrenzt von `rationale` (Audit-Begründung einer einzelnen Aktion, landet im Audit-Log, nicht am Beleg). Introduced 2026-07-22.
 
 ### Buchungsstapel (EXTF)
 
@@ -1935,14 +2236,14 @@ The project rule is English names for all code, schemas, and columns (see decisi
 - Definition: Ein **vom Mandanten selbst gebuchter** EXTF-Buchungsstapel (Rechnungssoftware, Kasse, Warenwirtschaft), den Ludwig entgegennimmt und als Entwurf importiert (`client_journal_entry.origin='client_import'`), statt dieselben Umsätze nachzubuchen. Nicht zu verwechseln mit dem **DATEV-Import** (was in DATEV *ist* → `client_datev_mirror_entries`) und nicht mit dem **Export** (was Ludwig *nach* DATEV schickt): der Mandantenstapel ist das, was noch nach DATEV *soll*. Seit F163 ist er ein **eigener Buchungszyklus** (`client_datev_export_batches.kind='client_batch'`, Benennung `MM-YYYY-EXT[-Kasse|-Debitoren]`), den der Agent in einem eigenen *Durchgang* der Art `client_batch` **vor** dem regulären Stapel bearbeitet — dort wird nichts gebucht, nur Belege werden den importierten Sätzen zugeordnet (Teilschritte 1b · 1d · 1e · 1f · 2a · 5a).
 - Data type: `ludwig.client_batch_imports` (ein Lauf je Datei: Datei-Hash als Idempotenz-Anker, `rejections` als Ablehnungsprotokoll, `export_batch_id` = der eröffnete Zyklus) + `client_journal_entry.batch_import_id`/`import_reference`/`export_batch_id`/`source_doc_id` (der Beleg zu genau diesem Satz — daraus schreibt der Export den DATEV-Beleglink). Modul `apps/web/src/modules/client-batches/` (Parser `domain/extf-batch.ts` pure, Import `application/import-client-batch-core.ts`).
 - Example: Ein Mandant fakturiert in Lexoffice und liefert monatlich `EXTF_Buchungsstapel_Juli.csv`; Ludwig legt je offener Forderung einen Sachverhalt an, die Zahlungseingänge des Kontoauszugs laufen dagegen.
-- Notes: Der Import legt **keine** fachlichen Sachverhalte an — alles geht in einen Sammel-Sachverhalt, den Mandantenstapel-Container (`kind='client_batch'`, F295). Erkennung am EXTF-Kopfsatz (Kategorie 21/16), kein Setting davor; `platform_clients.expects_client_batches` setzt der erste Import selbst; es sagt nur noch aus, dass dieser Mandant Stapel liefert (seit 2026-09-09, Befund 73/74). Gate 1e hängt seit F164 am Mandantenstapel-Durchgang selbst und liest dort dessen Import-Lauf. Parsen ist **deterministisch, nie LLM** (Beträge/Kontonummern/BU dürfen nicht durch Transkription laufen). Die Sätze durchlaufen die normale Kanzlei-Abnahme, aber **keinen Judge-Pass**: der Mandant hat gebucht, die Kanzlei nimmt ab. Sie sind vor der Abnahme als OPOS/Präzedenz sichtbar (eigener Zweig in `client_effective_journal_lines`) und werden von `submit_booking_proposal` nie gelöscht. Ein Satz, dessen Konten nicht sauber auflösbar sind, wird **abgelehnt und protokolliert** statt geraten. **Stammdaten-Sperre** (F165): fehlt zu einem Satz das Personenkonto (unbekannt oder nur Platzhaltername), ist der Stapel bis zur Debitoren-/Kreditorenliste **nicht freigebbar** — die Belegzuordnung läuft weiter, und der Server zieht blockierte Läufe nach, sobald die Liste (oder ein weiterer Stapel) die Konten liefert. Introduced 2026-08-11 (F69); eigener Zyklus + Beleg je Satz 2026-09-09 (F163–F165).
+- Notes: Der Import legt **keine** fachlichen Sachverhalte an — alles geht in einen Sammel-Sachverhalt, den Mandantenstapel-Container (`kind='client_batch'`, F295). Erkennung am EXTF-Kopfsatz (Kategorie 21/16), kein Setting davor; `platform_clients.expects_client_batches` setzt der erste Import selbst; es sagt nur noch aus, dass dieser Mandant Stapel liefert (seit 2026-09-09, Befund 73/74). Gate 1e hängt seit F164 am Mandantenstapel-Durchgang selbst und liest dort dessen Import-Lauf. Parsen ist **deterministisch, nie LLM** (Beträge/Kontonummern/BU dürfen nicht durch Transkription laufen). Die Sätze durchlaufen die normale Kanzlei-Abnahme, aber **keinen Judge-Pass**: der Mandant hat gebucht, die Kanzlei nimmt ab. Sie sind vor der Abnahme als OPOS/Präzedenz sichtbar (eigener Zweig in `client_effective_journal_lines`) und werden von `entry_propose` nie gelöscht. Ein Satz, dessen Konten nicht sauber auflösbar sind, wird **abgelehnt und protokolliert** statt geraten. **Stammdaten-Sperre** (F165): fehlt zu einem Satz das Personenkonto (unbekannt oder nur Platzhaltername), ist der Stapel bis zur Debitoren-/Kreditorenliste **nicht freigebbar** — die Belegzuordnung läuft weiter, und der Server zieht blockierte Läufe nach, sobald die Liste (oder ein weiterer Stapel) die Konten liefert. Introduced 2026-08-11 (F69); eigener Zyklus + Beleg je Satz 2026-09-09 (F163–F165).
 
 ### Zahlungs-Klammer-Auflösung (payment bracket resolution)
 
 - English: `payment bracket resolution`
 - German: `Zahlungs-Klammer-Auflösung`
 - Definition: Das Vervollständigen einer **halben** Buchung aus einem Mandantenstapel. Grundregel am **Gegenkonto der Zahlungszeile**: läuft die Kasse gegen ein **Sachkonto** (Fall a, „Aufwand an Kasse"), ist die Mandantenbuchung fachlich komplett; läuft sie gegen ein **Personenkonto** (Fall b, Diverse-Konto/Kreditor/Debitor), ist nur die **Zahlungshälfte** gebucht — die Belegseite muss Ludwig nachliefern. 12,98 € Kassenzahlung + zwei Bons über 3,19 € und 9,79 € sind **ein** Vorgang mit 1 Zahlung + 2 Belegen.
-- Data type: Kein Server-Schritt mehr — der deterministische Summen-Matcher ist mit dem EXTF-OPOS-Rückbau entfallen (W8/P14, `datev.md` R31). Der Agent hängt die Belege per `attach_source_doc_to_case` an und bucht sie Weg A gegen dasselbe Personenkonto; das Belegfeld liefert `bracketBelegfeld1` (`accounting-cases/application/immediate-payment.ts`).
+- Data type: Kein Server-Schritt mehr — der deterministische Summen-Matcher ist mit dem EXTF-OPOS-Rückbau entfallen (W8/P14, `datev.md` R31). Der Agent hängt die Belege per `case_link` an und bucht sie Weg A gegen dasselbe Personenkonto; das Belegfeld liefert `bracketBelegfeld1` (`accounting-cases/application/immediate-payment.ts`).
 - Example: Kassenstapel `Diverse-E-Konto an Kasse 12,98 €` + EDEKA-Bons 3,19 € / 9,79 € → ein Sachverhalt; beide Bons gehen Weg A gegen dasselbe Personenkonto mit der Belegnummer der Zahlung.
 - Notes:
   - **Die Mandantenzahlung wird nie angefasst** — nicht aufgeteilt, nicht umbenannt, nicht storniert. Ludwig bucht ausschließlich die Belegseite.
@@ -1953,7 +2254,7 @@ The project rule is English names for all code, schemas, and columns (see decisi
 - English: `document group` (batch sort order)
 - German: `Beleggruppe`
 - Definition: Die klassische Belegablage-Reihenfolge, in der der Buchungsstapel sortiert wird (BL-120): **1. Ausgangsrechnungen → 2. Eingangsrechnungen → 3. Kasse → 4. Bank → 5. Sachbuchungen** (reine Sachkonten-Umbuchungen, bewusst ans Ende). Zuordnung je Buchungssatz **kontobasiert**, nicht über `case.kind`: ein beteiligtes Zahlungskonto (`client_payment_accounts.kind`) gewinnt immer (`cash` → Kasse, sonst Bank; Kasse↔Bank-Umbuchung → Kasse), sonst entscheidet die `accounting_role` des Personenkontos (`debtor` → AR, `creditor` → ER), sonst Sachbuchung. Innerhalb der Gruppe gilt Buchungsdatum, dann id.
-- Data type: `client_journal_entry.document_group text` — fünf englische Werte `outgoing_invoices | incoming_invoices | cash | bank | general_ledger`; Klassifikation im Domain-Helper `apps/web/src/modules/datev-export/domain/document-group.ts` (`classifyDocumentGroup`, `sortEntriesByDocumentGroup`, `DOCUMENT_GROUP_RANK/LABEL` — die Labels bleiben deutsch, die Schlüssel sind englisch).
+- Data type: `client_journal_entry.document_group text` — fünf englische Werte `outgoing_invoices | incoming_invoices | cash | bank | general_ledger`; Klassifikation im Domain-Helper `apps/web/src/modules/accounting-cases/domain/document-group.ts` (`classifyDocumentGroup`, `sortEntriesByDocumentGroup`, `DOCUMENT_GROUP_RANK/LABEL` — die Labels bleiben deutsch, die Schlüssel sind englisch).
 - Example: Zahlungsbuchung Kreditor ⇄ Bank → Gruppe Bank (Zahlungskonto sticht Personenkonto); Abschreibung 6220 ⇄ 0470 → Sachbuchungen.
 - Notes: Gilt identisch für **beide** Exportwege (EXTF-Datei und JSON-Sequence des API-Exports — beide Builder nutzen `sortEntriesByDocumentGroup`, Divergenz wäre ein Bug) sowie für Wizard-Vorschau, „Offene Monate" und die Abnahmeliste (innerhalb der Prüfbedarf-Gruppen). Funktioniert kontobasiert auch für Altbestand-Sätze ohne `case_id`. Seit F66-T66.8 (2026-08-12) wird die Gruppe **beim Buchen persistiert** (`client_journal_entry.document_group`, `stampJournalEntry` in allen Schreibern — dieselbe TS-Funktion, keine zweite Implementierung; der frühere SQL-Rank-Spiegel in „Offene Monate" liest jetzt die Spalte). Daneben existiert eine **Arbeitsvorrats-Heuristik** für die Buchungs-Teilschritte 2b–2e des Agent-Laufs (`classifyEventWorkGroup`, F66): Bank-/Kassen-Tx → `client_payment_accounts.kind`, Rechnungs-Beleg → `accounting_role` des Belegs (out→2b, in/receipt→2c), Rest → 2f. Das ist **Planungs-Zuordnung, nicht Wahrheit** — sie darf von der persistierten Gruppe abweichen, ohne dass ein Gate bricht (die Vollständigkeits-Gates prüfen Ereignisse, nicht Gruppen). Introduced 2026-08-07 (BL-120). Spalte und Werte hießen bis F184 (2026-09-09) deutsch (`beleggruppe`, `'ausgangsrechnungen'` …) — ein Bruch von `AGENTS.md` → Naming, den dieser Eintrag nie gedeckt hat: er führte von Anfang an `English: document group`.
 
@@ -1962,7 +2263,7 @@ The project rule is English names for all code, schemas, and columns (see decisi
 - English: `entry kind`
 - German: `Satzart`
 - Definition: Was ein einzelner Buchungssatz **tut** — fünf Werte, aus den Konten seiner Zeilen abgeleitet und beim Buchen am Satz gestempelt: **`expense` / `revenue`** (bucht den Geschäftsvorfall selbst), **`payment`** (gleicht einen offenen Posten aus: Geld gegen Forderung, Verbindlichkeit oder Privatkonto), **`money_transfer`** (Geld zwischen eigenen Zahlungskonten, nach außen fließt nichts), **`reclassification`** (reine Umsortierung zwischen Bestandskonten). Leiter, erste passende Stufe gewinnt: Erfolgskonto beteiligt (`skr_class`) → Aufwand/Erlös (bei beidem der größere Betrag; SKR-Klasse 8 entscheidet über die Buchungsseite) · alle Zeilen auf Zahlungskonten → Geldtransit · mindestens eine → Zahlung · sonst Umbuchung. **Der Geschäftsvorfall schlägt die Zahlung**: „Bürobedarf an Bank" ist ein Aufwand, der direkt bezahlt wurde.
-- Data type: `client_journal_entry.entry_kind text` (CHECK auf die fünf Werte, `NULL` nur bei Sätzen ohne Zeilen); Klassifikation in der pure Domain-Funktion `apps/web/src/core/accounting/entry-kind.ts` (`classifyEntryKind`, `ENTRY_KIND_LABEL/DESCRIPTION`), gestempelt von `datev-export/application/journal-entry-stamp.ts`.
+- Data type: `client_journal_entry.entry_kind text` (CHECK auf die fünf Werte, `NULL` nur bei Sätzen ohne Zeilen); Klassifikation in der pure Domain-Funktion `apps/web/src/core/accounting/entry-kind.ts` (`classifyEntryKind`, `ENTRY_KIND_LABEL/DESCRIPTION`), gestempelt von `accounting-cases/application/journal-entry-stamp.ts`.
 - Example: `70100 Diverse B an 1800 Bank` → Zahlung; `1800 Bank an 1461 EC-Cash` → Geldtransit; `material_expense an Kreditor` → Aufwand.
 - Notes: Abgrenzung zur [Beleggruppe](#beleggruppe-stapel-sortierung): die sortiert den Stapel für die **Ablage** („wo liegt der Beleg?"), die Satzart erklärt den **einzelnen Satz** („was tut er?"). Beide sind kontobasiert, werden vom selben Helper in einer Fahrt gestempelt und teilen bewusst keinen Klassifikations-Code. Wer Zeilen ändert, stempelt neu — alle Schreibpfade tun das nach dem Zeilen-Insert. `client_accounting_event.kind` taugt nicht als Quelle (auf Stapel 206ebf8c tragen 42 `document_received`-Sätze ein Zahlungskonto und 44 `payment_*`-Sätze bewegen nur Geld zwischen eigenen Konten). Fehlt die `skr_class`, fällt der Satz auf die Geld-Stufen zurück statt zu raten. Angezeigt als Badge am Kopf jeder Buchungskarte in der Abnahme (Schritt Buchungsvorschläge, Fall-Vollbild); ohne Wert kein Badge statt eines geratenen. Introduced 2026-09-09, persistiert seit F184 (2026-09-09).
 
@@ -1973,7 +2274,7 @@ The project rule is English names for all code, schemas, and columns (see decisi
 - Definition: After a Buchungsstapel (EXTF) export run, the exported journal entries are stamped with `exported_at` + `export_batch_id`, and the run itself is recorded as one row in `client_datev_export_batches` (period, `file_name`, `created_by`). Der Umfang eines Stapels ist die Zahl der Sätze mit seinem Stempel (`export_batch_id`). A marked entry can only be reversed (Storno), never edited/rejected/deleted — otherwise Ludwig would diverge from DATEV (which stays leading, Variante A). Deliberately **not** `status='posted'`: that status stays reserved for a future own Festschreibung (owner decision 2026-07-04).
 - Data type: `ludwig.client_journal_entry.exported_at timestamptz` / `.export_batch_id uuid` + table `ludwig.client_datev_export_batches`; writer `markBatchExported(entryIds, batchMeta)` in `apps/web/src/modules/datev-export/server.ts`.
 - Example: repeat export of April only contains bookings with `exported_at is null`; a mis-export is fixed by Storno + new batch (no un-export).
-- Notes: Guards live in `booking-actions.ts` (`saveEventBooking`, `rejectEventBookings`) and `agent-booking-core.ts` (proposed-replace); `reverseEventBookings` stays allowed.
+- Notes: Guards live in `manual-booking-core.ts` (`saveEventBookingCore`), `journal-entry-review-core.ts` (`rejectEventBookingsCore`) and `journal-entry-proposal-core.ts` (proposed-replace); `reverseEventBookings` stays allowed.
 
 ### Buchungszyklus / Stapel
 
@@ -1981,11 +2282,11 @@ The project rule is English names for all code, schemas, and columns (see decisi
 - German: **Buchungszyklus**, `(Buchungs-)Stapel`; veraltet: `Exportvorgang`
 - Definition: **Zyklus, Stapel und Exportvorgang sind dieselbe Zeile** in `client_datev_export_batches` — seit F114 aber gedacht als Klammer um die *Bearbeitung eines Zeitraums*, nicht als Hülle um einen Export. Der Zyklus entsteht, BEVOR jemand darin arbeitet (Server: Kette nach der DATEV-Quittung + Onboarding-Review; Kanzlei: „Stapel anlegen"; **nie** der Agent), trägt n *Agent-Durchgänge* und die Arbeit der Kanzlei, wird freigegeben und endet, wenn er im DATEV-Spiegel wiedergefunden ist. `stapelnummer` (`YYYY-NNNN`, je Mandant) und Bezeichnung (`description`, z. B. `08-2026-Ludwig`) fallen bei der **Eröffnung**.
   - **Wer dran ist, IST der Zustand**: `agent` („Bei Ludwig" — freigegeben) → `prepared` (vorbereitet, wartet auf Freigabe) → `review` (Kanzlei prüft) → `ready` (freigegeben, geschnitten) → `exporting` → `inspection` → `confirmed` (DATEV quittiert) → `mirrored` (im Spiegel wiedergefunden, Nachlese offen) → `closed`. Daneben `failed` (human-hold) und `cancelled` (nur Bestand ohne Zyklus).
-  - **Freigabe an den Agenten** (`release to agent`, F177/F280): hebt einen Zyklus von `prepared` auf `agent` — ausgelöst durch die Freigabe des *Dateikorbs* (`tryReleaseFileBasket` → `releaseBatchesToAgent`), sobald die Pipeline den abgeschickten Korb durch hat. Abgeschickt wird der Korb mit „Korb verarbeiten" im Beleg-Eingang oder `POST /api/intake/v1/clients/{clientId}/release`. Ein Mensch bzw. das einspielende Werkzeug gibt das Signal, nie der Agent (kein MCP-Tool); freigegeben wird **pro Mandant**, also alles, was `prepared` ist. Ohne Freigabe steht der Zyklus nicht in der Agent-Queue: er sammelt noch Belege. Nach jedem Durchgang fällt er auf `prepared` zurück und braucht ein neues Signal.
+  - **Freigabe an den Agenten** (`release to agent`, F177/F280): hebt einen Zyklus von `prepared` auf `agent` — ausgelöst durch die Freigabe des *Dateikorbs* (`tryReleaseFileBasket` → `releaseBatchesToAgent`), sobald die Pipeline den abgeschickten Korb durch hat. Abgeschickt wird der Korb mit „Korb verarbeiten" im Beleg-Eingang oder `POST /api/intake/v2/clients/{clientId}/release`. Ein Mensch bzw. das einspielende Werkzeug gibt das Signal, nie der Agent (kein MCP-Tool); freigegeben wird **pro Mandant**, also alles, was `prepared` ist. Ohne Freigabe steht der Zyklus nicht in der Agent-Queue: er sammelt noch Belege. Nach jedem Durchgang fällt er auf `prepared` zurück und braucht ein neues Signal.
   - **Zwei Arten** (`kind`, F163): `regular` = Ludwig bearbeitet den Zeitraum; `client_batch` = ein vom Mandanten gelieferter EXTF-Stapel (*Mandantenstapel*), der nur dessen Sätze trägt. Er steht **neben** dem offenen regulären, geht in der Agent-Queue vor Nachtrag und regulärem Stapel durch, wird ohne Schnitt freigegeben und schreibt `booking_closed_until` nicht fort.
   - **Je Mandant genau ein offener regulärer Zyklus**, je Zeitraum genau ein offener — beide Eindeutigkeiten gelten nur für `kind='regular'`. Ein zweiter Zyklus für einen schon freigegebenen Zeitraum ist ein **Nachtrag** (`supplements_batch_id`): steht in der Agent-Queue vor dem regulären und schreibt `booking_closed_until` nicht fort. Die Freigabe legt ihn für offene Vorschläge automatisch an (F200, `prepared`).
   - **CSV** (`runDatevExport` → `markBatchExported`) bleibt der Altweg: EXTF-Datei-Download, `state='confirmed'`, `exported_at` sofort gesetzt — kein Zyklus, nur Transport.
-  - **Bridge** (`createExportvorgang`): die Freigabe claimt die `accepted`-Sätze mit dem Stempel des Stapels (nie einen Zeitraum, F199) und setzt `ready` — **ohne Schnitt**: der Stempel bleibt, offene Vorschläge gehen in einen automatisch angelegten Nachtrag (F200); die on-prem Bridge pusht per Polling und stempelt `exported_at` erst nach der DATEV-Quittung (`applyDatevResult`, `confirmed`).
+  - **Bridge** (`createExportOperation`): die Freigabe claimt die `accepted`-Sätze mit dem Stempel des Stapels (nie einen Zeitraum, F199) und setzt `ready` — **ohne Schnitt**: der Stempel bleibt, offene Vorschläge gehen in einen automatisch angelegten Nachtrag (F200); die on-prem Bridge pusht per Polling und stempelt `exported_at` erst nach der DATEV-Quittung (`applyDatevResult`, `confirmed`).
 - Data type: table `ludwig.client_datev_export_batches` (`stapelnummer`, `description`, `kind ∈ regular|client_batch`, `state ∈ agent|prepared|review|ready|exporting|inspection|confirmed|mirrored|closed|failed|cancelled`, `period_from/to`, `supplements_batch_id`, `datev_sequence_id`); Stapelnummer-Vergabe geteilt via `nextStapelnummer(tx, clientId, year)`. Der Umfang eines Stapels ist die Zahl der Sätze mit seinem Stempel (`export_batch_id`). Status-Achse `export_batch` in der Registry.
 - Example: Der Zyklus `2026-0007` / `08-2026-Ludwig` steht auf `review`; die Kanzlei gibt ihn zurück an den Agenten, der einen zweiten Durchgang darin fährt.
 - **Nachzügler / carry-over entries**: Buchungen, die **vor** dem gewählten Stapel-Zeitraum liegen und noch keinem Stapel zugeordnet sind — typisch die Rechnung, die erst nach dem Monatsexport hereinkam und nachgebucht wurde. Sie gehen standardmäßig mit (`includeEarlierUnbatched`, Wizard-Schritt 1, default an, mit Zähler + separater Auflistung in der Vorschau), weil sie sonst bis zum nächsten Export desselben Alt-Zeitraums liegen bleiben — für die Umsatzsteuer-Meldung müssen sie raus. Der Stapel-**Beginn** wird dafür auf das älteste Nachzügler-Datum vorgezogen (Dateiname, `period_from`, EXTF-Header, DATEV-`date_from` ziehen mit); der gewählte Zeitraum bleibt im Audit als `requestedFrom` + `carryOverCount`. Grenze: nur dasselbe Wirtschaftsjahr (`carryOverRange`) — ein EXTF-Stapel umfasst genau eines.
@@ -1997,27 +2298,41 @@ The project rule is English names for all code, schemas, and columns (see decisi
 - German: **Stapelabnahme**; die Schritte: *Prüfschritt*, die Runden: *Abnahme-Runde*
 - Definition: Der Prüfprozess, mit dem die Kanzlei einen *Buchungszyklus / Stapel* abnimmt: Ergebnis · Vollständigkeit · Rückfragen · Buchungsvorschläge · Kontenausgleich · offene Posten · Plausibilität · Konventionen · Prüfprotokoll · Übergabe an DATEV · Nachlese. Sie beginnt mit „Prüfung übernehmen" (`prepared → review`) und endet mit „Freigeben" (`→ ready`) oder „Zurück an Ludwig" (`→ agent`). **„Zurück an Ludwig"** ist app-weit *das* Wort für den Rückweg — am Stapel, am Sachverhalt (Reiter „Ohne Vorschlag") und am Beleg, der ohne Buchung erledigt wurde (Schritt Vollständigkeit, `?view=unbooked`, Beleg-Drawer-Fuß; belege.md R14d, F220). Einzige Ausnahme: am Buchungsvorschlag in Schritt Buchungsvorschläge heißt der Rückweg *Zurück an Ludwig* (F260).
   - Der **Rail ist ein Vorschlag, kein Zwang**: jeder Schritt ist jederzeit erreichbar; das Prüfprotokoll sagt am Ende, was offen blieb.
-  - **Ein Schritt heißt mit Namen, nicht mit Nummer** (2026-09-29): URL-Segment ist der englische Schlüssel (`completeness`, `proposals`, `account-clearing`, `protocol` …), die Zahl im Rail nur die Position 1…n in der Stapelart. Verweise nennen den Namen („Schritt Vollständigkeit"); alte Nummern 0–11 in Specs und Dossiers löst `LEGACY_REVIEW_STEP_NUMBERS` auf.
-  - **Geschrieben wird nur in `review`.** Vorher hat niemand übernommen, nachher sind die Sätze geclaimt. Jede Server Action prüft das selbst.
+  - **Ein Schritt heißt mit Namen, nicht mit Nummer** (2026-09-29): URL-Segment ist der englische Schlüssel (`completeness`, `proposals`, `account-clearing`, `protocol` …), die Zahl im Rail nur die Position 1…n in der Stapelart. Verweise nennen den Namen („Schritt Vollständigkeit"); alte Nummern 0–11 stehen nur noch in älteren Specs und Dossiers.
+  - **Festgeschrieben wird nur in `review`.** Der erste Schreibzugriff übernimmt einen Stapel in `prepared` (in `agent` nur bestätigt, F553); nachher sind die Sätze geclaimt. Jede Server Action prüft das selbst.
 - Data type: Routen `clients/[slug]/[year]/batches/[batchId]/review/[step]` (`step` = `ReviewStepKey`); Modul `apps/web/src/modules/batch-review` (`domain/steps.ts`, `domain/gating.ts`).
 - Example: „Stapel 2026-0009 wartet auf deine Abnahme → Ergebnis des Stapels."
-- Notes: Sie baut **keinen zweiten Kern** nach — die Schritte rufen dieselben Kerne wie Agent und Stammdatenpflege. Eigene Oberflächen hat sie sehr wohl (F123): das Grundmuster jedes Schritts ist *Todo-Liste* links, Detail rechts, Sprung zum nächsten offenen Punkt nach jeder Entscheidung; der Rail trägt je Schritt Ampel und Zähler. Nicht zu verwechseln mit der *Abnahme* eines einzelnen Buchungsvorschlags (Freigeben/Ablehnen am Satz), die ein Teil davon ist.
+- Notes: Sie baut **keinen zweiten Kern** nach — die Schritte rufen dieselben Kerne wie Agent und Stammdatenpflege. Eigene Oberflächen hat sie sehr wohl (F123): das Grundmuster jedes Schritts ist *Todo-Liste* links, Detail rechts, Sprung zum nächsten offenen Punkt nach jeder Entscheidung; der Rail trägt je Schritt Ampel und Zähler. Nicht zu verwechseln mit der *Abnahme* eines einzelnen Buchungsvorschlags (Freigeben/Ablehnen am Satz), die ein Teil davon ist. Seit F554 ist sie die *Expertensicht* hinter „Details" des *Monatsabschlusses*.
+
+### Monatsabschluss (Buchhalter-Abnahme)
+
+- English: `month close`
+- German: **Monatsabschluss**; die vier Teile: *Unterschritt*
+- Definition: Der Einstieg der Kanzlei in einen regulären Stapel (F554): je Phase ein Screen (`inbox` · `running` · `questions` · `review` · `released`), dann die Unterschritte Belege · Konten · Buchungen · Übergeben als Wizard; offene Rückfragen einzeln unter `…/close/questions`. Endet mit „Übergeben" (`→ ready`). Zeigt nur Probleme; Erledigtes steht in einer Zeile.
+- Data type: Routen `clients/[slug]/[year]/batches/[batchId]/close`, `…/close/questions`, `…/close/[step]` (`step` = `CloseStepKey`); `batch-review/domain/close-steps.ts`, `application/close-status.ts`, `ui/close/`.
+- Notes: Dieselben Bausteine wie die *Stapelabnahme*, kein zweiter Kern. Der Mandantenstapel hat keinen Monatsabschluss (`…/close` leitet auf `…/review`).
+
+### Expertensicht
+
+- English: `expert view`
+- German: **Expertensicht**
+- Definition: Die 13-Schritt-*Stapelabnahme* (`…/review/[step]`) hinter dem Link „Details" des *Monatsabschlusses*; jeder Unterschritt springt in seinen Expertenschritt (`CLOSE_STEP_EXPERT`). Deeplinks auf `…/review/<step>` bleiben gültig.
 
 ### In den Folgemonat schieben
 
 - English: `defer case to next cycle`
 - German: **In den Folgemonat schieben**
 - Definition: Einen offenen *Sachverhalt* ohne lebenden Buchungssatz aus seinem *Buchungszyklus* in den nächsten regulären Zyklus stempeln — weil Beleg oder Leistung nach dem Zeitraum liegen und keine Zahlung im Stapel steht. Der Fall bleibt `open` beim Agenten; nur `export_batch_id` an Fall und Ereignissen wandert. Gibt es noch keinen Folgestapel, wird der Fall zur Waise (`null`) und `openBatchForPeriod` adoptiert ihn bei der nächsten Eröffnung — erkannt an der Audit-Spur `case.defer_to_next_cycle`, nicht an einer Spalte.
-- Data type: Kern `accounting-cases/application/case-defer-core.ts` (`deferCaseToNextCycle`, `assignOrphanCasesToBatch`); Agent-Tool `defer_case_to_next_cycle`; Abnahme Schritt Buchungsvorschläge, Reiter „Ohne Vorschlag" (`deferCaseToNextCycleAction`).
+- Data type: Kern `accounting-cases/application/case-defer-core.ts` (`deferCaseToNextCycle`, `assignOrphanCasesToBatch`); Agent-Tool `case_transition(to=next_cycle)`; Abnahme Schritt Buchungsvorschläge, Reiter „Ohne Vorschlag" (`deferCaseToNextCycleAction`).
 - Example: „MUSTER STB-Rechnung vom 01.09. im August-Stapel — in den Folgemonat schieben, nicht mit verbogenem Datum buchen."
-- Notes: Nie ein Guard, nie der Server beim Lauf-Ende — die Entscheidung trifft der Agent (Tool) oder die Kanzlei (UI). Ein Fall mit lebendem Satz am Stapel lässt sich nicht schieben (erst `withdraw_proposal`). F217.
+- Notes: Nie ein Guard, nie der Server beim Lauf-Ende — die Entscheidung trifft der Agent (Tool) oder die Kanzlei (UI). Ein Fall mit lebendem Satz am Stapel lässt sich nicht schieben (erst `entry_withdraw`). F217.
 
 ### Zurück an Ludwig
 
 - English: `return proposal to agent`
 - German: **Zurück an Ludwig**
 - Definition: Einen Buchungsvorschlag in Schritt Buchungsvorschläge der *Stapelabnahme* mit Notiz an den Agenten zurückgeben: der Satz wird zurückgezogen (`reversed`, Notiz unter `proposal_rationale.review_return_note`), der Sachverhalt bleibt offen beim Agenten, die Notiz geht als Agent-Frage (`question_type = 'proposal_returned'`, `accounting_event_id` = Ereignis) an ihn.
-- Data type: Kern `returnProposalToAgent` (`accounting-cases/application/booking-actions.ts`); Action `returnProposalToAgentAction`; Reiter `returned` in Schritt Buchungsvorschläge (`listReturnedToAgent`).
+- Data type: Kern `returnProposalToAgentCore` (`accounting-cases/application/journal-entry-review-core.ts`); Action `returnProposalToAgentAction`; Reiter `returned` in Schritt Buchungsvorschläge (`listReturnedToAgent`).
 - Example: „Zurück an Ludwig: 4980 statt 4970 — das ist Wartung, keine Nebenkosten."
 - Notes: Nicht *Ablehnen* — das schließt den Fall, sobald nichts mehr offen ist, und der Agent bucht ihn nie neu. Der Fall steht im Reiter „Zurück an Ludwig", bis der Agent neu vorschlägt oder die Frage erledigt. F260.
 
@@ -2072,9 +2387,9 @@ The project rule is English names for all code, schemas, and columns (see decisi
 - English: `process strip`, `baton`, `relay bar`
 - German: **Prozessbild** (die vier Phasen), **Staffelstab** (wer dran ist), **Staffel-Leiste** (wo die Zeit hinging)
 - Definition: Die drei Darstellungen, mit denen eine Zustands-Achse ohne Klick lesbar wird. Das **Prozessbild** fasst die Zustände zu vier Phasen zusammen (beim Stapel: buchen · prüfen · übertragen · angekommen) und zeigt sie als Strip (Liste), Stepper (Detail-Kopf) oder Mini. Ist der Lauf durch (Stapel `closed`, Beleg erledigt), sind alle Phasen erledigt und die Leiste wird durchgehend grün. Der **Staffelstab** sagt, wer gerade dran ist — Icon **und** Wort, nie nur Farbe. Die **Staffel-Leiste** legt die Zeit zwischen den Zustandswechseln als Zeitachse aus, je Abschnitt eingefärbt nach Besitzer.
-  - **Alles drei ist abgeleitet**, kein gespeichertes Feld: Phasen und Besitzer aus dem Zustand (`domain/batch-process.ts`), die Abschnitte aus den Zustands-Ereignissen im Audit (`domain/staffel.ts`). Ein zweiter Speicher würde von der Zustands-Achse abweichen, und dann gälte welcher?
+  - **Alles drei ist abgeleitet**, kein gespeichertes Feld: Phasen und Besitzer aus dem Zustand (`domain/batch-process.ts`), die Abschnitte aus den Zustands-Ereignissen im Audit (`domain/relay-bar.ts`). Ein zweiter Speicher würde von der Zustands-Achse abweichen, und dann gälte welcher?
   - Die Komponenten (`@/ui/v2`) kennen **kein Fachmodul**: sie bekommen Phasen, Besitzer und Abschnitte als Props. Sonst wäre das Prozessbild an den Stapel gefesselt und der nächste Prozess bekäme ein eigenes.
-- Data type: `ui/v2/Prozessbild.tsx` (`ProzessMini`, `ProzessStepper`, `Staffelstab`, `StaffelLeiste`); Ableitungen in `modules/datev-export/domain/{batch-process,staffel}.ts`, Deckungstest gegen die Status-Achse `export_batch`.
+- Data type: `ui/v2/Prozessbild.tsx` (`ProzessMini`, `ProzessStepper`, `Staffelstab`, `StaffelLeiste`); Ableitungen in `modules/datev-export/domain/{batch-process,relay-bar}.ts`, Deckungstest gegen die Status-Achse `export_batch`.
 - Example: „Zwei Tage Agent, neun Tage Warten auf den Mandanten, ein Tag Kanzlei" — die Staffel-Leiste zum August-Stapel.
 - Notes: Erstmals an der Stapel-Seite (F119); gedacht für jede Achse mit Staffelstab-Charakter. Die Phasen-Zuordnung muss die Achse **vollständig** abdecken — ein Zustand ohne Phase fällt sonst still aus dem Bild.
 
@@ -2095,7 +2410,7 @@ The project rule is English names for all code, schemas, and columns (see decisi
   - `value_hash` bindet die Quittung an den geprüften Wert. Ändert er sich, steht die Zeile wieder da — eine alte Quittung soll nichts stillschweigend durchwinken.
 - Data type: table `ludwig.client_review_checks`, Schlüssel `(client_id, check_kind, subject_key, period)`; Kern `recordReviewCheck` / `withdrawReviewCheck` (`modules/batch-review/application/review-checks.ts`); Katalog `domain/check-kinds.ts`, deckungsgleich mit dem CHECK der Migration.
 - Example: „Kontenvergleich 6815 · 08/2026 quittiert von M. Vogt: Jahresrechnung Versicherung."
-- Notes: `export_batch_id` und `agent_run_id` sind **Herkunft, kein Schlüssel** — sie sagen, in welchem Stapel und gegen welchen Stand quittiert wurde.
+- Notes: `export_batch_id` und `agent_run_step_id` sind **Herkunft, kein Schlüssel** — sie sagen, in welchem Stapel und gegen welchen Stand quittiert wurde.
 
 ### Export status report (Export-Statusbericht)
 
@@ -2160,7 +2475,7 @@ These are real areas, but they are not stable enough to over-model yet.
 - English: `transaction currency`
 - German: `Transaktionswährung` / `Belegwährung`
 - Definition: The currency in which the source document was issued. Stored on `client_source_docs_invoices.fx_currency`, `client_source_docs_invoice_lines.transaction_*_value`, and `client_journal_entry.fx_currency`. NULL means the document was already in EUR; the EUR fields then equal what the preprocessor extracted.
-- Notes: Distinct from the `currency` column on the same rows, which always holds `EUR` after the FX-normalisation step. See "Local currency" and the FX-normalisation step in `apps/workflows/.../invoice_ingest_workflow.py`.
+- Notes: Distinct from the `currency` column on the same rows, which always holds `EUR` after the FX-normalisation step. See "Local currency" and the FX-normalisation step in `apps/pipeline/src/ludwig/workflows/.../invoice_ingest_workflow.py`.
 
 ### Local currency
 
@@ -2184,7 +2499,7 @@ Spalten mit DB-`CHECK`-Constraints, die kein eigenständiges Geschäftskonzept r
 
 - English: `membership role`
 - German: `Mitgliedschaftsrolle`
-- Definition: Rolle eines Platform-Users innerhalb einer konkreten Mitgliedschaft (Tenant oder Client). Steuert UI-Berechtigungen, nicht Daten-RLS.
+- Definition: Rolle eines Platform-Users innerhalb einer konkreten Mitgliedschaft (Tenant oder Client). Steuert UI-Berechtigungen, nicht die Datensicht.
 - Data type: text enum.
   - `ludwig.platform_tenant_users.role` ∈ `owner | admin | member`
   - `ludwig.platform_client_users.role` ∈ `owner | member`
@@ -2229,7 +2544,7 @@ Spalten mit DB-`CHECK`-Constraints, die kein eigenständiges Geschäftskonzept r
 
 - English: `ledger account source`
 - German: `Kontoherkunft`
-- Definition: Woher ein Sachkonto-Eintrag im Mandantenkontenrahmen stammt. `reference` ist seit F52-T52.3 der EINE Wert für „aus dem SKR-Referenz-Katalog aktiviert/materialisiert" (beide Pfade: `activate_ledger_account` im MCP-Agenten und der Legacy-Python-Materialisierer); `manual` meint echte Hand-Anlage.
+- Definition: Woher ein Sachkonto-Eintrag im Mandantenkontenrahmen stammt. `reference` ist seit F52-T52.3 der EINE Wert für „aus dem SKR-Referenz-Katalog aktiviert/materialisiert" (beide Pfade: `account_activate` im MCP-Agenten und der Legacy-Python-Materialisierer); `manual` meint echte Hand-Anlage.
 - Data type: `ludwig.client_ledger_accounts.source` — text enum (`'imported' | 'system_allocated' | 'reference' | 'manual'`).
 - Example: Aus historischem DATEV-Export migriert → `'imported'`; vom System neu angelegtes Kreditorkonto im Bereich 890000–899999 → `'system_allocated'`; vom Agenten aus dem SKR-Katalog aktiviert → `'reference'`; vom Operator angelegt → `'manual'`.
 
@@ -2270,10 +2585,10 @@ Spalten mit DB-`CHECK`-Constraints, die kein eigenständiges Geschäftskonzept r
 
 - English: `fund usage nature`
 - German: `Mittelverwendungsart`
-- Definition: Vom Interpreter geschätzte Natur einer Aufwandsposition. Kanonische Wertemenge (REQ-004 #8, 2026-05-22): `goods | service | expense | investment | mixed | unknown` (Pydantic-Typ `buchassi_shared.FundUsageNature`). `investment` bleibt **separat** von `goods`, weil Anlagengüter aktivierungspflichtig sind und auf eigene Konten (0xxx) gehen; `service` und `expense` differenzieren zwischen Dienstleistungs- und sonstigen Aufwendungen.
+- Definition: Vom Interpreter geschätzte Natur einer Aufwandsposition. Kanonische Wertemenge (REQ-004 #8, 2026-05-22): `goods | service | expense | investment | mixed | unknown` (Pydantic-Typ `ludwig.shared.FundUsageNature`). `investment` bleibt **separat** von `goods`, weil Anlagengüter aktivierungspflichtig sind und auf eigene Konten (0xxx) gehen; `service` und `expense` differenzieren zwischen Dienstleistungs- und sonstigen Aufwendungen.
 - Data type: `ludwig.client_invoice_line_items.fund_usage_nature` — text enum (`'goods' | 'service' | 'expense' | 'investment' | 'mixed' | 'unknown'`), nullable. Same codomain auf `client_business_partners.typical_nature` (Subset-Nutzung: der Creditor-Profiler emittiert in der Praxis nur `goods/service/expense/mixed/unknown` — `investment` ist eine Beleg-Achse, keine Lieferanten-Eigenschaft).
 - Example: „MacBook Pro M4" → `fund_usage_nature = 'investment'` (Aktivierung als AfA-Gut, da > 800 € netto); „SaaS-Abo" → `'service'`; „Bürokaffee" → `'expense'`; „Verkaufsware Schrauben" → `'goods'`.
-- Notes: Vor der Vereinheitlichung existierten drei parallele Definitionen — `interpreter FundUsageNature`, `interpreter CreditorTypicalNature`, `booking ServiceNature`. Sie sind 2026-05-22 alle Aliase auf `buchassi_shared.FundUsageNature` geworden (siehe Migration `20260522150000_unify_fund_usage_nature.sql`).
+- Notes: Vor der Vereinheitlichung existierten drei parallele Definitionen — `interpreter FundUsageNature`, `interpreter CreditorTypicalNature`, `booking ServiceNature`. Sie sind 2026-05-22 alle Aliase auf `ludwig.shared.FundUsageNature` geworden (siehe Migration `20260522150000_unify_fund_usage_nature.sql`).
 
 ### Accounting subject
 
@@ -2289,7 +2604,7 @@ Spalten mit DB-`CHECK`-Constraints, die kein eigenständiges Geschäftskonzept r
 - English: `confidence band`
 - German: `Konfidenz-Band`
 - Definition: 5-stufige Wortbezeichnung für eine Konfidenz in `[0, 1]`, parallel zum Float gehalten. LLMs sind in nackten Prozentwerten kalibrationsschwach — „mittel" liest sich für den Reviewer realistischer als „37 %". Schwellen: `sehr_niedrig <0.30`, `niedrig 0.30–0.50`, `mittel 0.50–0.70`, `hoch 0.70–0.85`, `sehr_hoch >0.85`.
-- Data type: `buchassi_shared.ConfidenceBand` — Literal-Union; Helper `confidence_to_band(value: float) -> ConfidenceBand` ist der Single-Source-of-Truth für das Mapping.
+- Data type: `ludwig.shared.ConfidenceBand` — Literal-Union; Helper `confidence_to_band(value: float) -> ConfidenceBand` ist der Single-Source-of-Truth für das Mapping.
 - Example: `JudgeVerdict.confidence_band = 'mittel'` mit `confidence = 0.61`. `BookingProposal.overall_confidence_band` ist ein abgeleitetes `@computed_field` aus `overall_confidence` — bleibt nach `_apply_judge_response`-Mutation automatisch konsistent.
 - Notes: Der Float bleibt parallel für Sortierung, Threshold-Logik (`AUTO_ACCEPT_CONFIDENCE_THRESHOLD`, `JUDGE_REVIEW_CONFIDENCE_CAP`) und gewichtete Aggregation. Das Band ist UI-nahes Etikett, der Float ist die Rechen-Größe.
 
@@ -2366,7 +2681,7 @@ Spalten mit DB-`CHECK`-Constraints, die kein eigenständiges Geschäftskonzept r
 - German: `Extraktions-Log-Modul`
 - Definition: Welches stateless Modul einen Eintrag im Pipeline-Log erzeugt hat. Engere Liste als `Source module` (kein Bindestrich, ohne `-module`-Suffix), weil das Log früher entstand.
 - Data type: `ludwig.ops_extraction_logs.module` — text enum (`'classifier' | 'preprocessor' | 'interpreter' | 'booking'`).
-- Notes: Verwandt mit `Source module`, aber für Logs statt für `InvoiceLogEntry`/`ClarificationQuestion`. Nicht zusammenführen, ohne die jeweiligen Schreibpfade zu prüfen.
+- Notes: Seit F381 schreibt nur noch der Preprocessor-Diagnostik-Store in diese Tabelle (`module='preprocessor'`); die Telemetrie der übrigen Module liegt in `client_invoice_traces`.
 
 ### DATEV mirror (DATEV-Spiegel)
 

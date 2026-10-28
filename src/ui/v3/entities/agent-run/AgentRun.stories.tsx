@@ -1,6 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { useState } from "react";
 import { HOLDER } from "@/ludwig/modules/source-docs/domain/document-process";
+import { resolveStatus } from "@/ludwig/ui/status/status-registry";
 import { Baton } from "../../patterns/Process";
 import { StepRail, type RailItem } from "../../patterns/StepRail";
 import { TaskList } from "../../patterns/TaskList";
@@ -42,7 +43,11 @@ export const Ticking: Story = {
   render: () => <AgentRunBanner state="running" startedAt={ago(50 / 60)} startedBy="Anna Berger" expectedMinutes={12} />,
 };
 
-/** The three states one under the other — same frame, same height; only surface, sign and sentence change. */
+/**
+ * The five states one under the other — same frame, same height; only surface,
+ * sign and sentence change. Tone and word of every end come from the status
+ * registry (0225, owner 2026-10-28, variant B).
+ */
 export const States: Story = {
   render: () => (
     <Stack>
@@ -53,10 +58,37 @@ export const States: Story = {
         action={{ label: "Rückfragen beantworten", href: "#questions" }}
       />
       <AgentRunBanner
-        state="failed"
-        message="Ludwig ist nicht fertig geworden: Der Kontoauszug für März fehlt."
+        state="stopped"
+        message="Ludwig hat abgebrochen: Der Kontoauszug für März fehlt."
         action={{ label: "Protokoll des Durchgangs öffnen", href: "#log" }}
       />
+      <AgentRunBanner
+        state="taken_over"
+        message="Die Kanzlei hat die Prüfung übernommen; Ludwigs Durchgang ist beendet."
+        action={{ label: "Protokoll des Durchgangs öffnen", href: "#log" }}
+      />
+      <AgentRunBanner
+        state="failed"
+        message="Ludwig steckt fest: Im Schritt Konten fehlen zwei offene Posten."
+        action={{ label: "Offene Posten ansehen", href: "#accounts" }}
+      />
+    </Stack>
+  ),
+};
+
+/**
+ * Stopped — broken off with a reason, or still too long (`agent_run_banner.stopped`):
+ * a warning, the reason as the sentence and the way as a reference, like `failed`.
+ */
+export const Stopped: Story = {
+  render: () => (
+    <Stack>
+      <AgentRunBanner
+        state="stopped"
+        message="Ludwig hat abgebrochen: Der Kontoauszug für März fehlt."
+        action={{ label: "Protokoll des Durchgangs öffnen", href: "#log" }}
+      />
+      <AgentRunBanner state="stopped" message="Ludwig war zwei Stunden still. Der Stapel liegt zur Prüfung bei Ihnen." />
     </Stack>
   ),
 };
@@ -83,16 +115,16 @@ export const Done: Story = {
   },
 };
 
-/** Failed — what the registry calls danger (`run_outcome.blocked`): a red sentence and a reference, and without one when the app has nowhere to point. */
+/** Failed — what the registry calls danger (`agent_run_banner.failed`): a red sentence and a reference, and without one when the app has nowhere to point. */
 export const Failed: Story = {
   render: () => (
     <Stack>
       <AgentRunBanner
         state="failed"
-        message="Ludwig ist nicht fertig geworden: Der Kontoauszug für März fehlt."
-        action={{ label: "Protokoll des Durchgangs öffnen", href: "#log" }}
+        message="Ludwig steckt fest: Im Schritt Konten fehlen zwei offene Posten."
+        action={{ label: "Offene Posten ansehen", href: "#accounts" }}
       />
-      <AgentRunBanner state="failed" message="Ludwig steckt fest: Im Schritt Konten fehlen zwei offene Posten." />
+      <AgentRunBanner state="failed" message="Ludwig steckt fest: Der Prüfschritt Bank ist rot, ein Auszug fehlt." />
     </Stack>
   ),
 };
@@ -171,7 +203,7 @@ const STEPS: RailItem[] = [
 
 const STARTED = ago(6);
 
-/** In place: under the step bar of the batch review. The switch stands in for the app's polling — running, done, failed. */
+/** In place: under the step bar of the batch review. The switch stands in for the app's polling — every state of a run. */
 export const InUse: Story = {
   render: () => {
     const [state, setState] = useState("running");
@@ -181,11 +213,10 @@ export const InUse: Story = {
           ariaLabel="Stand des Durchgangs (nur in der Story)"
           active={state}
           onPick={setState}
-          options={[
-            { key: "running", label: "läuft" },
-            { key: "done", label: "fertig" },
-            { key: "failed", label: "gescheitert" },
-          ]}
+          options={(["running", "done", "stopped", "taken_over", "failed"] as const).map((key) => ({
+            key,
+            label: resolveStatus("agent_run_banner", key).label,
+          }))}
         />
         <StepRail
           layout="bar"
@@ -209,12 +240,25 @@ export const InUse: Story = {
             message="Ludwig ist fertig: 2 neue Rückfragen"
             action={{ label: "Rückfragen beantworten", href: "#questions" }}
           />
+        ) : state === "stopped" ? (
+          <AgentRunBanner
+            state="stopped"
+            startedAt={STARTED}
+            message="Ludwig hat abgebrochen: Der Kontoauszug für August fehlt."
+            action={{ label: "Protokoll des Durchgangs öffnen", href: "#log" }}
+          />
+        ) : state === "taken_over" ? (
+          <AgentRunBanner
+            state="taken_over"
+            startedAt={STARTED}
+            message="Die Kanzlei hat die Prüfung übernommen; Ludwigs Durchgang ist beendet."
+          />
         ) : (
           <AgentRunBanner
             state="failed"
             startedAt={STARTED}
-            message="Ludwig ist nicht fertig geworden: Der Kontoauszug für August fehlt."
-            action={{ label: "Protokoll des Durchgangs öffnen", href: "#log" }}
+            message="Ludwig steckt fest: Im Schritt Konten fehlen zwei offene Posten."
+            action={{ label: "Offene Posten ansehen", href: "#accounts" }}
           />
         )}
         <Card>

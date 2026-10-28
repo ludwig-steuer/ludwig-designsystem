@@ -7,7 +7,7 @@
  * oder weist den Stapel ab (abweichender Satz) — in beiden Fällen steht in
  * Ludwig etwas anderes als in DATEV.
  *
- * Der Guard `automaticAccountWithTaxKey` deckte nur `submit_booking_proposal`
+ * Der Guard `automaticAccountWithTaxKey` deckte nur `entry_propose`
  * ab. Dieselbe Prüfung sitzt seit W3a auch an der manuellen Buchung und an den
  * Regel-Vorlagen (dort kamen die 21 Dauerregeln mit `template_tax_key='3'` auf
  * `8400`/`8401` her). Erkennung und Fehlertext leben deshalb hier — ein Ort,
@@ -66,6 +66,6 @@ export function automaticAccountTaxKeyFix(hit: AutomaticAccountTaxKeyHit): strin
     `Auf ${hit.accountNumber} keinen Steuerschlüssel setzen (weglassen bzw. "0") und keine eigene ` +
     `Steuerzeile buchen — die Steuer entsteht in DATEV automatisch. Ist der Steuersatz hier ein ` +
     `anderer als ${hit.rate ?? "?"} %, ist es die falsche Kontowahl: passendes Nicht-Automatikkonto ` +
-    `suchen (search_accounts zeigt isAutomaticAccount) oder Klärung stellen.`
+    `suchen (account_search zeigt automatic) oder Klärung stellen.`
   );
 }

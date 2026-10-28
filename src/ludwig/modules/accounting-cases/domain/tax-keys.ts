@@ -1,15 +1,15 @@
 /**
  * Statischer Katalog der häufigen DATEV-Steuerschlüssel (BU-Schlüssel), damit
- * der Agent an Buchungszeilen nur gültige `tax_key`s setzt (F06-T6.5). Kein
- * Umbau der booking-module-Tax-Regeln — nur ein abfragbarer Referenz-Katalog.
+ * der Agent an Buchungszeilen nur gültige `tax_key`s setzt (F06-T6.5). Nur ein
+ * abfragbarer Referenz-Katalog, keine Entscheidungslogik.
  *
  * Die BU-Schlüssel sind bei DATEV framework-übergreifend gleich (SKR03 == SKR04);
  * die verifizierten Werte 2/3/8/9 stammen aus dem DATEV-Import der Testmandanten,
  * `1` (steuerfrei) ist Standard. §13b (Reverse-Charge, 91/92/94/95) und
  * innergemeinschaftlicher Erwerb (18/19) sind seit F14-T14.7 mit aufgeführt,
  * **hängen aber am konkreten Sachverhalt** (Mandanten-Gate § 15, Belegangaben,
- * mit/ohne VSt-Abzug). Für die Entscheidung `get_guideline(name='input_tax')` abrufen
- * (Prüfschema + Buchungssätze); im Zweifel `raise_clarification` an die Kanzlei
+ * mit/ohne VSt-Abzug). Für die Entscheidung `help(topic="vat")` abrufen
+ * (Prüfschema + Buchungssätze); im Zweifel `clarification_raise` an die Kanzlei
  * statt raten. Der Assistenz-Modus des Submit rechnet nur 2/3/8/9 automatisch —
  * §13b/igE bucht der Agent explizit nach Guideline.
  */
@@ -21,7 +21,7 @@ import { DATEV_TAX_KEYS, type TaxKeyEntry } from "@/ludwig/core/datev/tax-keys";
 
 /**
  * Menge gültiger Keys — seit F81-T81.2 die **echte Allowlist** des Submit
- * (`TaxKeySchema` in `agent-booking-core`), nicht mehr nur eine behauptete.
+ * (`TaxKeySchema` in `journal-entry-proposal-schema`), nicht mehr nur eine behauptete.
  * Vorher war `tax_key` reines Pass-Through vom LLM: jeder Tippfehler landete
  * in der DB und fiel erst beim Export auf — oder gar nicht.
  */
@@ -32,7 +32,7 @@ export const DATEV_TAX_KEY_SET: ReadonlySet<string> = new Set(DATEV_TAX_KEYS.map
  * deren explizite Netto+Steuerzeile-Paarung validiert wird (Standard-VSt/USt
  * auf den Konten aus `taxAccountFor`). §13b (91/92/94/95) und igE (18/19)
  * gehören NICHT dazu — die bucht der Agent explizit auf Sonderkonten nach
- * `get_guideline(name='input_tax')` (F14-T14.7), ohne harte Submit-Validierung (T14.2-Ziel).
+ * `help(topic="vat")` (F14-T14.7), ohne harte Submit-Validierung (T14.2-Ziel).
  */
 export const STANDARD_ASSIST_TAX_KEYS: ReadonlySet<string> = new Set(["2", "3", "8", "9"]);
 
@@ -102,7 +102,7 @@ export function taxAccountFor(framework: string | null, taxKey: string): TaxAcco
  * bei 2/3/8/9 ist der Zahlbetrag hier NETTO und es entstehen ZWEI Steuerzeilen
  * (VSt auf der Sachseite, USt auf der Gegenseite — Nullsumme für die
  * Zahllast). `input` fehlt bei 95 (ohne VSt-Abzug: die Steuer wird Aufwand).
- * Konten laut Vorsteuer-Guideline Abschnitt 4 (input-tax-booking.md);
+ * Konten laut Vorsteuer-Schema (agent/help/topic/vat.md);
  * 7 %-Varianten (91/92/18) bewusst NICHT hinterlegt — keine verifizierten
  * Konten, fail-fast statt raten.
  */
@@ -182,6 +182,35 @@ export const INPUT_TAX_ACCOUNT_NUMBERS: ReadonlySet<string> = new Set([
     Object.values(byKey).flatMap((rc) => (rc.input ? [rc.input.accountNumber] : [])),
   ),
 ]);
+
+/**
+ * F490: alle UMSATZSTEUER-Konten (Ausgangsseite: Schlüssel 2/3 + §13b-/igE-output) — Gegenstück zu
+ * INPUT_TAX_ACCOUNT_NUMBERS, rahmenübergreifend.
+ */
+export const OUTPUT_TAX_ACCOUNT_NUMBERS: ReadonlySet<string> = new Set([
+  ...Object.values(TAX_ACCOUNTS_BY_FRAMEWORK).flatMap((byKey) =>
+    ["2", "3"].flatMap((k) => (byKey[k] ? [byKey[k].accountNumber] : [])),
+  ),
+  ...Object.values(REVERSE_CHARGE_ACCOUNTS_BY_FRAMEWORK).flatMap((byKey) =>
+    Object.values(byKey).map((rc) => rc.output.accountNumber),
+  ),
+]);
+
+/** F490: Vorsteuer-Konten eines Rahmens — die Nummernkreise überlagern sich (SKR04 3806 = USt, SKR03 3806 nicht). */
+export function inputTaxAccountNumbers(skr: "skr03" | "skr04"): ReadonlySet<string> {
+  return new Set([
+    ...["8", "9"].flatMap((k) => (TAX_ACCOUNTS_BY_FRAMEWORK[skr][k] ? [TAX_ACCOUNTS_BY_FRAMEWORK[skr][k].accountNumber] : [])),
+    ...Object.values(REVERSE_CHARGE_ACCOUNTS_BY_FRAMEWORK[skr]).flatMap((rc) => (rc.input ? [rc.input.accountNumber] : [])),
+  ]);
+}
+
+/** F490: Umsatzsteuer-Konten eines Rahmens. */
+export function outputTaxAccountNumbers(skr: "skr03" | "skr04"): ReadonlySet<string> {
+  return new Set([
+    ...["2", "3"].flatMap((k) => (TAX_ACCOUNTS_BY_FRAMEWORK[skr][k] ? [TAX_ACCOUNTS_BY_FRAMEWORK[skr][k].accountNumber] : [])),
+    ...Object.values(REVERSE_CHARGE_ACCOUNTS_BY_FRAMEWORK[skr]).map((rc) => rc.output.accountNumber),
+  ]);
+}
 
 /**
  * Stabiler Erkennungstext im domainError, wenn eine Buchung mit Vorsteuer-

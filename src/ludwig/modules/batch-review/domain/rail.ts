@@ -1,5 +1,5 @@
 import { rowSettled, type ChecklistRow, type ReleaseVerdict } from "./checklist";
-import { LAST_REVIEW_STEP, NACHLESE_STEP, TRANSFER_STEP } from "./steps";
+import type { ReviewStepKey } from "./steps";
 
 /**
  * Was im Rail neben jedem Schritt steht (F123 T123.2).
@@ -9,9 +9,9 @@ import { LAST_REVIEW_STEP, NACHLESE_STEP, TRANSFER_STEP } from "./steps";
  * `application/rail-status.ts`.
  *
  * Die Ampel hat vier Stufen, und die Unterscheidung ist der Punkt:
- * **`blocked`** gibt es nur auf Schritt 8 und nur, wenn die Freigabe wirklich
+ * **`blocked`** gibt es nur auf dem Prüfprotokoll und nur, wenn die Freigabe wirklich
  * gesperrt ist — sonst wäre Rot ein Dauerzustand und niemand sähe mehr hin.
- * **`neutral`** heißt „hier gibt es nichts zu zählen" (Schritt 0 ist ein
+ * **`neutral`** heißt „hier gibt es nichts zu zählen" (das Ergebnis ist ein
  * Bericht), nicht „nichts zu tun".
  */
 
@@ -39,29 +39,31 @@ const TRANSFER_TEXT: Record<string, RailZaehler> = {
 };
 
 export function railZaehler(
-  step: number,
+  step: ReviewStepKey,
   input: {
     /** Die Checklisten-Zeilen, die auf diesen Schritt springen. */
     rows: readonly ChecklistRow[];
     verdict: ReleaseVerdict;
     overdueExpectations: number;
+    /** F498: offene Befunde „Altlast Vormonat" — Hinweis, kein Prüfpunkt. */
+    priorPeriodFindings: number;
     kontenAuffaellig: number;
     state: string;
     /** Ist die Nachlese schon zu füllen? */
     nachleseBereit: boolean;
   },
 ): RailZaehler {
-  if (step === TRANSFER_STEP) {
+  if (step === "transfer") {
     return (
       TRANSFER_TEXT[input.state] ?? { tone: "neutral", counterText: null, open: 0, total: 0 }
     );
   }
-  if (step === NACHLESE_STEP) {
+  if (step === "follow-up") {
     return input.nachleseBereit
       ? { tone: "open", counterText: "Abgleich verfügbar", open: 0, total: 0 }
       : { tone: "neutral", counterText: "wartet auf DATEV", open: 0, total: 0 };
   }
-  if (step === LAST_REVIEW_STEP) {
+  if (step === "protocol") {
     const blocker = input.verdict.openBlocked + input.verdict.openWarn;
     return {
       tone: input.verdict.openBlocked > 0 ? "blocked" : blocker > 0 ? "open" : "done",
@@ -71,16 +73,19 @@ export function railZaehler(
       total: 0,
     };
   }
-  if (step === 5) {
+  if (step === "open-items") {
     const n = input.overdueExpectations;
+    const m = input.priorPeriodFindings;
+    const parts = [n > 0 ? `${n} überfällig` : null, m > 0 ? `${m} aus Vormonaten` : null].filter(Boolean);
     return {
-      tone: n > 0 ? "open" : "done",
-      counterText: n > 0 ? `${n} überfällig` : "nichts überfällig",
+      tone: n + m > 0 ? "open" : "done",
+      counterText: parts.length > 0 ? parts.join(" · ") : "nichts überfällig",
+      // Befunde sind keine Prüfpunkte — der Fortschritt zählt nur die überfälligen Erwartungen.
       open: n,
       total: n,
     };
   }
-  if (step === 6) {
+  if (step === "plausibility") {
     const n = input.kontenAuffaellig;
     return {
       tone: n > 0 ? "open" : "done",
@@ -91,7 +96,7 @@ export function railZaehler(
   }
 
   if (input.rows.length === 0) {
-    // Schritt 0 ist Bericht, kein Todo — ein Zähler wäre erfunden.
+    // Das Ergebnis ist Bericht, kein Todo — ein Zähler wäre erfunden.
     return { tone: "neutral", counterText: null, open: 0, total: 0 };
   }
   const open = input.rows.reduce(

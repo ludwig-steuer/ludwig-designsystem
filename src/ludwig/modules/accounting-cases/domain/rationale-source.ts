@@ -30,7 +30,7 @@ export type RationaleSourceKind = (typeof RATIONALE_SOURCE_KINDS)[number];
  *
  * `vendor_history` und `rule` stehen bewusst NICHT hier (Bugreport 2026-08-22
  * #14/R9): die Kreditorenhistorie ist eine Aggregation über viele Buchungen,
- * die `get_booking_context` als Liste liefert — es gibt keinen Datensatz, auf
+ * die `case_context` als Liste liefert — es gibt keinen Datensatz, auf
  * den eine uuid zeigen könnte. Der B9-Guard nennt `vendor_history` gleichzeitig
  * als zulässige Quelle; die Quelle war damit für genau die Buchungen nicht
  * angebbar, die sich auf sie stützen. Wer den Partner benennen will, hängt

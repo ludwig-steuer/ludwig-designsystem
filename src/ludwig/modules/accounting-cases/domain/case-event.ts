@@ -46,7 +46,8 @@ export interface CaseEventBooking {
   /** Wie freigegeben: `ai_unmodified` | `ai_edited` | `manual_only` | `imported`. */
   acceptanceQuality: string | null;
   /** Strukturierte KI-Begründung (`proposal_rationale` jsonb) — enthält u.a.
-   *  ``judge[].reasoning_short`` (deutscher Klartext) + ``overall_confidence``. */
+   *  ``agent_rationale`` (deutscher Klartext) + ``overall_confidence``; Judge-Urteile stehen
+   *  seit F540 in ``client_judge_reviews``. */
   proposalRationale: Record<string, unknown> | null;
   /** DATEV-Export-Markierung (T10.2): Zeitpunkt, oder null = nie exportiert. */
   exportedAt: string | null;

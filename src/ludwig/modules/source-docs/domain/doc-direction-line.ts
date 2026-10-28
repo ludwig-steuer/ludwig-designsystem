@@ -32,7 +32,7 @@ const AMOUNT_FMT = new Intl.NumberFormat("de-DE", {
 
 /**
  * Rendert z.B. `Eingangsrechnung von Telekom · 119,00 EUR` bzw.
- * `Ausgangsrechnung an Certina Management · 20.000,00 EUR`.
+ * `Ausgangsrechnung an Musterholding Management · 20.000,00 EUR`.
  *
  * `null` wenn keine verifizierte Richtung vorliegt (doc_direction fehlt oder
  * ist weder incoming noch outgoing). Gegenpartei/Betrag sind optional — was

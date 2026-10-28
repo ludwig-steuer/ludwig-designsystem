@@ -70,23 +70,14 @@ export function availableDocTabs(args: { isInvoice: boolean; hasDetails?: boolea
 }
 
 /**
- * Alte Slugs derselben Ansicht, die als Deep-Links kursieren: „buchung" war
- * die Übersicht bis 2026-07-20, „beleg" bis 2026-09-08 — und „pipeline" war
- * bis 2026-09-09 ein eigener Reiter. Seit L-270 ist die Pipeline **Tiefe im
- * Verlauf** (D12: drei Reiter beantworteten dieselbe Frage in drei Stufen);
- * der alte Link landet deshalb im Verlauf, nicht auf der Übersicht.
+ * Seit L-270 ist die Pipeline **Tiefe im Verlauf** (D12: drei Reiter
+ * beantworteten dieselbe Frage in drei Stufen).
  */
-const ALTE_SLUGS: Record<string, DocTab> = {
-  buchung: "overview",
-  beleg: "overview",
-  pipeline: "timeline",
-};
-
 export function parseDocTab(
   value: string | string[] | undefined,
   available: readonly DocTab[],
 ): DocTab {
   const raw = Array.isArray(value) ? value[0] : value;
-  const slug = (raw && ALTE_SLUGS[raw]) ?? raw;
+  const slug = raw;
   return available.includes(slug as DocTab) ? (slug as DocTab) : "overview";
 }

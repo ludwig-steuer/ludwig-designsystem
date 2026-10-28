@@ -1,8 +1,9 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { resolveStatus, type StatusKind } from "@/ludwig/ui/status/status-registry";
 import { formatDuration, formatTimeFull } from "../../format";
-import { StateIcon } from "../../patterns/Review";
+import { StateIcon, type StateKind } from "../../patterns/Review";
 import { Button } from "../../primitives/Button";
 import { TextButton } from "../../primitives/TextButton";
 
@@ -14,7 +15,7 @@ import { TextButton } from "../../primitives/TextButton";
  * clock runs in the browser, counted from `startedAt`.
  */
 
-/** The one way on after the run — a button when done, a reference when it failed. */
+/** The one way on after the run — a button when done, a reference after every other end. */
 export type AgentRunAction = { label: string; href: string } | { label: string; onClick: () => void };
 
 type RunFacts = {
@@ -34,9 +35,26 @@ type RunningProps = RunFacts & {
   action?: null;
 };
 
+/**
+ * How a run ended (0225, owner 2026-10-28, variant B). Tone and word of every
+ * state come from the registry axis `agent_run_banner`, never from here:
+ * `done` the regular end; `stopped` broken off or still too long; `taken_over`
+ * the office took over; `failed` only a run stuck at a red gate. The app maps
+ * its outcomes onto these five (`agentRunBannerState`).
+ */
+// ponytail: the value set `AGENT_RUN_BANNER_STATES` is not mirrored yet (L-375); import it once it is.
+type EndedState = "done" | "stopped" | "taken_over" | "failed";
+
+/**
+ * The sign for a tone — the icon carries the registry's word as its name (V7).
+ * Neutral has no sign: the sign goes with a level, and the open circle would
+ * say „offen" for a run that is over; the sentence carries the word.
+ */
+const SIGN: Record<StatusKind, StateKind | null> = { success: "done", warning: "warning", danger: "error", info: "info", neutral: null };
+
 /** The facts may stay on: the app can pass the same run in every state; they are not shown once it ended. */
 type EndedProps = RunFacts & {
-  state: "done" | "failed";
+  state: EndedState;
   /** The sentence, in the app's wording („Ludwig ist fertig: 2 neue Rückfragen"). */
   message: string;
   action?: AgentRunAction | null;
@@ -55,9 +73,11 @@ export function AgentRunBanner(props: RunningProps | EndedProps) {
   const running = props.state === "running";
   const now = useNow(running);
   const { action } = props;
+  const status = resolveStatus("agent_run_banner", props.state);
+  const sign = SIGN[status.kind];
   return (
-    <div className={`v3run v3run--${props.state}`}>
-      {running ? <RunMark /> : <StateIcon state={props.state === "done" ? "done" : "error"} />}
+    <div className={`v3run v3run--${status.kind}`}>
+      {running ? <RunMark /> : sign ? <StateIcon state={sign} title={status.label} /> : null}
       <p className="v3run__text">
         <strong className="v3run__lead">
           {/* The only live part, at the same place in every state: the change
@@ -71,7 +91,8 @@ export function AgentRunBanner(props: RunningProps | EndedProps) {
           ) : null}
         </strong>
         {running ? <Facts {...props} /> : null}
-        {props.state === "failed" && action ? (
+        {/* Every end but the regular one offers its way as a reference, not a button. */}
+        {!running && props.state !== "done" && action ? (
           <span className="v3run__ref">
             {"href" in action ? (
               <TextButton href={action.href}>{action.label}</TextButton>

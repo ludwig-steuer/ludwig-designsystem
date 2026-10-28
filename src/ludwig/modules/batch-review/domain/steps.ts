@@ -1,105 +1,126 @@
-import type { BookingCycleKind } from "@/ludwig/modules/datev-export";
+import type { BookingCycleKind } from "@/ludwig/modules/accounting-cases";
 
 /**
- * Die elf Schritte der Stapelabnahme (F109, Änderungsbrief §3).
+ * Die Prüfschritte der Stapelabnahme (F109, Änderungsbrief §3).
+ *
+ * Ein Schritt heißt mit seinem **Schlüssel** — zugleich das URL-Segment
+ * (`…/review/completeness`). Eine Nummer trägt er nicht: welche Schritte eine
+ * Stapelart zeigt, ist verschieden, und „Schritt 3" wäre je Stapel ein anderer.
+ * Die Zahl im Rail ist nur die fortlaufende Position 1…n in der Stapelart
+ * (`reviewStepNumber`); wer auf einen Schritt verweist, nennt ihn beim Namen.
  *
  * Der Rail ist **ein Vorschlag, kein Zwang**: jeder Schritt ist jederzeit
- * erreichbar, der Abschluss (Schritt 8) zeigt, was noch offen ist. Was der
- * Zustand des Stapels regelt, ist nicht die Reihenfolge, sondern ob man
- * schreiben darf — siehe `gating.ts`.
+ * erreichbar, das Prüfprotokoll zeigt, was noch offen ist. Was der Zustand des
+ * Stapels regelt, ist nicht die Reihenfolge, sondern ob man schreiben darf —
+ * siehe `gating.ts`.
  */
 
+/** Rail-Reihenfolge. */
+export const REVIEW_STEP_KEYS = [
+  "result",
+  "completeness",
+  "document-review",
+  "clarifications",
+  "client-entries",
+  "proposals",
+  "account-clearing",
+  "open-items",
+  "plausibility",
+  "conventions",
+  "protocol",
+  "transfer",
+  "follow-up",
+] as const;
+export type ReviewStepKey = (typeof REVIEW_STEP_KEYS)[number];
+
 export interface ReviewStep {
-  /** Zugleich das URL-Segment: `…/review/3`. */
-  n: number;
+  /** Zugleich das URL-Segment: `…/review/proposals`. */
+  key: ReviewStepKey;
   /** Eintrag im Rail und Überschrift des Screens — ein Substantiv. */
   label: string;
   /** Ein Satz: was der Prüfer hier tut. */
   description: string;
 }
 
-export const REVIEW_STEPS: readonly ReviewStep[] = [
-  { n: 0, label: "Ergebnis des Stapels", description: "Sehen, was Ludwig erledigt hat und wo er nicht fertig wurde – danach beginnt die Abnahme." },
-  { n: 1, label: "Vollständigkeit", description: "Prüfen, ob alle Kontoauszüge und Belege des Zeitraums da sind – und ob es so viele sind wie sonst." },
-  { n: 2, label: "Rückfragen", description: "Die Fragen von Ludwig beantworten, damit er die betroffenen Sachverhalte fertig buchen kann." },
-  { n: 3, label: "Buchungsvorschläge", description: "Jeden Vorschlag prüfen und übernehmen, ändern oder an Ludwig zurückgeben." },
-  // F220: „Kontenausgleich" — Banken, Verrechnungskonten, ruhende Zahlungskonten (Owner 2026-09-15).
-  { n: 4, label: "Kontenausgleich", description: "Prüfen, ob Bank- und Verrechnungskonten zum Periodenende aufgehen." },
-  { n: 5, label: "Offene Posten", description: "Sehen, wer zum Periodenende wem wie viel schuldet – und ob das zu DATEV passt." },
-  { n: 6, label: "Plausibilität", description: "Die Konten des Monats mit den letzten drei Monaten vergleichen und Ausreißer klären." },
-  { n: 7, label: "Konventionen", description: "Bestätigen oder verwerfen, was Ludwig in diesem Stapel als Regel gelernt hat." },
-  { n: 8, label: "Prüfprotokoll", description: "Alle Prüfpunkte auf einen Blick – dann den Stapel freigeben oder an Ludwig zurückgeben." },
-  { n: 9, label: "Übergabe an DATEV", description: "Den freigegebenen Stapel an DATEV übertragen und sehen, ob er angekommen ist." },
-  { n: 10, label: "Nachlese", description: "Vergleichen, was DATEV aus den übertragenen Sätzen gemacht hat." },
+const STEP_TEXTS: Record<ReviewStepKey, Omit<ReviewStep, "key">> = {
+  result: { label: "Ergebnis des Stapels", description: "Sehen, was Ludwig erledigt hat und wo er nicht fertig wurde – danach beginnt die Abnahme." },
+  completeness: { label: "Vollständigkeit", description: "Prüfen, ob alle Kontoauszüge und Belege des Zeitraums da sind." },
+  // F452: kein Beleg bleibt stillschweigend liegen — gebucht, klar disponiert oder gesichtet.
+  "document-review": { label: "Belegprüfung", description: "Jeden Beleg ohne Buchung und ohne klare Verarbeitung entscheiden – Vorschlag ausführen oder ansehen." },
+  clarifications: { label: "Rückfragen", description: "Die Fragen von Ludwig beantworten, damit er die betroffenen Sachverhalte fertig buchen kann." },
   // Nur im Mandantenstapel (Owner 2026-09-23): die Sätze hat der Mandant
-  // gebucht — hier sieht die Kanzlei sie je Konto und übernimmt sie in einem
-  // Zug. Im Rail steht der Schritt hinter 2 (`reviewStepsFor`); die Nummer 11
-  // bleibt, damit die Indizes 0–10 der anderen Schritte stabil sind.
-  { n: 11, label: "Buchungen des Mandanten", description: "Die gelieferten Sätze je Konto sehen und alle in einem Zug übernehmen – gebucht hat sie der Mandant." },
-];
+  // gebucht — hier sieht die Kanzlei sie je Konto und übernimmt sie in einem Zug.
+  "client-entries": { label: "Buchungen des Mandanten", description: "Die gelieferten Sätze je Konto sehen und alle in einem Zug übernehmen – gebucht hat sie der Mandant." },
+  proposals: { label: "Buchungsvorschläge", description: "Jeden Vorschlag prüfen und übernehmen, ändern oder an Ludwig zurückgeben." },
+  // F220: „Kontenausgleich" — Banken, Verrechnungskonten, ruhende Zahlungskonten (Owner 2026-09-15).
+  "account-clearing": { label: "Kontenausgleich", description: "Prüfen, ob Bank- und Verrechnungskonten zum Periodenende aufgehen." },
+  "open-items": { label: "Offene Posten", description: "Sehen, wer zum Periodenende wem wie viel schuldet – und ob das zu DATEV passt." },
+  plausibility: { label: "Plausibilität", description: "Die Konten des Monats mit den letzten drei Monaten vergleichen und Ausreißer klären." },
+  conventions: { label: "Konventionen", description: "Bestätigen oder verwerfen, was Ludwig in diesem Stapel als Regel gelernt hat." },
+  protocol: { label: "Prüfprotokoll", description: "Alle Prüfungen auf einen Blick – dann den Stapel freigeben oder an Ludwig zurückgeben." },
+  transfer: { label: "Übergabe an DATEV", description: "Den freigegebenen Stapel an DATEV übertragen und sehen, ob er angekommen ist." },
+  "follow-up": { label: "Nachlese", description: "Vergleichen, was DATEV aus den übertragenen Sätzen gemacht hat." },
+};
 
-/** Der Übernahme-Schritt des Mandantenstapels. */
-export const CLIENT_BATCH_ENTRIES_STEP = 11;
+export const REVIEW_STEPS: readonly ReviewStep[] = REVIEW_STEP_KEYS.map((key) => ({
+  key,
+  ...STEP_TEXTS[key],
+}));
+
+export function reviewStepLabel(key: ReviewStepKey): string {
+  return STEP_TEXTS[key].label;
+}
 
 /**
  * Welche Prüfschritte in welcher Stapelart gelten.
  *
  * **SSOT ist `docs/reference/stapelarten.md`** — diese Konstante zieht nach,
- * nicht umgekehrt; `__tests__/stapelarten-katalog.test.ts` hält beides
+ * nicht umgekehrt; `__tests__/batch-kinds-catalog.test.ts` hält beides
  * zusammen (F179).
  *
- * Beim Mandantenstapel bleiben `0 · 2 · 11 · 8 · 9 · 10`: der Mandant hat gebucht,
- * Ludwig ordnet Belege zu, die Kanzlei übernimmt die Sätze (11) und übergibt.
- * Was Ludwigs eigene Arbeit prüft —
- * Vollständigkeit, Vorschläge, Bank, Offene Posten, Plausibilität,
- * Konventionen — gibt es dort nicht.
+ * Beim Mandantenstapel bleiben Ergebnis · Rückfragen · Buchungen des Mandanten
+ * · Prüfprotokoll · Übergabe · Nachlese: der Mandant hat gebucht, Ludwig
+ * ordnet Belege zu, die Kanzlei übernimmt die Sätze und übergibt. Was Ludwigs
+ * eigene Arbeit prüft — Vollständigkeit, Vorschläge, Kontenausgleich, Offene
+ * Posten, Plausibilität, Konventionen — gibt es dort nicht.
  */
-export const REVIEW_STEP_SCOPE: Record<number, { regular: boolean; clientBatch: boolean }> = {
-  0: { regular: true, clientBatch: true },
-  1: { regular: true, clientBatch: false },
-  2: { regular: true, clientBatch: true },
-  3: { regular: true, clientBatch: false },
-  4: { regular: true, clientBatch: false },
-  5: { regular: true, clientBatch: false },
-  6: { regular: true, clientBatch: false },
-  7: { regular: true, clientBatch: false },
-  8: { regular: true, clientBatch: true },
-  9: { regular: true, clientBatch: true },
-  10: { regular: true, clientBatch: true },
-  11: { regular: false, clientBatch: true },
+export const REVIEW_STEP_SCOPE: Record<ReviewStepKey, { regular: boolean; clientBatch: boolean }> = {
+  result: { regular: true, clientBatch: true },
+  completeness: { regular: true, clientBatch: false },
+  "document-review": { regular: true, clientBatch: false },
+  clarifications: { regular: true, clientBatch: true },
+  "client-entries": { regular: false, clientBatch: true },
+  proposals: { regular: true, clientBatch: false },
+  "account-clearing": { regular: true, clientBatch: false },
+  "open-items": { regular: true, clientBatch: false },
+  plausibility: { regular: true, clientBatch: false },
+  conventions: { regular: true, clientBatch: false },
+  protocol: { regular: true, clientBatch: true },
+  transfer: { regular: true, clientBatch: true },
+  "follow-up": { regular: true, clientBatch: true },
 };
 
-/**
- * Gilt dieser Prüfschritt in dieser Stapelart?
- *
- * Ein unbekanntes `kind` (die Spalte trägt einen CHECK — ein dritter Wert wäre
- * ein Migrationsfehler) gilt als `regular`: lieber ein Schritt zu viel als eine
- * leere Abnahme.
- */
-export function reviewStepApplies(step: number, kind: BookingCycleKind): boolean {
+/** Gilt dieser Prüfschritt in dieser Stapelart? */
+export function reviewStepApplies(step: ReviewStepKey, kind: BookingCycleKind): boolean {
   const scope = REVIEW_STEP_SCOPE[step];
-  if (!scope) return false;
   return kind === "client_batch" ? scope.clientBatch : scope.regular;
 }
 
-/**
- * Die Schritte einer Stapelart in Rail-Reihenfolge. Schritt 11 steht beim
- * Mandantenstapel zwischen Rückfragen (2) und Prüfprotokoll (8).
- */
+/** Die Schritte einer Stapelart in Rail-Reihenfolge. */
 export function reviewStepsFor(kind: BookingCycleKind): ReviewStep[] {
-  const rank = (n: number) => (n === CLIENT_BATCH_ENTRIES_STEP ? 2.5 : n);
-  return REVIEW_STEPS.filter((s) => reviewStepApplies(s.n, kind)).sort(
-    (a, b) => rank(a.n) - rank(b.n),
-  );
+  return REVIEW_STEPS.filter((s) => reviewStepApplies(s.key, kind));
 }
 
-export const FIRST_STEP = 0;
-export const LAST_REVIEW_STEP = 8;
-export const TRANSFER_STEP = 9;
-export const NACHLESE_STEP = 10;
+/**
+ * Die Zahl vor dem Schritt: fortlaufend 1…n in dieser Stapelart. `null`, wo
+ * der Schritt in der Stapelart nicht vorkommt.
+ */
+export function reviewStepNumber(key: ReviewStepKey, kind: BookingCycleKind): number | null {
+  const i = reviewStepsFor(kind).findIndex((s) => s.key === key);
+  return i < 0 ? null : i + 1;
+}
 
-/** URL-Segment → Schritt. Unbekanntes ist `null`, damit die Route 404 gibt. */
+/** URL-Segment → Schritt. Unbekanntes ist `null`. */
 export function parseReviewStep(raw: string | undefined): ReviewStep | null {
-  if (raw === undefined || !/^\d{1,2}$/.test(raw)) return null;
-  return REVIEW_STEPS.find((s) => s.n === Number(raw)) ?? null;
+  return REVIEW_STEPS.find((s) => s.key === raw) ?? null;
 }

@@ -58,6 +58,12 @@ export const CASE_KIND = [
 ] as const;
 export type CaseKind = (typeof CASE_KIND)[number];
 
+// F494 (K8): Art der Abrechnung am Sachverhalt — Karten- oder Spesenabrechnung.
+// Spiegel des DB-CHECK ``client_accounting_case_settlement_kind_check``
+// (Migration 20261013040000). Setzt der Server, nie der Agent.
+export const CASE_SETTLEMENT_KINDS = ["credit_card", "employee_expense"] as const;
+export type CaseSettlementKind = (typeof CASE_SETTLEMENT_KINDS)[number];
+
 /** Anzeigetext je Case-Art. EINZIGE Quelle — nicht lokal duplizieren.
  *  Kein Status (keine Farbe, keine Übergänge), deshalb bewusst hier statt in
  *  der Status-Registry. */
@@ -147,8 +153,8 @@ export type AssignableCaseKind = z.infer<typeof AssignableCaseKindSchema>;
 export const CASE_KIND_LOCKED_REASON = {
   rule: "Ein Regelsachverhalt wird über seine Regel beendet, nicht umgestuft.",
   pool: "Ein Sammelfall wird aufgeteilt (Split), nicht umgestuft.",
-  client_batch:
-    "Art ändern ist am Mandantenstapel-Container nicht möglich — er ist der Sammelbehälter des importierten Stapels (F295).",
+  // L-362: sichtbar unter der Art-Auswahl — keine Systemwörter, in der Form der beiden anderen.
+  client_batch: "Ein Mandantenstapel wird über den Buchungszyklus abgenommen, nicht umgestuft.",
 } as const satisfies Partial<Record<CaseKind, string>>;
 
 /** F360: Regel- und laufender Sachverhalt — und der Übergang „Art offen". */
@@ -189,7 +195,20 @@ export const CASE_DISPOSITION_LABEL: Record<CaseDisposition, string> = {
  * ABGELEITET aus `answered_at` und `deferred_until`, nicht gespeichert.
  */
 export const CLARIFICATION_STATES = ["open", "deferred", "answered"] as const;
+/** L-368: die Antwortwerte einer `yes_no`-Frage; die Karte zeigt die Wörter und meldet den Wert. */
+export const CLARIFICATION_YES_NO = ["yes", "no"] as const;
+export type ClarificationYesNo = (typeof CLARIFICATION_YES_NO)[number];
+export const CLARIFICATION_YES_NO_LABELS: Record<ClarificationYesNo, string> = { yes: "Ja", no: "Nein" };
+
 export type ClarificationState = (typeof CLARIFICATION_STATES)[number];
+
+/** Adressat einer Klärung = die Partei, die danach am Zug ist: dieselben Werte wie `disposition` (DB-CHECK
+ *  `client_accounting_case_clarification_audience_check`). `agent` ist Ludwig; welche Agenten-Rolle eine Klärung
+ *  an `agent` abarbeitet, legt der Ablauf fest (Senior-Agent), nicht der Wert (Owner 2026-10-06). */
+export const CLARIFICATION_AUDIENCES = CASE_DISPOSITION;
+export type ClarificationAudience = CaseDisposition;
+/** Adressaten, an die neue Klärungen gehen (`client` nur Altbestand, F128). */
+export const CLARIFICATION_AUDIENCES_WRITABLE = CASE_DISPOSITION_WRITABLE;
 
 /** Der Zustand aus den gespeicherten Feldern — eine Regel, alle Leser. */
 export function clarificationState(c: {
@@ -239,6 +258,7 @@ export const CLARIFICATION_QUESTION_TYPE_LABEL: Record<string, string> = {
   opos_clearing_mismatch: "Ausgleich passt nicht zum offenen Posten",
   opos_settled_by_ludwig: "In Ludwig ausgeglichen, in DATEV nicht",
   opos_settled_extern: "Außerhalb von Ludwig ausgeglichen",
+  booking_unclear: "Buchung unklar",
   other: "Sonstiges",
 };
 
@@ -464,6 +484,8 @@ export interface CaseFilter {
   /** F100: nur Sachverhalte mit diesem Belegnummern-Modus. Wer die noch nicht
    *  gesplitteten Sammelfälle sucht, findet sie sonst nicht. */
   documentNumberMode?: CaseDocumentNumberMode;
+  /** F361: nur Sachverhalte dieser Art — etwa die Sammelfälle (``pool``). */
+  kind?: CaseKind;
   /** F125: Wenn ``true``: nur Sachverhalte mit einer offenen Beleg-ERWARTUNG.
    *  Abgeleitete Query, keine persistierte Spalte. */
   hasOpenDocumentRequest?: boolean;
@@ -536,6 +558,7 @@ export function caseFilterForListTab(
   const one = (v: string | string[] | undefined) => (Array.isArray(v) ? v[0] : v);
   const recurring = one(raw.recurring);
   const docMode = one(raw.docno);
+  const kind = one(raw.kind);
   const q = one(raw.q)?.trim();
   const dispo = one(raw.disposition);
   // `?partner=` öffnet den Drawer **und** filtert die Liste: der Klick auf den
@@ -552,6 +575,7 @@ export function caseFilterForListTab(
     documentNumberMode: (CASE_DOCUMENT_NUMBER_MODES as readonly string[]).includes(docMode ?? "")
       ? (docMode as CaseDocumentNumberMode)
       : undefined,
+    kind: (CASE_KIND as readonly string[]).includes(kind ?? "") ? (kind as CaseKind) : undefined,
     counterpartyPartnerId: partner && UUID_RE.test(partner) ? partner : undefined,
   };
   if ((CASE_DISPOSITION as readonly string[]).includes(dispo ?? "")) {
@@ -619,6 +643,7 @@ export const CASE_FILTER_PARAMS = [
   "recurring",
   "disposition",
   "docno",
+  "kind",
   "state",
   "rule",
   "partner",

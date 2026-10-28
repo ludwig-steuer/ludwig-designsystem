@@ -25,8 +25,7 @@ deshalb Lücken; sie werden nicht neu vergeben.
   bei der E-Rechnung), vier beim Vertrag, drei beim Kontoauszug; jeder Reiter nur, wo er etwas zeigt. „Details" trägt, was mehr
   als einen Wert betrifft, Einzelwerte bleiben in der Übersicht an ihrem Wert.
   Die **Pipeline** ist seit 2026-09-09 kein Reiter mehr, sondern aufklappbare
-  Tiefe im Verlauf; `?tab=pipeline` leitet dorthin (wie `?tab=buchung` und
-  `?tab=beleg` auf die Übersicht). Was über dem Inhalt steht, regelt
+  Tiefe im Verlauf; `?tab=pipeline` gibt es nicht mehr. Was über dem Inhalt steht, regelt
   `belege.md` R33. **Original je Format** (F285, `belege.md` R40): die Karte
   der Übersicht zeigt das Original über `loadSourceDocOriginal` — PDF im
   Viewer, Kontoauszug- und EXTF-Dateien als gelesene Zeilen (Deckel 200),
@@ -56,11 +55,41 @@ deshalb Lücken; sie werden nicht neu vergeben.
 - Geschäftspartner `clients/[clientSlug]/[year]/partners` (+ Detail
   `/partners/[partnerId]`) — die Liste ALLER Partner, nicht nur der
   Kreditoren (R14).
-- Konfiguration `clients/[clientSlug]/configuration/…` (Stammdaten,
-  Kontenplan, Bankkonten, Onboarding, Logs, …).
+- Zahlungskonten `clients/[clientSlug]/[year]/payment-accounts` (+ Detail
+  `/payment-accounts/[accountId]`, Reiter Kontoauszug · Reporting · Einstellungen, Kontoauszug nur mit Auszugsquelle) und Offene
+  Zahlungen `clients/[clientSlug]/[year]/unassigned-payments` — `bank.md` R15g.
+- Konfiguration `clients/[clientSlug]/configuration/…` (Übersicht,
+  Stammdaten, Profil & Leitlinien, Geldkonten, Verrechnungskonten, Regelwerk;
+  Logs nur für das Plattform-Team).
 - Admin `admin/…` — Übersicht, Kanzleien (mit Technikansicht je Mandant),
-  User, Abnahme-Qualität, Jobs, Audit-Log, MCP-Tokens, Agent-Anleitung
-  (`AdminNav.tsx`). Die User-Seite `admin/users/[userId]` trägt Profil,
+  DATEV-Bridges (F371), Benutzer, Abnahme-Qualität, Jobs, Audit-Log, Agent-Verbindungen (Tabs
+  Verbindungsarten · Tokens; der Tokens-Tab zeigt nur dauerhafte Tokens, Schritt-Tokens stehen auf der
+  Detailseite ihres Agent-Schritts, F470), Agentenläufe (F436, Tabs Laufend ·
+  Beendet · Werkzeuge · Lauf starten mit Provider-Wahl · Einstellungen = Modell-Zuordnung für alle
+  acht Agent-Aufgaben, Startzustand per Seed anthropic_subscription, nur Orchestrator und Judge lesen
+  sie heute (F460);
+  die Lauf-Tabs Laufend, Beendet und Lauf starten filtern nach Kanzlei und Mandant (F457), der Kopf-Knopf
+  „Lauf starten" führt mit Filter auf den Start-Tab; Laufend/Beendet zeigen die Läufe als Liste (`L-<n>`,
+  F473/F474/F484: eine Zeile je Lauf mit Ergebnis, Prozessbild der Phasen, Dauer, Buchungen, Kosten und
+  Auffälligkeiten; beim Überfahren des Prozessbilds der Phasenverlauf mit Uhrzeiten, je Phase verlinkt; die
+  Kennzahlen gebündelt je Seite aus `agentRunReportViews`), `/admin/agent-runs/<lauf>` das Lauf-Detail
+  (F484: Prozessbild als Stepper mit „wer ist dran", Ergebnis, die acht Kennzahlen der Lauf-Mail, Zusammenfassung,
+  die schwersten Auffälligkeiten und der Phasenverlauf zum Aufklappen mit Kennzahlen je Schritt, Anker
+  `#phase-<key>`, `?phase=<key>` öffnet die Phase),
+  `/admin/agent-runs/<lauf>/steps/<schritt>` den Schritt in Tabs (`?tab=`, F480): Übersicht
+  (Kennzahlen, Auffälligkeiten, Verlauf als Balken und Zeitstrahl, Zusammenfassung) · MCP-Aufrufe
+  (Tabelle mit Seiten, Sortierung und Filter nach Ergebnis und Werkzeug) · LLM-Aufrufe · Protokoll
+  (Ende des Runner-stderr aus `stats.log_tail`, F461; darüber der Download des Transkripts, F488: Link 5 min gültig,
+  nach 90 Tagen „Transkript gelöscht“) · Details (inkl. Provider, Ursache des Endes,
+  Wiederholung); geladen wird nur der aktive Tab, die Regeln der Auffälligkeiten stehen rein in
+  `modules/agent-runs/domain/step-findings.ts`; ein alter Link auf eine Schritt-ID leitet
+  dorthin um; zu jedem beendeten Lauf geht eine Lauf-Mail an die Plattform-Admins (F483, eine HTML-Mail je
+  Lauf statt je Schritt: Betreff `L-<n>` mit Ergebnis, darin Verlauf je Phase, acht Kennzahlen — Judge-Rückgaben
+  getrennt „an Ludwig (davon behoben)" und „an die Kanzlei", behoben gezählt wie `decideNextPhase` über
+  `clarificationIsOpen` (F484) —, die schwersten Auffälligkeiten und Links auf Lauf, Stapel und Schritte; Versand mit dem Verbrauch des letzten Schritts, nach
+  einem Absturz sofort, sonst per Worker-Sweep nach 35 min, einmalig über `report_sent_at`), Agent-Anleitung
+  (`AdminNav.tsx`: Seitenleiste in vier Gruppen Organisation · Agenten · Anbindungen · Betrieb).
+  Die Benutzer-Seite `admin/users/[userId]` trägt Profil,
   **Account** (E-Mail ändern, sperren/entsperren, löschen — alles unter
   `user.manage`, nicht am eigenen Account; Löschen bestätigt man mit dem
   Namen, F262), Kanzlei-Zugehörigkeit, „Zuständig für" und Mandanten-Zugriff.
@@ -77,12 +106,12 @@ dünn, Queries leben im Modul.
   EmptyState, PageHeader, StatusHeader, TabBar, Tooltip, TimeAgo, ….
 - `status/` — `status-registry.ts` + `StatusBadge` (R1).
 - `components/log` — `LogTable`/`LogView` + Zell-Bausteine.
-- `booking/` — `KontoCombobox`, Buchungs-Ansichten, Formatter.
+- `booking/` — `AccountCombobox`, Buchungs-Ansichten, Formatter.
 - `beleg/` — `BelegPreview`, der eine PDF-Viewer der Beleg-Ansichten.
 - `case/` — `CaseCell`, die Sachverhalts-Zelle jeder Liste.
 - `drawers/` — die einbindbaren Slide-over: Kennung rein, laden selbst
-  (`BelegDrawer`, `AccountLedgerDrawer`, `BankTransactionDrawer`,
-  `LudwigEntryDrawer`, `DatevEntryDrawer`, `RawRowDrawer`); Rahmen und
+  (`DocumentDrawer`, `AccountLedgerDrawer`, `BankTransactionDrawer`,
+  `LudwigEntryDrawer`, `DatevEntryDrawer`, `RawRowDrawer`, `JudgeHistoryDrawer`); Rahmen und
   `UrlDrawer` liegen in `components/primitives` (R8).
 
 **Zum Sichten** — Storybook. Die zweite Galerie (`app/dev/gallery`) ist mit
@@ -109,7 +138,7 @@ Kind („aus Sammel-PDF …, Seiten 5–7") und die Kinderliste am Eltern-Beleg.
 ### R1 — Status-Registry ist die eine Status-Darstellung
 Jede Status-Achse, die in der UI als farbiger Status auftaucht, wird über
 `ui/status/status-registry.ts` + `StatusBadge` dargestellt: Label,
-Badge-Farbe (`kind`) und Erklärtext pro Achse (`document_processing`, `accounting_case`,
+Badge-Farbe (`kind`) und Erklärtext pro Achse (`document_status`, `accounting_case`,
 `journal_entry`, `job`, …). Keine lokalen `STATUS_LABEL`-Maps, keine Hex-Farben
 in Feature-Komponenten. Die Registry ist NICHT die Wertebereich-Quelle —
 der lebt im DB-CHECK bzw. Domain-Enum; `__tests__/status-registry.test.ts`
@@ -148,6 +177,17 @@ der sichtbaren Filter, in der URL wie jeder Filter (`status`, `open`,
 `clarification`, `period=all`, `sort`). Ein Zähler je Schnellfilter zählt mit
 dem Listenfilter (`countInvoicesForClient`). Reiter gibt es auf der Belegliste
 nicht mehr; eine eigene Tabelle für „die anderen" Belege kommt nicht zurück.
+Spalten und Reihenfolge jeder Belegliste kommen aus dem Katalog des Sets
+(`sourceDocumentColumns`, Ansichten `*_VIEW`, DS 0212); eine Seite wählt die
+Ansicht, sie baut keine eigene Spalte und ordnet nicht um (Owner 2026-09-29,
+F335 E2). Leser von `listInvoicesForClient` bauen ihre Tabelle über
+`documentTable()`. Wer seine Belege selbst auswählt (Partner, Sachverhalt,
+Sammel-PDF, Abnahme, Eingang), holt die Zeilen über
+`listDocumentRows(clientId, ids)`; Kompaktlisten bekommen
+`documentTableData()` und reichen die Bilder an `SourceDocumentList`, Client-Tabellen
+bauen ihre Spalten mit `documentTableColumns()` aus `@/modules/invoices/client` —
+nie über `@/modules/invoices`, dessen Server-Aktionen die Abfragen in jeden
+Importeur ziehen (F341, F343).
 „Problematisch" = `status ∈ {agent_review, human_review}` — die Definition der
 Statusmaschine (belege.md R14), nicht „ohne Rechnungszeile/Datum". *Warum:* zwei Listen neben zwei ID-Räumen waren derselbe
 Fehlerzustand wie zwei Detail-Shells (R5); ein Beleg, der in keiner Sicht
@@ -172,13 +212,18 @@ Was keinem davon entspricht, bleibt als Upload-Zeile mit dem Grund stehen und
 legt nichts an. *Warum:* der Weg, den ein Mensch benutzt, war der ärmere von
 zwei Kernen für dieselbe Schreibaktion (P31, F170).
 
+Die Belegliste des Eingangs ist die Katalogzeile V1 (DS 0212, F343):
+Fortschritt statt „Erkennung"; der Stockungshinweis (3 min) und der
+Handlungssatz beim Kontoauszug stehen als Hover an der Fortschritt-Zelle.
+Filter, Aktionen und Polling arbeiten weiter auf den Einträgen
+(`loadInboxView` liefert beides).
+
 ### R6 — Label-Maps haben genau eine Quelle im Domain-Modul
 Fachvokabular-Labels (Belegformen, Belegrichtung, Belegart, …) wohnen
 genau einmal im zuständigen Domain-Modul (z. B.
 `source-docs/domain/document-form-labels.ts`, `DOC_DIRECTION_LABEL`);
 Options-Listen für Editoren werden daraus **abgeleitet**
-(Muster: `ClassificationEditor` über `DOCUMENT_FORM_ROUTING` +
-`formatDocumentForm`). Keine lokalen Kopien. *Warum:* Kopien sind
+(Muster: Optionen aus `DOCUMENT_FORM_ROUTING` + `formatDocumentForm`). Keine lokalen Kopien. *Warum:* Kopien sind
 nachweislich auseinandergelaufen („Tankquittung" vs. „Tankbeleg") und
 ließen Werte im Editor fehlen, die es gab.
 
@@ -186,10 +231,10 @@ ließen Werte im Editor fehlen, die es gab.
 App-weit öffnen Detail-Ansichten über einen Search-Param: er trägt die Id,
 Schließen nimmt ihn wieder aus der URL. Öffnen und Schließen kosten keine
 Server-Runde, wo keine nötig ist (F261): **Client-Drawer** (Inhalt lädt der
-Client — `account`, `transactionId`, `document`, in Schritt 4 der Abnahme
+Client — `account`, `transactionId`, `document`, in Schritt Kontenausgleich der Abnahme
 `drawer`/`drawer_account`) öffnen per `window.history.pushState`,
 ohne Neu-Rendern, Scroll oder Zustandsverlust; **Server-Drawer** (Inhalt ist
-eine Server-Component — `partner`, `entry`) öffnen weich mit
+eine Server-Component — `partner`, `entry`, `judge_history`) öffnen weich mit
 `scroll: false`. Durchgesetzt an **einer** Stelle, dem `DrawerLinkInterceptor`
 im Jahres-Layout (`ui/drawers/shallow-url.ts`); ein neuer Drawer-Parameter
 wird dort eingetragen.
@@ -219,8 +264,11 @@ success|partial|failure`, kein Level-Spektrum; Fehler als `payload.error`
 Ludwig-Empfänger schreibt `source='bridge'`). Leseseite: `/admin/audit-log`
 (Keyset-Pagination, Filterachsen, ILIKE über `message`). Detail-Logs
 (`client_invoice_traces` — absorbiert die früheren Log-Entries als
-`step_kind='finding'` —, `ops_llm_call_logs`, `ops_bridge_heartbeats`,
-`ops_extraction_logs` als Preprocessor-Diagnostik) bleiben Drill-down via
+`step_kind='finding'` und seit F381 die Telemetrie des Orchestrators:
+Schritt-Grenzen `started`/`finished` als `level='verbose'`, Abbrüche als
+`step_kind='failed'` —, `ops_llm_call_logs`, `ops_bridge_heartbeats`,
+`ops_extraction_logs` nur noch als Diagnostik-Store des Preprocessors)
+bleiben Drill-down via
 `resource_id`/`correlation_id`. *Warum:* das Audit-Event sagt *dass* und
 *mit welchem Ausgang*; das Detail-Log sagt *wie im Einzelnen*.
 
@@ -235,21 +283,25 @@ Deep-Link — kein zweites Log-Modell. Fachliche Daten (Belege, Buchungen)
 gehören in den Mandanten-Arbeitsbereich `/clients/[slug]/…`; der Link
 dorthin ist der Sprung, nicht die Vermischung.
 
-### R12 — Dauersachverhalt-UI: Zuordnung getrennt vom Regelwerk
-Am Sachverhalt ist die Zuordnung (die Regel als `RecurringRuleFacts` mit
-`explain` — je Einstellung der Satz aus `RULE_SETTING_HELP` —, zugeordnete
-Zahlungen, `matching_note` — DATEV-Analogon: Lerndatei) ein eigener Tab,
-getrennt vom Regelwerk-Tab („was wird wie oft gebucht?", dort der Editor). *Warum:* Lernstand und
-Regeldefinition sind verschiedene Fragen mit verschiedenen Schreibern.
+### R12 — Dauersachverhalt-UI: ein Reiter „Wiederkehr" für Regel und Zuordnung
+Am Dauersachverhalt sind Regelwerk und Zuordnung **ein** Reiter „Wiederkehr"
+(`accounting-cases/ui/case-page/tabs/RecurrenceTab.tsx`, F257, F196 O2):
+links die Regel als Satz mit Vorschau (`RecurringRuleFacts` mit `explain` —
+je Einstellung der Satz aus `RULE_SETTING_HELP`) und die `matching_note`
+(Notiz, kein Kriterium), rechts, was die Regel gebucht und zugeordnet hat.
+Ohne Regel steht dort der Editor, vorbefüllt aus der letzten Zahlung.
+*Warum:* Regel und ihre Wirkung beantworten dieselbe Frage („läuft die
+Wiederkehr?") — zwei Reiter ließen zwischen Ursache und Wirkung springen.
 
 ### R13 — Sidebar zeigt den aktiven Mandanten, gewechselt wird auf `/clients`
-Der Mandanten-Block der Sidebar (`MandantSwitcher`) ist Anzeige + Link auf
+Der Mandanten-Block der Sidebar (`ClientSwitcher`) ist Anzeige + Link auf
 die Mandantenliste — kein Dropdown. *Warum:* eine echte Kanzlei führt
 dreistellig viele Mandanten; eine gescrollte Popup-Liste mit Mini-Suchfeld
 ist dafür das schlechtere Werkzeug als `/clients`, wo Nummer, SKR,
 Versteuerung, Aktiv-Status und Belegzahl in einer Tabelle stehen. Der
 Aktiv-Status steht dort als Badge „stillgelegt" an der gedimmten Zeile
-(Regel `onboarding.md` R19).
+(Regel `onboarding.md` R19). Zusätzlich wechselt das Command-Menü mit `m:`
+den Mandanten (R25).
 
 ### R14 — Geschäftspartner-Sichten zeigen beide Personenkonto-Seiten
 Die Liste unter `/[year]/partners` heißt „Geschäftspartner" und führt jeden
@@ -264,20 +316,68 @@ unfertige Kreditoren. Und ein leeres Kontofeld verleitet dazu, ein zweites
 Konto anzulegen, obwohl unter der internen Nummer längst gebucht wird.
 
 ### R16 — Die Stapelabnahme ist eine Subsite unter dem Stapel, kein eigener Ort
-Der Prüfprozess der Kanzlei (`batches/[batchId]/review/[step]`, Schritte
-0–10) läuft **innerhalb** von Ludwigs Rahmen: App-Header und Mandanten-Sidebar
-bleiben, der Schritt-Rail ist eine zweite, schmalere Spalte in der
-Arbeitsfläche. Ein Schritt ist ein **Pfad-Segment**, kein Search-Param — echte
-URLs für Mail-Deeplinks, funktionierender Zurück-Knopf, und die Search-Params
-bleiben für die Drawer frei (R8).
+Der Prüfprozess der Kanzlei (`batches/[batchId]/review/[step]`) läuft
+**innerhalb** von Ludwigs Rahmen: App-Header und Mandanten-Sidebar bleiben, der
+Schritt-Rail ist eine zweite, schmalere Spalte in der Arbeitsfläche. Ein
+Schritt ist ein **Pfad-Segment**, kein Search-Param — echte URLs für
+Mail-Deeplinks, funktionierender Zurück-Knopf, und die Search-Params bleiben
+für die Drawer frei (R8).
 
-Der Rail ist ein Vorschlag, kein Zwang: jeder Schritt ist erreichbar, Schritt 8
-sagt am Ende, was offen blieb. Was der Stapel-Zustand regelt, ist nur, ob
-geschrieben werden darf — geschrieben wird ausschließlich in `review`
-(`domain/gating.ts`), und **jede Server Action prüft das selbst**: ein
-gedimmter Knopf ist keine Zugriffskontrolle. Der Einstieg (`…/abnahme` ohne
-Schritt) landet dort, wo die Arbeit liegt: Prüfung → 0, unterwegs → 9, in
-DATEV → 10.
+**Ein Schritt heißt mit Namen, nicht mit Nummer** (Owner 2026-09-29). Das
+Pfad-Segment ist der englische Schlüssel des Rail-Eintrags (`result`,
+`completeness`, `clarifications`, `client-entries`, `proposals`,
+`account-clearing`, `open-items`, `plausibility`, `conventions`, `protocol`,
+`transfer`, `follow-up` — `batch-review/domain/steps.ts`). Die Zahl im Rail ist
+nur die fortlaufende Position 1…n in der Stapelart; „Weiter zu Schritt n"
+zählt genauso. Verweise — Prüfprotokoll, Sprünge, Texte — nennen den Schritt
+beim Namen („Schritt Vollständigkeit"). *Warum:* welche Schritte ein Stapel
+zeigt, hängt an der Stapelart; im Mandantenstapel war „Schritt 11" der dritte
+Eintrag, und eine feste Nummer hieß je Stapel etwas anderes. Ältere Specs und
+Dossiers nennen die Schritte noch mit den Nummern 0–11; die Route kennt nur
+die Schlüssel.
+
+Der Rail ist ein Vorschlag, kein Zwang: jeder Schritt ist erreichbar, das
+Prüfprotokoll sagt am Ende, was offen blieb. Was der Stapel-Zustand regelt, ist nur, ob
+festgeschrieben werden darf — festgeschrieben wird nur in `review`
+(`domain/gating.ts`); wer in `prepared`/`agent` schreibt, übernimmt den Stapel
+damit (`ensureBatchInReview` in `review-take-over.ts`, aus `agent` nur
+bestätigt, F553), und **jede Server Action prüft das selbst**: ein gedimmter
+Knopf ist keine Zugriffskontrolle. Der Einstieg (`…/review` ohne
+Schritt) landet dort, wo die Arbeit liegt: Prüfung → Ergebnis des Stapels,
+unterwegs → Übergabe an DATEV, in DATEV → Nachlese.
+
+**Der Einstieg der Kanzlei ist die Abnahme `…/close` (F554, F560).** In den
+Phasen `questions` und `review` steht dort die **Startseite**: ein Satz, was
+passiert, die Schritte als Tabelle mit Zweck und Stand, die erwartete Dauer und
+ein Knopf zum ersten Schritt mit Arbeit. Die übrigen Phasen zeigen ihren Screen.
+Über jeder Seite der Abnahme steht **eine Kopfleiste über alle Schritte**: links
+„Stapel <nr> abnehmen" mit dem Zeitraum (kein Monatsname, ein Stapel kann jeden
+Zeitraum abdecken), daneben Start · Rückfragen · Belege · Buchungen · Konten ·
+Übergeben, jeder Schritt ein Link mit seinem Stand (`closeWizardSteps`).
+Bedingte Schritte hängen an der Stapelart (Tabelle `CONDITIONAL_STEPS`, heute
+leer). Die Unterschritte sind Pfade (`…/close/documents · bookings · accounts ·
+handover`), offene Rückfragen stehen einzeln in `…/close/questions`
+(`?q=<clarificationId>`). `…/review/[step]` ist die Expertensicht; der Umschalter
+„Einfach | Experten" sitzt oben rechts auf beiden Seiten an derselben Stelle
+(Owner 2026-10-26) und wechselt schrittgenau (`CLOSE_STEP_EXPERT`). Die Bausteine sind dieselben Dateien
+(`StepDocumentReview`, `Step3`, `ClarificationDetail`) — die Abnahme gibt ihnen
+nur Pfade und `writable` mit (sie schreibt auch in `prepared`/`agent`, der
+Wächter übernimmt). Konten zeigt sie als Tabelle (Saldo laut Ludwig · laut
+Auszug · Differenz · Abgleich); eine Saldo-Abweichung **warnt**, in Konten und
+Übergeben, sie sperrt die Übergabe nicht. Einstiege aus Stapelliste und
+Stapelseite führen auf `…/close`; der Mandantenstapel leitet auf `…/review`.
+**Die Starter-Mail verlinkt direkt** (`…/close/questions?from=mail`, ohne offene
+Rückfrage `…/close?from=mail`); `from=mail` klappt die Seitenleiste für diesen
+Besuch ein, ohne den gespeicherten Stand zu ändern. Phase
+(`batch-review/domain/close-steps.ts`, `deriveClosePhase`):
+
+| Phase | Dran ist | Hinein | Hinaus |
+|---|---|---|---|
+| `inbox` | Kanzlei | `prepared` ohne Durchgang | „Lauf starten" (Korb abschicken) → `running` |
+| `running` | Ludwig | ein Lauf läuft | Lauf endet → `questions` / `review` |
+| `questions` | Kanzlei | offene Kanzlei-Rückfragen oder Rücklauf-Korb | beantwortet + „An Ludwig zurückgeben" → `running` |
+| `review` | Kanzlei | nichts offen außer Belegen/Konten/Buchungen | „Übergeben" (`releaseBatchAction`, offene Hinweise per `override` als Vermerk) → `released` |
+| `released` | Bridge | Stapel freigegeben | — |
 
 **Übernahme vom stillen Agenten (F253):** im Zustand `agent` ist die Abnahme
 nur lesbar — bis der Agent an diesem Mandanten zwei Stunden nichts geschrieben
@@ -299,25 +399,25 @@ einem zweiten Werkzeug (Owner 09.09.2026).
 
 Die Abnahme **baut keinen zweiten Kern nach**. Sie ruft die Kerne, die Agent
 und Stammdatenpflege ohnehin rufen (Abnahme, Klärung, Konvention, Freigabe);
-die Freigabe-Checkliste in Schritt 8 rechnet **dieselben Gates**, die der Agent
+die Freigabe-Checkliste in Schritt Prüfprotokoll rechnet **dieselben Gates**, die der Agent
 passieren muss (`computeBatchGates`). Gelesen wird dort nie der Gate-Text des
 Agenten, sondern je Zeile und Befundart ein Kanzlei-Satz
 (`batch-review/domain/checkpoint-texts.ts`, F246).
-Schritt 1 und 8 stellen je Umsatz zwei Fragen: Sachverhalt, Buchungsvorschlag
-(F187) — in Schritt 1 ist eine offene Klärung ein zulässiger Zwischenstand
-(gelb), in Schritt 8 nicht (rot), denn freigegeben wird nur ein voll gebuchtes
-Bankkonto. Schritt 8 stellt eine dritte Frage: freigegeben? Eine Auszugszeile,
+Vollständigkeit und Prüfprotokoll stellen je Umsatz zwei Fragen: Sachverhalt, Buchungsvorschlag
+(F187) — in Schritt Vollständigkeit ist eine offene Klärung ein zulässiger Zwischenstand
+(gelb), in Schritt Prüfprotokoll nicht (rot), denn freigegeben wird nur ein voll gebuchtes
+Bankkonto. Schritt Prüfprotokoll stellt eine dritte Frage: freigegeben? Eine Auszugszeile,
 die nur einen Vorschlag trägt, ist dort ein Mangel (F201).
 Eine **Deckungslücke aus Gate 1a** (ein Datei-Import endet vor dem
 Periodenende) macht die Zeile „Kontoauszüge lückenlos" **gelb und
 quittierpflichtig**: Auszug nachliefern oder begründet quittieren, und die
 Quittung verfällt, sobald sich die Deckungsgrenze bewegt. Der Wortlaut wird aus
 den Gate-Feldern in Menschen-Sprache gebaut (`domain/coverage-gap.ts`), für
-Schritt 1 und 8 derselbe Satz; **gerechnet wird nur im Gate**. *Warum:* der
+Vollständigkeit und Prüfprotokoll derselbe Satz; **gerechnet wird nur im Gate**. *Warum:* der
 Agent läuft autonom und kann die Lücke nicht zurückspielen — entscheiden muss
 der Mensch (Owner 03.09.2026). Lücken an Konten mit „Sollte kommen" sind nicht
 quittierpflichtig (`bank.md` R15b).
-**Schritt 4 „Kontenausgleich"** (F220, vorher „Bank"; F245) hat zwei Karten,
+**Schritt Kontenausgleich** (F220, vorher „Bank"; F245) hat zwei Karten,
 in dieser Reihenfolge: **Bankkonten → Verrechnungskonten** — die
 Bank ist die wichtigste Aussage des Schritts. **„Bankkonten"** zeigt je
 Zahlungskonto (`batch-review/domain/bank-reconciliation.ts`) fünf Zahlen ohne
@@ -341,36 +441,37 @@ unvollständig), und ohne Eröffnungswert aus DATEV der Hinweis, dass der Saldo
 ohne Anfang läuft — ohne ihn ist ein stimmender Saldo gelb. Dann die Zeile
 **„Zuletzt bestätigt am …: stimmt / Abweichung …"** bzw. „Noch nie bestätigt"
 mit dem Link **„Kontostand bestätigen ↗"** auf den Reporting-Reiter des Kontos
-(`banks/[accountId]?tab=report&as_of=<Stapelende>`) — bestätigt wird nur
-dort, Schritt 4 ist Sicht (F292). **„Buchungen
+(`payment-accounts/[accountId]?tab=report&as_of=<Stapelende>`) — bestätigt wird nur
+dort, Schritt Kontenausgleich ist Sicht (F292). **„Buchungen
 anzeigen"** setzt `?bookings=<Konto>` und zeigt die freigegebenen Sätze dieses
 Stapels auf dem Konto als Tabelle (`loadBankAccountBatchLines`, dieselbe Menge
 wie „dieser Stapel"), darunter die Umsätze ohne freigegebene Buchung als
 Kontoauszug-Ausschnitt (`BankTransactionExcerpt`, bank.md R19) mit der
 Zusatzspalte „Grund" und dem Link „Gesamten Kontoauszug öffnen" (Vollansicht
 mit Filter „nicht gebucht"); ein Wert, der zu keinem Konto passt, wird ignoriert. *Warum:* Top
-Fahrrad 07-2026, 50,03 € Esso als Vorschlag ohne Freigabe, Schritt 4 meldete
+Fahrrad 07-2026, 50,03 € Esso als Vorschlag ohne Freigabe, Schritt Kontenausgleich meldete
 „sauber". Am Ende der Karte steht als eigene Zeile **„Zahlungskonten ohne
 Umsätze"**: Konten ohne Umsatz und Buchung im Zeitraum — grau, aber **gelb,
 wenn der Vormonat Umsätze hatte** („Vormonat n Umsätze, jetzt keine — fehlt
-ein Auszug?"; derselbe Zähler wie in Schritt 1,
+ein Auszug?"; derselbe Zähler wie in Schritt Vollständigkeit,
 `application/statement-coverage.ts`). Die Bank-Prüfpunkte der Gates 2a und 4d
 (zugeordnet · gebucht · Sammelsachverhalte gehen auf · Zentralregulierung nur
-mit Befund, `BANK_CHECK_LABELS`) stehen **nur im Prüfprotokoll, Schritt 8**;
-Schritt 4 zeigt sie nicht noch einmal (F255). Rail-Zähler und Prüfprotokoll
+mit Befund, `BANK_CHECK_LABELS`) stehen **nur im Prüfprotokoll**;
+Schritt Kontenausgleich zeigt sie nicht noch einmal (F255). Rail-Zähler und Prüfprotokoll
 rechnen sie unverändert.
 **„Verrechnungskonten"** (`application/clearing-balances.ts`,
 `ui/ClearingAccountsCard.tsx`, F243) teilt die bestätigten Verrechnungskonten
 in drei Gruppen: mit Bewegung im Zeitraum → **„Im Stapel bebucht"**, egal
-welcher Saldo, aufgeklappt immer die Zeilen mit Datum, Gegenkonto (Nummer und
-Name, öffnet den Konto-Drawer, F255), Betrag und Sachverhalt als das „warum" (höchstens 200 je Konto, der Rest über das
+welcher Saldo, aufgeklappt immer die Zeilen als Kontobewegungen, T2 (DS 0211;
+Gegenkonto mit Namen öffnet den Konto-Drawer, F255; Beleg, Buchungszustand und
+Sachverhalt, F337) als das „warum" (höchstens 200 je Konto, der Rest über das
 Konto-Blatt); ohne Bewegung mit Saldo → „Saldo offen ohne Bewegung"; ohne
 Bewegung und auf null → eingeklappt „Ausgeglichen (n)". Saldo (zum
 Periodenende) und Bewegung rechnen **mit Vorschlägen wie Gate 4d** — anders als
 der Bankabgleich, dort zählen Vorschläge nie. Offene Vorschläge (Zweig
 `proposed`, im Zeitraum) stehen als Warn-Callout über der Karte mit Link auf
-Schritt 3, Vorschlagszeilen tragen das Badge „Vorschlag"; `client_import`
-zählt als Bestand. *Warum:* Gate 4d rechnet mit Vorschlägen; Schritt 4 zeigt
+Schritt Buchungsvorschläge, Vorschlagszeilen tragen den Buchungszustand „Vorschlag"; `client_import`
+zählt als Bestand. *Warum:* Gate 4d rechnet mit Vorschlägen; Schritt Kontenausgleich zeigt
 dieselbe Zahl und sagt, was davon noch nicht freigegeben ist (Owner). Null ist
 grün, ein Rest gelb; Konten ohne Zielsaldo null (`shareholder`,
 `payroll_liability`) tragen ihren Saldo ohne Warnung. Nie ein Blocker — Gate
@@ -385,7 +486,7 @@ grün, ein Rest gelb; Konten ohne Zielsaldo null (`shareholder`,
 | Differenz 0, kein EB-Wert im Spiegel | gelb | stimmt — ohne EB-Wert im Spiegel |
 | sonst | grün | stimmt mit dem Auszug überein |
 
-**Schritt 1** (F220) führt die Belege in **drei disjunkten Zeilen** — in der
+**Schritt Vollständigkeit** (F220) führt die Belege in **drei disjunkten Zeilen** — in der
 Periode (rot, wenn offen) · vor der Periode (Altlast, gelb, nie rot) · nach
 dem Zeitraum (F203, gelb) — nichts steht doppelt; ein Beleg ohne Datum zählt
 zur Periode. Zugeklappt zeigt jede Zeile nur Ampel, Prüfung und Zahl; der
@@ -407,9 +508,9 @@ R15a/R15b), die übrigen gültigen Zahlungskonten eingeklappt unter
 „Weitere Zahlungskonten"; ein roter Stand wird nie eingeklappt
 (`isStatementCoverageActive`, `partitionStatementCoverage`). Die Kontozeile
 öffnet den Konto-Drawer (`?account=`); der Saldo
-wohnt **nur** in Schritt 4 (Owner). Der Rail-Zähler für Schritt 1 bleibt an
+wohnt **nur** in Schritt Kontenausgleich (Owner). Der Rail-Zähler für Schritt Vollständigkeit bleibt an
 der Checklisten-Zeile `statements_complete` (Gate 1a).
-Was dem Mandanten **fehlt**, steht in Schritt 1 als Zeile „Fehlende
+Was dem Mandanten **fehlt**, steht in Schritt Vollständigkeit als Zeile „Fehlende
 Belege beim Mandanten": aufgeklappt die wartenden Sachverhalte — je Zeile
 Nummer und Titel, dahinter Gegenpartei · Datum · Betrag · Referenz ·
 Verwendungszweck (F254) —, darunter der Knopf, der den Mail-Entwurf zur
@@ -457,39 +558,45 @@ den Drawer-Param (R8). Nach jeder Entscheidung springt die Auswahl zum nächsten
 **offenen** Punkt; wer nur durchsieht, schaltet das ab.
 
 Das **Gewicht** liegt dort, wo gearbeitet wird. Wird im Detail gelesen und
-geschrieben (Schritt 2: Rückfrage lesen, antworten), ist die Liste schmal und
+geschrieben (Schritt Rückfragen: Rückfrage lesen, antworten), ist die Liste schmal und
 das Detail breit und mitscrollend (`MasterDetail detailBreit`). Ist die Liste
-selbst die Arbeitsfläche (Schritte 5 und 6: Zahlenspalten), bleibt sie breit
+selbst die Arbeitsfläche (Offene Posten, Plausibilität: Zahlenspalten), bleibt sie breit
 und das Detail schmal und stehend.
 
-Schritt 2 führt fünf Gruppen: Fragen an die Kanzlei · Fragen an den Mandanten
-· **Beantwortet — wartet auf den Agenten** · Erledigt · **Technische Details**
+Schritt Rückfragen führt sechs Gruppen: Fragen an die Kanzlei · Wartet auf den
+Mandanten · **Zurückgestellt** (mit „bis …") · **Beantwortet — wartet auf den
+Agenten** · Erledigt · **Technische Details**
 (F218, ehemals „Overrides des Agenten") — die Stellen, an denen der Agent ein
 rotes Gate bewusst übergangen hat. Sie stehen **zuletzt**, bleiben aber
-quittierpflichtig („n zu quittieren"; Schritt 8 zählt sie). Die letzten drei
-starten zugeklappt. „Wartet auf den Agenten" = beantwortet, Sachverhalt liegt
+quittierpflichtig („n zu quittieren"; Schritt Prüfprotokoll zählt sie). Die letzten drei
+starten zugeklappt. Welche Fragen der Stapel führt, sagt sachverhalt.md S20:
+der offene reguläre Stapel zeigt auch jede unbeantwortete Frage aus früheren,
+stornierten oder fehlenden Stapeln — der Rail-Zähler zählt nur die eigenen. „Wartet auf den Agenten" = beantwortet, Sachverhalt liegt
 beim Agenten (`disposition='agent'`, nicht geschlossen) und seit der Antwort hat
 kein Durchgang des Stapels begonnen (`awaitingAgent` in
 `application/batch-clarifications.ts`). Ist keine Frage mehr offen, zeigt das
 Detail ohne Auswahl einen großen grünen Haken („Alle Klärungsfragen erledigt");
 warten noch Antworten auf den Agenten, heißt er „… beantwortet" und verlinkt die
 Rückgabe (`review/return`).
-Im **Detail einer Rückfrage** steht oben der Link zum Sachverhalt, darunter
-Frage, Status und Quellen — Konto-Quellen mit vollem Kontonamen, sie öffnen den
-Konto-Drawer — und der Block **„Kontext"**: Konten · Zahlungen · Buchungen des
-Sachverhalts (`application/clarification-context.ts`), je aufklappbar; jede
+Das **Detail einer Rückfrage** ist dieselbe DS-`ClarificationCard` wie am
+Sachverhalt (F345, DS 0214): oben der Link zum Sachverhalt, dann Frage,
+Empfehlung, Grundlage und der Block **„Quellen und Kontext"** — Belege ·
+Konten · Zahlungen · Buchungen des Sachverhalts
+(`accounting-cases/application/clarification-context.ts`) plus „Weitere
+Quellen", je aufklappbar mit Anzahl. Der Kontext ist sachverhaltsweit; was
+**diese** Frage zitiert, steht in seiner Gruppe oben und heißt „genannt". Jede
 Zeile öffnet ihren Drawer statt einer anderen Seite, damit die halb getippte
-Antwort stehen bleibt (F255). Unter dem Antwortfeld stehen nur die zwei
-Antwort-Knöpfe.
+Antwort stehen bleibt (F255). Darunter die Antwortoptionen, das Freitextfeld
+(immer, S13) und die kleinen Auswege Zurückstellen · Anderweitig geklärt ·
+Zurückstellung aufheben. Unter der Karte der **Verlauf** (`ClarificationThread`):
+alle Fragen und Notizen des Sachverhalts, älteste zuerst, aufklappbar, mit
+Person und Zeit — ein Hin und Her ist eine neue Frage am selben Fall.
 
-**Wer antwortet, sagt auch wohin**: In Schritt 2 speichert die Kanzlei eine
-Rückfrage-Antwort über einen von zwei Knöpfen — „Antwort speichern und selbst
-korrigieren" (der Sachverhalt bleibt auf `disposition='accounting'`) oder
-„Antwort speichern und zurück an Ludwig" (`disposition='agent'`, er landet
-bei Ludwig). Beide rufen denselben Klärungs-Kern und routen danach über
-`routeCaseAction`; die Wahl des Menschen sticht das aus dem Fragesteller
-abgeleitete Routing. Ein Fall, der mit der Antwort geschlossen wurde, bleibt
-geschlossen.
+**Eine Antwort in der Abnahme geht immer zurück an Ludwig** (`routeCaseAction`,
+`disposition='agent'`, Knopf „Antwort speichern und zurück an Ludwig"). Selbst
+korrigieren gibt es nicht; wer die Frage anders geklärt
+hat, nimmt „Anderweitig geklärt". Ein Fall, der mit der Antwort geschlossen
+wurde, bleibt geschlossen.
 
 **Agententext ist Markdown**: Rückfragen, Antworten und Begründungen laufen
 durch `@/ui/Markdown`, nie als roher Absatz. **Quellen werden verlinkt**, wo
@@ -509,7 +616,7 @@ bis vier Wochen und soll nichts auswendig können müssen.
 „3 Blocker"). Beides zusammen, weil Farbe allein kein Signal ist. Gerechnet
 wird das **einmal je Request** (`application/rail-status.ts`, `React.cache`)
 aus denselben Quellen, die die Schritte selbst zeigen — „6 von 58" heißt im
-Rail und in Schritt 8 dasselbe. Der Rahmen rendert Kopf, Banner und
+Rail und in Schritt Prüfprotokoll dasselbe. Der Rahmen rendert Kopf, Banner und
 Schritt-Inhalt, ohne auf den Rail zu warten; Rail und Fortschritt streamen nach
 (`Suspense` in `ReviewFrame`), Zurück/Weiter rechnet aus `stepAccess`, nicht
 aus dem Rail.
@@ -517,7 +624,7 @@ aus dem Rail.
 **Der Rail zählt, er prüft nicht teuer.** Der Probe-Export rechnet die
 DATEV-Zerlegung *aller* noch nicht exportierten Sätze des Mandanten und kostet
 Sekunden; er lief auf jedem der elf Schritte mit, nur damit der Rail einen
-Zähler hat. Gerechnet wird er jetzt dort, wo er zählt: in Schritt 8 und im
+Zähler hat. Gerechnet wird er jetzt dort, wo er zählt: in Schritt Prüfprotokoll und im
 Freigabe-Guard (`getReleaseChecklist(…, { probeExport: true })`) — im Rail
 fehlt die Zeile, statt grün zu lügen. Dieselbe Trennung führt Gate 4d schon
 für den Agenten (`expensive`). Ebenso bleibt der DATEV-Spiegel-Abgleich der
@@ -526,7 +633,7 @@ und die Abnahme zeigt seine Warnungen gar nicht — **der Agent behält ihn
 überall**, denn er soll die Doppelbuchung sehen, bevor er bucht.
 *Warum:* die Abnahme lud sonst ~6 s je Schritt (Owner 09.09.2026).
 
-**Schritt 0 trägt eine Botschaft** (F219, F314/F315, DS 0208): drei Ränge in
+**Schritt Ergebnis des Stapels trägt eine Botschaft** (F219, F314/F315, DS 0208): drei Ränge in
 einer Spalte, nichts steht zweimal (`ui/Step0.tsx`, `domain/step0-view.ts`).
 (1) **Urteil**, ein `StatusCallout` „Ergebnis", genau ein Fall: arbeitet noch
 (Liste vorläufig) · übergeben (Vergangenheit, „n Stellen blieben offen", kein
@@ -537,11 +644,11 @@ heißt: jeder Posten ist gebucht oder hat eine Rückfrage** (Owner 2026-09-18).
 Die Durchgangszeile nennt Nummer, Zeit und die vorangegangene Rückgabe
 (`loops.lastReturnedAt`, Ereignis `export_batch.returned_to_agent`).
 (2) **Aufgaben**, `TaskList`: Vollständigkeit als eigene Gruppe, solange sie
-fehlt („Bank gebucht bis … — n Tage fehlen" → Schritt 1; Mandantenstapel „n
+fehlt („Bank gebucht bis … — n Tage fehlen" → Schritt Vollständigkeit; Mandantenstapel „n
 Personenkonten ohne Namen" → Stammdaten, F165), dann „Offen", Erledigtes in
 **einer** Faltzeile („6 von 8 erledigt"); die Zahl im Urteil = Zeilen unter
 „Offen", jede Zeile mit Zähler und Sprung (`jumpHref`). Gelesen wird
-**dieselbe** Freigabe-Checkliste wie in Schritt 8 (`getRailChecklist`,
+**dieselbe** Freigabe-Checkliste wie in Schritt Prüfprotokoll (`getRailChecklist`,
 `domain/agent-done.ts`): Agentenarbeit sind die Zeilen mit Sprung auf 0–7 ohne
 die vier Kanzlei-Zeilen (Kontoauszüge lückenlos, Buchungen freigegeben,
 Rückfragen beantwortet, Konventionen entschieden); Übergabe und Nachlese sind
@@ -556,11 +663,11 @@ Abschnitte, „Was gemacht wurde" und „Auffälligkeiten" (`agent-playbooks.md`
 (Owner 2026-09-21): übernommen wird im Banner, weiter über „Weiter" im Kopf;
 die Durchgänge stehen am Stapel (Tab „Durchgänge").
 
-**Schritt 5** beginnt mit der **OPOS-Gesamtübersicht** (F221, Owner
+**Schritt Offene Posten** beginnt mit der **OPOS-Gesamtübersicht** (F221, Owner
 2026-09-15: Achse Kreditoren / Debitoren, beide Quellen): zwei Zeilen
 **Kreditoren** (wir schulden) · **Debitoren** (uns schuldet man), je Zeile das
-Wertpaar aus Schritt 6 (`ui/SourcePair.tsx`) — oben DATEV „n Posten · Summe"
-aus dem OPOS-Spiegel zum Periodenende (`getOposStichtag`), unten in Blau Ludwig
+Wertpaar aus Schritt Plausibilität (`ui/SourcePair.tsx`) — oben DATEV „n Posten · Summe"
+aus dem OPOS-Spiegel zum Periodenende (`getOposCutoff`), unten in Blau Ludwig
 „n erwartet · Summe" aus den offenen Zahlungs-Erwartungen
 (`application/open-items-overview.ts`; die Abbildung Richtung → Seite steht
 dort einmal: `outgoing` = Kreditor, `incoming` = Debitor, alles andere ist ein
@@ -568,8 +675,8 @@ Fehler). Der Kopf nennt den Stichtag des Spiegels und den Abruf — sonst
 vergleicht man Stände; ohne Spiegel steht „kein DATEV-Stand", kein Fehler. Der
 Side-Link „Alle offenen Posten" führt auf `[year]/open-items?cutoff=<periodTo>`
 — die Volliste bleibt dort, die Abnahme zeigt den Ausschnitt zum Periodenende.
-Schritt 5 hat **zwei Reiter** (`?tab=`, Helfer `ui/step-tabs.ts`), beide mit
-demselben Segment Debitoren | Kreditoren (`?side=`, Default Debitoren) — die
+Schritt Offene Posten hat **drei Reiter** (`?tab=`, Helfer `ui/step-tabs.ts`); die ersten beiden
+teilen das Segment Debitoren | Kreditoren (`?side=`, Default Debitoren) — die
 Seite bleibt beim Reiterwechsel stehen.
 **Offene Posten**: Auf der gewählten Seite steht je
 Personenkonto ein Ausklapper, sortiert nach Kontonummer; der Kopf zeigt Konto
@@ -584,16 +691,21 @@ erwartet"; die Spalte „Zahlungserwartung" zeigt Ludwigs Reife (Achse
 `expectation_maturity`, keine Mahnstufe). **Mahnwesen**: die Erwartungsliste
 (überfällig · in Frist · wartend) der gewählten Seite, mit Klärung an den Mandanten und Wiedervorlage;
 im Detail der eindeutig zugeordnete DATEV-Posten. Das Mahnwesen selbst bleibt
-DATEV (R4).
+DATEV (R4). **Aus Vormonaten** (F498, `PriorPeriodFindingsCard`): die offenen Befunde
+„Altlast Vormonat" des Mandanten aus allen Läufen — Kommentare mit
+`question_type='prior_period_duplicate'` (`application/prior-period-findings.ts`), je Zeile Sachverhalt ·
+Befund · DATEV-Sätze. Erledigt ist ein Befund, sobald der Spiegel die Korrektur zeigt (gelöscht oder
+storniert, `sachverhalt.md` S14); die Liste hält die Freigabe nicht auf. Der Rail-Zähler des Schritts nennt
+„n überfällig · m aus Vormonaten"; der Fortschritt zählt nur die überfälligen Erwartungen.
 
-**Schritt 3**, Reiter „Wahrscheinlich richtig", endet mit dem zugeklappten Ausklapper
+**Schritt Buchungsvorschläge**, Reiter „Wahrscheinlich richtig", endet mit dem zugeklappten Ausklapper
 „Dauersachverhalte ohne Sollstellung in diesem Stapel" (F228,
 `application/rules-without-proposal.ts`): die aktiven Regeln ohne lebenden Satz
 im Stapel, ausgegraut, je Zeile Rhythmus, Betrag und „zuletzt gebucht am … ·
 Stapel …" — Auskunft, keine Aufgabe, damit ein Quartals- oder Jahresfall nicht
 für verschwunden gehalten wird.
 
-**Schritt 8 „Prüfprotokoll"** (F246, `ui/Step8.tsx`) ist eine Tabelle der
+**Schritt Prüfprotokoll** (F246, `ui/Step8.tsx`) ist eine Tabelle der
 Prüfpunkte in **Schritt-Reihenfolge**: Kontoauszüge lückenlos · Belege
 bearbeitet (1) · Rückfragen beantwortet (2) · Sachverhalte mit
 Buchungsvorschlag · Buchungen freigegeben · Probe-Export fehlerfrei (3) · die
@@ -614,24 +726,30 @@ BWA, UStVA) sind **keine Zeilen**, sondern ein Satz unter der Tabelle.
 gehört nicht hinein, und was die Kanzlei tun soll, steht als Satz da statt als
 Tooltip voller Codes (Owner-Entscheid zu F246).
 
-**Schritt 8** hat zwei Ausgänge (`ui/ReviewExits.tsx`, Anker `#exits` — „Weiter"
-springt auf dieser Seite dorthin, nicht nach Schritt 9). **Freigeben** schreibt
-seit F228 hier, über denselben Kern und dieselbe Komponente wie Schritt 9
+**Schritt Prüfprotokoll** hat zwei Ausgänge (`ui/ReviewExits.tsx`, Anker `#exits` — „Weiter"
+springt auf dieser Seite dorthin, nicht nach Schritt Übergabe an DATEV). **Freigeben** schreibt
+seit F228 hier, über denselben Kern und dieselbe Komponente wie Schritt Übergabe an DATEV
 (`releaseBatchAction`, `HandoverActions mode="release"` inkl. Override-
-Checkbox); ist der Stapel freigegeben, steht dort der Link zu Schritt 9 (F123
+Checkbox); ist der Stapel freigegeben, steht dort der Link zu Schritt Übergabe an DATEV (F123
 T123.7 „der Knopf navigiert nur" ist zurückgenommen). **Zurück an Ludwig**
 ist ein Kasten mit dem ausklappbaren Rücklauf-Korb (eine Query,
-`application/return-basket.ts`): abgelehnte Sätze · beantwortete Fragen an
-Kanzlei/Mandant · offene Fragen an den Agenten · verworfene Konventionen ·
-zurückgesetzte Belege · die Rückgabe-Notiz.
+`application/return-basket.ts`). Der Korb zeigt nur, was beim nächsten Durchgang wirklich an Ludwig geht
+(F395): beantwortete Fragen an Kanzlei/Mandant, solange der Sachverhalt offen und bei Ludwig ist bzw. die
+Quittung am Dauersachverhalt fehlt — dieselbe Bedingung wie Ludwigs Arbeitsliste
+(`clarificationAnswerAwaitsAgent`, `core/db/clarification-open.ts`) · offene Fragen an Ludwig ·
+zurückgesetzte Belege, solange nicht erledigt · Rückgabe-Notizen seit dem Start des letzten Durchgangs dieses
+Stapels (`client_agent_run_steps.started_at`), nie leere. Abgelehnte Sätze und verworfene Konventionen liest Ludwig
+nicht — sie stehen am Sachverhalt (Audit `booking.reject`) bzw. in Schritt Konventionen als verworfen, nicht im
+Korb; wer Ludwig etwas zu einem Satz sagen will, nimmt „Zurück an KI mit Notiz" (F260, Agent-Frage).
+*Warum:* bis F395 blieb alles für immer im Korb (Staging `91d0d97a`: 11 beantwortete Fragen, keine wartete).
 
-**Schritt 7** erklärt sich in einem Lead (Konventionen sind abgeleitete
+**Schritt Konventionen** erklärt sich in einem Lead (Konventionen sind abgeleitete
 Regeln; beobachtete gelten sofort, bestätigte widerruft der Agent nicht) und
 beschriftet je Regel **Regel · Warum · Gilt für · Stand**; die Konventionen des
 Mandanten insgesamt wohnen im Profil (`configuration/profile#conventions`),
-Schritt 7 verlinkt sie nur (F218).
+Schritt Konventionen verlinkt sie nur (F218).
 
-**Schritt 6** stellt neben den Ist-Saldo des laufenden Monats die Spalte
+**Schritt Plausibilität** stellt neben den Ist-Saldo des laufenden Monats die Spalte
 „Dieser Stapel": die Summe der **Vorschläge dieses Stapels** je Konto
 (`getBatchContribution`, nur `status='proposed'`, Personenkonten wie sonst
 draußen). Sie ist Auskunft und zählt **nicht** in die Abweichung — der
@@ -671,15 +789,17 @@ DATEV · Log). Das Log kennt drei Sichten mit steigender Tiefe — **Verlauf**
 Besitzer. Sie beantwortet „warum hat der August drei Wochen gedauert?" in einem
 Blick, ohne dass irgendwo eine Dauer gespeichert wäre.
 
+„Zur Abnahme" und „Übernehmen" führen auf die Startseite der Abnahme `…/close`
+(F560, `batchActionHref`); die Expertensicht bleibt über „Einfach | Experten" erreichbar.
+
 „Stapel anlegen" ist ein **Dialog mit Server-Vorschau**: dieselbe Funktion, die
 danach anlegt (`planManualBatch`), sagt vorher, was entsteht — Nachtrag,
 regulär oder Konflikt mit Namen des offenen Stapels.
 *Warum:* Eine nachgerechnete Vorschau ist eine zweite Wahrheit; sie stimmt so
 lange, bis jemand die Anlage-Regel ändert und die Vorschau vergisst.
 ### R19 — Geteilte UI importiert die Datei, nicht das Barrel
-`@/ui/status` und `@/ui/components` re-exportieren auch Komponenten, die ein
-Fachmodul laden (`FlowModal` → `@/modules/invoices`, `AppShell`/`UserMenu` →
-`@/modules/auth`). Wer aus einem dieser Barrels importiert, zieht den halben
+`@/ui/components` re-exportiert auch Komponenten, die ein Fachmodul laden
+(`AppShell`/`UserMenu` → `@/modules/auth`). Wer aus einem dieser Barrels importiert, zieht den halben
 Server-Graphen mit — inklusive `postgres`. In der App fällt das nicht auf, weil
 Next die Grenze zieht; in Storybook stirbt die Story an `Buffer is not defined`.
 
@@ -693,7 +813,7 @@ verbindet alles mit allem. Der Fehler zeigt sich nicht dort, wo er entsteht,
 sondern in einer beliebigen Story, die zufällig einen Badge rendert.
 
 ### R20 — Ein Reiter beantwortet *was*, eine Sicht *wie angesehen* — nie beide dieselbe Frage
-Das Grundmuster aus R16 (Todo-Liste links, Detail rechts) trägt Schritt 3
+Das Grundmuster aus R16 (Todo-Liste links, Detail rechts) trägt Schritt Buchungsvorschläge
 nicht: „Stimmen die Vorschläge?" zerfällt in **zwei verschiedene Fragen**, und
 jede verlangt eine andere Oberfläche.
 
@@ -718,26 +838,60 @@ Die Reiter (Design `Buchungsreview.dc.html` → Screen 3) trennen das Offene sei
 F232 nach **Prüfbedarf** (`buchung.md` R17, `scoreCasesForReview`,
 `domain/review-tabs.ts`): **Bitte anschauen** (Score ab der Schwelle oder ein
 harter Grund) · **Wahrscheinlich richtig** (der Rest) · **Mandantenstapel**
-(`origin = 'client_import'`, nur gerendert, wenn er etwas enthält) — und
-dahinter **Freigegeben** (`released`, kein Prüfbedarf, deshalb nicht in der
+(`origin = 'client_import'`, nur gerendert, wenn er etwas enthält) ·
+**Ohne Vorschlag** (F350, nur gerendert, wenn er etwas enthält) ·
+**Sammelzahlungen** (F354, ebenso) · **Zurück an Ludwig** (F260, ebenso) — und dahinter **Freigegeben** (`released`, kein Prüfbedarf, deshalb nicht in der
 Achse `review_tab`): alles Entschiedene. Ein Fall **wandert** nach der
 Entscheidung dorthin; die offenen Reiter sind reine Arbeitsvorräte, einen
 Filter „nur offene" gibt es deshalb nicht (Owner 2026-09-21). Die Zahl am
 Reiter zählt seine Fälle; ohne `?tab=` beginnt die Arbeit beim ersten Reiter
-mit etwas Offenem, ist nichts mehr offen, bei „Freigegeben". Die Köpfe stehen nach Score absteigend,
+mit etwas Offenem (Bitte anschauen → Wahrscheinlich richtig → Mandantenstapel →
+Ohne Vorschlag → Sammelzahlungen), ist nichts mehr offen, bei „Freigegeben"; „Zurück an Ludwig"
+wählt er nie von selbst. *Warum „Ohne Vorschlag" vor dem Entschiedenen:* er ist
+offene Arbeit und blockiert den Prüfpunkt „Sachverhalte mit Buchungsvorschlag";
+als Gruppe unter der Liste wurde er übersehen (Owner 2026-09-30). Die Köpfe stehen nach Score absteigend,
 dann Betrag. Die Zählzeile darüber lautet „{offen} Vorschläge offen — n bitte
 anschauen, m wahrscheinlich richtig{, k Mandantenstapel}", der
 „Ohne Karte"-Abgleich (F200) rechnet gegen die Summe der drei. *Warum:* bis
 F232 trennten die Reiter nach Herkunft (Wiederkehrende/Einzelfälle, F202) und
 zeigten sichere und unsichere Sätze gleichrangig — die Frage des Prüfenden ist
 aber, wo er hinschauen muss.
-**Unter den Reitern** steht die Gruppe **„Ohne Vorschlag"** (F217,
-`application/cases-without-proposal.ts`): die offenen Fälle am Stapel ohne
-lebenden Satz — Schritt 8 zählt sie als „ohne Buchungsvorschlag" und springt
-mit `#without-proposal` genau hierher; je Zeile „In den Folgemonat"
+Der Reiter **„Ohne Vorschlag"** (F217, F350,
+`application/cases-without-proposal.ts`, rendert `Step3WithoutProposal` statt
+`Step3Single`): die offenen Fälle am Stapel ohne lebenden Satz; es zählen nur
+Sätze **dieses** Stapels, ein Satz in einem anderen Stapel nimmt den Fall hier
+nicht heraus (F352) — Schritt
+Prüfprotokoll zählt sie als „ohne Buchungsvorschlag" und springt mit
+`?tab=without_proposal` genau hierher; je Zeile „In den Folgemonat"
 (`deferCaseToNextCycle`, derselbe Kern wie das Agent-Tool
-`defer_case_to_next_cycle`) und „Zurück an Ludwig". Leer wird sie nicht
-gerendert.
+`case_transition(to=next_cycle)`) und „Zurück an Ludwig". Leer erscheint der Reiter
+nicht. Hat der Stapel gar keine Karte, steht die Tabelle unter dem Leer-Hinweis.
+Der Reiter **„Sammelzahlungen"** (F354, `listCollectiveCasesWithRemainder` in
+`accounting-cases/infrastructure/collective-cases.ts`) zeigt die
+Sammelsachverhalte des Mandanten (`document_number_mode = 'multiple'`) mit Rest
+auf dem Personenkonto — **mandantenweit** und mit derselben Abfrage wie Gate 4d,
+damit der Prüfpunkt „Sammelsachverhalte gehen auf" und der Reiter dieselbe Menge
+nennen (ein Sammelfall aus der OPOS-Kaskade trägt oft keinen Stapel-Stempel).
+Dieselbe Tabelle wie „Ohne Vorschlag", dazu die Spalte „Rest"; ein Fall darin
+steht nicht zusätzlich unter „Ohne Vorschlag". Das Prüfprotokoll springt mit
+`?tab=collective` hierher, gezählt wird die Zeile im Rail weiter beim
+Kontenausgleich. Leer erscheint der Reiter nicht; ohne Karte steht die Tabelle
+unter „Ohne Vorschlag".
+
+**Prüfgrund statt Wortliste (F355, F357, DS 0218/0219):** die Zeile zeigt einen
+Wert, den stärksten **Prüfgrund** (Achse `review_reason`, `rankReviewReasons`;
+Kurzwort des Prüfpunkts bzw. Wort der Achse, Ton nach A7, Hover mit der
+Einzelheit des Falls), dahinter „+n"; sein (i) zeigt alle Teile des Prüfbedarfs
+mit Punkten, Summe und Schwelle. Konfidenz und Judge-Urteil stehen dort unter
+den Teilen, nicht als eigene Spalte („Prüfung durch Ludwig" nur über
+`include: ["verdict"]`, aus). Aufklapper und Fall-Ansicht sind **ein** Baustein
+(`BookingReview`): je Satz alle Zeilen (nie gefiltert), Satzart, Status,
+Konfidenz, Begründung mit Quellen, Prüfpunkte, Judge und die Handlung; bei
+Rechnung + Zahlung „Aufwand/Erlös mit Zahlung" einmal darüber (P58). Der
+Aufklapper zeigt die Sätze kompakt ohne Beleg & Zahlung, die Fall-Ansicht voll
+mit dem Editor im Slot — der bekommt kein `aiReview` mehr und das Buchungsdatum
+als ISO. Der Startmodus des Editors (`simple`/`full`) ist eine Konstante in
+`Step3Single.tsx` (offene Owner-Frage).
 
 Alle Reiter sind **eine** Komponente (`Step3Single` mit `tab`), die Wörter
 unterscheiden sich, Sichten, Filter, Hotkeys und Aktionen nicht — bis auf
@@ -772,7 +926,11 @@ roten Punkt ablehnt, benennt die Meldung (`buchung.md` R17a):
   (F184) und rechnet nichts nach; gestempelt wird beim Buchen aus den **Konten**
   der Zeilen, nicht aus der Ereignisart: die sagt, woher der Vorgang kam, nicht
   was der Satz tut. Ohne Wert (Satz ohne Zeilen) zeigt die Karte **kein** Badge
-  statt eines geratenen.
+  statt eines geratenen. Die Generalumkehr zeigt statt der Satzart das
+  Herkunfts-Wort „Generalumkehr", darüber im Satz die Verweiszeile, und hat
+  kein „Ändern". Das Original trägt zusätzlich „Wird aufgehoben" bzw.
+  „Aufgehoben" (F349) — in der Einzelansicht und im Aufklapper der Liste
+  derselbe Helfer (`entryKindBadge`).
 
 Die drei Sichten teilen sich **eine** Tabelle und dieselben
 Worte je Zeile — Nr. · Datum · Gegenpartei · Buchung · KI-Prüfung · Beleg ·
@@ -839,7 +997,7 @@ regelgebuchten Fälle kommt aus **vier** Abfragen für den ganzen Reiter
 (`application/rule-context.ts`), nicht aus acht je Zeile; der Prüfbedarf aus
 vier Sammelabfragen für alle offenen Karten (`scoreCasesForReview`).
 
-Der Vormonatsvergleich ist **nicht** die Drei-Monats-Engine aus Schritt 6
+Der Vormonatsvergleich ist **nicht** die Drei-Monats-Engine aus Schritt Plausibilität
 (`domain/comparison.ts`), sondern `domain/previous-month.ts`: ein Dauersachverhalt hat
 genau einen Bezugswert, und eine Engine, die unter zwei Vormonaten schweigt,
 beantwortet hier die falsche Frage. Er steht als Zeile „Vormonat" in der
@@ -914,7 +1072,7 @@ Stand: angewandt in der Stapelabnahme (F244) — Schritt-Texte in
 Stapel in einer Zeile über Rail und Inhalt und trägt den einen Weg „Zum Stapel"
 (Owner 2026-09-27). Die Rückgabe an den Agenten hat **einen** Ort: die Seite
 `review/return` am Rücklauf-Korb, Overline „Rücklauf-Korb", mit „Im Korb" und
-„Was dann passiert" (F253); Schritt 8 behält seine Karte und verweist dorthin.
+„Was dann passiert" (F253); Schritt Prüfprotokoll behält seine Karte und verweist dorthin.
 App-weit offen → `web-ui-offen.md` P46.
 *Warum:* In der Stapelabnahme sagten Overline, Seitentitel, Lead und erster
 Box-Titel viermal dasselbe („Vollständigkeit" / „Ist alles da?"), keine Ebene
@@ -928,8 +1086,7 @@ denselben Rahmen (`caseFrameSlots` → `CaseDetailView`): Pager, Kopf
 (`EntityHeader`, ein Zustand = Lebenszyklus, Zuständigkeit als Wort in der
 Meta-Zeile, Betrag nur mit Wert), nächster Schritt (`StatusCallout`, sonst
 nichts), Reiter. Reiter-Satz: Übersicht · Ereignisse · Belege · Rückfragen ·
-Plausibilität · Wiederkehr (nur Dauersachverhalt) · Stammdaten · Technik;
-alte `?tab=`-Werte bildet die Alias-Schicht ab.
+Plausibilität · Wiederkehr (nur Dauersachverhalt) · Stammdaten · Technik.
 Die **Übersicht** ist dreispaltig: links der Strang (DS-`CaseTimeline`:
 Ereignisse, Fragen und offene Erwartungen, die jüngsten zehn; darunter „In
 DATEV gebucht" nur mit Einträgen, `MirrorEntryList`, Betrag und Konten aus
@@ -945,7 +1102,10 @@ Fragen und Notizen stehen in **einer** Karte (`ClarificationList` +
 'comment'` derselben Tabelle. Eine Antwortfläche gibt es nur bei `audience =
 accounting`. Ein Schreibweg je Art: Notiz → `addCaseComment`, Frage →
 `raiseCaseClarification`; Fragen an den Mandanten von Hand weist die Action
-ab. Zähler und Blocker zählen nur Fragen (F249). Wer am Fall weiterarbeitet
+ab. Zähler und Blocker zählen nur Fragen (F249). Im Reiter **Rückfragen** steht
+die gewählte Frage mit „Quellen und Kontext" und darunter der **Verlauf** aller
+Fragen und Notizen des Falls (F345) — dieselbe Karte wie in der Abnahme; dort
+ist jede frühere Antwort mit Person und Zeit lesbar. Wer am Fall weiterarbeitet
 („zurück an Agent", „selbst buchen"), steht im Menü des Kopfs.
 Saldo & Konten, Prüfpunkte, Belegnummern-Register und der offene Posten
 stehen im Reiter Plausibilität; DATEV-Wahrheit, Protokoll, Herkunft und
@@ -959,3 +1119,46 @@ sortiert numerisch (1200 vor 4000 vor 10000). Im Client
 einer Nicht-Ziffer zur Laufzeit würfe). Prüffrage bei jeder neuen Liste (F290).
 *Warum:* Textsortierung stellt 10000 vor 4000 — in jeder Kontenliste sichtbar
 falsch, und an 20 Stellen einzeln nachgebaut.
+
+### R25 — Das Command-Menü ist ein Zusatzweg; `m:` wechselt den Mandanten, alles andere sucht im Mandanten
+⌘K (oder ein Klick auf die Suche in der Kopfzeile) öffnet das Command-Menü
+(F351, `modules/command-palette`). Es ersetzt keine Liste und keinen
+`ClientSwitcher` (R13), es kürzt den Weg zu Seite, Konto, Beleg, Sachverhalt
+und Stapel ab.
+
+| Eingabe | Treffer | Enter | ⇧Enter („Vorschau") |
+|---|---|---|---|
+| Text ohne Präfix | **Seiten** des Mandanten (Sidebar) | Seite | — |
+| Text ohne Präfix | **Konten**: Nummer oder Name, Kontenplan + SKR-Katalog | Kontoseite | Kontodrawer |
+| `m: Fakir` · `m: 42606` | **Mandanten** (Name oder DATEV-Nr.), nur mit `m:` | Mandant wechseln | — |
+| `b: telekom` | **Belege** per Textsuche (Lieferant, Rechnungsnr., Zusammenfassung, OCR-Text) | Belegseite | Belegdrawer |
+| `SV-2026-0001` | **Sachverhalt** mit genau dieser Nummer | Sachverhalt | — |
+| `2026-0001` | **Stapel**, darunter **Sachverhalt** mit der Nummer | Stapel bzw. Sachverhalt | — |
+| `j: 2025` | **Jahre** des Mandanten | Jahr wechseln | — |
+| leer / Text | **Kurzfunktionen**: „Offenen Stapel öffnen", „Abnahme öffnen" | Ziel | — |
+| `4.872,88` | **Kontobewegungen** + **Belege** mit genau diesem Betrag | Banken + Drawer / Belegseite | Bewegungs- / Belegdrawer |
+
+Enter öffnet die Seite, ⇧Enter den Drawer, wo es einen gibt — im Menü heißt
+das „Shift ↵ Vorschau" (Owner 2026-10-01; Sachverhalt und
+Stapel haben keinen, dort wirkt ⇧Enter wie Enter), ⌘↵ / Strg↵ öffnet jeden
+Treffer mit Seite in einem neuen Tab. Eine nackte Nummer `2026-0001` zeigt
+**zuerst den Stapel**, darunter den Sachverhalt: `case_number` und
+`stapelnummer` haben dieselbe Form, erst `SV-` macht sie eindeutig. Ein
+Betrag braucht ein Komma, sonst ist `4930` ein Konto. Leeres Feld: „Suchen
+mit" (die Präfixe), „Kurzfunktionen", „Seiten". Außerhalb eines Mandanten
+(Dashboard, Admin) öffnet das Menü mit `m: ` im Feld.
+*Warum `m:` Pflicht ist:* Treffer aus fremden Mandanten mischen sich nie in die
+Suche im Mandanten. Wer „Telekom" sucht, meint den Beleg dieses Mandanten und
+nicht einen anderen Mandanten, der zufällig so heißt. Der Server sucht deshalb
+nur im Mandanten aus dem Pfad und prüft ihn gegen die Sitzung
+(`listClientsForSession`; es gibt keine RLS, R28); die Mandanten filtert der Client
+aus der Liste, die er schon hat.
+
+### R26 — Schriften liegen im Repo
+
+Inter, Source Serif 4 und JetBrains Mono liegen als variable Latin-woff2 unter
+`apps/web/src/app/fonts/` (mit OFL-Lizenz) und werden über `next/font/local`
+geladen (`app/layout.tsx`). Kein `next/font/google`: es lädt beim Build aus dem
+Netz, und ein fehlgeschlagener Abruf bricht den Image-Build ab (F370). Neue Schrift oder neues Gewicht → variable Latin-woff2 aus der
+Google-Fonts-CSS-API holen (mit Browser-User-Agent, sonst kommt TTF) und die
+`OFL.txt` danebenlegen, nicht über Google einbinden.

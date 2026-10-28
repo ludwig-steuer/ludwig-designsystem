@@ -23,7 +23,9 @@
  */
 import type { ActorKind } from "@/ludwig/modules/audit-log";
 import type { JournalEntryVM } from "@/ludwig/modules/entries";
+import type { ReversalDisplay } from "@/ludwig/core/accounting/reversal-note";
 import { CASE_KIND_LABEL } from "./case";
+import type { FollowUpOf } from "./clarification-follow-up";
 import type { VatWithoutDocumentApproval } from "./case-detail";
 import type {
   CaseDisposition,
@@ -83,6 +85,8 @@ export interface TimelineEventVM {
   docType: "invoice" | "contract" | "other" | null;
   docLabel: string | null;
   booking: JournalEntryVM | null;
+  /** Umkehrsätze und ihre Originale, nie mit `booking` verschmolzen (F349). */
+  reversalEntries: { entry: JournalEntryVM; display: ReversalDisplay }[];
   /** true, wenn die Buchung(en) des Ereignisses storniert wurden (kein aktiver Satz). */
   reversed: boolean;
   /** F36: true = Event durch ein neueres ersetzt (Korrekturbeleg) — Badge „Ersetzt". */
@@ -130,7 +134,7 @@ export interface SaldoAccountVM {
 
 export interface ClarificationVM {
   id: string;
-  type: "sachverhalt" | "beleg";
+  type: "case" | "document";
   short: string;
   /** Kompakte Überschrift (client_accounting_case_clarification.title), sonst null. */
   title: string | null;
@@ -181,6 +185,10 @@ export interface CaseClarificationEntry {
   question: string | null;
   context: string | null;
   recommendation: string | null;
+  /** Die empfohlene Antwort — die Karte hebt sie hervor und wählt sie vor. */
+  recommendedOption: string | null;
+  /** „Beim Mandanten klären": die Notiz für den Mandanten; NULL = nicht markiert. */
+  clientNote: string | null;
   facts: Array<{ label: string; value: string }>;
   severity: "required" | "optional";
   audience: "accounting" | "client" | "agent";
@@ -202,6 +210,58 @@ export interface CaseClarificationEntry {
   /** Anzeigename des Fragestellers, wenn ein Kanzlei-User fragte. */
   raisedByName: string | null;
   sources: ClarificationSourceVM[];
+  /** F345: die Antwort als Satz (Option, dann Ergänzung) — null, solange offen. */
+  answerText: string | null;
+  /** F345: ohne Antwort aufgelöst („Anderweitig geklärt", Marker `(gegenstandslos)`). */
+  resolved: boolean;
+  /** F395: die beantwortete Agent-Frage, auf die diese Nachfrage antwortet; null = keine Nachfrage. */
+  followsClarification: FollowUpOf | null;
+}
+
+/**
+ * F255/F345 — was man neben einer Rückfrage sehen muss, um sie zu
+ * beantworten: Belege, Konten, Zahlungen und Buchungen ihres Sachverhalts.
+ * **Sachverhaltsweit**, für jede Frage desselben Falls gleich; was die
+ * einzelne Frage ausdrücklich nennt, markiert erst das Mapping (`cited`).
+ */
+export interface ClarificationCaseContext {
+  documents: {
+    sourceDocId: string;
+    date: string | null;
+    issuer: string | null;
+    number: string | null;
+    amount: number | null;
+    currency: string | null;
+  }[];
+  accounts: { accountNumber: string; accountName: string | null }[];
+  payments: {
+    transactionId: string;
+    postingDate: string;
+    amount: number;
+    currency: string;
+    counterpartyName: string | null;
+    purpose: string | null;
+    paymentAccountLabel: string | null;
+    paymentAccountId: string | null;
+    /** L-363: der Kontoauszug (Import-Batch), aus dem die Zahlung kommt — für die Gruppe „Kontoauszug" der Karte. */
+    statement: { importBatchId: string; periodFrom: string | null; periodTo: string | null } | null;
+  }[];
+  entries: {
+    source: string;
+    entryId: string;
+    bookingDate: string;
+    isProposal: boolean;
+    /** Das Ereignis der Buchung — Ziel des Klicks; beides null bei Spiegel-Zeilen. */
+    sourceDocId: string | null;
+    bankTransactionId: string | null;
+    lines: {
+      accountNumber: string;
+      accountName: string | null;
+      side: "debit" | "credit";
+      amount: number;
+      taxKey: string | null;
+    }[];
+  }[];
 }
 
 /** Quelle an einer Rückfrage — `ledger_account` trägt die aufgelöste Kontonummer. */

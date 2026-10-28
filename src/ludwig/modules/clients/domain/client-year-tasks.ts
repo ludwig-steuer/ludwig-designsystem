@@ -21,6 +21,8 @@ export interface ClientYearTask {
   title: string;
   description?: string;
   action: { label: string; href: string };
+  /** Owner 2026-10-26: der Knopf startet einen Lauf (Korb abschließen) — die Seite rendert dann die Action, keinen Link. */
+  startsRun?: boolean;
 }
 
 /** Eine Stapel-Aufgabe, wie `openBatchTask` sie liefert. `urgent` = Übertragung gescheitert. */
@@ -37,19 +39,22 @@ export const TASK_PRIORITY = {
   onboarding: 10,
   batchFailed: 20,
   batch: 30,
+  basket: 35,
   stuckDocuments: 40,
 } as const;
 
 export function clientYearTasks(input: {
   batches: readonly ClientYearBatchTask[];
   stuckDocuments: number;
+  /** Belege im offenen Dateikorb (Owner 2026-10-26): ein Eintrag mit genau einer Aktion „Korb abschließen". */
+  basketDocuments?: number;
   /** Der Mandant hat noch gar keinen Stapel — beim Bestandsmandanten legt die Kanzlei den ersten an. */
   noBatchYet?: boolean;
   /** Onboarding wartet auf Freigabe — bis dahin bucht Ludwig nicht. */
   onboardingHref: string | null;
   basePath: string;
 }): ClientYearTask[] {
-  const { batches, stuckDocuments, noBatchYet = false, onboardingHref, basePath } = input;
+  const { batches, stuckDocuments, basketDocuments = 0, noBatchYet = false, onboardingHref, basePath } = input;
   const tasks: ClientYearTask[] = [];
 
   if (onboardingHref) {
@@ -76,6 +81,19 @@ export function clientYearTasks(input: {
       title: "Noch kein Stapel",
       description: "Für einen Bestandsmandanten legt die Kanzlei den ersten Stapel an; danach eröffnet der Server jeden weiteren.",
       action: { label: "Stapel anlegen", href: `${basePath}/batches` },
+    });
+  }
+
+  if (basketDocuments > 0) {
+    tasks.push({
+      key: "file_basket",
+      priority: TASK_PRIORITY.basket,
+      tone: "info",
+      title: basketDocuments === 1 ? "1 Beleg im Korb" : `${basketDocuments} Belege im Korb`,
+      description: "Ludwig bucht die Belege, Sie bekommen eine Mail.",
+      // Der Weg ohne JavaScript: der Eingang, wo der Korb liegt. Die Seite rendert sonst den Start-Knopf.
+      action: { label: "Korb abschließen", href: `${basePath.replace(/\/\d{4}$/, "")}/document-inbox` },
+      startsRun: true,
     });
   }
 

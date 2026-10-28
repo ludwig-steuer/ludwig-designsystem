@@ -84,7 +84,7 @@ export function parsePageRequest<K extends string = never>(
 }
 
 /**
- * Inclusive zero-based range for Supabase `.range(from, to)`.
+ * Inclusive zero-based row range (`from`..`to`) of a page, e.g. for OFFSET/LIMIT.
  */
 export function pageRange(page: PageRequest): { from: number; to: number } {
   const from = (page.page - 1) * page.pageSize;
@@ -93,6 +93,24 @@ export function pageRange(page: PageRequest): { from: number; to: number } {
 
 export function totalPages(totalItems: number, pageSize: number): number {
   return Math.max(1, Math.ceil(totalItems / pageSize));
+}
+
+/**
+ * Ein Listen-Patch des DS als URL-Parameter (`page`, `size`, `sort`, `dir`).
+ * Der Pager schickt nur einen Teil (`{ page }`) — was der Patch nicht nennt,
+ * bleibt, wie die Liste es gerade zeigt, sonst verwirft Blättern Sortierung
+ * und Seitengröße (F336-Review).
+ */
+export function listPatchParams(
+  patch: { page?: number; pageSize?: number; sort?: string; dir?: SortDir },
+  current: { pageSize?: number; sort?: { key: string; dir: SortDir } | null },
+): { page: number | null; size: number | null; sort: string | null; dir: SortDir | null } {
+  return {
+    page: patch.page ?? null,
+    size: patch.pageSize ?? current.pageSize ?? null,
+    sort: patch.sort ?? current.sort?.key ?? null,
+    dir: patch.sort ? (patch.dir ?? "desc") : (current.sort?.dir ?? null),
+  };
 }
 
 /**
