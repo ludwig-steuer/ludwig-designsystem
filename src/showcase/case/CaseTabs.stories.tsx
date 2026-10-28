@@ -102,7 +102,7 @@ function Tab({
     <CasePage accountingCase={of} tab={tab}>
       <div className="v2stack">
         {children}
-        <div className="lw-overline">Leerzustand</div>
+        <div className="lw-ui-group">Leerzustand</div>
         {empty}
       </div>
     </CasePage>

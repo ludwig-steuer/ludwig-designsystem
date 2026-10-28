@@ -43,7 +43,7 @@ const noTab = () => "#";
 function Labelled({ label, children }: { label: string; children: ReactNode }) {
   return (
     <section>
-      <div className="lw-overline" style={{ padding: "var(--space-4) var(--space-5) 0" }}>
+      <div className="lw-ui-group" style={{ padding: "var(--space-4) var(--space-5) 0" }}>
         {label}
       </div>
       {children}
@@ -138,14 +138,14 @@ export const AllTabs: Story = {
       <AccountPage facts={moneyTransit.facts} master={moneyTransit.master} tab="details" tabHref={noTab}>
         <div className="v2stack">
           <DetailsTab scenario={moneyTransit} />
-          <div className="lw-overline">Leerzustand</div>
+          <div className="lw-ui-group">Leerzustand</div>
           <DetailsTab scenario={withoutLlmProfile} />
         </div>
       </AccountPage>
       <AccountPage facts={moneyTransit.facts} master={moneyTransit.master} tab="raw" tabHref={noTab}>
         <div className="v2stack">
           <RawTab scenario={moneyTransit} />
-          <div className="lw-overline">Leerzustand</div>
+          <div className="lw-ui-group">Leerzustand</div>
           <RawTab scenario={unused} />
         </div>
       </AccountPage>

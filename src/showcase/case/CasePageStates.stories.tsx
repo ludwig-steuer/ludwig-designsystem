@@ -68,7 +68,7 @@ export const LoadingErrorNotFound: Story = {
   render: () => (
     <div style={{ display: "grid", gap: 40, padding: 24 }}>
       <div>
-        <div className="v2muted" style={{ marginBottom: 8 }}>lädt</div>
+        <div className="lw-ui-group" style={{ marginBottom: 8 }}>lädt</div>
         <div style={{ display: "grid", gap: 16 }}>
           <Skeleton lines={3} />
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1.3fr 0.8fr", gap: 16 }}>
@@ -80,7 +80,7 @@ export const LoadingErrorNotFound: Story = {
       </div>
 
       <div>
-        <div className="v2muted" style={{ marginBottom: 8 }}>Fehler</div>
+        <div className="lw-ui-group" style={{ marginBottom: 8 }}>Fehler</div>
         <Banner tone="danger" title="Der Sachverhalt konnte nicht geladen werden.">
           Die Verbindung zur Datenbank ist abgerissen. Laden Sie die Seite neu; bleibt es dabei,
           hilft nur ein Blick in die Protokolle.
@@ -88,7 +88,7 @@ export const LoadingErrorNotFound: Story = {
       </div>
 
       <div>
-        <div className="v2muted" style={{ marginBottom: 8 }}>nicht gefunden</div>
+        <div className="lw-ui-group" style={{ marginBottom: 8 }}>nicht gefunden</div>
         <EmptyState
           inline
           title="Diesen Sachverhalt gibt es nicht."

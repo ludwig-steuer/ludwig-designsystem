@@ -32,7 +32,8 @@ export function Todo({
         padding: "var(--space-3)",
         background: "var(--color-bg-soft)",
         color: "var(--color-text-muted)",
-        fontSize: "var(--fs-caption)",
+        // The productive scale, not the reading register's caption (0237).
+        fontSize: "var(--fs-ui-sm)",
       }}
     >
       <strong style={{ color: "var(--color-text)" }}>
@@ -52,7 +53,7 @@ export function TodoInline({ spec, name }: { spec: string; name: string }) {
         borderRadius: "var(--radius-sm)",
         padding: "2px 6px",
         color: "var(--color-text-muted)",
-        fontSize: "var(--fs-overline)",
+        fontSize: "var(--fs-ui-xs)",
         whiteSpace: "nowrap",
       }}
     >

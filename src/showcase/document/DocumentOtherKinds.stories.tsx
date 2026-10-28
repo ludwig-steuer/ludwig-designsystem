@@ -436,7 +436,8 @@ export const StatementWronglyAssigned: Story = {
                 accounts={ACCOUNTS}
               />
             </div>
-            <p className="v2muted" style={{ margin: 0 }}>
+            {/* The role „Hinweis" under a field, not a bare p that inherits 16 px (0237). */}
+            <p className="lw-ui-hint">
               Beim Umordnen bleiben die vorhandenen Buchungen stehen; bereits akzeptierte
               Zuordnungen brechen ab und werden neu vorgeschlagen.
             </p>
