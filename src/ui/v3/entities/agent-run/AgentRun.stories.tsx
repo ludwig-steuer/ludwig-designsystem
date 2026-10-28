@@ -12,7 +12,7 @@ import { DateRange } from "../../primitives/Time";
 import { AgentRunBanner, AgentRunCell } from "./AgentRun";
 
 const meta: Meta<typeof AgentRunBanner> = {
-  title: "v3/Entitäten/Durchgang/AgentRun",
+  title: "v3/Entitäten/Lauf/AgentRun",
   component: AgentRunBanner,
   parameters: { layout: "padded" },
 };
@@ -60,12 +60,12 @@ export const States: Story = {
       <AgentRunBanner
         state="stopped"
         message="Ludwig hat abgebrochen: Der Kontoauszug für März fehlt."
-        action={{ label: "Protokoll des Durchgangs öffnen", href: "#log" }}
+        action={{ label: "Protokoll des Laufs öffnen", href: "#log" }}
       />
       <AgentRunBanner
         state="taken_over"
-        message="Die Kanzlei hat die Prüfung übernommen; Ludwigs Durchgang ist beendet."
-        action={{ label: "Protokoll des Durchgangs öffnen", href: "#log" }}
+        message="Die Kanzlei hat die Prüfung übernommen; Ludwigs Lauf ist beendet."
+        action={{ label: "Protokoll des Laufs öffnen", href: "#log" }}
       />
       <AgentRunBanner
         state="failed"
@@ -86,7 +86,7 @@ export const Stopped: Story = {
       <AgentRunBanner
         state="stopped"
         message="Ludwig hat abgebrochen: Der Kontoauszug für März fehlt."
-        action={{ label: "Protokoll des Durchgangs öffnen", href: "#log" }}
+        action={{ label: "Protokoll des Laufs öffnen", href: "#log" }}
       />
       <AgentRunBanner state="stopped" message="Ludwig war zwei Stunden still. Der Stapel liegt zur Prüfung bei Ihnen." />
     </Stack>
@@ -109,7 +109,7 @@ export const Done: Story = {
           message="Ludwig ist fertig: keine neue Rückfrage, 14 Buchungsvorschläge"
           action={{ label: `Buchungen prüfen${clicked ? ` (${clicked}× geklickt)` : ""}`, onClick: () => setClicked((n) => n + 1) }}
         />
-        <AgentRunBanner state="done" message="Ludwig ist fertig: nichts Neues in diesem Durchgang" />
+        <AgentRunBanner state="done" message="Ludwig ist fertig: nichts Neues in diesem Lauf" />
       </Stack>
     );
   },
@@ -196,7 +196,7 @@ const STEPS: RailItem[] = [
     tone: "dimmed",
     counterText: "Ludwig bucht",
     href: null,
-    disabledReason: "Ludwig bucht gerade nach. Die Vorschläge stehen hier, sobald der Durchgang fertig ist.",
+    disabledReason: "Ludwig bucht gerade nach. Die Vorschläge stehen hier, sobald der Lauf fertig ist.",
   },
   { key: "handover", index: 6, label: "Übergeben", tone: "neutral", counterText: "an DATEV", href: "#handover" },
 ];
@@ -210,7 +210,7 @@ export const InUse: Story = {
     return (
       <Stack>
         <Segmented
-          ariaLabel="Stand des Durchgangs (nur in der Story)"
+          ariaLabel="Stand des Laufs (nur in der Story)"
           active={state}
           onPick={setState}
           options={(["running", "done", "stopped", "taken_over", "failed"] as const).map((key) => ({
@@ -245,13 +245,13 @@ export const InUse: Story = {
             state="stopped"
             startedAt={STARTED}
             message="Ludwig hat abgebrochen: Der Kontoauszug für August fehlt."
-            action={{ label: "Protokoll des Durchgangs öffnen", href: "#log" }}
+            action={{ label: "Protokoll des Laufs öffnen", href: "#log" }}
           />
         ) : state === "taken_over" ? (
           <AgentRunBanner
             state="taken_over"
             startedAt={STARTED}
-            message="Die Kanzlei hat die Prüfung übernommen; Ludwigs Durchgang ist beendet."
+            message="Die Kanzlei hat die Prüfung übernommen; Ludwigs Lauf ist beendet."
           />
         ) : (
           <AgentRunBanner
@@ -264,7 +264,7 @@ export const InUse: Story = {
         <Card>
           <CardHead title="Rückfragen" />
           <p style={{ margin: 0, padding: "var(--space-4)" }}>
-            Alles bleibt sichtbar, während Ludwig arbeitet. Quittieren lässt sich erst nach dem Durchgang.
+            Alles bleibt sichtbar, während Ludwig arbeitet. Quittieren lässt sich erst nach dem Lauf.
           </p>
         </Card>
       </Stack>

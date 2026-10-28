@@ -4,7 +4,7 @@
 |---|---|
 | Status | fertig (Abnahme Variante B 2026-10-29: B1–B5 ✓, keine Mängel, Hinweise H7–H13) · vorher: Abnahme (Nachtrag 2026-10-29: Variante B über die Registry-Achse `agent_run_banner`, M7 entschieden) · davor: Abnahme (Nachbesserung 2026-10-27: M1–M6 behoben, M7 mit Default, Frage an llcto) · davor: in Arbeit (Abnahme 2026-10-27: M1–M7 offen) |
 | Stufe | `entities/agent-run/` |
-| Klassen-Test | „Ergäbe das auch in einer Versicherungs-App Sinn?" → nein, der Text nennt Ludwig und seinen Durchgang. |
+| Klassen-Test | „Ergäbe das auch in einer Versicherungs-App Sinn?" → nein, der Text nennt Ludwig und seinen Lauf. |
 | Quelle | Owner 2026-10-26 über llcto (Zuruf 2026-10-27): Lauf-Leiste in der Buchhalter-Abnahme |
 | Ersetzt | nichts; heute sagt nur der gedimmte Schritt im StepRail „Ludwig bucht" (`disabledReason`) |
 | Blockiert | Abnahme-Seiten (`batches/[id]/close`) und die Liste „Zu tun" der Mandanten-Übersicht |
@@ -12,10 +12,10 @@
 
 ## Ziel
 
-Während Ludwig einen Durchgang fährt, soll die Steuerfachangestellte auf jeder
+Während Ludwig einen Lauf fährt, soll die Steuerfachangestellte auf jeder
 Seite der Abnahme sehen, dass er läuft, seit wann, wer ihn gestartet hat und
 wann er meist fertig ist. Bisher sieht sie das nur an einem gedimmten Schritt.
-Ist der Durchgang fertig, sagt dieselbe Leiste in einem Satz, was er hinterlassen
+Ist der Lauf fertig, sagt dieselbe Leiste in einem Satz, was er hinterlassen
 hat, und bietet genau einen nächsten Schritt an. Ist er gescheitert, steht dort
 ein Satz mit Verweis. In einer Listenzeile, etwa „Zu tun" der Mandanten-Übersicht,
 reicht die kurze Form ohne Knopf.
@@ -28,7 +28,7 @@ reicht die kurze Form ohne Knopf.
   Leiste. `Duration` zeigt eine feste Dauer, die nicht mitläuft. `Progress` zeigt
   einen Anteil, eine laufende Arbeit ohne Anteil ist keiner. `.v2spin` steht für
   eine kurze Handlung im Knopf; zwölf Minuten Drehen sind nicht ruhig.
-- **Neu, weil:** §3 Regel 5. Der Durchgang (GLOSSARY „Agent run / Durchgang",
+- **Neu, weil:** §3 Regel 5. Der Lauf (GLOSSARY „Agent run / Lauf",
   `client_agent_runs`) hat bisher keine Form, und zwei Seiten brauchen eine.
 - **Zuschnitt:** eine Familie, eine Datei `AgentRun.tsx` mit zwei Exporten.
   Beide teilen die laufende Uhr und die Lauf-Marke. Getrennt wären es nur
@@ -43,10 +43,10 @@ reicht die kurze Form ohne Knopf.
 | Prop | Typ | Pflicht | Bedeutung | Nachweis (Story) |
 |---|---|---|---|---|
 | `state` | `"running" \| "done" \| "stopped" \| "taken_over" \| "failed"` | ja | Ton und Wort jedes Zustands aus der Registry-Achse `agent_run_banner` (Variante B, Owner 2026-10-28): läuft (info, „läuft“) · fertig (neutral, „fertig“) · abgebrochen (warning, „abgebrochen“) · übernommen (neutral, „übernommen“) · Fehler (danger, „Fehler“, nur ein Lauf, der an einem roten Gate steckt). Die Zuordnung aus den Ausläufen macht die App (`agentRunBannerState`) | `States`, `Stopped` |
-| `startedAt` | `string \| Date`; nach dem Ende `string \| Date \| null` | bei `running` ja | Start des Durchgangs. Die Leiste zählt ab hier minutengenau mit; als `title` steht der volle Zeitpunkt daneben (T7) | `Running`, `Ticking` |
+| `startedAt` | `string \| Date`; nach dem Ende `string \| Date \| null` | bei `running` ja | Start des Laufs. Die Leiste zählt ab hier minutengenau mit; als `title` steht der volle Zeitpunkt daneben (T7) | `Running`, `Ticking` |
 | `startedBy` | `string \| null` | nein | „gestartet von Anna Berger"; ohne den Namen entfällt der Teil | `Running`, `RunningMinimal` |
 | `expectedMinutes` | `number \| null` | nein | „meist fertig nach etwa 12 Min"; den Wert liefert die App aus den bisherigen Läufen | `Running`, `Edge` |
-| `pass` | `number \| null` | nein | Nummer des Durchgangs im Stapel, „2. Durchgang" | `Running` |
+| `pass` | `number \| null` | nein | Nummer des Laufs im Stapel, „2. Lauf" | `Running` |
 | `message` | `string` | nach dem Ende ja | der Satz, im Wortlaut der App („Ludwig ist fertig: 2 neue Rückfragen") | `Done`, `Failed` |
 | `action` | `AgentRunAction \| null`, `AgentRunAction` = `{ label: string; href: string } \| { label: string; onClick: () => void }`; bei `running` nur `null` | nein | `done`: genau ein Hauptknopf rechts, Label und Ziel von der App. Jedes andere Ende (`stopped`, `taken_over`, `failed`): derselbe Weg als Verweis hinter dem Satz. Bei `running` gibt es keinen | `Done`, `Stopped`, `Failed`, `InUse` |
 
@@ -68,10 +68,10 @@ Die Dauer kommt aus `formatDuration`, also „6 Min" ohne Punkt wie überall im 
 **Kann bewusst nicht:**
 
 - Die Leiste fragt nichts ab. Den Stand holt die App und wechselt `state`.
-- Sie zeigt keinen Anteil: Ein Durchgang hat keinen bekannten Rest.
+- Sie zeigt keinen Anteil: Ein Lauf hat keinen bekannten Rest.
 - Sie hat keine Glocke und keine Benachrichtigung, das wird zentral gelöst (Owner).
 - Sie bietet keinen zweiten Knopf an.
-- `AgentRunCell` kennt nur „läuft". Ein beendeter Durchgang in einer Zeile ist
+- `AgentRunCell` kennt nur „läuft". Ein beendeter Lauf in einer Zeile ist
   ein Status und kein Lauf.
 
 ## Verhalten
@@ -90,7 +90,7 @@ Die Dauer kommt aus `formatDuration`, also „6 Min" ohne Punkt wie überall im 
   kein zweiter Text daneben): „Ludwig arbeitet", sonst `message`. Der Knoten
   steht in allen Zuständen an derselben Stelle, so wird nur der Wechsel
   angesagt; die Minute steht außerhalb. Der **Start** wird nicht verlässlich
-  angesagt: Die App rendert die Leiste erst, wenn ein Durchgang läuft, und eine
+  angesagt: Die App rendert die Leiste erst, wenn ein Lauf begonnen hat, und eine
   Region, die schon mit Inhalt ins DOM kommt, lesen die meisten Screenreader
   nicht vor (H3). Wer den Lauf startet, bekommt die Rückmeldung von seiner
   Handlung; angesagt werden verlässlich fertig und gescheitert.
@@ -104,18 +104,18 @@ Die Dauer kommt aus `formatDuration`, also „6 Min" ohne Punkt wie überall im 
 - **Tastatur:** Knopf und Verweis sind gewöhnliche Fokusziele. Die Leiste
   selbst ist keins.
 
-Zustände: gefüllt = `running`. „Leer" heißt, es läuft kein Durchgang; dann
+Zustände: gefüllt = `running`. „Leer" heißt, Ludwig arbeitet gerade nicht; dann
 rendert die App die Leiste nicht (kein Leertext, denn eine Leiste, die „läuft
 nicht" sagt, wäre Lärm auf jeder Seite). Laden entfällt, die Leiste lädt nichts.
 Der Fehler ist `failed`. Einen Filter gibt es nicht.
 
 ## Stories
 
-Titel `v3/Entitäten/Durchgang/AgentRun`.
+Titel `v3/Entitäten/Lauf/AgentRun` (bis 2026-10-29 `Durchgang`, H7).
 
 | Story | Beweist |
 |---|---|
-| `Running` | alle Angaben: Dauer, Erwartung, Starter, Durchgang |
+| `Running` | alle Angaben: Dauer, Erwartung, Starter, Lauf |
 | `RunningMinimal` | nur `startedAt`, unter einer Minute |
 | `Ticking` | die Uhr springt im Browser von „weniger als 1 Min" auf „1 Min" |
 | `States` | alle fünf Zustände untereinander, gleiche Höhe, Ton und Wort aus der Achse |
@@ -130,7 +130,7 @@ Titel `v3/Entitäten/Durchgang/AgentRun`.
 
 | Was fehlt | Welche Prop es trägt | Woran man merkt, dass es Zeit ist |
 |---|---|---|
-| Dauer des beendeten Durchgangs („fertig nach 11 Min") | `finishedAt?` | die App will die Dauer am Ende zeigen |
+| Dauer des beendeten Laufs („fertig nach 11 Min") | `finishedAt?` | die App will die Dauer am Ende zeigen |
 | Hinweis, wenn der Lauf länger dauert als meist | Ableitung aus `expectedMinutes`, neues Wort | Owner wünscht es; das Wort entscheidet er |
 | Starter, Erwartung und Scheitern aus dem Modell | Felder an `Step0View.run` | L-369 ist erledigt |
 
@@ -160,7 +160,7 @@ Fest (gilt immer):
 
 Variabel (aus dieser Spec):
 
-- [ ] `running` zeigt „Ludwig arbeitet seit n Min", dazu Erwartung, Starter und Durchgang nur, wenn gesetzt (`Running`, `RunningMinimal`)
+- [ ] `running` zeigt „Ludwig arbeitet seit n Min", dazu Erwartung, Starter und Lauf nur, wenn gesetzt (`Running`, `RunningMinimal`)
 - [ ] Die Uhr zählt im Browser ohne neue Props weiter (`Ticking`)
 - [ ] Unter einer Minute: „seit weniger als 1 Min", über einer Stunde: „2 Std 5 Min" (`RunningMinimal`, `Edge`)
 - [ ] `title` an der Dauer trägt den vollen Startzeitpunkt (`Running`)
@@ -306,4 +306,6 @@ Abgenommen von / am: fremde Abnahme (Prüfsitzung, nicht die bauende), gemessen,
 - H12: Die Änderung ist in `docs/spiegel-vormerkungen.md` unter „Folgen im Set“ eingetragen.
 - H13: `storybook build` lief in ein eigenes Verzeichnis, Exit 0. `pnpm build` ist derselbe Befehl. `storybook-static/` bleibt unberührt.
 - H7 („Durchgang“ oder „Lauf“) ist eine Frage an llcto bzw. den Owner. H10 liegt außerhalb von L1.
+
+**H7 entschieden (llcto, 2026-10-29):** Es gilt das GLOSSARY. In der Leiste heißt es „Lauf“: „2. Lauf“, „Protokoll des Laufs öffnen“, Storybook-Gruppe `v3/Entitäten/Lauf/AgentRun`. Die Story-IDs beginnen jetzt mit `v3-entitäten-lauf-agentrun`; die Abnahmen oben nennen noch die alten. Die Strings, die die Leiste übergeben bekommt, stellt die App mit dem Zeiger um.
 

@@ -8,7 +8,7 @@ import { Button } from "../../primitives/Button";
 import { TextButton } from "../../primitives/TextButton";
 
 /**
- * Ludwig's run (GLOSSARY „Agent run / Durchgang", `client_agent_runs`), while
+ * Ludwig's run (GLOSSARY „Agent run / Lauf", `client_agent_runs`), while
  * it runs and right after it ended (0225).
  *
  * Nothing here asks for the state: the app polls and changes `state`. Only the
@@ -24,7 +24,7 @@ type RunFacts = {
   startedBy?: string | null;
   /** From the earlier runs, „meist fertig nach etwa 12 Min". */
   expectedMinutes?: number | null;
-  /** Number of the run within the batch, „2. Durchgang". */
+  /** Number of the run within the batch, „2. Lauf". */
   pass?: number | null;
 };
 
@@ -141,7 +141,7 @@ function Facts({ startedBy, expectedMinutes, pass }: RunFacts) {
   const parts = [
     expectedMinutes ? `meist fertig nach etwa ${formatDuration(expectedMinutes * 60)}` : null,
     startedBy ? `gestartet von ${startedBy}` : null,
-    pass ? `${pass}. Durchgang` : null,
+    pass ? `${pass}. Lauf` : null,
   ].filter((p): p is string => p !== null);
   return (
     <>
