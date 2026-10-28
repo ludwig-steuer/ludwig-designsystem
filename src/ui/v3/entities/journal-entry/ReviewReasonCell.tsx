@@ -93,10 +93,8 @@ export function ReviewReasonCell({
           <table className="v3rrc__parts">
             <caption>Prüfbedarf</caption>
             <tbody>
-              {/* One summand per kind, `check` once red and once yellow: kind and
-                  check make the key; `code` is null for base load and precedent. */}
               {score.reasons.map((r) => (
-                <tr key={`${r.kind}:${r.checkCode ?? ""}`}>
+                <tr key={r.code}>
                   <th scope="row">{r.label}</th>
                   <td className="v2num">{signed(r.points)}</td>
                 </tr>
