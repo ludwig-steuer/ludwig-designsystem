@@ -81,6 +81,7 @@ Kein Ausbau.
    will. Er ist ein linearer Lauf (Import, Anlage), keine Kopfleiste, und der
    Wunsch galt der Abnahme. Wird es gewünscht, trägt dieselbe Änderung
    (`STATE_ICON.done` weg, `.v2vh`) ihn auch.
+   - **Entschieden (llcto, 2026-11-03):** Der Wizard behält den Haken.
 
 ## Abnahmekriterien
 
