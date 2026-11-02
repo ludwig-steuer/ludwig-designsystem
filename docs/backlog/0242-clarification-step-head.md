@@ -187,3 +187,34 @@ Abgenommen von / am: fremde Abnahme, 2026-11-03 · Offene Punkte: keine Mängel;
 - H4: Satz unter Verhalten berichtigt.
 - H5: Nachtrag in 0222 nennt die Zeile „Obere Zone“ der Bau-Tabelle.
 - H1 (Maß der Frage gegen den Kontext) und H2 (`SourceDocumentReview` mit altem Kopf) gehen als Frage an llcto. H3 (Fixture der Zeilenliste 0224) bleibt bis zu einem Anlass.
+
+## Nachtrag 2026-11-03 — eine Kante für Frage und Kontext (llcto)
+
+Abnahme-Hinweis H1, entschieden von llcto am 2026-11-03: Frage und Kontext sind
+für den Leser eine Spalte. Die Frage unter dem Titel bekommt deshalb das Maß
+von `.v2clc__prose`, also keins, statt der 68ch von `lw-ui-text`. Das geschieht
+als lokale Regel der Karte (`.v2clc__head > .lw-ui-text { max-width: none }`).
+Die Rolle aus 0220 und das Prosa-Maß bleiben unverändert. `SourceDocumentReview`
+(0223, H2) behält den alten Kopf, bis der Owner dort dasselbe will.
+
+- [ ] Frage und Kontext brechen an derselben rechten Kante um, gemessen an einer Frage, die länger als eine Zeile ist (`Step`, 1280 und 1920)
+- [ ] `lw-ui-text` ist anderswo unverändert 68ch (Stichprobe außerhalb der Karte)
+
+### Abnahme des Nachtrags (2026-11-03)
+
+Gemessen auf dem laufenden Dev-Server (Port 6107) mit der Headless Shell 1247
+über `scripts/cdp.mjs`. Die Proben liegen im Scratchpad (`abn0243/m3.mjs`,
+`m4.mjs`). Die Frage wurde nur im Browser verlängert, und auch das alte Maß
+wurde nur dort nachgestellt. Story-IDs ohne das Präfix
+`v3-entitäten-klärung-clarificationcard`.
+
+| Kriterium | Nachweis (Story-ID · Befehl · Screenshot) | Ergebnis |
+|---|---|---|
+| Frage und Kontext brechen an derselben rechten Kante um, an einer Frage über mehr als eine Zeile (`Step`, 1280 und 1920) | `--step` und `--step-free-text` bei 1280 und 1920 px. Der Story-Rahmen ist 1180 px breit, beide Breiten messen deshalb gleich. Frage (`.v2clc__head > .lw-ui-text`) und Kontext (`.v2clc__prose`) haben denselben Kasten: x 41, rechte Kante 815, Breite 774 px, `max-width: none`. Es greifen `.lw-ui-text { max-width: var(--content-measure) }` und `.v2clc__head > .lw-ui-text { max-width: none }`, die zweite Regel gewinnt. Die Frage wurde per DOM-Probe auf drei Zeilen verlängert, ihre Zeilen enden bei 801,3 · 768,1 · 726,6. Die Kontextzeilen enden bei 800 · 789,4 · 765,9 · 793,9 · 797,9 (`--step`) und bei 784,9 · 779,3 · 810,1 (`--step-free-text`). Alle brechen vor derselben Kante 815 um, der Rest ist Wortlänge. Zum Vergleich wurde das alte Maß im Browser nachgestellt: Die Frage war 579,1 px breit, ihre Kante lag bei 620,1, und in `--step` stand sie auf zwei Zeilen („… (Dezember 2025)“ / „gebucht werden?“). Jetzt steht sie auf einer Zeile bis 703 (`0242-step-long-question-1280.png`, `0242-step-long-question-1920.png`, `0242-step-1280-old-68ch-simulated.png`) | ✓ |
+| `lw-ui-text` ist anderswo unverändert 68ch | Der berechnete `max-width` ist 579,129 px (68 × „0“ bei 13,5 px gemessen: 579,1 px) in `v3-grundlagen-typografie--roles`, `v3-patterns-rahmen-wizard--many-steps`, `v3-entitäten-buchungssatz-bookingreview--case-editable` und `--list-full`. Die Karten-Form (`--filled`) hat kein `lw-ui-text` im Kopf, die Regel trifft also nur die Schritt-Form. Die Konsole meldet 0 Fehler. Es gibt keinen neuen Token und keine neue Klasse: `check:classes` meldet nur die vier Altklassen, `check:type` ist ok. Der Kommentar in `v3.css` ist englisch und nennt Anlass und Datum | ✓ |
+
+Abgenommen von / am: fremde Abnahme, 2026-11-03 · Offene Punkte: keine Mängel. Hinweis: Jetzt
+hat keiner der beiden Texte ein Maß. In der Story ist die Spalte 774 px breit,
+das sind etwa 91 statt 68 Zeichen. Wird die Fragenspalte in der App breiter,
+werden die Zeilen von Frage und Kontext gemeinsam länger. Ein Maß gehört dann
+an die Spalte, nicht an einen der beiden Texte.

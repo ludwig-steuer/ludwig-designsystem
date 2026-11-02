@@ -40,8 +40,10 @@ export interface RailItem {
  *
  * `layout="bar"` lays the same rows across the page, `head` on the left (0221):
  * the frame of a review whose steps are pages of their own. The number sits
- * in a circle; a finished step shows a check, a blocked one an alert sign —
- * each with its word as `aria-label`, the counter says the rest.
+ * in a circle and stays there: a finished step turns the circle green and
+ * says „erledigt" to the screen reader only (owner 2026-11-02, 0243); a
+ * blocked one shows an alert sign instead, with its word as `aria-label` —
+ * red is criticality and needs a sign. The counter says the rest.
  *
  * @when    Multi-step review with a traffic light and counter per step, on the
  *          left (`rail`) or across the top of the page (`bar`).
@@ -115,13 +117,18 @@ function RailRow({ item }: { item: RailItem }) {
   );
 }
 
-/** Sign and word for the two tones a number cannot say — the same signs as Wizard (0087). */
-const BAR_SIGN: Partial<Record<RailTone, ActionKey>> = { done: "confirm", blocked: "alert" };
+/**
+ * Only criticality replaces the number with a sign (0087). A finished step
+ * keeps its number — after four weeks away the number finds the step (owner
+ * 2026-11-02, 0243); the filled circle and the word read aloud carry „done".
+ */
+const BAR_SIGN: Partial<Record<RailTone, ActionKey>> = { blocked: "alert" };
 const BAR_WORD: Partial<Record<RailTone, string>> = { done: "erledigt", blocked: "gesperrt" };
 
 function BarStep({ item }: { item: RailItem }) {
   // The current step shows its number: „where am I" beats „is it done".
   const sign = item.current ? undefined : BAR_SIGN[item.tone];
+  const doneWord = item.current || item.tone !== "done" ? null : BAR_WORD.done;
   const cls =
     `v3stepbar__step v3stepbar__step--${item.tone}` + (item.current ? " is-current" : "");
   const inner = (
@@ -137,6 +144,7 @@ function BarStep({ item }: { item: RailItem }) {
         <span className="v3stepbar__name" title={item.label}>
           {item.label}
         </span>
+        {doneWord ? <span className="v2vh"> {doneWord}</span> : null}
         {item.counterText ? <span className="v3stepbar__count">{item.counterText}</span> : null}
       </span>
     </>

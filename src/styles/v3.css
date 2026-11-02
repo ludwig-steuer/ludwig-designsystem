@@ -3208,6 +3208,10 @@ button.v2ibtn[aria-disabled="true"] > * { opacity: 0.5; }
 }
 .v2clc__question { margin: 0; font-weight: 600; }
 .v2clc__prose { color: var(--color-text); }
+/* 0242 Nachtrag (llcto 2026-11-03): question and context read as one column,
+   so the question under the step title takes the measure of the prose (none)
+   instead of the 68ch of `lw-ui-text`. Local to the card; the role stays. */
+.v2clc__head > .lw-ui-text { max-width: none; }
 
 .v2clc__block { display: flex; flex-direction: column; gap: var(--space-2); }
 .v2clc__label {

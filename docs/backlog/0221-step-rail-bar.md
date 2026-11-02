@@ -240,3 +240,13 @@ Hinweise erledigt: Kontrastkommentar in `v3.css` nennt die gemessenen Werte
 (6,69 · 6,19 · 5,80:1); der Kopf der Stories nutzt `DateRange`; `.v3stepbar`
 setzt `--fs-ui`/`--lh-ui`, der Kopf erbt nicht mehr 16 px der Seite.
 „Frame" statt „Rahmen" im Story-Titel ist vorbestehend und bleibt.
+
+## Nachtrag 2026-11-03 — Nummer bleibt bei „erledigt“ (0243)
+
+Owner 2026-11-02 über ll-abnahme: Ein erledigter Schritt behält seine Ziffer
+im grünen Kreis, statt sie gegen einen Haken zu tauschen. „erledigt“ steht als
+`.v2vh` hinter dem Namen und ist Teil des Linknamens. `blocked` behält das
+Warnzeichen. Die Zeilen `index` und `tone` der Tabelle oben gelten für `done`
+nicht mehr, ebenso „Haken“ im Punkt „Farbe nie allein“ unter Verhalten: Bei
+`done` trägt jetzt der gefüllte Kreis die Form, das Wort ist `.v2vh`. Siehe
+`0243-step-bar-done-number.md`.
