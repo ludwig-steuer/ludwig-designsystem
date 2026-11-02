@@ -1,6 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { useState } from "react";
 
+import { Drawer } from "../../primitives/Drawer";
 import { RecordPager } from "../../primitives/RecordPager";
 import { Card, CardHead } from "../../primitives/Table";
 import { ClarificationCard, type ClarificationDetailVM } from "./ClarificationCard";
@@ -905,6 +906,93 @@ export const StepPaging: Story = {
           />
         </div>
       </StepFrame>
+    );
+  },
+};
+
+/** Facts with their source (0238): as a link, as plain text, and none. */
+const FACTS_WITH_SOURCES: ClarificationDetailVM["facts"] = [
+  { label: "Betrag", value: "240,40 €", source: { label: "Beleg RE-2026-4471", kind: "document", id: "doc-4471", href: "#doc-4471" } },
+  { label: "Belegdatum", value: "21.08.2026", source: { label: "Beleg RE-2026-4471", kind: "document", id: "doc-4471", href: "#doc-4471" } },
+  { label: "Gegenkonto bisher", value: "4650 Bewirtungskosten", source: { label: "Buchung vom 18.07.2026", kind: "entry", id: "je-2", href: "#je-2" } },
+  { label: "Übernachtung", value: "172,00 €", source: { label: "laut Hotelrechnung im Anhang" } },
+  { label: "Teilnehmer laut Beleg", value: "4" },
+];
+
+/**
+ * Basis with a source column (0238): a source with kind and id opens like a
+ * row under „Weitere Quellen", a source as text stays text, a fact without one
+ * leaves the cell empty.
+ */
+export const FactsWithSources: Story = {
+  render: () => (
+    <div style={{ maxWidth: 760 }}>
+      <ClarificationCard clarification={{ ...BASE, ...AGENT_DETAIL, facts: FACTS_WITH_SOURCES }} mode="read" />
+    </div>
+  ),
+};
+
+/** Old questions without a source: the same table, two columns, no empty third (0238). */
+export const FactsWithoutSources: Story = {
+  render: () => (
+    <div style={{ maxWidth: 760 }}>
+      <ClarificationCard clarification={{ ...BASE, ...AGENT_DETAIL }} mode="read" />
+    </div>
+  ),
+};
+
+/** Round trip: a click on a source calls `onSelect` — in the card and in the step form (0238). */
+export const FactsSourcePick: Story = {
+  render: () => {
+    const [picked, setPicked] = useState<string | null>(null);
+    const pick = (item: { kind: string; id: string }) => setPicked(`${item.kind}:${item.id}`);
+    return (
+      <div style={{ maxWidth: 1180, display: "grid", gap: "var(--space-4)" }}>
+        <p className="lw-ui-hint" role="status">{picked ? `Drawer öffnet: ${picked}` : "Klick auf eine Quelle öffnet ihren Drawer."}</p>
+        <div style={{ maxWidth: 760 }}>
+          <ClarificationCard clarification={{ ...BASE, ...AGENT_DETAIL, facts: FACTS_WITH_SOURCES }} mode="read" onSelect={pick} />
+        </div>
+        <ClarificationCard
+          variant="step"
+          mode="answer"
+          clarification={{ ...STEP_QUESTION, facts: FACTS_WITH_SOURCES }}
+          submitLabel="Speichern und weiter"
+          onSelect={pick}
+          onAnswer={async () => {}}
+        />
+      </div>
+    );
+  },
+};
+
+/** In place: an answered question in the drawer „Fragen dieses Stapels" (`sm`), a long source and a long value (0238). */
+export const FactsInDrawer: Story = {
+  render: () => {
+    const [open, setOpen] = useState(true);
+    const [picked, setPicked] = useState<string | null>(null);
+    return (
+      <>
+        <p className="lw-ui-hint">{picked ? `Drawer öffnet: ${picked}` : "Der Drawer steht offen."}</p>
+        <Drawer open={open} onClose={() => setOpen(false)} title="Fragen dieses Stapels" size="sm">
+          <ClarificationCard
+            mode="read"
+            onSelect={(item) => setPicked(`${item.kind}:${item.id}`)}
+            clarification={{
+              ...BASE,
+              ...AGENT_DETAIL,
+              state: "answered",
+              facts: [
+                ...(FACTS_WITH_SOURCES ?? []),
+                {
+                  label: "Verwendungszweck der Zahlung",
+                  value: "EREF+RE-2026-4471 SVWZ+RE-2026-4471 Bewirtung und Übernachtung 21.08.2026",
+                  source: { label: "Zahlung vom 23.08.2026 · Sparkasse Musterstadt, Geschäftskonto 1800", kind: "payment", id: "bt-1" },
+                },
+              ],
+            }}
+          />
+        </Drawer>
+      </>
     );
   },
 };

@@ -19,7 +19,6 @@ import { Link } from "../../primitives/Link";
 import { CardHead, HeadRow, Row, Table } from "../../primitives/Table";
 import { DateField } from "../../primitives/DateField";
 import { Field } from "../../primitives/Form";
-import { FieldList } from "../../primitives/FieldList";
 import { Markdown } from "../../primitives/Markdown";
 import { ReasonDialog } from "../../primitives/ReasonDialog";
 import { TextButton } from "../../primitives/TextButton";
@@ -108,6 +107,17 @@ export interface ClarificationSource {
   /** For `onSelect` (0214); without it the label is the key. */
   id?: string;
   cited?: boolean;
+}
+
+/**
+ * Where a fact comes from (0238): the app's text; with `kind` and `id` it
+ * opens like a row under „Weitere Quellen", with `href` alone it links.
+ */
+export interface ClarificationFactSource {
+  label: string;
+  kind?: EvidenceKind;
+  id?: string;
+  href?: string;
 }
 
 /**
@@ -204,7 +214,8 @@ export interface ClarificationDetailVM {
    * `"no"` (0222 Nachtrag; the server check follows with L-368).
    */
   recommendedOption?: string | null;
-  facts?: readonly { label: string; value: string }[];
+  /** Ludwig's facts with their source (0238); a table, the source column only when a fact has one. */
+  facts?: readonly { label: string; value: string; source?: ClarificationFactSource | null }[];
   sources?: readonly ClarificationSource[];
   /**
    * The question type as stored on the row. Its **word** comes from the domain
@@ -376,6 +387,43 @@ function EvidenceTable({ cols, head, children }: { cols: string; head: string[];
       </HeadRow>
       {children}
     </Table>
+  );
+}
+
+/**
+ * The facts as one compact table, with or without sources (0238, llcto for the
+ * owner 2026-11-02: an overview is a table). Only the source cell is a target:
+ * the row is the fact, the source the way to check it.
+ */
+function Facts({ facts, select }: { facts: NonNullable<ClarificationDetailVM["facts"]>; select: Select }) {
+  const withSource = facts.some((f) => f.source);
+  return (
+    <EvidenceTable
+      cols={withSource ? "minmax(0, 1fr) minmax(0, 1fr) minmax(0, 1.25fr)" : "minmax(0, 1fr) minmax(0, 1.4fr)"}
+      head={withSource ? ["Bezeichnung", "Wert", "Quelle"] : ["Bezeichnung", "Wert"]}
+    >
+      {facts.map((f, i) => (
+        // The app's order is the key: labels may repeat („Betrag" twice).
+        <Row key={i}>
+          <span className="v2clc__factcell">{f.label}</span>
+          <span className="v2clc__factcell lw-numeric">{f.value}</span>
+          {withSource ? (
+            <span className="v2clc__factcell">
+              {f.source ? (
+                <Pick
+                  kind={f.source.kind ?? "other"}
+                  row={{ id: f.source.id ?? f.source.label, href: f.source.href }}
+                  select={f.source.kind && f.source.id ? select : undefined}
+                  inRow={false}
+                >
+                  {f.source.label}
+                </Pick>
+              ) : null}
+            </span>
+          ) : null}
+        </Row>
+      ))}
+    </EvidenceTable>
   );
 }
 
@@ -1071,7 +1119,7 @@ export function ClarificationCard({
 
       {c.facts && c.facts.length > 0 ? (
         <Block label="Grundlage" level={step ? 3 : 4}>
-          <FieldList tone="soft" rows={c.facts.map((f) => [f.label, f.value])} />
+          <Facts facts={c.facts} select={onSelect} />
         </Block>
       ) : null}
 

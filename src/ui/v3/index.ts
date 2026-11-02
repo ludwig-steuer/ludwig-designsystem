@@ -742,6 +742,7 @@ export {
   type ClarificationEvent,
   type ClarificationEventKind,
   type ClarificationSource,
+  type ClarificationFactSource,
   type ClarificationEvidence,
   type EvidenceDocument,
   type EvidenceAccount,

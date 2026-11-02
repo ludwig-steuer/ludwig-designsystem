@@ -5171,6 +5171,17 @@ a.v3bbr__val:hover { text-decoration-color: currentColor; }
 .v2clc__ctxsub { display: block; font-size: var(--fs-ui-sm); line-height: var(--lh-ui-sm); color: var(--color-text-muted); }
 .v2clc__evidence { display: grid; gap: var(--space-2); }
 .v2clc__pick { background: none; border: 0; padding: 0; font: inherit; cursor: pointer; text-align: left; min-height: 24px; }
+/* 0238: a long word breaks at a syllable like the account name in .v3prop__acc
+   („Verwendungs-zweck"), only as a last resort inside it. */
+.v2clc__factcell { min-width: 0; hyphens: auto; hyphenate-limit-chars: 12 5 5; overflow-wrap: break-word; }
+/* The source as a target of 24 px (I8), link or button alike: the padding
+   makes the height, the same negative margin gives it back, so the text stays
+   on the line of label and value — on one line and on three (measured). */
+.v2clc__factcell > :is(a, button) {
+  display: inline-block;
+  padding-block: calc((24px - 1lh) / 2);
+  margin-block: calc((1lh - 24px) / 2);
+}
 /* The key in link colour, mono or not; „genannt" as a quiet second line, not glued to the date. */
 .v2clc__pick .v2mono { color: inherit; }
 .v2clc__cited { display: block; color: var(--color-text-muted); }
