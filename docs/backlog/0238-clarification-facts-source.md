@@ -240,3 +240,12 @@ Abgenommen von / am: fremde Abnahme, 2026-11-02 · Offene Punkte: keine Mängel;
   TypeScript lehnt die direkte Übergabe also ab. Die Folge-Spec muss abbilden:
   `source_doc → document`, `bank_transaction → payment`,
   `ledger_account → account`, der Rest `other` oder ohne `kind`.
+
+## Nachtrag 2026-11-03 — eingeklappt (0241)
+
+Der Block „Grundlage“ ist seit 0241 ein `Disclosure` mit Anzahl, der
+eingeklappt startet, in der Karte wie in der Schritt-Form. Spalten und Regeln
+der Tabelle bleiben. Das Polster des Fold-outs macht sie 16 px schmaler (744
+statt 760 px in der Story), der Umbruch im Drawer bleibt wie gemessen. Die vier Stories dieser Spec öffnen ihn beim Laden. „Nur die
+Kopfebene unterscheidet sich“ (Verhalten, Beide Formen) gilt nicht mehr: Beide
+Formen zeigen dieselbe `summary`.

@@ -782,3 +782,12 @@ im Rahmen der gewählten Option und wird mit ihr gesendet, die Wörter sagen das
 jetzt. Entschieden von llcto für den Owner am 2026-10-27. Eine echte freie Antwort
 statt der Optionen ist ein eigenes Thema. Die Abnahme oben bleibt wie
 geschrieben.
+
+## Nachtrag 2026-11-03 — Kopf und Grundlage (0241, 0242)
+
+- **Kopf (0242, Owner 2026-11-02 über llcto):** Die `h2` ist jetzt `title`,
+  darunter steht `question` als `p.lw-ui-text`. Das Thema klein und grau
+  (`.v2clc__topic`) entfällt. Punkte 1 und 2 der Liste oben und die Zeile
+  „Obere Zone“ der Bau-Tabelle (Thema, Frage `h2`) gelten nicht mehr.
+- **Grundlage (0241):** eingeklappt als `Disclosure` mit Anzahl, kein `h3`
+  mehr. M5 bleibt erfüllt: Unter der `h2` folgen nur `h3`.

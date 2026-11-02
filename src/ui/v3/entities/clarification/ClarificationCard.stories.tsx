@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 import { Drawer } from "../../primitives/Drawer";
 import { RecordPager } from "../../primitives/RecordPager";
@@ -549,14 +549,15 @@ export const ErrorState: Story = {
  */
 const STEP_QUESTION: ClarificationVM & ClarificationDetailVM = {
   id: "q-0412",
-  title: "Wolkenhaus-Rechnung WH-26-00871 über 42,84 € (Dezember 2025): Steuerschlüssel unklar",
+  // Short, as a person would write it: „<topic>: <counterparty> <amount>" (0242).
+  title: "Steuerschlüssel unklar: Wolkenhaus S.à r.l. 42,84 €",
   state: "open",
   severity: "required",
   type: "question",
   audience: "accounting",
   raisedAt: "2026-10-09T19:14:47+02:00",
   raisedBy: { kind: "agent", id: null, label: null },
-  question: "Wie soll die Wolkenhaus-Rechnung WH-26-00871 über 42,84 € gebucht werden?",
+  question: "Wie soll die Rechnung WH-26-00871 von Wolkenhaus über 42,84 € (Dezember 2025) gebucht werden?",
   context:
     "Die Rechnung von **Wolkenhaus S.à r.l.** lautet über 50,00 USD (42,84 €) und weist 6,84 € USt (19 %) aus. " +
     "Die Erkennung hat Deutschland als Sitzland gelesen, Wolkenhaus sitzt in Luxemburg. 2025 liefen Wolkenhaus-Rechnungen " +
@@ -615,8 +616,8 @@ const StepFrame = ({ children, picked }: { children: React.ReactNode; picked?: s
 );
 
 /**
- * The slim question (0222): topic small, question as the headline, context,
- * facts, the options with the recommended one marked and its why right under
+ * The slim question (0222): the title as the headline, the question as a
+ * sentence under it (0242), context, the facts closed (0241), the options with the recommended one marked and its why right under
  * them, every way out in one row — and „Kontext" on the right.
  */
 export const Step: Story = {
@@ -910,6 +911,19 @@ export const StepPaging: Story = {
   },
 };
 
+/**
+ * Opens every „Grundlage" fold-out once, as a click would: the card starts it
+ * closed (0241) and has no prop to open it. The facts stories below show the
+ * table of 0238, so they open it.
+ */
+function useFactsOpen() {
+  useEffect(() => {
+    for (const d of document.querySelectorAll<HTMLDetailsElement>("details.v2disc")) {
+      if (d.querySelector(":scope > .v2disc__body .v2clc__factcell")) d.open = true;
+    }
+  }, []);
+}
+
 /** Facts with their source (0238): as a link, as plain text, and none. */
 const FACTS_WITH_SOURCES: ClarificationDetailVM["facts"] = [
   { label: "Betrag", value: "240,40 €", source: { label: "Beleg RE-2026-4471", kind: "document", id: "doc-4471", href: "#doc-4471" } },
@@ -925,20 +939,26 @@ const FACTS_WITH_SOURCES: ClarificationDetailVM["facts"] = [
  * leaves the cell empty.
  */
 export const FactsWithSources: Story = {
-  render: () => (
-    <div style={{ maxWidth: 760 }}>
-      <ClarificationCard clarification={{ ...BASE, ...AGENT_DETAIL, facts: FACTS_WITH_SOURCES }} mode="read" />
-    </div>
-  ),
+  render: () => {
+    useFactsOpen();
+    return (
+      <div style={{ maxWidth: 760 }}>
+        <ClarificationCard clarification={{ ...BASE, ...AGENT_DETAIL, facts: FACTS_WITH_SOURCES }} mode="read" />
+      </div>
+    );
+  },
 };
 
 /** Old questions without a source: the same table, two columns, no empty third (0238). */
 export const FactsWithoutSources: Story = {
-  render: () => (
-    <div style={{ maxWidth: 760 }}>
-      <ClarificationCard clarification={{ ...BASE, ...AGENT_DETAIL }} mode="read" />
-    </div>
-  ),
+  render: () => {
+    useFactsOpen();
+    return (
+      <div style={{ maxWidth: 760 }}>
+        <ClarificationCard clarification={{ ...BASE, ...AGENT_DETAIL }} mode="read" />
+      </div>
+    );
+  },
 };
 
 /** Round trip: a click on a source calls `onSelect` — in the card and in the step form (0238). */
@@ -946,6 +966,7 @@ export const FactsSourcePick: Story = {
   render: () => {
     const [picked, setPicked] = useState<string | null>(null);
     const pick = (item: { kind: string; id: string }) => setPicked(`${item.kind}:${item.id}`);
+    useFactsOpen();
     return (
       <div style={{ maxWidth: 1180, display: "grid", gap: "var(--space-4)" }}>
         <p className="lw-ui-hint" role="status">{picked ? `Drawer öffnet: ${picked}` : "Klick auf eine Quelle öffnet ihren Drawer."}</p>
@@ -970,6 +991,7 @@ export const FactsInDrawer: Story = {
   render: () => {
     const [open, setOpen] = useState(true);
     const [picked, setPicked] = useState<string | null>(null);
+    useFactsOpen();
     return (
       <>
         <p className="lw-ui-hint">{picked ? `Drawer öffnet: ${picked}` : "Der Drawer steht offen."}</p>

@@ -750,8 +750,8 @@ function HistoryBlock({ history, level }: { history: readonly ClarificationEvent
 }
 
 /**
- * `variant="step"` is the slim form inside a review run (0222): question as
- * the headline, no state badges, no meta line, no „asked" entry in the
+ * `variant="step"` is the slim form inside a review run (0222): the title as
+ * the headline and the question under it (0242), no state badges, no meta line, no „asked" entry in the
  * history, the recommendation right under the options, every way out in one
  * row — and the evidence as a list in a box on the right.
  *
@@ -844,7 +844,8 @@ export function ClarificationCard({
   }, [asking, askId, c.id]);
   // A new question under the same card (a pager paged, an answer was saved):
   // the note mode ends, and if the focus was in the card or lost, it goes to
-  // the new question's heading — read aloud, one Tab to its first option. A
+  // the new question's heading — read aloud, one Tab to „Grundlage" when it
+  // has facts (0241), then its first option. A
   // focus on the pager stays there, so paging by keyboard keeps its place
   // (rule for single reviews under RecordPager, llcto 2026-10-26).
   const headingRef = useRef<HTMLHeadingElement>(null);
@@ -996,10 +997,13 @@ export function ClarificationCard({
 
   const head = step ? (
     <header className="v2clc__head">
-      {c.question && c.question.trim() !== c.title.trim() ? <p className="v2clc__topic">{c.title}</p> : null}
+      {/* The title says what it is about, the question as a whole sentence
+          under it (0242, owner 2026-11-02): running text, not a muted lead —
+          it is what to decide, not an introduction. */}
       <h2 className="lw-ui-section v2clc__q" ref={headingRef} tabIndex={-1}>
-        {c.question ?? c.title}
+        {c.title}
       </h2>
+      {c.question && c.question.trim() !== c.title.trim() ? <p className="lw-ui-text">{c.question}</p> : null}
       {/* No badge in the step form (owner 2026-10-26): every question here is
           open, nearly all block. One that need not be answered says so in a
           sentence from the registry. */}
@@ -1109,7 +1113,7 @@ export function ClarificationCard({
       ) : null}
 
       {/* While answering, `ChoicePrompt` carries the question — once is enough;
-          the step form has it as its headline. */}
+          the step form has it under its headline. */}
       {c.question && !canAnswer && !step ? <p className="v2clc__question">{c.question}</p> : null}
       {c.context ? <Markdown text={c.context} className="v2clc__prose" /> : null}
       <Markdown text={c.text} className="v2clc__prose" />
@@ -1117,10 +1121,13 @@ export function ClarificationCard({
       {/* Recommendation first, then what it rests on (owner 2026-09-29, 0214). */}
       {noteUnderOptions ? null : recommendationNote}
 
+      {/* Closed with its count, like the evidence below (0241, owner 2026-11-02:
+          many facts make the question long). Keyed by the question: the next
+          one starts closed again. */}
       {c.facts && c.facts.length > 0 ? (
-        <Block label="Grundlage" level={step ? 3 : 4}>
+        <Disclosure key={c.id} summary="Grundlage" count={c.facts.length}>
           <Facts facts={c.facts} select={onSelect} />
-        </Block>
+        </Disclosure>
       ) : null}
 
       {!step && evidence ? <Evidence e={evidence} select={onSelect} /> : null}
