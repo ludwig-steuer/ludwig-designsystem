@@ -4,6 +4,7 @@
 |---|---|
 | Status | in Specs |
 | GLOSSARY | `### Ledger account (Konto)` — englisch `ledger account`, Ordner `entities/account/` (Abweichung, siehe Befund 5) |
+| Anzeigename | „<Nummer> <Name>“ — Kennung die Kontonummer; bestehend, im Set `AccountCell` (Nummer mono, Name daneben); Stand umgesetzt (App `docs/topics/web-ui.md` R27, DS 0244) |
 | Tabelle | `ludwig.client_ledger_accounts` · View `client_ledger_accounts_current` (jahresfreie Leser) · Semantik separat in `client_account_enrichment` |
 | Typen | `src/ludwig/modules/accounts/domain/account.ts` — `ACCOUNT_TYPES`, `CLEARING_ACCOUNT_TYPES`; `core/datev/main-function.ts` — `DATEV_MAIN_FUNCTION_NUMBER`; `core/datev/account-number.ts` — Kontonummern-Kanon |
 | Status-Achsen | `konto` (Kontostatus) · `konto_typ` (Rolle) · `konto_datev_sync` · `verrechnungskonto`; für die Bewegungen `buchung`, `buchung_datev`, `buchung_origin`, `mirror_match` |

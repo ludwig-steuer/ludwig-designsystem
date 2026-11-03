@@ -1,7 +1,8 @@
 import type { ReactNode } from "react";
 
 import type { SourceDocumentVM } from "@/ui/v3/entities/source-document/SourceDocument";
-import { SourceDocumentCompletion } from "@/ui/v3/entities/source-document/SourceDocument";
+import { SourceDocumentCompletion, documentNameFields } from "@/ui/v3/entities/source-document/SourceDocument";
+import { belegAnzeigename } from "@/ludwig/modules/source-docs/domain/beleg-name";
 import { SourceDocumentView } from "@/ui/v3/entities/source-document/SourceDocumentView";
 import { EntityHeader } from "@/ui/v3/patterns/EntityHeader";
 import { EntityIcon } from "@/ui/v3/Icons";
@@ -65,9 +66,8 @@ export function DocumentPage({
   // to the document form for `other`. A second word list was already a second
   // truth once — the head said "Sammelbeleg", the card "Sammel-PDF".
   const art = sourceDocTypeLabel(document.sourceDocType, document.classDocumentForm);
-  // Rank 1: the counterparty names the document; without one the kind does.
-  // The file name is the last fallback and stands in the facts, not here.
-  const title = document.counterparty ?? art;
+  // Rank 1: the document's one name (R27, 0244), as the app's page has it.
+  const title = belegAnzeigename(documentNameFields(document));
   // Positions and input tax only exist where there is an invoice row.
   const tabs = document.hasInvoiceRow ? DOCUMENT_TABS : DOCUMENT_TABS_WITHOUT_INVOICE;
 

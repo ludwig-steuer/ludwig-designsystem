@@ -4,6 +4,7 @@
 |---|---|
 | Status | analysiert · geprüft · in Specs |
 | GLOSSARY | `### <Eintrag>` — englisch `<name>`, Ordner `entities/<slug>/` |
+| Anzeigename | Wert aus App `docs/topics/web-ui.md` R27 — Kennung; Funktion (App, Set); Stand |
 | Tabelle | `ludwig.<tabelle>` (+ Subtyp-Tabellen) |
 | Typen | `src/ludwig/modules/<modul>/domain/<datei>.ts` — `<Typ>`, `<ENUM>`, `<Ableitung>()` |
 | Status-Achsen | `STATUS_REGISTRY.<achse>`, … |

@@ -458,6 +458,7 @@ export const CreditCardTravel: Story = {
   render: () => {
     const travel = documentFixture({
       sourceDocType: "travel_expense_report",
+      classDocumentForm: "expense_report",
       fileName: "Reisekosten-2026-08.pdf",
       counterparty: null,
       doneAt: null,

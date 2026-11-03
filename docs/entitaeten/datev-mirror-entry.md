@@ -4,6 +4,7 @@
 |---|---|
 | Status | **geprüft** — fremde Prüfung am 2026-09-11 (Prüfer-Session im Auftrag `ludwig-manager`, gegen e1326ef); vier Nacharbeiten und die Nachzählung der App eingearbeitet, siehe „Prüfung" |
 | GLOSSARY | `### DATEV mirror (DATEV-Spiegel)`, `### Mirror entry line (Spiegel-Zeile)`, `### Mirror classification (Spiegel-Klassifikation)`, `### Snapshot (DATEV-Snapshot)`, `### Rand-Regel` — Ordner `entities/datev-mirror-entry/` |
+| Anzeigename | R27 führt sie nicht; F640 prüft den Bestand der übrigen Entitäten (App `docs/topics/web-ui.md` R27, DS 0244) |
 | Tabelle | `ludwig.client_datev_mirror_entries` (Satz) + `ludwig.client_datev_mirror_entry_lines` (Spiegel-Zeilen, F208, per Trigger aus dem jsonb `lines`; noch nicht in `datenmodell.json`). Keine Subtypen; die Spiegel-Zeile hat kein eigenes Gesicht — **ein Profil** |
 | Typen | **keine im Spiegel.** Die Formen der App leben in `modules/datev-truth/infrastructure/truth-queries.ts` (`TruthEntryRow`, `TruthEntryLine`, `TruthEntryDetail`, `TruthEntryFilter`) und werden deshalb nicht gespiegelt → L-302. Im Spiegel nur die Konto-Sicht: `accounts/domain/account-entry.ts` (`AccountEntry` mit `source: "datev"`, `datevMirrorEntryId`) |
 | Status-Achsen | `mirror_match` (`match_state`) · `abgleich_lauf` am Lauf, nicht am Satz (L-221). **Ohne Achse:** die Paar-Arten des Stapelvergleichs (lokale `KIND_META`, L-303), die DATEV-Herkunft `mark_of_origin` (L-304), die Spiegel-Klassifikation (nur in `reporting-queries.ts`, L-305) |

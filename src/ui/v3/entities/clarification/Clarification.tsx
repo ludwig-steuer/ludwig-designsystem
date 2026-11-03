@@ -69,6 +69,7 @@ export interface ClarificationVM {
   deferredUntil?: string | null;
   /** Only shown with `showCase`, in lists outside the case. */
   caseNumber?: string | null;
+  /** The case's display name, built by the app with `caseDisplayTitle` (R27, 0244). */
   caseTitle?: string | null;
   /** Without it the row is not a link (portal, read-only). */
   href?: string | null;

@@ -13,6 +13,8 @@ export default meta;
 type Story = StoryObj<typeof JournalEntryReviewList>;
 
 const PARTNERS = ["Deutsche Telekom Geschäftskunden GmbH", "Stadtwerke Beispielstadt", "Aral Tankstelle", "Beispiel Leasing AG", "Hartje KG", "Telekom Deutschland GmbH", "Deutsche Post AG", "Allianz Versicherungs-AG"];
+/** Short case titles, „Gegenpart: Gegenstand" (F627) — one per partner above. */
+const TITLES = ["Telekom Geschäftskunden: Festnetz und Mobilfunk 09/2026", "Stadtwerke: Strom Büro", "Aral: Tankquittung", "Beispiel Leasing: Leasingrate Transporter", "Hartje: Fahrradteile", "Telekom: Mobilfunk", "Deutsche Post: Porto", "Allianz: Betriebshaftpflicht"];
 const KINDS = [
   { key: "invoice", label: "Rechnung" },
   { key: "payment", label: "Zahlung" },
@@ -107,8 +109,11 @@ const ROWS: ProposalRow[] = Array.from({ length: 40 }, (_, i) => {
     id: `case-${i + 1}`,
     number: String(i + 1),
     date: `2026-09-${String((i % 28) + 1).padStart(2, "0")}`,
+    // Every fifth without a title — the name falls back to „<Art>: <Gegenpart>";
+    // row 8 has neither, the kind alone stands (R27, 0244).
+    title: i === 7 || i % 5 === 4 ? null : TITLES[i % TITLES.length]!,
+    caseKind: "single",
     counterparty: i === 7 ? null : PARTNERS[i % PARTNERS.length]!,
-    title: "Eingangsrechnung ohne erkannten Gegenpart",
     priorSameBookings: i % 9 === 4 ? 0 : PRIOR[i % 6]!,
     accounts:
       i === 11

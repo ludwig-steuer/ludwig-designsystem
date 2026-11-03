@@ -17,6 +17,7 @@ import { JournalEntryCell, type JournalLine } from "../journal-entry/JournalEntr
 import type { Currency } from "@/ludwig/shared/money";
 import { formatBytes } from "../../format";
 import {
+  documentHeadOf,
   FileName,
   SourceDocumentClass,
   SourceDocumentCompletion,
@@ -291,18 +292,6 @@ function stuckState(hasInvoiceRow: boolean | undefined, variant: StuckVariant): 
   return hasInvoiceRow ? "datum_fehlt" : "nicht_extrahiert";
 }
 
-/**
- * The head of the name (R32, owner E3): the counterparty, else the form the
- * classifier read, else the file. The amount and the date of the name stand in
- * their own columns.
- */
-function documentHead(d: SourceDocumentVM): { text: string; file: boolean } {
-  if (d.counterparty?.trim()) return { text: d.counterparty.trim(), file: false };
-  const form = d.classDocumentForm && d.classDocumentForm !== "unknown" && d.classDocumentForm !== "other" ? formatDocumentForm(d.classDocumentForm) : null;
-  if (form) return { text: form, file: false };
-  return { text: d.fileName, file: true };
-}
-
 /** The document number of the specialization — never the file name. */
 function documentNumber(d: SourceDocumentVM): string | null {
   const ident = sourceDocumentIdentifier(d);
@@ -313,7 +302,7 @@ function documentNumber(d: SourceDocumentVM): string | null {
 function documentTitle(d: SourceDocumentVM, number: string | null): string {
   return [
     // The head in full first — the cell cuts it with an ellipsis (hint ll-dev2 G2).
-    documentHead(d).text,
+    documentHeadOf(d).text,
     `Datei: ${d.fileName}${d.pageCount ? ` (${d.pageCount} ${d.pageCount === 1 ? "Seite" : "Seiten"})` : ""}`,
     number ? `Belegnummer: ${number}` : null,
     d.basketNumber ? `Dateikorb: ${d.basketNumber}` : null,
@@ -396,7 +385,7 @@ export function sourceDocumentColumns({
       width: variant !== "full" ? "minmax(130px, 1.4fr)" : "minmax(170px, 1.4fr)",
       sortable: variant === "full",
       cell: (d) => {
-        const head = documentHead(d);
+        const head = documentHeadOf(d);
         const number = documentNumber(d);
         const body = head.file ? (
           <span className="v2mono">

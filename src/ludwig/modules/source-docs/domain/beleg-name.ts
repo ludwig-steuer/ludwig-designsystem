@@ -8,6 +8,7 @@
  * dastehen.
  *
  * Die Kaskade, in dieser Ordnung:
+ *   0. ein gesetzter Titel (F639, nur Belege ohne Rechnungsauslese, ≤ 60) — „eBay: Gebührenabrechnung Q4/2025"
  *   1. `Gegenpart · Betrag · Datum`   — „eBay S.à r.l. · 50,75 € · 09.07.2026"
  *   2. ohne Betrag tritt die Belegform an dessen Stelle
  *   3. ohne Gegenpart bleiben Form und Datum
@@ -24,6 +25,8 @@ import { documentCounterparty } from "./document-counterparty";
 import { formatDocumentForm } from "./document-form-labels";
 
 export interface BelegNameFelder {
+  /** F639: Kurztitel, den Ludwig in Schritt 1b setzt — nur bei Belegen ohne Rechnungsauslese. */
+  title?: string | null;
   businessPartnerName?: string | null;
   docDirection?: string | null;
   vendorName?: string | null;
@@ -69,6 +72,9 @@ function form(value: string | null | undefined): string | null {
  * Kennzeichen" — nie ein leerer String, an dem eine Zeile unsichtbar wird.
  */
 export function belegAnzeigename(f: BelegNameFelder): string {
+  // Der Titel trägt seinen Zeitraum selbst — kein Betrag, kein Datum dahinter.
+  const titel = f.title?.trim();
+  if (titel) return titel;
   const gegenpart = documentCounterparty(f);
   const summe = betrag(f.grossValue, f.currency);
   const art = form(f.documentForm);
@@ -78,4 +84,15 @@ export function belegAnzeigename(f: BelegNameFelder): string {
   const teile = [gegenpart, gegenpart ? (summe ?? art) : (art ?? summe), datum(f.documentDate)];
   const name = teile.filter((t): t is string => !!t && t.length > 0).join(" · ");
   return name || f.fileName?.trim() || "Beleg ohne Kennzeichen";
+}
+
+/**
+ * Der Kopf der Spalte Beleg in Tabellen (R32, DS 0212): Betrag und Datum stehen dort in eigenen Spalten, der Kopf
+ * nennt nur, was der Beleg ist — Titel, sonst Gegenpart, sonst Form, sonst Dateiname. Hier gebaut, damit das
+ * Design-System ihn nicht selbst ableitet (R27).
+ */
+export function documentHead(f: BelegNameFelder): string {
+  return (
+    f.title?.trim() || documentCounterparty(f) || form(f.documentForm) || f.fileName?.trim() || "Beleg ohne Kennzeichen"
+  );
 }

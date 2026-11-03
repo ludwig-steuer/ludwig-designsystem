@@ -4,6 +4,7 @@
 |---|---|
 | Status | **analysiert** |
 | GLOSSARY | `### Convention (Konvention)` — englisch `convention`, Ordner `entities/convention/` |
+| Anzeigename | R27 führt sie nicht; F640 prüft den Bestand der übrigen Entitäten (App `docs/topics/web-ui.md` R27, DS 0244) |
 | Tabelle | `ludwig.client_agent_notes` — „Konventionsspeicher (F106): Wissen, das über den Einzelfall hinaus gilt und nicht aus den Daten ableitbar ist — je Zeile eine Regel, kein Inventar" (Tabellenkommentar). Keine Subtypen |
 | Typen | `accounting-cases/domain/convention.ts` — `CONVENTION_SCOPES`, `CONVENTION_STATUSES`, `CONVENTION_ORIGINS`, `isConfirmed()`. **Nicht im Spiegel:** die Zeile selbst — `ClientNote` (`accounting-cases/application/client-notes-core.ts:99`), `NoteVM` (im UI-File `ClientAgentNotesPanel.tsx`), `BatchConvention` (`batch-review/application/batch-conventions.ts`) → L-322 |
 | Status-Achsen | `convention` (`status`: Wartet auf Freigabe · Gilt · Archiviert) · `convention_origin` (`origin`: vier Stufen, drei davon „bestätigt") |

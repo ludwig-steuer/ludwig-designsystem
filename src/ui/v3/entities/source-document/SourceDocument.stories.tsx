@@ -210,6 +210,19 @@ export const Kinds: Story = {
           docCategory: "payment",
           href: "#beleg-b9-b",
         },
+        {
+          id: "b10",
+          fileName: "scan-20260112-090514.pdf",
+          // No invoice readout, a short title from Ludwig (F639): the title
+          // leads, ahead of counterparty and form (R27, 0244).
+          title: "Musterverband: Mitgliedsbeiträge und Umlagen Q4/2025",
+          sourceDocType: "other",
+          classDocumentForm: "accounting_report",
+          documentDate: "2026-01-12",
+          receivedDate: "2026-01-12",
+          uploadedAt: "2026-01-14T08:12:00Z",
+          href: "#beleg-titel",
+        },
       ]}
     />
   ),
@@ -350,7 +363,7 @@ export const Cell: Story = {
  * What the cutting does. A 139-character file name is cut **in the middle**,
  * so the extension stays readable; a 56-character counterparty is cut at the
  * end. Both keep their full text in the `title`. Below them the two documents
- * that know almost nothing: no counterparty (the file name leads), no document
+ * that know almost nothing: no counterparty (the form leads, 0244), no document
  * date (an em dash — it should exist), and one that has nothing but its file
  * and its arrival.
  */

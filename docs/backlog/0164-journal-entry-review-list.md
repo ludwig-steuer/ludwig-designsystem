@@ -436,3 +436,8 @@ M8 und M7 sind im Spec-Text behoben, M6 ist gemessen behoben, M9 ist an die
 App übergeben, die Story-Daten stimmen. Kriterium 9 ist grün. Offen bleiben,
 wie vorgesehen und nicht blockierend, das Kriterium „offen (App)" sowie M2
 (setweit, Backlog 0213).
+
+**Nachtrag 2026-11-03 (0244, R27):** Die Spalte „Gegenpartei" heißt jetzt **„Sachverhalt"** (Schlüssel
+`case` statt `counterparty`). Sie zeigt `caseTitle` — den Titel, sonst „<Art>: <Gegenpart>", sonst die Art —
+statt `counterparty ?? title`; `ProposalRow.title` ist roh und nullbar, neu `caseKind`. Breite und drei Zeilen
+bleiben; ein 60-Zeichen-Titel kann darin gekürzt stehen (Frage an llcto in 0244).

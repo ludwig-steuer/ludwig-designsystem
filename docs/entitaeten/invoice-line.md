@@ -4,6 +4,7 @@
 |---|---|
 | Status | **in Specs** — 0072 (`InvoiceLineRow`), 0114 (`InvoiceLineFacts`), 0115 (`InvoiceLineList`), geschrieben am 2026-09-07 |
 | GLOSSARY | **kein eigener Eintrag** — nur drei Einträge *über* sie (`Invoice line item source`, `Fund usage nature`, `Accounting subject`). Befund B1; bis dahin gilt der englische Name `invoice line`, Ordner `entities/invoice-line/` |
+| Anzeigename | R27 führt sie nicht; F640 prüft den Bestand der übrigen Entitäten (App `docs/topics/web-ui.md` R27, DS 0244) |
 | Tabelle | `ludwig.client_source_docs_invoice_lines` (1:n zum Rechnungs-Subtyp `client_source_docs_invoices`) |
 | Typen | `src/ludwig/modules/invoices/domain/invoice.ts` — `InvoiceLineItem` (**32 Felder**; die Tabelle hat 41 Spalten), eingebettet in `InvoiceDetail.lineItems` |
 | Status-Achsen | **eine, geliehen:** die Konfidenz der Position liest die Achse `konfidenz` über das Pattern `Confidence` (0078, fertig) — die Ableitung Wert → Stufe steht in `src/ludwig/shared/confidence.ts`. Die vier **Wertebereiche** (`source`, `fund_usage_nature`, `line_special_type`, `vat_special_case`) stehen in keiner Achse — Befund B2 |

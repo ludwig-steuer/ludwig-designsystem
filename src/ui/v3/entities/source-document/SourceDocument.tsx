@@ -1,3 +1,4 @@
+import { documentHead, type BelegNameFelder } from "@/ludwig/modules/source-docs/domain/beleg-name";
 import { sourceDocTypeLabel } from "@/ludwig/modules/source-docs/domain/source-doc-type";
 // The record, under a name that does not collide with the component family.
 import type { SourceDocumentVM as MirrorDocument } from "@/ludwig/modules/source-docs/domain/source-document-vm";
@@ -65,6 +66,12 @@ export type { SourceDocDoneVia, SourceDocReviewReason, SourceDocStatus };
  * invoice half of it.
  */
 export interface SourceDocumentVM extends MirrorDocument {
+  /**
+   * The short title Ludwig sets in step 1b, only on documents without an
+   * invoice readout (F639) — the name wherever it is set. Not on the mirror's
+   * record yet (finding L-378).
+   */
+  title?: string | null;
   /** Pages of the file — the early warning for a split PDF in the inbox (F335 V1; finding L-359). */
   pageCount?: number | null;
   /** The file basket it arrived in, „K-2026-0012" (finding L-359). */
@@ -74,6 +81,43 @@ export interface SourceDocumentVM extends MirrorDocument {
   caseHref?: string | null;
   /** Without it the row is not a link. */
   href?: string | null;
+}
+
+/**
+ * The record as the mirror's name functions read it (R27, 0244):
+ * `belegAnzeigename` names the document, `documentHead` heads the column.
+ * `counterparty` comes resolved from the app, so it goes in as the partner.
+ *
+ * @when    A form of this family names a document — drawer title, topic line.
+ * @instead The head of a row or a column, without amount and date → documentHeadOf.
+ */
+export function documentNameFields(d: SourceDocumentVM): BelegNameFelder {
+  // The invoice's gross only, as the app passes it (`invoice.totalValue`) — a
+  // contract's amount would make the same document read differently here.
+  const invoice = d.detail?.kind === "invoice" ? d.detail : null;
+  return {
+    title: d.title ?? null,
+    businessPartnerName: d.counterparty ?? null,
+    grossValue: invoice?.gross ?? null,
+    currency: invoice?.currency ?? null,
+    documentForm: d.classDocumentForm ?? null,
+    documentDate: d.documentDate ?? null,
+    fileName: d.fileName,
+  };
+}
+
+/**
+ * The head of the name (R32, owner E3) from the mirror's `documentHead`:
+ * title, counterparty, form, file — for a row or a column, where amount and
+ * date stand apart. Only whether it fell through to the file is ours: a file
+ * name is cut in the middle, not at the end.
+ *
+ * @when    The lead of a document row or the column „Beleg".
+ * @instead The whole name, with amount and date → `belegAnzeigename(documentNameFields(d))`.
+ */
+export function documentHeadOf(d: SourceDocumentVM): { text: string; file: boolean } {
+  const text = documentHead(documentNameFields(d));
+  return { text, file: text === d.fileName.trim() };
 }
 
 /* ── Cutting ─────────────────────────────────────────────────────────────
@@ -402,21 +446,19 @@ export function SourceDocumentRow({ document }: { document: SourceDocumentVM }) 
   const detail = resolveSourceDocumentDetail(document.sourceDocType, document.detail);
   const ident = sourceDocumentIdentifier(document);
   const kind = sourceDocTypeLabel(document.sourceDocType, document.classDocumentForm);
-  // Rank 1 leads; without a counterparty the file name does (rank 1b) — and
-  // then it is not repeated as the identifier below.
-  const lead = document.counterparty
-    ? {
-        node: <span className="v2doc__keyname">{clipEnd(document.counterparty, MAX_COUNTERPARTY)}</span>,
-        full: document.counterparty,
-      }
-    : {
-        node: <FileName value={document.fileName} max={MAX_FILENAME_ROW} />,
-        full: document.fileName,
-      };
+  // The head of the name leads (R32, 0244): title, counterparty, form; only
+  // without all three the file name does (rank 1b) — and then it is not
+  // repeated as the identifier below.
+  const head = documentHeadOf(document);
+  const lead = head.file
+    ? { node: <FileName value={head.text} max={MAX_FILENAME_ROW} />, full: head.text }
+    : // No cut by characters (0244): a title has up to 60, the CSS ellipsis
+      // stops at the cell edge and the `title` carries it whole.
+      { node: <span className="v2doc__keyname">{head.text}</span>, full: head.text };
 
   // Where the file name already leads (rank 1b), it is not repeated as the
   // identifier three columns further right — one document, one anchor.
-  const identRepeatsLead = !document.counterparty && ident.value === document.fileName;
+  const identRepeatsLead = head.file && ident.value === document.fileName;
 
   return (
     <Row className="v2doc__row">
@@ -432,7 +474,9 @@ export function SourceDocumentRow({ document }: { document: SourceDocumentVM }) 
             lead.node
           )}
         </span>
-        <span className="v2sub">{kind}</span>
+        {/* The kind under the head — unless the head already is it (a form
+            without a counterparty, 0244). */}
+        {kind !== head.text ? <span className="v2sub">{kind}</span> : null}
       </span>
 
       {/* Rank 3 — the measure of the specialization. A bank statement has no

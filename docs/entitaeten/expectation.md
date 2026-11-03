@@ -4,6 +4,7 @@
 |---|---|
 | Status | **analysiert** |
 | GLOSSARY | `### Expectation`, `### Beleg-Nachforderung (document request)` — englisch `expectation`, Ordner `entities/expectation/` (besteht seit 0025) |
+| Anzeigename | R27 führt sie nicht; F640 prüft den Bestand der übrigen Entitäten (App `docs/topics/web-ui.md` R27, DS 0244) |
 | Tabelle | `ludwig.client_accounting_case_expectation` — „Erwartung am Sachverhalt: hier fehlt noch ein Beleg (kind=document) oder eine Zahlung (kind=payment), fällig ab due_date. Aufgelöst wird sie durch ein EREIGNIS, nicht durch eine Antwort" (Tabellenkommentar). Keine Subtypen; Beleg und Zahlung sind eine Tabelle „aus zwei Enden gelesen" (GLOSSARY) |
 | Typen | `accounting-cases/domain/expectation.ts` — `ExpectationRow` (samt `resolvedAt`, L-205 erledigt), `ExpectationDirection`, `DueSource`, `ExpectationAudience`, `ExpectationResolution`; `domain/case.ts` — `EXPECTATION_KINDS`, `EXPECTATION_MATURITY`, `expectationMaturity()`; `domain/expectation-labels.ts` — `EXPECTED_DOC_KIND_LABEL`, `expectedDocKindLabel()` (seit 2026-09-11 eine Map statt zwei) |
 | Status-Achsen | `expectation_maturity` (Läuft · Fällig · Eskaliert · Erledigt — abgeleitet, nie gespeichert) · `expectation_kind` (Beleg fehlt · Zahlung offen). **Ohne Achse und ohne Wortliste:** `due_source`, `resolution`, `audience`, `direction` (L-332) |

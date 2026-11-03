@@ -40,6 +40,7 @@ import {
   ToastHost,
   useToast,
   type TimelineItem,
+  caseTitle,
 } from "@/ui/v3";
 import {
   AssignableCaseKindSchema,
@@ -217,7 +218,7 @@ function CasePage() {
               <Row key={c.caseId} active={c.caseId === selected}>
                 <span>{c.caseNumber}</span>
                 <TextButton onClick={() => setSelected(c.caseId)}>
-                  {c.title ?? `${CASE_KIND_LABEL[c.kind]}: ${c.counterpartyName ?? "unbekannt"}`}
+                  {caseTitle(c)}
                 </TextButton>
                 <span>{c.counterpartyName}</span>
                 <AmountCell value={c.totalAmount} />
@@ -245,7 +246,7 @@ function CasePage() {
       {current ? (
         <Card>
           <CardHead
-            title={current.title ?? CASE_KIND_LABEL[current.kind]}
+            title={caseTitle(current)}
             sub={`Sachverhalt ${current.caseNumber}`}
             actions={
               <Badge tone={current.openClarificationsCount > 0 ? "warning" : "neutral"} dot>

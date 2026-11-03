@@ -4,6 +4,7 @@
 |---|---|
 | Status | in Specs — 0059 · 0060 · 0061 |
 | GLOSSARY | `### Clarification question` — englisch `clarification question`, Ordner `entities/clarification/` |
+| Anzeigename | `title`, „Thema: Partner Betrag“, ≤ 70 — keine Kennung; die Spalte selbst, keine Funktion; Stand F624 (App `docs/topics/web-ui.md` R27, DS 0244) |
 | Tabelle | `ludwig.client_accounting_case_clarification` (vormals `client_invoice_clarifications`), keine Subtypen |
 | Typen | `src/ludwig/modules/accounting-cases/domain/case.ts` — `CLARIFICATION_STATES`, `clarificationState()`, `CLARIFICATION_TYPES`; `modules/invoices/domain/invoice.ts` — `ClarificationSeverity`, `ClarificationAnswerKind` |
 | Status-Achsen | `STATUS_REGISTRY.klaerung` (Schwere) · `.klaerung_status` (offen/zurückgestellt/beantwortet, abgeleitet) · `.klaerung_typ` (Frage/Kommentar) |

@@ -134,7 +134,12 @@ export interface EvidenceRow {
 }
 export interface EvidenceDocument extends EvidenceRow {
   date: string | null;
-  issuer: string | null;
+  /**
+   * The head of the document's name, as the app builds it with `documentHead`
+   * (R27, 0244): title, else counterparty, else form, else file. Date, number
+   * and amount stand beside it — the card derives nothing.
+   */
+  name: string;
   number: string | null;
   amount: number | null;
   currency: Currency | null;
@@ -166,6 +171,7 @@ export interface EvidenceEntry extends EvidenceRow {
 /** The case the question belongs to (0222) — in the step form it is not on screen otherwise. */
 export interface EvidenceCase extends EvidenceRow {
   number: string;
+  /** The case's display name, built by the app with `caseDisplayTitle` (R27, 0244). */
   title: string | null;
 }
 /**
@@ -361,7 +367,7 @@ function Pick({
   if (select)
     return (
       // `v2rowlink`: the button's overlay covers the whole row — a click on the
-      // issuer calls it too (acceptance 0214, M1; I11).
+      // name calls it too (acceptance 0214, M1; I11).
       <button type="button" className={`v3cell-link v2clc__pick${rowLink}`} onClick={() => select({ kind, id: row.id })}>
         {body}
       </button>
@@ -474,13 +480,13 @@ function Evidence({ e, select }: { e: ClarificationEvidence; select: Select }) {
         ) : null}
         {docs.length ? (
           <Disclosure summary="Belege" count={docs.length}>
-            <EvidenceTable cols="88px minmax(0, 1.4fr) minmax(0, 1fr) 112px" head={["Datum", "Aussteller", "Beleg-Nr.", "Betrag"]}>
+            <EvidenceTable cols="88px minmax(0, 1.4fr) minmax(0, 1fr) 112px" head={["Datum", "Beleg", "Beleg-Nr.", "Betrag"]}>
               {docs.map((d) => (
                 <Row key={d.id}>
                   <Pick kind="document" row={d} select={select}>
                     {d.date ? <Time value={d.date} format="date" size="sm" /> : "—"}
                   </Pick>
-                  <span className="v2trunc" title={d.issuer ?? undefined}>{d.issuer ?? "—"}</span>
+                  <span className="v2trunc" title={d.name}>{d.name}</span>
                   <span className="v2mono v2trunc">{d.number ?? "—"}</span>
                   <span className="v2num">{d.amount === null ? "—" : <AmountCell value={d.amount} currency={d.currency} />}</span>
                 </Row>
@@ -622,10 +628,10 @@ function EvidencePanel({ e, select }: { e: ClarificationEvidence; select: Select
       label: "Belege",
       items: g.docs.map((d) => ({
         row: d,
-        main: d.issuer ?? d.number ?? "Beleg",
+        main: d.name,
         sub: joined([
           d.date ? <Time value={d.date} format="date" size="sm" /> : null,
-          d.issuer ? d.number : null,
+          d.number,
           d.amount === null ? null : <AmountCell value={d.amount} currency={d.currency} />,
         ]),
       })),

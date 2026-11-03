@@ -322,3 +322,7 @@ und Ausweg (Umzug, sobald es eine gibt). Owner und Datum stehen, die Ausnahme
 ist benannt; der Teil „lokale Label-Map" dieses M3 ist erledigt. Offen bleibt
 von 0212 nur M2 (Trefferflächen, setweit). Urteil: **abgenommen mit Auflage
 M2**.
+
+**Nachtrag 2026-11-03 (0244, R27):** Der Kopf der Spalte „Beleg" kommt aus dem Spiegel (`documentHead`
+in `source-docs/domain/beleg-name.ts`, ludwig/app `be5bfa05d`) und kennt den Beleg-Titel (F639) vor dem
+Gegenpart. Der Drawer-Kopf ist `belegAnzeigename` — der offene Schritt dieser Spec ist damit erledigt.

@@ -4,6 +4,7 @@
 |---|---|
 | Status | **in Specs** — 0074 · 0075 · 0076 (alle drei freigegeben, Status `in Arbeit`) |
 | GLOSSARY | `### Source document supertype & specializations (Beleg-Supertyp)` — englisch `source document`, Ordner `entities/source-document/` |
+| Anzeigename | `title` — nur bei Belegen ohne Rechnungsauslese, Ludwig setzt ihn in Schritt 1b (Muster „Aussteller: Gegenstand Zeitraum“, ≤ 60) → Kette aus `belege.md` R32. Kennung D-0412 (im Set `sourceDocumentIdentifier`). Funktion `belegAnzeigename`, für Tabellenköpfe `documentHead` (`source-docs/domain/beleg-name.ts`, gespiegelt); im Set über `documentNameFields`/`documentHeadOf` (`SourceDocument.tsx`); Stand F639 (App `docs/topics/web-ui.md` R27, DS 0244) |
 | Tabelle | `ludwig.client_source_docs` (Supertyp) + `…_invoices` · `…_contracts` (1:1-Subtypen, Class-Table-Inheritance) |
 | Typen | `src/ludwig/modules/source-docs/domain/` — `source-doc-type.ts` (`SOURCE_DOC_TYPE_LABELS`, `sourceDocTypeLabel()`), `document-form-labels.ts`, `document-form-mapping.ts` (`SourceDocType`, `DocCategory`, `DocDirection`), `tabs.ts`; `modules/contracts/domain/contract.ts` — `ContractDetailData`, `CONTRACT_TYPE_LABELS` |
 | Status-Achsen | `beleg_inbox` (Supertyp-`status`) · `beleg` (Pipeline, lebt am **Rechnungs-Subtyp**) · `beleg_stage` · `beleg_kategorie` · `beleg_richtung` · `dokumentgruppe` |

@@ -4,12 +4,10 @@ import { useId, useRef, type ReactNode } from "react";
 
 import { ChoicePrompt, type ChoiceAnswer, type ChoiceOption } from "../../patterns/ChoicePrompt";
 import { StatusBadge } from "../../patterns/StatusBadge";
-import { Amount } from "../../primitives/Amount";
 import { Callout } from "../../primitives/Callout";
-import { Time } from "../../primitives/Time";
 import { useFocusOnNewRecord } from "../../primitives/focus";
-import type { SourceDocumentVM } from "./SourceDocument";
-import { resolveSourceDocumentDetail } from "./source-document-detail";
+import { belegAnzeigename } from "@/ludwig/modules/source-docs/domain/beleg-name";
+import { documentNameFields, type SourceDocumentVM } from "./SourceDocument";
 
 /**
  * One document of the batch review, decided (0223): the original on the left,
@@ -38,7 +36,7 @@ export function SourceDocumentReview({
   pending,
   error,
 }: {
-  /** Counterparty, document date and amount for the topic line; `reviewReason` for the reason. */
+  /** Its name for the topic line (`belegAnzeigename`, R27); `reviewReason` for the reason. */
   document: SourceDocumentVM;
   /** The left column — as a rule `SourceDocumentPreview`; loading and failure of the original are the caller's. */
   preview: ReactNode;
@@ -59,12 +57,8 @@ export function SourceDocumentReview({
   const rootRef = useRef<HTMLDivElement>(null);
   const headingRef = useRef<HTMLHeadingElement>(null);
   useFocusOnNewRecord(d.id, rootRef, headingRef);
-  const measure = resolveSourceDocumentDetail(d.sourceDocType, d.detail)?.measure;
-  const topic = [
-    d.counterparty ? <span key="who">{d.counterparty}</span> : null,
-    d.documentDate ? <Time key="when" value={d.documentDate} format="date" size="sm" /> : null,
-    measure ? <Amount key="amount" value={measure.value} currency={measure.currency} size="sm" /> : null,
-  ].filter(Boolean);
+  // The one name of the document (R27, 0244) — never empty, so the line always stands.
+  const topic = belegAnzeigename(documentNameFields(d));
   // A recommended place to file sits inside its group (owner 2026-10-27).
   const recommended = options.some((o) => o.recommended || o.options?.some((c) => c.recommended));
 
@@ -72,16 +66,7 @@ export function SourceDocumentReview({
     <div className="v3docreview" ref={rootRef}>
       <div className="v3docreview__original">{preview}</div>
       <section className="v3docreview__decide" aria-labelledby={headId}>
-        {topic.length > 0 ? (
-          <p className="v3docreview__topic">
-            {topic.map((part, i) => (
-              <span key={i}>
-                {i > 0 ? " · " : null}
-                {part}
-              </span>
-            ))}
-          </p>
-        ) : null}
+        <p className="v3docreview__topic">{topic}</p>
         <h2 className="lw-ui-section v3docreview__q" id={headId} ref={headingRef} tabIndex={-1}>
           Wohin gehört dieser Beleg?
         </h2>

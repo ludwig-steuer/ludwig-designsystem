@@ -1,7 +1,7 @@
 import { Amount } from "../../primitives/Amount";
 import { StatusBadge } from "../../patterns/StatusBadge";
 import { resolveEventBookingState } from "./derive";
-import { caseIdentifier } from "../accounting-case/case-title";
+import { caseIdentifier, caseTitle } from "../accounting-case/case-title";
 import { Row } from "../../primitives/Table";
 import {
   bankTransactionColumns,
@@ -83,7 +83,7 @@ function SplitRows({ transaction }: { transaction: BankTransactionRowData }) {
         {transaction.cases.map((c) => (
           <div className="v2btxrow__splitrow" key={c.caseId}>
             <span>{caseIdentifier(c)}</span>
-            <span className="v2btxrow__splittitle">{c.title ?? c.counterpartyName}</span>
+            <span className="v2btxrow__splittitle">{caseTitle(c)}</span>
             {/* The state of this case's event, here and not only in the row:
                 from three cases on the row condenses (0193), and „which one
                 holds it up" has to stay answerable per case. */}

@@ -60,8 +60,8 @@ const EVIDENCE: ClarificationDetailVM["evidence"] = {
   cases: [{ id: "case-0042", number: "2026-0042", title: "Bewirtung Musterfirma GmbH mit Übernachtung" }],
   statements: [{ id: "imp-2026-08", paymentAccount: "1800 Sparkasse Musterstadt", periodFrom: "2026-08-01", periodTo: "2026-08-31" }],
   documents: [
-    { id: "doc-4471", cited: true, date: "2026-08-21", issuer: "Musterfirma GmbH", number: "RE-2026-4471", amount: 240.4, currency: "EUR" },
-    { id: "doc-4470", date: "2026-08-14", issuer: "Hotel am Markt GmbH & Co. KG", number: "HM-88213", amount: 172, currency: "EUR" },
+    { id: "doc-4471", cited: true, date: "2026-08-21", name: "Musterfirma GmbH", number: "RE-2026-4471", amount: 240.4, currency: "EUR" },
+    { id: "doc-4470", date: "2026-08-14", name: "Hotel am Markt GmbH & Co. KG", number: "HM-88213", amount: 172, currency: "EUR" },
   ],
   accounts: [
     { id: "4650", number: "4650", name: "Bewirtungskosten" },
@@ -583,7 +583,7 @@ const STEP_QUESTION: ClarificationVM & ClarificationDetailVM = {
   evidence: {
     cases: [{ id: "case-0412", number: "2026-0412", title: "Wolkenhaus S.à r.l., Cloud-Speicher Dezember 2025" }],
     documents: [
-      { id: "doc-0871", cited: true, date: "2026-01-01", issuer: "Wolkenhaus S.à r.l.", number: "WH-26-00871", amount: 42.84, currency: "EUR" },
+      { id: "doc-0871", cited: true, date: "2026-01-01", name: "Wolkenhaus S.à r.l.", number: "WH-26-00871", amount: 42.84, currency: "EUR" },
     ],
     payments: [
       {
@@ -663,7 +663,7 @@ export const StepFreeText: Story = {
           recommendation: null,
           evidence: {
             documents: [
-              { id: "doc-0131", cited: true, date: "2026-01-03", issuer: "Tabula Cloud Inc.", number: "INV-2026-000183", amount: 54, currency: "USD" },
+              { id: "doc-0131", cited: true, date: "2026-01-03", name: "Tabula Cloud Inc.", number: "INV-2026-000183", amount: 54, currency: "USD" },
             ],
           },
         }}
@@ -800,7 +800,7 @@ export const StepYesNo: Story = {
             recommendation: "Leistung und Rechnung liegen im Januar; die Zahlung im Februar ändert den Monat der Buchung nicht.",
             evidence: {
               documents: [
-                { id: "doc-0421", cited: true, date: "2026-01-30", issuer: "Druckerei Hansen", number: "DH-2026-0117", amount: 238, currency: "EUR" },
+                { id: "doc-0421", cited: true, date: "2026-01-30", name: "Druckerei Hansen", number: "DH-2026-0117", amount: 238, currency: "EUR" },
               ],
               payments: [
                 {

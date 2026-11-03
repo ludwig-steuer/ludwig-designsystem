@@ -1,7 +1,8 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 
+import { belegAnzeigename } from "@/ludwig/modules/source-docs/domain/beleg-name";
 import { SourceDocumentCard } from "./SourceDocumentCard";
-import type { SourceDocumentVM } from "./SourceDocument";
+import { documentNameFields, type SourceDocumentVM } from "./SourceDocument";
 import { Card, CardHead } from "../../primitives/Table";
 import { TextButton } from "../../primitives/TextButton";
 
@@ -205,7 +206,7 @@ export const Bare: Story = {
   render: () => (
     <div style={{ padding: "var(--space-5)", maxWidth: 1060 }}>
       <Card>
-        <CardHead title="Rechnung · Bürobedarf Meier GmbH" sub="RE-4471" />
+        <CardHead title={belegAnzeigename(documentNameFields(INVOICE))} sub="RE-4471" />
         <div style={{ padding: "var(--space-4)" }}>
           <SourceDocumentCard document={INVOICE} summary={SUMMARY} previewUrl={PREVIEW} tone="bare">
             <p className="v2doc__limit">

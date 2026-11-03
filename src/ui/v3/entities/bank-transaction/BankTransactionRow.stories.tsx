@@ -273,7 +273,9 @@ export const Expanded: Story = {
             CASE({
               caseId: "c-4488",
               caseNumber: "2026-0488",
-              title: "Ersatzteile Kompressor",
+              // Without a title the sub-row names it like CaseCell: „<Art>: <Gegenpart>" (0244).
+              title: null,
+              counterpartyName: "Kältetechnik Nord GmbH",
               amount: 200,
               eventBookingState: null,
             }),

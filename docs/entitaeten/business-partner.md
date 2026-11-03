@@ -4,6 +4,7 @@
 |---|---|
 | Status | **gebaut** (2026-09-09) — 0139–0143 stehen, fremde Abnahme steht aus; geprüft am 2026-09-09 vom zweiten Agenten |
 | GLOSSARY | `### Business partner (Geschäftspartner)` — englisch `business partner`, Ordner `entities/business-partner/` |
+| Anzeigename | Kurzname, sonst amtlicher Name — Kennung das Personenkonto; Funktion neu, Stand F640 (App `docs/topics/web-ui.md` R27, DS 0244) |
 | Tabelle | `ludwig.client_business_partners` (46 Spalten) + `ludwig.client_business_partner_bank_aliases` (Lookup-Schlüssel, kein Subtyp) |
 | Typen | `src/ludwig/modules/business-partners/domain/business-partner.ts` — `BusinessPartnerListItem`, `BusinessPartnerDetail`, `PartnerAccountRef`, `PartnerPersonalAccount`, `BusinessPartnerFilter`, `VAT_PROFILE`, `TYPICAL_NATURE`, `PARTNER_NATURE_LABEL`, `ONBOARDING_STATE`, `PARTNER_ROLE_LABEL`; `domain/tabs.ts` — `PARTNER_TABS`, `PARTNER_TAB_LABEL` |
 | Status-Achsen | `STATUS_REGISTRY.partner` (`onboarding_state`: draft · proposed · confirmed). Die Rolle ist **keine** Achse — sie steht am Personenkonto (`accounting_role`), und `vat_profile` / `typical_nature` sind Eigenschaften, keine Zustände |

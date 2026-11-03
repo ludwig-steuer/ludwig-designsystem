@@ -2,7 +2,8 @@ import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 
 import { SourceDocumentView } from "./SourceDocumentView";
 import { SourceDocumentCard } from "./SourceDocumentCard";
-import { SourceDocumentClass, type SourceDocumentVM } from "./SourceDocument";
+import { belegAnzeigename } from "@/ludwig/modules/source-docs/domain/beleg-name";
+import { SourceDocumentClass, documentNameFields, type SourceDocumentVM } from "./SourceDocument";
 import { SourceDocumentCompletion } from "./SourceDocument";
 import { AppShell, TopBar } from "../../primitives/AppShell";
 import { NavList, type NavSection } from "../../primitives/NavList";
@@ -98,7 +99,7 @@ function Head({ document, actions }: { document: SourceDocumentVM; actions?: Rea
     <EntityHeader
       icon={<EntityIcon entity="source-document" size={20} />}
       overline="Beleg · Musterbau GmbH"
-      title={document.counterparty ?? "Noch nicht eingeordnet"}
+      title={belegAnzeigename(documentNameFields(document))}
       // **The completion leads**, not processing: the `beleg` axis hangs on the
       // invoice row and has no value for 16 % of all documents (L-42).
       status={<SourceDocumentCompletion document={document} />}

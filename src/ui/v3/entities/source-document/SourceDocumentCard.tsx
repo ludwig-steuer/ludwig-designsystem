@@ -162,6 +162,8 @@ export function SourceDocumentCard({
             original={original}
             url={previewUrl ?? null}
             unavailableReason={previewUnavailableReason}
+            // The kind of paper, not the document's name (0244): the drawer
+            // title and the page head name it — twice would say it twice.
             title={kind}
             fileName={document.fileName}
             excerpt={excerpt}

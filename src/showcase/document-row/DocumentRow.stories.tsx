@@ -70,6 +70,12 @@ const ROWS: Row[] = [
     batch: "09-2026-Ludwig",
     entries: 0,
   },
+  {
+    // 0244 — no invoice readout, a short title from Ludwig (F639): the title heads the column.
+    doc: documentFixture({ id: "r6", title: "Musterverband: Mitgliedsbeiträge und Umlagen Q4/2025", counterparty: null, classDocumentForm: "accounting_report", detail: null, documentDate: "2026-01-12", receivedDate: "2026-01-12", caseNumber: null }),
+    process: "S09",
+    classification: "1",
+  },
 ];
 
 const withSince = (picture: ProcessPicture, since?: string): ProcessPicture => (since ? { ...picture, since } : picture);

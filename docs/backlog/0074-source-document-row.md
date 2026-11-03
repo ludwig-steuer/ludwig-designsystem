@@ -626,3 +626,7 @@ was sonst noch daran hängt, steht **einmal** im Nachtrag von
 `0070-source-document-columns.md`. Aufrufer, die `uploadedAt` nicht
 mitgeben, lassen den Rang leer — das ist die ehrliche Antwort, nicht der
 andere Tag in seinen Kleidern.
+
+**Nachtrag 2026-11-03 (0244, R27):** Die Führung der Zeile ist der Kopf des Namens aus dem Spiegel
+(`documentHead`: Titel → Gegenpart → Form → Datei) statt Gegenpart → Datei. Sie kürzt nicht mehr nach Zeichen
+(36), sondern per CSS am Zellrand; die Art darunter entfällt, wenn der Kopf schon die Art ist.

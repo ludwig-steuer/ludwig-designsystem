@@ -3,7 +3,7 @@
 import { FileWarning } from "lucide-react";
 import type { ReactNode } from "react";
 
-import { sourceDocTypeLabel } from "@/ludwig/modules/source-docs/domain/source-doc-type";
+import { belegAnzeigename } from "@/ludwig/modules/source-docs/domain/beleg-name";
 
 import { Callout } from "../../primitives/Callout";
 import { Drawer, DrawerFullView } from "../../primitives/Drawer";
@@ -13,6 +13,7 @@ import { Card, CardHead } from "../../primitives/Table";
 import {
   SourceDocumentCompletion,
   clipMiddle,
+  documentNameFields,
   sourceDocumentIdentifier,
   type SourceDocumentVM,
 } from "./SourceDocument";
@@ -67,10 +68,12 @@ export interface SourceDocumentQuickView {
   group?: SourceDocumentGroup | null;
 }
 
-/** „Rechnung · ACME GmbH" — the kind of document leads, never „Beleg" for all. */
+/**
+ * The document's one name (R27, 0244) — the same as on its page and in the
+ * checklists. The kind of paper stays in the head of the original below.
+ */
 function headTitle(document: SourceDocumentVM): string {
-  const kind = sourceDocTypeLabel(document.sourceDocType, document.classDocumentForm);
-  return document.counterparty ? `${kind} · ${document.counterparty}` : kind;
+  return belegAnzeigename(documentNameFields(document));
 }
 
 /**

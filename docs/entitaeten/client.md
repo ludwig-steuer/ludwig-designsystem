@@ -4,6 +4,7 @@
 |---|---|
 | Status | **geprüft** — fremde Prüfung am 2026-09-11 (Prüfer-Session im Auftrag `ludwig-manager`, gegen 9373438), ohne Nacharbeit; siehe „Prüfung" |
 | GLOSSARY | `### Client`, `### Replay client (Replay-Mandant)`, `### Client number`, `### Mandanten-Profil`, `### Client onboarding`, `### Booking style`, `### Booking interval`, `### Booking closed until` — Ordner `entities/client/` |
+| Anzeigename | Kurzname — Kennung die DATEV-Nummer; Funktion neu, Stand F640 (App `docs/topics/web-ui.md` R27, DS 0244) |
 | Tabelle | `ludwig.platform_clients` — „A company or business entity managed by a tenant … A client belongs to exactly one tenant" (GLOSSARY). Keine Subtypen; der Replay-Mandant ist ein Mandant mit `replay_cutoff_date` |
 | Typen | `clients/domain/client.ts` — `ClientListItem`, `ClientDetail`. **Nicht im Spiegel:** die offene Arbeit je Mandant (`ClientOpenWork`, `OpenWorkCounts` in `accounting-cases/infrastructure/case-queries.ts:799/883`) → L-316; die Abbildung der Rechtsform (`LEGAL_FORM_MAP`, `onboarding/application/derive-client-config.ts:51`) → L-315 |
 | Status-Achsen | `mandant_betrieb` (aktiv · stillgelegt · Replay — abgeleitet aus `is_active` + `replay_cutoff_date`) · `mandant_onboarding` (`onboarding_state`, 6 Werte) · `mandant_onboarding_verdict` (abgeleitet) |

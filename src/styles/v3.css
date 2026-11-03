@@ -3503,7 +3503,10 @@ button.v2ibtn[aria-disabled="true"] > * { opacity: 0.5; }
   text-overflow: ellipsis;
   white-space: nowrap;
 }
-.v2doc__lead .v2rowlink { display: flex; align-items: baseline; min-width: 0; }
+/* `flex-shrink: 1` against the rule above: the link is a child of
+   `.v2doc__key` and was pinned to its content — a 60-character title stood
+   cut mid-word without an ellipsis (acceptance 0244, M1). */
+.v2doc__lead .v2rowlink { display: flex; align-items: baseline; min-width: 0; flex-shrink: 1; }
 /* The row link inherits the colour: it is the row, not a word in it. */
 .v2doc__lead .v2rowlink { color: inherit; text-decoration: none; }
 

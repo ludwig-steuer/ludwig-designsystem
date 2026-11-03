@@ -1,5 +1,6 @@
 import type { ReactNode } from "react";
 
+import type { CaseKind } from "@/ludwig/modules/accounting-cases/domain/case";
 import type { ReviewReason } from "@/ludwig/modules/accounting-cases/domain/review-score";
 import type { Currency } from "@/ludwig/shared/money";
 
@@ -16,6 +17,7 @@ import { Badge } from "../../primitives/Badge";
 import { Link } from "../../primitives/Link";
 import { AmountCell } from "../../primitives/Cells";
 import { Time } from "../../primitives/Time";
+import { caseTitle } from "../accounting-case/case-title";
 import { SourceDocumentRefCell } from "../source-document/SourceDocumentRefCell";
 import { AiBookingNotesCell, type JudgeVerdict } from "./AiBookingNotes";
 import { JournalEntryCell, type JournalLine } from "./JournalEntryCompact";
@@ -43,9 +45,19 @@ export interface ProposalRow {
   number: string;
   /** Booking date of the proposal. */
   date: string | null;
-  /** The counterparty; the case title stands in where there is none. */
+  /**
+   * The case's own title, raw — not `title ?? summary`. The row names the case
+   * with `caseTitle` (R27, 0244): the title, else „<Art>: <Gegenpart>" from
+   * `caseKind` and `counterparty`, else the kind.
+   */
+  title: string | null;
+  /** The kind of the case — not `kindLabel`, the kind of the entry. */
+  caseKind?: CaseKind | null;
+  /**
+   * The case's counterparty, as `caseDisplayTitle` takes it everywhere — not
+   * the vendor of its first document. Only an input of the fallback name since 0244.
+   */
   counterparty: string | null;
-  title: string;
   /**
    * A counterparty never booked before. Superseded by `priorSameBookings`
    * (0218) — read only when that is missing.
@@ -90,7 +102,7 @@ export interface ProposalRow {
 export type ProposalColumn =
   | "number"
   | "date"
-  | "counterparty"
+  | "case"
   | "accounts"
   | "debit"
   | "debitName"
@@ -111,9 +123,9 @@ export type ProposalColumn =
  * enough, and Soll and Haben need the room). Both exist for a frame that wants
  * them — pass them in `include`.
  */
-const FULL: readonly ProposalColumn[] = ["number", "date", "counterparty", "debit", "debitName", "credit", "creditName", "amount", "taxKey", "document", "precedent", "verdict", "kind", "reviewReason"];
+const FULL: readonly ProposalColumn[] = ["number", "date", "case", "debit", "debitName", "credit", "creditName", "amount", "taxKey", "document", "precedent", "verdict", "kind", "reviewReason"];
 const NAMES: readonly ProposalColumn[] = ["debitName", "creditName"];
-const COMPACT: readonly ProposalColumn[] = ["date", "counterparty", "accounts", "amount", "document", "verdict", "reviewReason"];
+const COMPACT: readonly ProposalColumn[] = ["date", "case", "accounts", "amount", "document", "verdict", "reviewReason"];
 /**
  * Optional, through `include`: „Nr." and „Beleg" (see above) and — since 0218 —
  * „Prüfung durch Ludwig": the row shows one value, the review reason; the
@@ -200,6 +212,10 @@ function hiddenLines(a: NonNullable<ProposalRow["accounts"]>): ReactNode {
   return a.lineCount && a.lineCount > a.debit.length + a.credit.length ? <span className="v2sub">{a.lineCount} Zeilen</span> : null;
 }
 
+function nameOf(p: ProposalRow): string {
+  return caseTitle({ title: p.title, kind: p.caseKind ?? null, counterpartyName: p.counterparty });
+}
+
 /**
  * @when    The proposals of a batch or a period are reviewed — review reason,
  *          precedent, bulk release; as columns for a `DataTable` of one's own.
@@ -217,9 +233,12 @@ export function proposalReviewColumns(options: ProposalColumnOptions = {}): Colu
       width: "76px",
       cell: (p) => (p.date ? <Time value={p.date} format="date" size="sm" /> : <span className="v2muted">—</span>),
     },
-    counterparty: {
-      key: "counterparty",
-      header: "Gegenpartei",
+    // The case by its one name (R27, 0244) — it was „Gegenpartei" and showed
+    // the counterparty before the title, so the case read differently here
+    // than in its own head.
+    case: {
+      key: "case",
+      header: "Sachverhalt",
       // 120 + up to three lines: „Deutsche Telekom Geschäftskunden GmbH" stands
       // whole, as in step 3 before (review F340); Soll/Haben give way — their
       // names wrap anyway.
@@ -228,8 +247,8 @@ export function proposalReviewColumns(options: ProposalColumnOptions = {}): Colu
         <span className="v3prop__who">
           {/* Three lines before the cut — the list step 3 showed up to 40 characters
               and wrapped (review F340, owner rule „drop nothing"). */}
-          <span className="v3prop__name" title={p.counterparty ?? p.title}>
-            {p.counterparty ?? p.title}
+          <span className="v3prop__name" title={nameOf(p)}>
+            {nameOf(p)}
           </span>
         </span>
       ),
@@ -410,7 +429,7 @@ export function JournalEntryReviewList(
           selection: {
             actions: bulkActions,
             // What the row shows — the number is no longer a column by default.
-            label: (p: ProposalRow) => `${formatTime(p.date, "date")} · ${p.counterparty ?? p.title}`,
+            label: (p: ProposalRow) => `${formatTime(p.date, "date")} · ${nameOf(p)}`,
             sticky: true,
           },
         }

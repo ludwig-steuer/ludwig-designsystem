@@ -4,6 +4,7 @@
 |---|---|
 | Status | **analysiert** |
 | GLOSSARY | kein eigener Eintrag — der offene Posten steht in `### OPOS-Vortrag (open item carryover)`, `### Sammelsachverhalt und OPOS-Pool (collective case / open item pool)` und im Abschnitt „Tabellen" (`client_open_item`). Englisch `open item`, Ordner `entities/open-item/` (besteht seit 0029) |
+| Anzeigename | R27 führt ihn nicht; F640 prüft den Bestand der übrigen Entitäten (App `docs/topics/web-ui.md` R27, DS 0244) |
 | Tabelle | `ludwig.client_datev_open_items` — je DATEV-Abzug (Snapshot) die Zeilen der OPOS-Liste. **Der Posten ist keine Zeile, sondern eine Klammer:** alle Zeilen mit demselben `op_key` (Personenkonto + Belegfeld 1) sind ein Posten — Sollstellung, Teilzahlungen, Raten |
 | Typen | im Spiegel: `datev-truth/domain/open-item.ts` — `OPEN_ITEM_AGE_BUCKETS`, `OPEN_ITEM_AGE_LABEL`, `openItemAgeBucket()`, `groupByAge()`, `OpenItemLink`. **Nicht im Spiegel:** der Posten selbst (`OposStichtagItem`), die Klammer (`OposKlammer`, `OposKlammerLine`) und der Abgleich (`OposAbgleichReport`) — alle in `datev-truth/application/opos-stichtag-core.ts` → L-325. Das Set hält eine Abschrift: `entities/open-item/open-item.ts` (`OpenItem`) |
 | Status-Achsen | `open_item_settlement` (offen · nach Stichtag ausgeglichen) · `open_item_line_kind` (Sollstellung · Sollstellung offen · Zahlung) · `ledger_account_type` für die Art (Debitor · Kreditor). Beide eigenen Achsen sind berechnet, nicht gespeichert, und haben deutsche Werte (L-326) |

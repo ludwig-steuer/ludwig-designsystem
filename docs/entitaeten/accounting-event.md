@@ -4,6 +4,7 @@
 |---|---|
 | Status | **geprüft** — fremde Prüfung am 2026-09-11 (Prüfer-Session im Auftrag `ludwig-manager`, gegen b849ddc); eine Nacharbeit (Ort der `EventPane`), siehe „Prüfung" |
 | GLOSSARY | Tabelle „Datenmodell-Schichten" → Zeile **Ereignis** (`client_accounting_event`, „Geschäftsereignis"), `### OPOS-Vortrag (open item carryover)` — Ordner `entities/accounting-event/`. **Kein eigener `###`-Eintrag** für das Ereignis (die Zeile der Schichten-Tabelle trägt Definition und Rolle) |
+| Anzeigename | R27 führt sie nicht; F640 prüft den Bestand der übrigen Entitäten (App `docs/topics/web-ui.md` R27, DS 0244) |
 | Tabelle | `ludwig.client_accounting_event` — „Punkt-in-Zeit-Ereignis (Belegeingang, Bankbewegung, manuelle Erfassung). Hängt 1:N am Sachverhalt, 1:0..1 an genau einer Quelle" (Tabellenkommentar; CHECK `num_nonnulls(source_doc_id, bank_transaction_id, datev_mirror_entry_id) <= 1`). Keine Subtypen |
 | Typen | `accounting-cases/domain/case.ts` — `EVENT_KINDS` · `case-event.ts` — `CaseEvent`, `CaseEventSourceDoc`, `CaseEventBankTransaction`, `CaseEventBooking` · `overview-vm.ts` — `TimelineEventVM`, `TimelineState`. **Nicht im Spiegel:** `deriveTitle()` (`accounting-cases/application/case-overview.ts`); die Spiegelbuchung als Quelle fehlt in beiden VMs → L-309 |
 | Status-Achsen | `ereignis_art` (`kind`, 7 Wörter — L-02 erledigt) · `ereignis` (abgeleitet aus den Buchungen am Ereignis: `open` „Buchung fehlt" · `proposed` · `accepted` · `posted` · `no_booking_required` · `superseded` „Ersetzt" · `blocked` „Benötigt Antwort" · `planned`) |

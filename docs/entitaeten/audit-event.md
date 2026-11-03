@@ -4,6 +4,7 @@
 |---|---|
 | Status | **geprüft** — fremde Prüfung am 2026-09-11 (Prüfer-Session im Auftrag `ludwig-manager`, gegen 01d269a/d7cdb00); Zahlen-Nacharbeiten und die Nachzählung der App eingearbeitet, siehe „Prüfung" |
 | GLOSSARY | `### Audit event` — Ordner `entities/audit-event/` (bleibt leer, siehe Formen) |
+| Anzeigename | R27 führt es nicht; F640 prüft den Bestand der übrigen Entitäten (App `docs/topics/web-ui.md` R27, DS 0244) |
 | Tabelle | `ludwig.platform_audit_events` — „Generisches Audit-Log: Nutzer-/Systemaktionen mit Actor, Action, Outcome und optionalem Resource-/Tenant-Kontext. Immutable (kein updated_at)." (Tabellenkommentar). Polymorph über `resource_kind` / `resource_id` — die Historie **jeder** Entität |
 | Typen | `audit-log/domain/types.ts` — `ACTOR_KINDS`, `AuditOutcome`, `AuditSource`, `AuditEvent`, `AuditEventFilter`, **`auditEventToLogEntry()`** (die Abbildung auf die Zeile des Sets) · `shared/log-views.ts` — `LOG_VIEWS`, `LOG_VIEW_DEPTH` (Verlauf · Protokoll · Technik) · `datev-export/domain/batch-log.ts` — `batchLogDepth()` (Tiefe je Aktion, nur für den Stapel) |
 | Status-Achsen | `actor_kind` (5) · `log_level` — `outcome` wird in `auditEventToLogEntry()` zur Schwere (`failure` → Fehler, `partial` → Warnung), bewusst ohne eigene Achse |
