@@ -37,26 +37,10 @@ export const CASE_LIFECYCLE = [
 ] as const;
 export type CaseLifecycle = (typeof CASE_LIFECYCLE)[number];
 
-// EINZIGE TS-Quelle der Case-Arten (F11-T11.2). Spiegel des DB-CHECK
-// ``client_accounting_case_kind_check`` in Migration
-// ``supabase/migrations/20261002120000_case_kind_mechanics.sql`` — bei
-// Änderung BEIDE anfassen. Keine lokalen z.enum-Duplikate mehr;
-// bewusste Einschränkungen als ``CaseKindSchema.extract/exclude`` mit
-// Kommentar am Konsumenten.
-// Die Art beantwortet eine Frage (F360): Wie kommt der Sachverhalt zu seinen
-// Buchungen, und wann ist er fertig? Die Richtung trägt ``counterparty_side``.
-// ``recurring_charge`` ist nur Übergang („Art offen") — nie neu schreiben.
-export const CASE_KIND = [
-  "single",
-  "rule",
-  "running",
-  "pool",
-  // F295: der Sammel-Sachverhalt eines importierten Mandantenstapels — ohne
-  // Gegenpartei, vergibt nur der Import.
-  "client_batch",
-  "recurring_charge",
-] as const;
-export type CaseKind = (typeof CASE_KIND)[number];
+// F627: Case-Arten, ihre Anzeigetexte, Nummer und Anzeigename liegen in `core/accounting/case-display-title.ts`,
+// damit jedes Modul denselben Namen bauen kann; hier weiter exportiert, bestehende Importe bleiben.
+import { CASE_KIND, CASE_KIND_LABEL, type CaseKind } from "@/ludwig/core/accounting/case-display-title";
+export { CASE_KIND, CASE_KIND_LABEL, caseDisplayTitle, formatCaseNumber, type CaseKind } from "@/ludwig/core/accounting/case-display-title";
 
 // F494 (K8): Art der Abrechnung am Sachverhalt — Karten- oder Spesenabrechnung.
 // Spiegel des DB-CHECK ``client_accounting_case_settlement_kind_check``
@@ -64,30 +48,8 @@ export type CaseKind = (typeof CASE_KIND)[number];
 export const CASE_SETTLEMENT_KINDS = ["credit_card", "employee_expense"] as const;
 export type CaseSettlementKind = (typeof CASE_SETTLEMENT_KINDS)[number];
 
-/** Anzeigetext je Case-Art. EINZIGE Quelle — nicht lokal duplizieren.
- *  Kein Status (keine Farbe, keine Übergänge), deshalb bewusst hier statt in
- *  der Status-Registry. */
-export const CASE_KIND_LABEL: Record<CaseKind, string> = {
-  single: "Einzelsachverhalt",
-  rule: "Regelsachverhalt",
-  running: "Laufender Sachverhalt",
-  pool: "Sammelfall",
-  client_batch: "Mandantenstapel",
-  recurring_charge: "Dauersachverhalt – Art offen",
-};
-
 /** Label für Aufrufer, die den Wert nur als ``string`` haben (Query-Ergebnisse,
  *  Formularwerte). Unbekanntes fällt auf den Rohwert zurück statt zu leeren. */
-/**
- * Anzeige der Sachverhaltsnummer (F280): `2026-0012` → `SV-2026-0012`. Reine
- * Anzeige — `case_number` bleibt in der DB `YYYY-NNNN`, die Suche nimmt beides.
- */
-export function formatCaseNumber(n: string): string;
-export function formatCaseNumber(n: string | null | undefined): string | null;
-export function formatCaseNumber(n: string | null | undefined): string | null {
-  return n ? `SV-${n}` : null;
-}
-
 export function caseKindLabel(kind: string | null | undefined): string {
   if (!kind) return "—";
   return CASE_KIND_LABEL[kind as CaseKind] ?? kind;
@@ -687,17 +649,21 @@ export function caseStateFilter(
  * eigener Titel, sonst „Art: Gegenpart", sonst die Art allein. „Sachverhalt"
  * als Titel ist keine Auskunft; „Eingangsrechnung: Telekom" schon.
  */
-export function caseDisplayTitle(input: {
-  title: string | null | undefined;
-  kind: string | null | undefined;
-  counterpartyName?: string | null;
-}): string {
-  const titel = input.title?.trim();
-  if (titel) return titel;
-  const art = input.kind ? (CASE_KIND_LABEL[input.kind as CaseKind] ?? input.kind) : "Sachverhalt";
-  const gegenpart = input.counterpartyName?.trim();
-  return gegenpart ? `${art}: ${gegenpart}` : art;
+/** F627 (`web-ui.md` R27): ein Sachverhalts-Titel ist ein Name, kein Satz. */
+export const CASE_TITLE_MAX_CHARS = 60;
+
+/**
+ * F627: Titel aus Fremdtext (DATEV-Buchungstext, Partnername + Nummer) auf höchstens 60 Zeichen — Leerraum
+ * normalisiert, sonst an der letzten Wortgrenze bis 59 Zeichen plus „…“; ein einzelnes zu langes Wort hart gekürzt.
+ */
+export function compactCaseTitle(text: string): string {
+  const t = text.replace(/\s+/g, " ").trim();
+  if (t.length <= CASE_TITLE_MAX_CHARS) return t;
+  const cut = t.slice(0, CASE_TITLE_MAX_CHARS - 1);
+  const space = cut.lastIndexOf(" ");
+  return `${(space > 0 ? cut.slice(0, space) : cut).trimEnd()}…`;
 }
+
 
 /**
  * Höchstabstand einer Wiedervorlage in Tagen.

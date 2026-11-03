@@ -9,7 +9,8 @@ export interface RuleWithoutProposal {
   ruleId: string;
   caseId: string;
   caseNumber: string | null;
-  title: string | null;
+  /** F627: `caseDisplayTitle` — nie leer. */
+  title: string;
   counterpartyName: string | null;
   expectedInterval: RuleExpectedInterval | null;
   templateAmount: number | null;

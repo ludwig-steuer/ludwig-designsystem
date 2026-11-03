@@ -278,7 +278,6 @@ export interface ClarificationSourceVM {
 export interface CaseHeaderVM {
   caseId: string;
   caseNumber: string;
-  title: string;
   /** User-/Agent-editierbare Sachverhalts-Beschreibung (client_accounting_case.summary). */
   summary: string | null;
   counterpartyName: string | null;

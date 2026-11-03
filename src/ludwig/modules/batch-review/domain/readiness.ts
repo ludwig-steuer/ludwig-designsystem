@@ -32,6 +32,7 @@
  * freigegeben wird nur ein voll gebuchtes Bankkonto.
  */
 
+import { formatCaseNumber } from "@/ludwig/core/accounting/case-display-title";
 import { formatAmount, formatTime } from "@ludwig/designsystem";
 
 import { belegAnzeigename } from "@/ludwig/modules/source-docs";
@@ -114,7 +115,7 @@ function umsatzPunkt(r: CoverageEingang["rows"][number]): ReadinessItem {
       ? "Ohne Sachverhalt (Gate 2a)."
       : r.reason === "clarification_pending"
         ? `Klärung offen an Kanzlei/Mandant seit ${formatTime(r.clarificationSince, "date")}` +
-          `${r.caseNumber ? `, Sachverhalt ${r.caseNumber}` : ""}.`
+          `${r.caseNumber ? `, Sachverhalt ${formatCaseNumber(r.caseNumber)}` : ""}.`
         : `Bei Ludwig offen${r.caseNumber ? ` (${r.caseNumber})` : ""}.`;
   return {
     key: `tx-${r.bankTransactionId}`,

@@ -1,3 +1,5 @@
+import { formatCaseNumber } from "./case-display-title";
+
 /**
  * F349 — die Verweiszeile zwischen Generalumkehr und Original, rein (kein IO):
  * Abnahme und Sachverhalt-Seite sagen damit, welcher Satz welchen aufhebt.
@@ -82,7 +84,7 @@ function reversedNote(r: ReversedEntryInfo, position: number | null, currentCase
     position !== null
       ? `Satz ${position} hebt ihn per Generalumkehr auf.`
       : caseNumber && caseNumber !== currentCaseNumber
-        ? `Die Generalumkehr in Sachverhalt ${caseNumber} hebt ihn auf.`
+        ? `Die Generalumkehr in Sachverhalt ${formatCaseNumber(caseNumber)} hebt ihn auf.`
         : "Die Generalumkehr in diesem Sachverhalt hebt ihn auf.";
   return inDatev + wer;
 }

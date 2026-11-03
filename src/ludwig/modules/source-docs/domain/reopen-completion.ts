@@ -7,6 +7,8 @@
  * Zustand, Gate 3f formuliert damit den Einwand.
  */
 
+import { formatCaseNumber } from "@/ludwig/core/accounting/case-display-title";
+
 export interface ReopenFacts {
   /** Belegstatus — zurück geht `done` (F289: `reopened`, done → bookable) und seit Owner 2026-10-27 auch `bookable`. */
   status: string;
@@ -31,7 +33,7 @@ export function reopenBlocker(f: ReopenFacts): string | null {
     return "Am Beleg hängt eine Buchung. Erst den Satz ablehnen — dann öffnet der Beleg von selbst.";
   }
   if (f.closedCaseNumber !== null) {
-    return `Der Sachverhalt ${f.closedCaseNumber} ist geschlossen — an ihm kann Ludwig nicht mehr arbeiten.`;
+    return `Der Sachverhalt ${formatCaseNumber(f.closedCaseNumber)} ist geschlossen — an ihm kann Ludwig nicht mehr arbeiten.`;
   }
   return null;
 }
