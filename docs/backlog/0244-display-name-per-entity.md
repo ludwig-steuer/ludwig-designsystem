@@ -64,7 +64,7 @@ Gegenpart → Form → Datei → „Beleg ohne Kennzeichen").
 
 | Stelle | vorher | nachher |
 |---|---|---|
-| `SourceDocumentVM` (Anzeige-Erweiterung) | — | neu `title?: string \| null`, bis der Spiegel es trägt (Befund **L-378**) |
+| `SourceDocumentVM` (Anzeige-Erweiterung) | — | neu `title?: string \| null`, bis der Spiegel es trägt (Befund **L-378**) — seit 2026-11-04 im Spiegel (App `c1f030fc5`), die Erweiterung ist gestrichen |
 | `documentNameFields(d)` (`SourceDocument.tsx`, nicht im Barrel) | — | die **eine** Abbildung des Datensatzes auf `BelegNameFelder`: `title`, `counterparty` als `businessPartnerName` (die App liefert ihn aufgelöst), Brutto und Währung nur einer Rechnung (`detail.kind === "invoice"`, wie die App), Form, Belegdatum, Datei |
 | `documentHeadOf(d)` (`SourceDocument.tsx`, nicht im Barrel) | lokales `documentHead` in `source-document-columns.tsx` | `documentHead(documentNameFields(d))`; eigen ist nur, ob der Kopf auf die Datei fiel (Datei wird in der Mitte gekürzt, mono in der Spalte) |
 | Spalte „Beleg" (`sourceDocumentColumns`) | Gegenpart → Form → Datei | `documentHeadOf` |

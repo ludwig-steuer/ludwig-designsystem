@@ -85,6 +85,8 @@ export type SourceDocumentDetail =
 
 export interface SourceDocumentVM {
   id: string;
+  /** F639 (L-378): Kurztitel eines Belegs ohne Rechnungsauslese — gesetzt ist er der Name (`belegAnzeigename`). */
+  title?: string | null;
   /**
    * NOT NULL und bei **jeder** Belegart gefüllt — deshalb hier Pflicht: der
    * Dateiname ist der letzte Rückfall der Kennung und der einzige Anker, den
@@ -238,6 +240,7 @@ export interface SourceDocumentVM {
 export function sourceDocumentFromListRow(row: {
   sourceDocId: string | null;
   invoiceId: string | null;
+  title?: string | null;
   sourceDocType?: string | null;
   fileName: string | null;
   /** Fertig aufgelöst — `documentCounterparty()` beim Aufrufer. */
@@ -259,6 +262,7 @@ export function sourceDocumentFromListRow(row: {
 }): Omit<SourceDocumentVM, "detail"> {
   return {
     id: row.sourceDocId ?? row.invoiceId ?? "",
+    title: row.title ?? null,
     // NOT NULL in der Datenbank; die Listenzeile lässt es trotzdem `null` zu,
     // weil sie über einen LEFT JOIN kommt. Leer heißt hier „kein Rückfall" —
     // die Kennung fällt dann auf die Kurz-Id.
@@ -293,6 +297,7 @@ export function sourceDocumentFromListRow(row: {
  */
 export function sourceDocumentFromDispatch(doc: {
   sourceDocId: string;
+  title?: string | null;
   fileName: string | null;
   sourceDocType: string | null;
   classDocumentForm: string | null;
@@ -318,6 +323,7 @@ export function sourceDocumentFromDispatch(doc: {
 }): Omit<SourceDocumentVM, "detail"> {
   return {
     id: doc.sourceDocId,
+    title: doc.title ?? null,
     fileName: doc.fileName ?? "",
     sourceDocType: (doc.sourceDocType as SourceDocumentVM["sourceDocType"]) ?? null,
     classDocumentForm: doc.classDocumentForm,

@@ -66,12 +66,6 @@ export type { SourceDocDoneVia, SourceDocReviewReason, SourceDocStatus };
  * invoice half of it.
  */
 export interface SourceDocumentVM extends MirrorDocument {
-  /**
-   * The short title Ludwig sets in step 1b, only on documents without an
-   * invoice readout (F639) — the name wherever it is set. Not on the mirror's
-   * record yet (finding L-378).
-   */
-  title?: string | null;
   /** Pages of the file — the early warning for a split PDF in the inbox (F335 V1; finding L-359). */
   pageCount?: number | null;
   /** The file basket it arrived in, „K-2026-0012" (finding L-359). */

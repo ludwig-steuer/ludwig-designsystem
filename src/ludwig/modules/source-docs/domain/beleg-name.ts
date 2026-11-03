@@ -11,7 +11,7 @@
  *   0. ein gesetzter Titel (F639, nur Belege ohne Rechnungsauslese, ≤ 60) — „eBay: Gebührenabrechnung Q4/2025"
  *   1. `Gegenpart · Betrag · Datum`   — „eBay S.à r.l. · 50,75 € · 09.07.2026"
  *   2. ohne Betrag tritt die Belegform an dessen Stelle
- *   3. ohne Gegenpart bleiben Form und Datum
+ *   3. ohne Gegenpart bleiben Form und Datum; bliebe nur das Datum, heißt er „Beleg vom <Datum>“ (L-379)
  *   4. erst wenn nichts erkannt ist, der Dateiname
  *
  * Die Belegnummer steht **nicht** im Namen: sie ist in Listen eine eigene
@@ -81,8 +81,11 @@ export function belegAnzeigename(f: BelegNameFelder): string {
   // Mit Gegenpart führt der Betrag — er ist das Merkmal, an dem man einen
   // Beleg wiedererkennt. Ohne Gegenpart führt die Form: „50,75 € ·
   // 09.07.2026" ließe offen, was für ein Papier das ist.
-  const teile = [gegenpart, gegenpart ? (summe ?? art) : (art ?? summe), datum(f.documentDate)];
+  const tag = datum(f.documentDate);
+  const teile = [gegenpart, gegenpart ? (summe ?? art) : (art ?? summe), tag];
   const name = teile.filter((t): t is string => !!t && t.length > 0).join(" · ");
+  // L-379: ein nacktes Datum ist kein Name.
+  if (tag && name === tag) return `Beleg vom ${tag}`;
   return name || f.fileName?.trim() || "Beleg ohne Kennzeichen";
 }
 
