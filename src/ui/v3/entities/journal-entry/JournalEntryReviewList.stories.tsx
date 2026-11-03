@@ -14,7 +14,7 @@ type Story = StoryObj<typeof JournalEntryReviewList>;
 
 const PARTNERS = ["Deutsche Telekom Geschäftskunden GmbH", "Stadtwerke Beispielstadt", "Aral Tankstelle", "Beispiel Leasing AG", "Hartje KG", "Telekom Deutschland GmbH", "Deutsche Post AG", "Allianz Versicherungs-AG"];
 /** Short case titles, „Gegenpart: Gegenstand" (F627) — one per partner above. */
-const TITLES = ["Telekom Geschäftskunden: Festnetz und Mobilfunk 09/2026", "Stadtwerke: Strom Büro", "Aral: Tankquittung", "Beispiel Leasing: Leasingrate Transporter", "Hartje: Fahrradteile", "Telekom: Mobilfunk", "Deutsche Post: Porto", "Allianz: Betriebshaftpflicht"];
+const TITLES = ["Telekom Geschäftskunden: Festnetz, Mobilfunk und Router 9/26", "Stadtwerke: Strom Büro", "Aral: Tankquittung", "Beispiel Leasing: Leasingrate Transporter", "Hartje: Fahrradteile", "Telekom: Mobilfunk", "Deutsche Post: Porto", "Allianz: Betriebshaftpflicht"];
 const KINDS = [
   { key: "invoice", label: "Rechnung" },
   { key: "payment", label: "Zahlung" },

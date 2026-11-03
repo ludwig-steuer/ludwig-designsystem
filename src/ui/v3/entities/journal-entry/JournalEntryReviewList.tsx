@@ -239,14 +239,18 @@ export function proposalReviewColumns(options: ProposalColumnOptions = {}): Colu
     case: {
       key: "case",
       header: "Sachverhalt",
-      // 120 + up to three lines: „Deutsche Telekom Geschäftskunden GmbH" stands
-      // whole, as in step 3 before (review F340); Soll/Haben give way — their
-      // names wrap anyway.
-      width: "minmax(120px, 1.4fr)",
+      // Without account names Soll/Haben carry only the number, so the name gets
+      // the largest share of what is left (weight 2): 180 px — 60 characters
+      // (R27) in three lines — from about 1220 px table width in step 3. With the
+      // names (weight 1.4, as before) they need that room themselves; weight 2
+      // made those rows 20 % taller at 1440 px for no gain. The floor stays 120,
+      // so 1084 px (1440 with the sidebar, owner 2026-10-27) still fit; narrower,
+      // the `title` carries the cut name (0244 addendum, llcto 2026-11-03).
+      width: accountNames ? "minmax(120px, 1.4fr)" : "minmax(120px, 2fr)",
       cell: (p) => (
         <span className="v3prop__who">
-          {/* Three lines before the cut — the list step 3 showed up to 40 characters
-              and wrapped (review F340, owner rule „drop nothing"). */}
+          {/* Three lines before the cut — 60 characters fit from 180 px on
+              (0244 addendum; review F340, owner rule „drop nothing"). */}
           <span className="v3prop__name" title={nameOf(p)}>
             {nameOf(p)}
           </span>

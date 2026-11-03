@@ -169,3 +169,50 @@ Dazu: `scripts/sync-ludwig.sh` holt `core/accounting/case-display-title.ts` mit 
 im Showcase `DocumentRow` (`r6`), Kriterium C und B2 präzisiert, Datenpunkt im Profil Sachverhalt datiert.
 Der Spiegel `beleg-name.ts` trägt das R27-Beispiel wörtlich (byte-gleich); es nennt eine Plattform, keinen
 Mandanten.
+
+## Nachtrag 2026-11-03 (llcto): Breite der Spalte „Sachverhalt"
+
+**Wunsch:** 60 Zeichen (R27) in höchstens drei Zeilen. Gemessen bei 13,5 px: 160 px → vier Zeilen,
+**180 px → drei**; kompakt (12,5 px) reichen 170 px.
+
+**Konflikt:** Eine Untergrenze von 180 px hätte die App-Konfiguration von Schritt 3 (`full`,
+`accountNames={false}`, gruppiert `without={["kind"]}`) bei 1084 px Tabellenbreite (1440 px mit
+Sidebar) um rund 40 px über die Karte geschoben — genau der Owner-Befund vom 2026-10-27 („Aktionen"
+ragte hinaus). Der Owner-Befund geht vor (llcto). Die Untergrenze bleibt 120 px.
+
+**Gebaut: Gewicht 2 statt 1,4, wo Soll/Haben nur die Nummer tragen** — `accountNames ? "minmax(120px,
+1.4fr)" : "minmax(120px, 2fr)"`. Zuerst gebaut und
+abgenommen war Variante C (`minmax(120px, 180px)`, „wächst bis 180"); die Abnahme fand zwei Preise:
+bei 1084 px teilte sie den Platz mit „Prüfgrund" (168 → 159 px, drei Badges mehr gekürzt), und ab etwa
+1564 px blieb der Name bei 180 px stehen, während Soll/Haben mit nur der Kontonummer 260–420 px breit
+wurden (Zeilen 67 → 88 px). Das Gewicht holt sich den Platz aus den Spuren Soll/Haben statt aus
+„Prüfgrund" und hat keine Obergrenze; „Prüfgrund" wächst weiter zuerst bis 200 px, dann teilen sich die
+fr-Spuren den Rest 2 : 1 : 1. **Mit Kontonamen** (`accountNames`, Standard bei `full`; App-Reiter „Zum
+Schließen", `CloseCasesPanel.tsx`) bleibt es bei 1,4: Dort nahm 2fr den Platz aus den Namensspalten
+(1440 px: 129 → 110 px, Zeilen zusammen +20 %, gekürzte Kontonamen 0 → 5), ohne dem Namen zu helfen —
+bei 219 wie bei 180 px drei Zeilen (zweite Nachprüfung, M1).
+
+Gemessen in der App-Konfiguration (Story `Grouped`, umgestellt auf `accountNames={false}`,
+`without={["kind"]}`):
+
+| Tabellenbreite | vorher 1,4fr | C (bis 180) | **2fr** |
+|---|---|---|---|
+| 1084 px | Sachverhalt 120 · Prüfgrund 168 · 6/40 Namen, 5/29 Badges gekürzt | 129 · 159 · 5/40, 8/29 | **120 · 168 · 6/40, 5/29** (= vorher) |
+| 1246 px | 159 · 200 · 4/40, 0/29 | 180 · 200 · 0/40, 0/29 | **193 · 200 · 0/40, 0/29** |
+| 1564 px | 290, Zeilen ≤ 67 px | 180, Zeilen bis 88 px | **352, Zeilen ≤ 67 px** |
+| 1886 px | 422, Zeilen ≤ 62 px | 180, Zeilen bis 88 px | **513, Zeilen ≤ 62 px** |
+
+Querscroll in keiner Variante; die Mindestbreite (`--v2-min` 1066 px) ändert sich nicht.
+
+| # | Kriterium | Prüfung |
+|---|---|---|
+| N1 | Bei 1084 px Tabellenbreite ist alles wie vorher: Spuren, Querscroll, gekürzte Namen und Badges | App-Konfiguration und Stories `Flat`/`Grouped` bei Fenster 1118 |
+| N2 | In der App-Konfiguration ab 1246 px Tabellenbreite ≥ 180 px, kein Name gekürzt | App-Konfiguration bei Fenster 1280 |
+| N3 | Bei 1280 px in den Stories kein Querscroll und kein Badge in „Prüfgrund" gekürzt („Prüfgrund" 200 px) | `Flat` 138 px Sachverhalt (ohne Kontonamen, 2fr), `Grouped` 120 px (mit Kontonamen, 1,4fr) |
+| N4 | Auf breiten Fenstern wächst die Spalte weiter, Zeilen werden nicht höher als vorher | 1920: `Flat` 458 px; App-Konfiguration Zeilen ≤ 62 px |
+| N5 | Mit Kontonamen (`Grouped`) sind Spuren und Zeilenhöhen wie vor 0244 | `Grouped` bei 1280, 1440, 1598 px gegen `minmax(120px, 1.4fr)` |
+
+**Abnahme des Nachtrags 2026-11-03 (fremder Agent, drei Runden): abgenommen.** Runde 1 fand an C den Preis
+in „Prüfgrund" und auf breiten Fenstern (→ 2fr), Runde 2 an 2fr den Preis bei angezeigten Kontonamen
+(→ 1,4fr mit Namen), Runde 3 bestätigt N1–N5.
+
