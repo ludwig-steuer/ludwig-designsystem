@@ -3,7 +3,7 @@ import type { ReactNode } from "react";
 import type {
   ClarificationState,
   ClarificationType,
-} from "@/ludwig/modules/accounting-cases/domain/case";
+} from "@/ludwig/modules/accounting-cases/domain";
 import type { ClarificationSeverity } from "@/ludwig/modules/invoices/domain/invoice";
 
 import { Disclosure } from "../../primitives/Disclosure";
@@ -50,7 +50,7 @@ const AUDIENCE_ORDER: readonly ClarificationAudience[] = ["accounting", "client"
  * shows it (ranks 1–7 of the entity profile).
  *
  * `state` is **derived, never stored** — the caller runs `clarificationState()`
- * from `@/ludwig/modules/accounting-cases/domain/case`, so that „open" means
+ * from `@/ludwig/modules/accounting-cases/domain`, so that „open" means
  * the same thing here as it does in a query.
  */
 export interface ClarificationVM {

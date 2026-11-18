@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { useState } from "react";
 
-import type { CaseListItem } from "@/ludwig/modules/accounting-cases/domain/case";
+import type { CaseListItem } from "@/ludwig/modules/accounting-cases/domain";
 
 import { Card, CardHead } from "../../primitives/Table";
 import { CasePicker } from "./CasePicker";

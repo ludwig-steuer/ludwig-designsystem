@@ -2,7 +2,7 @@
 
 import { useId } from "react";
 import { DATEV_MAX_BELEGFELD1 } from "@/ludwig/core/datev/field-limits";
-import type { KnownDocumentNumber } from "@/ludwig/modules/accounting-cases/domain/document-number";
+import type { KnownDocumentNumber } from "@/ludwig/modules/accounting-cases/domain";
 import { ActionIcon } from "../../Icons";
 import { IconButton } from "../../primitives/IconButton";
 import { TextButton } from "../../primitives/TextButton";

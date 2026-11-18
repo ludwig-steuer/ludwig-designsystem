@@ -1,6 +1,6 @@
 import type { ReactNode } from "react";
 
-import type { CaseListItem } from "@/ludwig/modules/accounting-cases/domain/case";
+import type { CaseListItem } from "@/ludwig/modules/accounting-cases/domain";
 import { asCurrency } from "@/ludwig/shared/money";
 
 import { Amount } from "../../primitives/Amount";
@@ -9,7 +9,7 @@ import { Card, CardHead } from "../../primitives/Table";
 import { StatusBadge } from "../../patterns/StatusBadge";
 import { resolveStatus } from "@/ludwig/ui/status/status-registry";
 import { caseIdentifier, caseTitle, type CaseLink } from "./case-title";
-import { caseKindLabel } from "@/ludwig/modules/accounting-cases/domain/case";
+import { caseKindLabel } from "@/ludwig/modules/accounting-cases/domain";
 
 /**
  * The case as a **card** — the shape it takes where it does not stand in a

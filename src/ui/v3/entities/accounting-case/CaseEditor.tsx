@@ -13,9 +13,9 @@ import {
   type CaseDispositionWritable,
   type CaseDocumentNumberMode,
   type CaseKind,
-} from "@/ludwig/modules/accounting-cases/domain/case";
-import type { KnownDocumentNumber } from "@/ludwig/modules/accounting-cases/domain/document-number";
-import { CASE_TAB_LABEL } from "@/ludwig/modules/accounting-cases/domain/tabs";
+} from "@/ludwig/modules/accounting-cases/domain";
+import type { KnownDocumentNumber } from "@/ludwig/modules/accounting-cases/domain";
+import { CASE_TAB_LABEL } from "@/ludwig/modules/accounting-cases/domain";
 import { resolveStatus } from "@/ludwig/ui/status/status-registry";
 
 import { InlineEdit } from "../../primitives/InlineEdit";
