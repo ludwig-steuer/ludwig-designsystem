@@ -1,4 +1,10 @@
+import { BadgeCheck, CircleDashed, Globe, History, Ruler, Scale, UserCheck, type LucideIcon } from "lucide-react";
 import type { ReactNode } from "react";
+
+import type { FactSourceKind } from "@/ludwig/modules/fact-records/domain/fact-source";
+import { resolveStatus } from "@/ludwig/ui/status/status-registry";
+
+import { ENTITY_ICON } from "../Icons";
 
 import { MonoCell } from "../primitives/Cells";
 import { Disclosure } from "../primitives/Disclosure";
@@ -17,8 +23,8 @@ import { Confidence, type ConfidenceLevel } from "./Confidence";
  * answer: the mark beside the value, and the derivation one click further.
  *
  * The pattern knows no entity: the word of the origin comes from the caller's
- * registry axis (`buchung_origin` …), the word of a source kind from the
- * caller's word list. The judge's verdict stays in `AiBookingNotes` — agent
+ * registry axis (`buchung_origin` …). The kind of a source has one mark for the
+ * whole set, `FactSourceKindMark` (0247): word from the axis `fact_source_kind`. The judge's verdict stays in `AiBookingNotes` — agent
  * and judge exist only at the journal entry.
  */
 
@@ -72,6 +78,48 @@ export interface Provenance {
   sources?: readonly ProvenanceSource[];
   /** Set only when someone changed the value by hand. */
   corrected?: { by: ReactNode; at: string } | null;
+}
+
+/**
+ * **One sign per kind of source**, in the whole set (0247): the same kind looks
+ * the same at an entry's reasoning and at a fact. Where the kind is an entity,
+ * its sign is the entity's (`ENTITY_ICON`) — a document is a receipt here as
+ * everywhere else; the rest keep a sign of their own. An exempt enumeration in
+ * `check:icons`, like `StateIcon`'s.
+ */
+const SOURCE_ICON: Record<FactSourceKind, LucideIcon> = {
+  source_doc: ENTITY_ICON["source-document"].icon,
+  contract: ENTITY_ICON.contract.icon,
+  bank_transaction: ENTITY_ICON["bank-transaction"].icon,
+  clarification: ENTITY_ICON.clarification.icon,
+  ledger_account: ENTITY_ICON["ledger-account"].icon,
+  business_partner: ENTITY_ICON.partner.icon,
+  client_profile: ENTITY_ICON.client.icon,
+  vendor_history: History,
+  rule: Ruler,
+  law: Scale,
+  web: Globe,
+  external_service: BadgeCheck,
+  default: CircleDashed,
+  accounting_review: UserCheck,
+};
+
+/**
+ * The sign and the word of a kind of source — the word from the app's axis
+ * `fact_source_kind`, the sign from the one table above.
+ *
+ * @when    Naming the kind of a source: at an entry's reasoning, at a fact —
+ *          the `kind` of a ProvenanceSource.
+ * @instead The whole list of sources → ProvenanceSources (it takes this as `kind`).
+ */
+export function FactSourceKindMark({ kind }: { kind: FactSourceKind }) {
+  const Icon = SOURCE_ICON[kind];
+  return (
+    <>
+      <Icon size={13} strokeWidth={1.5} aria-hidden="true" />
+      <span className="ki__art">{resolveStatus("fact_source_kind", kind).label}</span>
+    </>
+  );
 }
 
 /** Above this the reason is cut for the hover — the whole of it is one click away. */

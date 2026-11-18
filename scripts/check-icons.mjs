@@ -35,8 +35,9 @@ const EXEMPT = new Map([
   ["entities/accounting-case/CaseTimeline.tsx", "the event kind (client_accounting_event.kind)"],
   [
     "entities/journal-entry/AiBookingNotes.tsx",
-    "the kind of source backing a statement: bank, document, rule, law, web",
+    "the chevron of the expandable source row (the kind of a source moved to patterns/Provenance.tsx, 0247)",
   ],
+  ["patterns/Provenance.tsx", "the sign of a kind of source — one per kind, for the whole set (0247)"],
 ]);
 
 /**

@@ -2,14 +2,12 @@ import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { useState, type ReactNode } from "react";
 
 import type { FactSourceKind } from "@/ludwig/modules/fact-records/domain/fact-source";
-import { resolveStatus } from "@/ludwig/ui/status/status-registry";
 
-import { EntityIcon, type EntityKey } from "../Icons";
 import { Disclosure } from "../primitives/Disclosure";
 import { Drawer } from "../primitives/Drawer";
 import { Card, CardHead } from "../primitives/Table";
 import { FactTable, type FactTableRow } from "./FactTable";
-import type { ProvenanceSource } from "./Provenance";
+import { FactSourceKindMark, type ProvenanceSource } from "./Provenance";
 
 const meta: Meta<typeof FactTable> = {
   title: "v3/Patterns/Prüfen/FactTable",
@@ -18,17 +16,12 @@ const meta: Meta<typeof FactTable> = {
 export default meta;
 type Story = StoryObj<typeof FactTable>;
 
-/** Icon of the entity and word of the axis `fact_source_kind` — as the fact view's caller draws a kind. */
-const kind = (entity: EntityKey, source: FactSourceKind): ReactNode => (
-  <>
-    <EntityIcon entity={entity} />
-    {resolveStatus("fact_source_kind", source).label}
-  </>
-);
+/** The one mark of a kind of source (0247) — as every caller draws it. */
+const kind = (source: FactSourceKind): ReactNode => <FactSourceKindMark kind={source} />;
 
 const INVOICE: ProvenanceSource = {
   key: "doc",
-  kind: kind("source-document", "source_doc"),
+  kind: kind("source_doc"),
   label: "Rechnung INV-2026-0412",
   locator: "S. 1",
   quote: "Annual subscription Cloud Workspace, 12 months",
@@ -36,14 +29,14 @@ const INVOICE: ProvenanceSource = {
 };
 const PARTNER: ProvenanceSource = {
   key: "bp",
-  kind: kind("partner", "business_partner"),
+  kind: kind("business_partner"),
   label: "Nordlicht Software Ltd.",
   locator: "Feld Land",
   href: "#partner=nordlicht",
 };
 const HISTORY: ProvenanceSource = {
   key: "hist",
-  kind: kind("journal-entry", "vendor_history"),
+  kind: kind("vendor_history"),
   label: "Kreditor 70418, 11 Buchungen, zuletzt 14.10.2026",
 };
 
@@ -126,7 +119,7 @@ export const Edge: Story = {
             sources: [
               { ...INVOICE, key: "a", quote: "Reverse charge: VAT to be accounted for by the recipient according to Article 196 of Council Directive 2006/112/EC" },
               PARTNER,
-              { key: "law", kind: resolveStatus("fact_source_kind", "law").label, label: "§ 13b Abs. 1 UStG", href: "#law=13b" },
+              { key: "law", kind: kind("law"), label: "§ 13b Abs. 1 UStG", href: "#law=13b" },
             ],
           },
           { key: "use", label: "Verwendung", value: null },
@@ -182,10 +175,10 @@ export const Certainty: Story = {
     <div style={{ maxWidth: 760 }}>
       <FactTable
         facts={[
-          { key: "vat_id", label: "USt-IdNr. gültig", value: "ja, geprüft am 03.11.2026", certainty: "confirmed", sources: [{ key: "ext", kind: resolveStatus("fact_source_kind", "external_service").label, label: "Bestätigungsabfrage beim BZSt", locator: "03.11.2026, 10:14 Uhr" }] },
+          { key: "vat_id", label: "USt-IdNr. gültig", value: "ja, geprüft am 03.11.2026", certainty: "confirmed", sources: [{ key: "ext", kind: kind("external_service"), label: "Bestätigungsabfrage beim BZSt", locator: "03.11.2026, 10:14 Uhr" }] },
           { key: "country", label: "Land des Lieferanten", value: "Irland", certainty: "explicit", sources: [{ ...INVOICE, key: "c", locator: "S. 1, Absender", quote: "Dublin 2, Ireland" }] },
           { key: "supply_kind", label: "Art der Leistung", value: "Leistung, kein Gegenstand", certainty: "inferred", sources: [{ ...INVOICE, key: "k", quote: "Annual subscription Cloud Workspace" }] },
-          { key: "is_business", label: "Unternehmer", value: "ja", certainty: "assumed", sources: [{ key: "def", kind: resolveStatus("fact_source_kind", "default").label, label: "Ltd. ohne Gegenangabe" }] },
+          { key: "is_business", label: "Unternehmer", value: "ja", certainty: "assumed", sources: [{ key: "def", kind: kind("default"), label: "Ltd. ohne Gegenangabe" }] },
           { key: "use", label: "Verwendung", value: null, certainty: "unknown" },
         ]}
       />
@@ -207,6 +200,18 @@ export const Validity: Story = {
           { key: "small_business", label: "Kleinunternehmer", value: "nein", certainty: "confirmed", validTo: "2025-12-31" },
         ]}
       />
+    </div>
+  ),
+};
+
+/**
+ * `marked` (0247): the facts a result rests on, picked by the reader — their
+ * rows take the „selected" background, and each label is a focus target.
+ */
+export const Marked: Story = {
+  render: () => (
+    <div style={{ maxWidth: 760 }}>
+      <FactTable facts={LINE_FACTS} marked={["supply_type", "use"]} />
     </div>
   ),
 };

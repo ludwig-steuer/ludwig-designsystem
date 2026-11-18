@@ -4195,6 +4195,8 @@ button.v2ibtn[aria-disabled="true"] > * { opacity: 0.5; }
   font-family: var(--font-mono); font-size: var(--fs-ui-xs);
   color: var(--color-text-subtle); word-break: break-word;
 }
+/* What belongs under one point only — the disagreeing sources of a contradiction (0247). */
+.v3open__more { margin-top: var(--space-2); }
 
 /* --- The (i) at a state (0077) -------------------------------------------
  * Hit area **24 × 24**, the house measure from 0113 — the sign itself is 12.
@@ -4577,6 +4579,22 @@ a.v3prov:focus-visible { text-decoration: underline; }
 /* One step for the whole line: `Time`/`DateRange` set their own size, which
    put the date at 12.5 next to „gilt ab" at 11.5 (acceptance 0246 S2-M1). */
 .v3fact__valid .v2time { font-size: inherit; }
+
+/* 0247 · FactRecordView — the sections stand one under the other. */
+.v3frv { display: grid; gap: var(--space-4); }
+/* The posting text under the account, a quiet second line. */
+.v3frv__text { display: block; }
+/* „aus: Land des Lieferanten, Verwendung" — a line of its own under the result. */
+.v3frv__from { display: block; }
+/* Each fact named is a button of 24 px (I8) inside running text: the padding
+   makes the height, the same negative margin gives it back to the line. */
+.v3frv__ref {
+  display: inline-block;
+  padding-block: calc((24px - 1lh) / 2);
+  margin-block: calc((1lh - 24px) / 2);
+  font-weight: 400;
+}
+.v3frv__ref[aria-pressed="true"] { text-decoration: underline; }
 /* The source as a target of 24 px (I8), link or button alike: the padding
    makes the height, the same negative margin gives it back, so the text stays
    on the line of label and value — on one line and on three (measured, 0238). */

@@ -1,10 +1,12 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 
-import { EntityIcon } from "../Icons";
+import type { FactSourceKind } from "@/ludwig/modules/fact-records/domain/fact-source";
+
 import { FieldList } from "../primitives/FieldList";
 import { Card, CardHead, HeadRow, Row, Table } from "../primitives/Table";
 import { StatusBadge } from "./StatusBadge";
 import {
+  FactSourceKindMark,
   ProvenanceMark,
   ProvenanceNote,
   ProvenanceRows,
@@ -22,18 +24,13 @@ type Story = StoryObj<typeof ProvenanceNote>;
 /** The origin as the caller's axis says it — here the one of the journal entry. */
 const origin = (status: string) => <StatusBadge axis="journal_entry_origin" status={status} info={false} />;
 
-/** Icon and word of a source kind — the caller's word list, drawn from the icon registry. */
-const kind = (entity: "source-document" | "bank-transaction" | "journal-entry" | "recurring-rule", word: string) => (
-  <>
-    <EntityIcon entity={entity} />
-    {word}
-  </>
-);
+/** The one mark of a kind of source (0247) — as every caller draws it. */
+const kind = (source: FactSourceKind) => <FactSourceKindMark kind={source} />;
 
 const SOURCES: ProvenanceSource[] = [
-  { key: "1", kind: kind("source-document", "Beleg"), label: "Rechnung 93846778", quote: "Rechnung vom 16.07.2026 über 25,41 EUR", href: "#document=93846778" },
-  { key: "2", kind: kind("journal-entry", "Bisherige Buchungen"), label: "Kreditor 71202, 14 Buchungen, zuletzt 22.06.2026" },
-  { key: "3", kind: kind("bank-transaction", "Kontoauszug"), label: "Zahlung vom 30.07.2026", href: "#bank=30-07" },
+  { key: "1", kind: kind("source_doc"), label: "Rechnung 93846778", quote: "Rechnung vom 16.07.2026 über 25,41 EUR", href: "#document=93846778" },
+  { key: "2", kind: kind("vendor_history"), label: "Kreditor 71202, 14 Buchungen, zuletzt 22.06.2026" },
+  { key: "3", kind: kind("bank_transaction"), label: "Zahlung vom 30.07.2026", href: "#bank=30-07" },
 ];
 
 const PROPOSAL: Provenance = {
@@ -178,8 +175,8 @@ export const InUse: Story = {
               rule: { code: "belegfeld_exact", sentence: "Belegnummer und Betrag stimmen genau überein." },
               rationale: "Die Zahlung nennt RE-4471 im Verwendungszweck und deckt den offenen Posten auf den Cent.",
               sources: [
-                { key: "b", kind: kind("bank-transaction", "Kontoauszug"), label: "Zahlung vom 30.08.2026", quote: "RE-4471 Musterbau GmbH" },
-                { key: "r", kind: kind("source-document", "Beleg"), label: "Rechnung RE-4471", href: "#document=RE-4471" },
+                { key: "b", kind: kind("bank_transaction"), label: "Zahlung vom 30.08.2026", quote: "RE-4471 Musterbau GmbH" },
+                { key: "r", kind: kind("source_doc"), label: "Rechnung RE-4471", href: "#document=RE-4471" },
               ],
             }}
           />
@@ -201,7 +198,7 @@ export const Edges: Story = {
           rationale: `${"Die Rechnung enthält Positionen mit 7 % und 19 % Umsatzsteuer; Ludwig teilt nach Steuersatz auf und bucht die Leergutpfand-Position gesondert. ".repeat(5)}Die Präzedenz des Lieferanten deckt diese Aufteilung.`,
           sources: Array.from({ length: 12 }, (_, i) => ({
             key: `e-${i}`,
-            kind: kind("journal-entry", "Bisherige Buchungen"),
+            kind: kind("vendor_history"),
             label: `Buchung ${i + 1} desselben Kreditors, Juni 2026`,
           })),
         }}
@@ -225,7 +222,7 @@ export const Rows: Story = {
         provenance={{
           rationale: PROPOSAL.rationale,
           sources: [
-            { key: "o", kind: kind("source-document", "Beleg"), label: "Rechnung 93846778", onOpen: () => {} },
+            { key: "o", kind: kind("source_doc"), label: "Rechnung 93846778", onOpen: () => {} },
             ...SOURCES.slice(1),
           ],
         }}

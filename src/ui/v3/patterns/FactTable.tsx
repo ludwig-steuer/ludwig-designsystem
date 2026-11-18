@@ -68,12 +68,24 @@ function Validity({ from, to }: { from: string | null; to: string | null }) {
 
 /**
  * @when    Facts with their value, certainty and source — the basis of a
- *          clarification, the facts an entry rests on.
+ *          clarification, the facts an entry rests on; `marked` shows which
+ *          of them a result rests on.
  * @instead One record's fields as label and value → FieldList. Why one value
  *          stands as it stands → ProvenanceRows. Two states of one record →
  *          DiffView.
  */
-export function FactTable({ facts }: { facts: readonly FactTableRow[] }) {
+export function FactTable({
+  facts,
+  marked,
+}: {
+  facts: readonly FactTableRow[];
+  /**
+   * Keys of the facts a result rests on, picked by the reader (0247): their
+   * rows take the „selected" background, and each label becomes a focus
+   * target (`data-fact-key`), so the caller can move focus there.
+   */
+  marked?: readonly string[];
+}) {
   if (facts.length === 0) return null;
   const withSource = facts.some((f) => f.sources && f.sources.length > 0);
   const withCertainty = facts.some((f) => f.certainty);
@@ -100,8 +112,10 @@ export function FactTable({ facts }: { facts: readonly FactTableRow[] }) {
       {facts.map((f) => {
         const certainty = f.certainty ? resolveStatus("fact_certainty", f.certainty) : null;
         return (
-          <Row key={f.key}>
-            <span className="v3fact__cell">{f.label}</span>
+          <Row key={f.key} active={marked?.includes(f.key) ?? false}>
+            <span className="v3fact__cell" data-fact-key={f.key} tabIndex={-1}>
+              {f.label}
+            </span>
             {/* Left like the label: a fact is mostly a word; figures in it keep tnum (V3). */}
             <span className="v3fact__cell lw-numeric">
               {f.value ?? (

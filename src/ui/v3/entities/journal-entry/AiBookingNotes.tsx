@@ -1,16 +1,6 @@
 "use client";
 
-import {
-  Banknote,
-  ChevronRight,
-  FileText,
-  Globe,
-  HelpCircle,
-  History,
-  Ruler,
-  Scale,
-  type LucideIcon,
-} from "lucide-react";
+import { ChevronRight } from "lucide-react";
 import { useState } from "react";
 
 // Direct import, not the barrel: `@/ui/status` also exports `FlowModal` and
@@ -20,7 +10,7 @@ import { StateIcon, type StateKind } from "../../patterns/Review";
 import { StatusInfoButton } from "../../patterns/StatusInfoButton";
 import { resolveStatus } from "@/ludwig/ui/status/status-registry";
 import type { FactSourceKind } from "@/ludwig/modules/fact-records/domain/fact-source";
-import { ProvenanceRows, type ProvenanceSource } from "../../patterns/Provenance";
+import { FactSourceKindMark, ProvenanceRows, type ProvenanceSource } from "../../patterns/Provenance";
 import { StatusBadge } from "../../patterns/StatusBadge";
 
 /**
@@ -65,14 +55,14 @@ export type SourceKind =
  * the same words the facts of the review show, so a source is called the same
  * at an entry and at a fact.
  */
-const SOURCE_KIND: Record<SourceKind, { Icon: LucideIcon; kind: FactSourceKind }> = {
-  bank: { Icon: Banknote, kind: "bank_transaction" },
-  document: { Icon: FileText, kind: "source_doc" },
-  history: { Icon: History, kind: "vendor_history" },
-  clarification: { Icon: HelpCircle, kind: "clarification" },
-  rule: { Icon: Ruler, kind: "rule" },
-  law: { Icon: Scale, kind: "law" },
-  web: { Icon: Globe, kind: "web" },
+const SOURCE_KIND: Record<SourceKind, FactSourceKind> = {
+  bank: "bank_transaction",
+  document: "source_doc",
+  history: "vendor_history",
+  clarification: "clarification",
+  rule: "rule",
+  law: "law",
+  web: "web",
 };
 
 /**
@@ -221,15 +211,9 @@ export function aiSourcesToProvenance(sources: readonly AiSource[]): ProvenanceS
   }));
 }
 
-/** Icon and word of a source kind — the vocabulary of this entity, not of the pattern. */
+/** Icon and word of a source kind at an entry's reasoning. */
 function SourceKindMark({ art }: { art: SourceKind }) {
-  const { Icon, kind } = SOURCE_KIND[art];
-  return (
-    <>
-      <Icon size={13} strokeWidth={1.5} />
-      <span className="ki__art">{resolveStatus("fact_source_kind", kind).label}</span>
-    </>
-  );
+  return <FactSourceKindMark kind={SOURCE_KIND[art]} />;
 }
 
 /**
