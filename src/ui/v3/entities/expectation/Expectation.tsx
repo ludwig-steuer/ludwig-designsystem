@@ -1,14 +1,14 @@
 import {
   expectationMaturity,
   type ExpectationKind,
-} from "@/ludwig/modules/accounting-cases/domain/cases/case";
+} from "@/ludwig/modules/accounting-cases/domain";
 // The record is `ExpectationRow` over there and a component here, so it comes
 // in under the name the glossary uses for the thing itself.
 import type {
   ExpectationAudience,
   ExpectationRow as Expectation,
-} from "@/ludwig/modules/accounting-cases/domain/expectations/expectation";
-import { expectationResolutionLabel } from "@/ludwig/modules/accounting-cases/domain/expectations/expectation-labels";
+} from "@/ludwig/modules/accounting-cases/domain";
+import { expectationResolutionLabel } from "@/ludwig/modules/accounting-cases/domain";
 import type { Currency } from "@/ludwig/shared/money";
 import { STATUS_REGISTRY } from "@/ludwig/ui/status/status-registry";
 import { StatusBadge } from "../../patterns/StatusBadge";

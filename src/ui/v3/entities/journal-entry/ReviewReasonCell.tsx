@@ -1,4 +1,4 @@
-import { REVIEW_SCORING, type ReviewReason } from "@/ludwig/modules/accounting-cases/domain/review/review-score";
+import { REVIEW_SCORING, type ReviewReason } from "@/ludwig/modules/accounting-cases/domain";
 import { resolveStatus, type StatusKind } from "@/ludwig/ui/status/status-registry";
 
 import { formatCount } from "../../format";

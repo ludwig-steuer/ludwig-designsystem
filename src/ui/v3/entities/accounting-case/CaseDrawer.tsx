@@ -1,6 +1,6 @@
 import type { ReactNode } from "react";
 
-import { caseKindLabel } from "@/ludwig/modules/accounting-cases/domain/cases/case";
+import { caseKindLabel } from "@/ludwig/modules/accounting-cases/domain";
 import { asCurrency } from "@/ludwig/shared/money";
 import { StatusBadge } from "../../patterns/StatusBadge";
 import { Amount } from "../../primitives/Amount";

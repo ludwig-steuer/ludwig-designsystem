@@ -2,7 +2,7 @@ import {
   caseDisplayTitle,
   type CaseKind,
   type CaseLifecycle,
-} from "@/ludwig/modules/accounting-cases/domain/cases/case";
+} from "@/ludwig/modules/accounting-cases/domain";
 import type { Currency } from "@/ludwig/shared/money";
 
 /**

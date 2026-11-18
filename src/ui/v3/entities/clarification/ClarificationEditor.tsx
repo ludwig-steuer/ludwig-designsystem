@@ -2,7 +2,7 @@
 
 import { useId, useState } from "react";
 
-import type { ClarificationType } from "@/ludwig/modules/accounting-cases/domain/cases/case";
+import type { ClarificationType } from "@/ludwig/modules/accounting-cases/domain";
 import type { ClarificationSeverity } from "@/ludwig/modules/invoices/domain/invoice";
 
 import { ActionIcon } from "../../Icons";

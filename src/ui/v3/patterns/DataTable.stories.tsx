@@ -8,7 +8,7 @@ import {
   type CaseKind,
   type CaseLifecycle,
   type CaseListItem,
-} from "@/ludwig/modules/accounting-cases/domain/cases/case";
+} from "@/ludwig/modules/accounting-cases/domain";
 
 import { Button } from "../primitives/Button";
 import { AmountCell, MonoCell, Timestamp } from "../primitives/Cells";

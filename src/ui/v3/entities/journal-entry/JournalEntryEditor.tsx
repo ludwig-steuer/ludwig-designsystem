@@ -17,7 +17,7 @@ import { Button } from "../../primitives/Button";
 import { Dialog } from "../../primitives/Dialog";
 import { Time } from "../../primitives/Time";
 import { AccountField, type AccountCandidate, type AccountGroup } from "../account/AccountField";
-import type { KnownDocumentNumber } from "@/ludwig/modules/accounting-cases/domain/document-number/document-number";
+import type { KnownDocumentNumber } from "@/ludwig/modules/accounting-cases/domain";
 
 import { DocumentNumberField } from "../document-number/DocumentNumberField";
 import type { DocumentNumberSourceLabels } from "../document-number/document-number-labels";

@@ -47,7 +47,7 @@ import {
   CASE_KIND_LABEL,
   CASE_KIND_LOCKED_REASON,
   type CaseListItem,
-} from "@/ludwig/modules/accounting-cases/domain/cases/case";
+} from "@/ludwig/modules/accounting-cases/domain";
 
 
 /**
@@ -62,7 +62,7 @@ import {
  * marker names the backlog entry rather than local markup papering over it;
  * as of 2026-09-03 all but one of ten markers are real building blocks.
  *
- * Types come from `@/ludwig/modules/accounting-cases/domain/case` — the app's
+ * Types come from `@/ludwig/modules/accounting-cases/domain` — the app's
  * data model is the given, per `spec-schreiben` §5.
  */
 

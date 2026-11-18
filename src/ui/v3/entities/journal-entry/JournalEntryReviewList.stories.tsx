@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 
-import { reviewScore } from "@/ludwig/modules/accounting-cases/domain/review/review-score";
+import { reviewScore } from "@/ludwig/modules/accounting-cases/domain";
 import type { CheckItem } from "../../patterns/Review";
 import { BookingReview } from "./BookingReview";
 import { JournalEntryReviewList, type ProposalRow } from "./JournalEntryReviewList";

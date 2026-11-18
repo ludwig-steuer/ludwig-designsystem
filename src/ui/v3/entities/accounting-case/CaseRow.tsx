@@ -1,4 +1,4 @@
-import type { CaseListItem } from "@/ludwig/modules/accounting-cases/domain/cases/case";
+import type { CaseListItem } from "@/ludwig/modules/accounting-cases/domain";
 import { Row } from "../../primitives/Table";
 import { caseColumns, type CaseColumnOptions } from "./case-columns";
 

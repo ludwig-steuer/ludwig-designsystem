@@ -17,7 +17,7 @@ import {
   STANDARD_TAX_ACCOUNT_NUMBERS,
   taxAccountFor,
   vatRateForTaxKey,
-} from "@/ludwig/modules/accounting-cases/domain/vat/tax-keys";
+} from "@/ludwig/modules/accounting-cases/domain";
 /** The only thing this file needed from the deleted `booking/types.ts` (0043). */
 type BookingSide = "debit" | "credit";
 
