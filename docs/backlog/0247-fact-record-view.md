@@ -176,6 +176,7 @@ Variabel (Teil A):
 - [ ] lädt und Fehler ohne Sprung, Fehler mit Weg nur bei `onRetry` (`Loading`, `Error`)
 - [ ] Kein Querscroll im Drawer `md` bei 1280 px, Fokus nicht vom Sticky-Kopf verdeckt, Treffer ≥ 24 px, gemessen (`InUse`)
 - [ ] Keine lokale Definition von `FactView`: Typ aus `src/ludwig/` (L-382)
+- [ ] Ein Zeichen je Quellenart im ganzen Set (Folgeauftrag aus der S2-Abnahme von 0246): Ein gemeinsamer Export zeichnet Icon und Wort (Wort aus `fact_source_kind`) für die Buchung (`AiBookingNotes`) und die Faktenansicht. Dieselbe Art hat an Buchung und Fakt dasselbe Zeichen, auch in den `FactTable`-Stories
 
 ## Offene Fragen
 
