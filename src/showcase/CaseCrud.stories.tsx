@@ -47,7 +47,7 @@ import {
   CASE_KIND_LABEL,
   CASE_KIND_LOCKED_REASON,
   type CaseListItem,
-} from "@/ludwig/modules/accounting-cases/domain/case";
+} from "@/ludwig/modules/accounting-cases/domain/cases/case";
 
 
 /**

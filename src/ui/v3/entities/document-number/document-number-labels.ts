@@ -1,7 +1,7 @@
 import type {
   DocumentNumberSource,
   DocumentNumberState,
-} from "@/ludwig/modules/accounting-cases/domain/document-number";
+} from "@/ludwig/modules/accounting-cases/domain/document-number/document-number";
 
 /**
  * The words of the nine sources and the three states — **overrides**.

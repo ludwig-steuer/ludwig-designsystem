@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
-import type { CaseListItem } from "@/ludwig/modules/accounting-cases/domain/case";
+import type { CaseListItem } from "@/ludwig/modules/accounting-cases/domain/cases/case";
 import { CaseRow } from "./CaseRow";
 import { caseColumns, caseTracks, type CaseColumn } from "./case-columns";
 import { Card, CardHead, HeadRow, Table } from "../../primitives/Table";

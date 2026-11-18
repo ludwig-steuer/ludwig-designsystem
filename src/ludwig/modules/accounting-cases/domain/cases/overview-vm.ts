@@ -25,7 +25,7 @@ import type { ActorKind } from "@/ludwig/modules/audit-log";
 import type { JournalEntryVM } from "@/ludwig/modules/entries";
 import type { ReversalDisplay } from "@/ludwig/core/accounting/reversal-note";
 import { CASE_KIND_LABEL } from "./case";
-import type { FollowUpOf } from "./clarification-follow-up";
+import type { FollowUpOf } from "../clarification-follow-up";
 import type { VatWithoutDocumentApproval } from "./case-detail";
 import type {
   CaseDisposition,

@@ -1,8 +1,8 @@
 import type { ReactNode } from "react";
 
-import type { CaseDetail } from "@/ludwig/modules/accounting-cases/domain/case-detail";
-import type { CaseHeaderVM } from "@/ludwig/modules/accounting-cases/domain/overview-vm";
-import type { CaseKind, CaseLifecycle } from "@/ludwig/modules/accounting-cases/domain/case";
+import type { CaseDetail } from "@/ludwig/modules/accounting-cases/domain/cases/case-detail";
+import type { CaseHeaderVM } from "@/ludwig/modules/accounting-cases/domain/cases/overview-vm";
+import type { CaseKind, CaseLifecycle } from "@/ludwig/modules/accounting-cases/domain/cases/case";
 import { StatusBadge } from "../../patterns/StatusBadge";
 import { FieldList } from "../../primitives/FieldList";
 import { LongText } from "../../primitives/LongText";

@@ -6,7 +6,7 @@ import {
   isDatevSource,
   sortByDominance,
   type KnownDocumentNumber,
-} from "@/ludwig/modules/accounting-cases/domain/document-number";
+} from "@/ludwig/modules/accounting-cases/domain/document-number/document-number";
 import { resolveStatus } from "@/ludwig/ui/status/status-registry";
 import { Badge } from "../../primitives/Badge";
 import { EmptyState } from "../../primitives/EmptyState";

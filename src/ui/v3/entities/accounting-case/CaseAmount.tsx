@@ -1,4 +1,4 @@
-import type { CaseHeaderVM } from "@/ludwig/modules/accounting-cases/domain/overview-vm";
+import type { CaseHeaderVM } from "@/ludwig/modules/accounting-cases/domain/cases/overview-vm";
 import type { Currency } from "@/ludwig/shared/money";
 
 import { Amount } from "../../primitives/Amount";

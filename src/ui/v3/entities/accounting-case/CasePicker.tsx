@@ -2,8 +2,8 @@
 
 import { useMemo, useState } from "react";
 
-import type { CaseListItem } from "@/ludwig/modules/accounting-cases/domain/case";
-import { caseDisplayTitle } from "@/ludwig/modules/accounting-cases/domain/case";
+import type { CaseListItem } from "@/ludwig/modules/accounting-cases/domain/cases/case";
+import { caseDisplayTitle } from "@/ludwig/modules/accounting-cases/domain/cases/case";
 import { asCurrency, formatMoney, money } from "@/ludwig/shared/money";
 import { resolveStatus } from "@/ludwig/ui/status/status-registry";
 

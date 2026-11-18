@@ -6,7 +6,7 @@
  * Rein, keine DB. Verdrahtet in F505a: Default im Submit-Kern, Guard `taxKeyProposalGate`, Sicht in `case_context`.
  */
 import { DATEV_TAX_KEYS, REVERSE_CHARGE_CASE_LABEL } from "@/ludwig/core/datev/tax-keys";
-import { REVERSE_CHARGE_ASSIST_TAX_KEYS } from "./tax-keys";
+import { REVERSE_CHARGE_ASSIST_TAX_KEYS } from "./vat/tax-keys";
 import type { VatFact, VatRuleResult } from "./vat-rules";
 import type { VatAssessmentStatus, VatTreatment } from "./vat-treatment";
 

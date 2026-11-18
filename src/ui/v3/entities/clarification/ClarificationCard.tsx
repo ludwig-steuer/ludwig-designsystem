@@ -7,8 +7,8 @@ import {
   MAX_DEFERRAL_DAYS,
   clarificationModuleLabel,
   clarificationQuestionTypeLabel,
-} from "@/ludwig/modules/accounting-cases/domain/case";
-import type { RationaleSourceKind } from "@/ludwig/modules/accounting-cases/domain/rationale-source";
+} from "@/ludwig/modules/accounting-cases/domain/cases/case";
+import type { RationaleSourceKind } from "@/ludwig/modules/accounting-cases/domain/review/rationale-source";
 import type { Actor } from "@/ludwig/modules/audit-log/domain/types";
 
 import type { Currency } from "@/ludwig/shared/money";

@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
-import type { CaseListItem } from "@/ludwig/modules/accounting-cases/domain/case";
+import type { CaseListItem } from "@/ludwig/modules/accounting-cases/domain/cases/case";
 import { CaseList, type CaseListTab } from "./CaseList";
 import type { CaseColumn } from "./case-columns";
 import { AppShell, TopBar } from "../../primitives/AppShell";

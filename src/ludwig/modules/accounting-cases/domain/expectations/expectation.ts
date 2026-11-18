@@ -11,8 +11,8 @@
 // `ExpectationKind` steht in `case.ts` neben `EXPECTATION_KINDS`, das den
 // Wertebereich führt. Eine zweite Definition hier wäre eine zweite Wahrheit
 // über dieselben zwei Werte (L-210).
-export type { ExpectationKind } from "./case";
-import type { ExpectationKind } from "./case";
+export type { ExpectationKind } from "../cases/case";
+import type { ExpectationKind } from "../cases/case";
 export type ExpectationDirection = "incoming" | "outgoing";
 export type DueSource = "invoice_due_date" | "payment_term" | "client_default";
 /** Wer die Unterlage besorgt. Kein `agent` — der Agent besorgt keine Belege. */

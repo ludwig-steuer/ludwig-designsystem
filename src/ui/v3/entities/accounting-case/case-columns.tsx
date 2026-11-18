@@ -1,4 +1,4 @@
-import { caseKindLabel, type CaseListItem } from "@/ludwig/modules/accounting-cases/domain/case";
+import { caseKindLabel, type CaseListItem } from "@/ludwig/modules/accounting-cases/domain/cases/case";
 import type { ColumnDef } from "../../patterns/DataTable";
 import { StatusBadge } from "../../patterns/StatusBadge";
 import { StatusInfoButton } from "../../patterns/StatusInfoButton";

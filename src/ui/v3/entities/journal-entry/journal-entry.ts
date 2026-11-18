@@ -8,7 +8,7 @@ import { deriveTax } from "./tax-assist";
 import {
   STANDARD_TAX_ACCOUNT_NUMBERS,
   TAX_ACCOUNT_NUMBERS,
-} from "@/ludwig/modules/accounting-cases/domain/tax-keys";
+} from "@/ludwig/modules/accounting-cases/domain/vat/tax-keys";
 
 /**
  * What the reading grid and the editor share — the data, not the markup.

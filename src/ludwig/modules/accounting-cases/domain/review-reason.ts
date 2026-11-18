@@ -1,4 +1,4 @@
-import type { ReviewReason } from "./review-score";
+import type { ReviewReason } from "./review/review-score";
 
 /**
  * F355/F357 — der **Prüfgrund**: der stärkste Grund aus dem Prüfbedarf-Score,
