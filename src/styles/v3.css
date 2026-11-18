@@ -4569,6 +4569,14 @@ a.v3prov:focus-visible { text-decoration: underline; }
    hyphen („INV-2026-|0412", seen in the drawer `md`). */
 .v3fact__src .v3prov__sources li { row-gap: 0; align-items: flex-start; }
 .v3fact__src .v3prov__quote { flex-basis: 100%; }
+/* S2 · the certainty is a grey word, no colour, no dot (F678: assumptions
+   are neutral); one line, so the column is as wide as „angenommen". */
+.v3fact__cert { color: var(--color-text-muted); white-space: nowrap; }
+/* „gilt ab 01.01.2026" — its own line under the value. */
+.v3fact__valid { display: block; }
+/* One step for the whole line: `Time`/`DateRange` set their own size, which
+   put the date at 12.5 next to „gilt ab" at 11.5 (acceptance 0246 S2-M1). */
+.v3fact__valid .v2time { font-size: inherit; }
 /* The source as a target of 24 px (I8), link or button alike: the padding
    makes the height, the same negative margin gives it back, so the text stays
    on the line of label and value — on one line and on three (measured, 0238). */

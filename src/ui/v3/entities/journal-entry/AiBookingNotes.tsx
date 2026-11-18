@@ -19,6 +19,7 @@ import { Confidence, type ConfidenceLevel } from "../../patterns/Confidence";
 import { StateIcon, type StateKind } from "../../patterns/Review";
 import { StatusInfoButton } from "../../patterns/StatusInfoButton";
 import { resolveStatus } from "@/ludwig/ui/status/status-registry";
+import type { FactSourceKind } from "@/ludwig/modules/fact-records/domain/fact-source";
 import { ProvenanceRows, type ProvenanceSource } from "../../patterns/Provenance";
 import { StatusBadge } from "../../patterns/StatusBadge";
 
@@ -58,14 +59,20 @@ export type SourceKind =
   | "law"
   | "web";
 
-const SOURCE_KIND: Record<SourceKind, { Icon: LucideIcon; label: string }> = {
-  bank: { Icon: Banknote, label: "Kontoauszug" },
-  document: { Icon: FileText, label: "Beleg" },
-  history: { Icon: History, label: "Bisherige Buchungen" },
-  clarification: { Icon: HelpCircle, label: "Rückfrage" },
-  rule: { Icon: Ruler, label: "Regel" },
-  law: { Icon: Scale, label: "Gesetz" },
-  web: { Icon: Globe, label: "Web" },
+/**
+ * The sign per kind stays here (an exempt enumeration in `check:icons`); the
+ * **word** comes from the app's axis `fact_source_kind` (0246 S2, L-381) —
+ * the same words the facts of the review show, so a source is called the same
+ * at an entry and at a fact.
+ */
+const SOURCE_KIND: Record<SourceKind, { Icon: LucideIcon; kind: FactSourceKind }> = {
+  bank: { Icon: Banknote, kind: "bank_transaction" },
+  document: { Icon: FileText, kind: "source_doc" },
+  history: { Icon: History, kind: "vendor_history" },
+  clarification: { Icon: HelpCircle, kind: "clarification" },
+  rule: { Icon: Ruler, kind: "rule" },
+  law: { Icon: Scale, kind: "law" },
+  web: { Icon: Globe, kind: "web" },
 };
 
 /**
@@ -216,11 +223,11 @@ export function aiSourcesToProvenance(sources: readonly AiSource[]): ProvenanceS
 
 /** Icon and word of a source kind — the vocabulary of this entity, not of the pattern. */
 function SourceKindMark({ art }: { art: SourceKind }) {
-  const { Icon, label } = SOURCE_KIND[art];
+  const { Icon, kind } = SOURCE_KIND[art];
   return (
     <>
       <Icon size={13} strokeWidth={1.5} />
-      <span className="ki__art">{label}</span>
+      <span className="ki__art">{resolveStatus("fact_source_kind", kind).label}</span>
     </>
   );
 }
