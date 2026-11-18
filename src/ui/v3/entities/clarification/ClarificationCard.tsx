@@ -25,6 +25,8 @@ import { TextButton } from "../../primitives/TextButton";
 import { useFocusOnNewRecord } from "../../primitives/focus";
 import { DateRange, Time } from "../../primitives/Time";
 import { ActionIcon, EntityIcon, type EntityKey } from "../../Icons";
+import { FactTable } from "../../patterns/FactTable";
+import type { ProvenanceSource } from "../../patterns/Provenance";
 import { StatusBadge } from "../../patterns/StatusBadge";
 import { resolveStatus } from "@/ludwig/ui/status/status-registry";
 import { ChoicePrompt, type ChoiceAnswer } from "../../patterns/ChoicePrompt";
@@ -397,40 +399,41 @@ function EvidenceTable({ cols, head, children }: { cols: string; head: string[];
 }
 
 /**
- * The facts as one compact table, with or without sources (0238, llcto for the
- * owner 2026-11-02: an overview is a table). Only the source cell is a target:
- * the row is the fact, the source the way to check it.
+ * The facts as the set's one fact table (0238, since 0246 `FactTable`): the
+ * same form as the facts an entry rests on in the review. A source with kind
+ * and id opens like a row under „Weitere Quellen", one with `href` links, the
+ * rest stays text.
  */
 function Facts({ facts, select }: { facts: NonNullable<ClarificationDetailVM["facts"]>; select: Select }) {
-  const withSource = facts.some((f) => f.source);
   return (
-    <EvidenceTable
-      cols={withSource ? "minmax(0, 1fr) minmax(0, 1fr) minmax(0, 1.25fr)" : "minmax(0, 1fr) minmax(0, 1.4fr)"}
-      head={withSource ? ["Bezeichnung", "Wert", "Quelle"] : ["Bezeichnung", "Wert"]}
-    >
-      {facts.map((f, i) => (
+    <FactTable
+      facts={facts.map((f, i) => ({
         // The app's order is the key: labels may repeat („Betrag" twice).
-        <Row key={i}>
-          <span className="v2clc__factcell">{f.label}</span>
-          <span className="v2clc__factcell lw-numeric">{f.value}</span>
-          {withSource ? (
-            <span className="v2clc__factcell">
-              {f.source ? (
-                <Pick
-                  kind={f.source.kind ?? "other"}
-                  row={{ id: f.source.id ?? f.source.label, href: f.source.href }}
-                  select={f.source.kind && f.source.id ? select : undefined}
-                  inRow={false}
-                >
-                  {f.source.label}
-                </Pick>
-              ) : null}
-            </span>
-          ) : null}
-        </Row>
-      ))}
-    </EvidenceTable>
+        key: String(i),
+        label: f.label,
+        value: f.value,
+        ...(f.source ? { sources: [factSource(f.source, select)] } : {}),
+      }))}
+    />
   );
+}
+
+/**
+ * No kind before the name: the app's label already names it („Beleg
+ * RE-2026-4471", „Buchung vom 18.07.2026"). The entity's word before it read
+ * „Beleg Beleg RE-2026-4471", the sign alone would be an icon without a word
+ * (T8) — both seen in the build of 0246. The kind comes once these facts carry
+ * the fact record's sources, whose label does not name it (0246 S2).
+ */
+function factSource(s: ClarificationFactSource, select: Select): ProvenanceSource {
+  const { kind, id } = s;
+  return {
+    key: s.id ?? s.label,
+    kind: null,
+    label: s.label,
+    ...(s.href ? { href: s.href } : {}),
+    ...(kind && id && select ? { onOpen: () => select({ kind, id }) } : {}),
+  };
 }
 
 /** The two answers of a yes/no question: keys for the app, words for the reader (0222 Nachtrag). */

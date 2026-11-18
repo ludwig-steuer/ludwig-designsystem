@@ -919,7 +919,7 @@ export const StepPaging: Story = {
 function useFactsOpen() {
   useEffect(() => {
     for (const d of document.querySelectorAll<HTMLDetailsElement>("details.v2disc")) {
-      if (d.querySelector(":scope > .v2disc__body .v2clc__factcell")) d.open = true;
+      if (d.querySelector(":scope > .v2disc__body .v3fact__cell")) d.open = true;
     }
   }, []);
 }

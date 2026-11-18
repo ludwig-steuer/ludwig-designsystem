@@ -623,6 +623,24 @@ Fehler, öffnet den Rahmen und zeigt darin die Kern-Fakten aus derselben
 Komponente wie die Vollansicht — plus genau einen Ausgang dorthin. Name,
 Aufbau und die vier Zustände: `web-ui-regeln.md` R15 (Muster `BelegDrawer`, F113).
 
+**Fakten über Entitäten hinweg (2026-11-18, 0246):** Ein Fakt (Bezeichnung ·
+Wert · Quelle, ab Schritt 2 auch Sicherheit und Gültigkeit) hat **eine** Form,
+das Pattern `FactTable`. Es ist keine Form einer Entität: Dieselbe Tabelle
+trägt die Grundlage einer Rückfrage (`ClarificationCard`, 0238) und die
+Fakten, auf denen eine Buchung beruht (Faktenansicht der Abnahme, App F678).
+Gruppen (Beleg · Rechnungsposition · Geschäftspartner · Mandant · Zahlung ·
+Serie) setzt der Aufrufer als Köpfe darüber. Nicht zu verwechseln mit
+`<Entity>Facts` (`CaseFacts`, `SourceDocumentFacts` …): Das sind die Felder
+**einer** Entität als Bezeichnung und Wert (`FieldList`), ohne Quelle.
+
+**Ein Quellname, eine Gestalt (2026-11-18, 0246):** In jeder Quellenliste
+(`ProvenanceSources`, also auch `BookingReview` und die KI-Buchungshinweise)
+steht der Name einer Quelle gleich, ob er daneben öffnet (Button) oder
+wegführt (Link): Gewicht 400, linksbündig, Unterstreichung beim Hover (der
+Link nimmt dazu die globale Hover-Farbe aus `tokens.css`, der Button nicht). Bis
+dahin stand ein öffnender Quellname als `v2link` in 600 und zentriert. Die
+Fundstelle („S. 2“) steht grau hinter dem Namen, ohne Trennzeichen.
+
 ### 4.5 Vorschlag für neue R-Regeln in `docs/topics/web-ui.md`
 
 Zur Abnahme vorgelegt, **nicht** selbst eingetragen (F111 Nicht-Scope):

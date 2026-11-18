@@ -24,9 +24,14 @@ import { Confidence, type ConfidenceLevel } from "./Confidence";
 
 export interface ProvenanceSource {
   key: string;
-  /** Icon and word of the kind — from the caller. */
+  /** Icon and word of the kind — from the caller. Without one (`null`) the name stands alone. */
   kind: ReactNode;
   label?: string | null;
+  /**
+   * Where inside the source — „S. 2", „Position 3", „Feld Rechtsform" (0246).
+   * Worded by the caller: the pattern reads no page box and no line id.
+   */
+  locator?: string | null;
   quote?: string | null;
   /** The way to the source; without it the source is text. */
   href?: string | null;
@@ -179,27 +184,36 @@ export function ProvenanceNote({
  * the row „Quellen" in `ProvenanceRows`, for a surface that names it with its
  * own heading (0232: the section „Begründung" of `BookingReview`).
  *
- * @when    The sources of a reason under a heading of their own.
- * @instead Origin, rule, reason and sources together as label/value rows → ProvenanceRows.
+ * @when    The sources of a reason under a heading of their own; the sources
+ *          of one fact, with the place inside them (`locator`).
+ * @instead Origin, rule, reason and sources together as label/value rows →
+ *          ProvenanceRows. Many facts, each with its sources → FactTable.
  */
 export function ProvenanceSources({ sources }: { sources: readonly ProvenanceSource[] }) {
   return (
     <ul className="v3prov__sources">
       {sources.map((s) => (
         <li key={s.key}>
-          <span className="v3prov__kind">{s.kind}</span>
-          {/* Opening beside beats jumping away (0151): where the caller has
-              a drawer, the source is a button; where it has a URL, a link;
-              otherwise it stays text. */}
-          {s.onOpen ? (
-            <button type="button" className="v2link" onClick={s.onOpen}>
-              {s.label ?? "öffnen"}
-            </button>
-          ) : s.href ? (
-            <Link href={s.href}>{s.label ?? "öffnen"}</Link>
-          ) : s.label ? (
-            <span>{s.label}</span>
-          ) : null}
+          {s.kind ? <span className="v3prov__kind">{s.kind}</span> : null}
+          {/* Name and place in one run of text: the place wraps like words under
+              the name (0246). No „·" between them — a button cannot be glued to
+              the text after it, and a dot would open the wrapped line. The
+              grey sets the place apart from the name. */}
+          <span className="v3prov__name">
+            {/* Opening beside beats jumping away (0151): where the caller has
+                a drawer, the source is a button; where it has a URL, a link;
+                otherwise it stays text. */}
+            {s.onOpen ? (
+              <button type="button" className="v2link" onClick={s.onOpen}>
+                {s.label ?? "öffnen"}
+              </button>
+            ) : s.href ? (
+              <Link href={s.href}>{s.label ?? "öffnen"}</Link>
+            ) : s.label ? (
+              <span>{s.label}</span>
+            ) : null}
+            {s.locator ? <> <span className="v3prov__loc">{s.locator}</span></> : null}
+          </span>
           {s.quote ? <span className="v3prov__quote">„{s.quote}“</span> : null}
         </li>
       ))}

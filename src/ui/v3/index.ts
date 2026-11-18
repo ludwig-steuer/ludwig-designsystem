@@ -301,6 +301,7 @@ export {
   type Provenance,
   type ProvenanceSource,
 } from "./patterns/Provenance";
+export { FactTable, type FactTableRow } from "./patterns/FactTable";
 export { Timeline, type TimelineItem } from "./patterns/Timeline";
 export {
   ChoicePrompt,

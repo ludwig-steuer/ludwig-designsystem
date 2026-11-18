@@ -23,6 +23,7 @@ import type { ReactNode } from "react";
  *          (`surface`/`soft`) or free-standing inside one (`bare`); sentences
  *          as values with `values="prose"`.
  * @instead Values that get edited → Field. Many records of the same kind → Table.
+ *          Facts with their source (and certainty) → FactTable.
  */
 export function FieldList({
   title,
