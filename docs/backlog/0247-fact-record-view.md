@@ -196,6 +196,39 @@ Variabel (Teil A):
    `detail`, `evidence[].value` optional, Fakt mit `decidedByAgent`;
    `editable`/`options` erst mit Teil B. Oben eingearbeitet.
 
+## Nachträge im Bau von Teil A (Spec-Autor, 2026-11-18)
+
+Gebaut auf dem DS-Branch `booking-v3` (Typ F678a nur dort gespiegelt,
+`26ec869`). Was anders wurde als oben, mit Grund:
+
+1. **Satz ohne `JournalEntryCard`:** Die Zeilen kommen fertig formatiert
+   (`account` „Nummer Name“, `amount` als Text, F678a). `JournalEntryCard`
+   braucht Zahl und Kontonummer getrennt, und das Set rechnet nicht zurück.
+   Die Ansicht zeigt die Zeilen deshalb als eigene kompakte Tabelle in
+   DATEV-Ordnung (Konto · Soll · Haben · BU, Beträge rechts in `tnum`, BU in
+   Mono). Gleich auszusehen wie überall ist das Ziel → L-383.
+2. **„Von Hand“ ohne Vergleich:** Das VM trägt für eine Buchung von Hand
+   keinen abgeleiteten Satz. Die Prop `bookedByHand` und die `DiffView`
+   gebucht ↔ abgeleitet entfallen in Teil A. `ByHand` zeigt die Herkunft
+   „Manuell“ und die Fakten → Ausbau, wenn das VM den abgeleiteten Satz
+   liefert (L-383).
+3. **Namen:** `renderSourceOpen` heißt `openSource`. Die Story `Error` heißt
+   `LoadError`, weil der Exportname sonst das globale `Error` überdeckt.
+4. **`InUse` ohne Liste dahinter:** Die Abnahme-Liste ist die Seite der App
+   (F678b). Die Story misst die Leiste in ihrer Breite `md` und den Weg
+   „Quelle öffnet daneben“.
+5. **Ergebnis als Karte:** `Card` mit `CardHead` „Ergebnis“ und `FieldList`
+   `bare`/`prose`, damit es wie die anderen Abschnitte aussieht und die
+   Werte (Text) links stehen. Ein `FieldList` mit eigenem Titel stand
+   rechtsbündig und mit anderem Kopf (gesehen im Bau).
+6. **Ein Zeichen je Quellenart:** `FactSourceKindMark` (in `AiBookingNotes`,
+   der freigestellten Aufzählung) zeichnet jede Art für Buchung und Fakt.
+   Wo die Art eine Entität ist, ist das Zeichen das der Entität. Sichtbar an
+   den KI-Buchungshinweisen: Beleg, Kontoauszug und Rückfrage tragen jetzt
+   die Entitätszeichen statt `FileText`, `Banknote`, `HelpCircle`.
+7. **`OpenPoints` um `headingLevel`** (eine Prop, §3 Regel 2): im Drawer `h3`
+   unter dessen `h2` (A14).
+
 ## Abnahme
 
 | Kriterium | Nachweis (Story-ID · Befehl · Screenshot) | Ergebnis |
