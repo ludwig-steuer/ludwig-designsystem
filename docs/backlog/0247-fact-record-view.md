@@ -70,19 +70,24 @@ festgelegt, die Namen sind vorläufig. Der Typ gehört nach `src/ludwig/`
 | Prop | Typ | Pflicht | Bedeutung | Nachweis (Story) |
 |---|---|---|---|---|
 | `view` | `FactView` (L-382) | ja | Satz, Herkunft, vorläufig, Ergebnis, offene Punkte, Gruppen mit Fakten | `WithAssumptions` |
-| `view.entry.decidedBy` | Achse `journal_entry_origin_method` | ja | `StatusBadge` neben „Buchungssatz“ | `WithAssumptions`, `ByHand` |
+| `view.entry.originMethod` | Achse `journal_entry_origin_method` | ja | `StatusBadge` neben „Buchungssatz“ (app-f0: `originMethod` statt `decidedBy`) | `WithAssumptions`, `ByHand` |
 | `view.entry.provisional` | `boolean` | ja | `Callout` Hinweis „Vorläufig gebucht: Der Satz ruht auf einem offenen Punkt.“ unter dem Satz | `Provisional` |
-| `view.openPoints` | Liste | ja | `OpenPoints` ganz oben, Titel „Offen“. Je Punkt: Bezeichnung des Fakts, Grund (Achse), wer am Zug ist (`case_disposition`). Bei `contradictory` darunter eine `FactTable` mit je einer Zeile je Quelle und ihrem eigenen Wert | `OpenPoint` |
-| `view.result` | Liste | ja | `FieldList`: Bezeichnung, Wert, darunter „aus: Land des Lieferanten, Verwendung“ als Wortverweise | `WithAssumptions`, `BackReference` |
+| `view.openPoints` | Liste mit `id`, `detail` | ja | `OpenPoints` ganz oben, Titel „Offen“, Schlüssel `id`. Je Punkt: Bezeichnung des Fakts, `detail` als Satz darunter, Grund (Achse), wer am Zug ist (`case_disposition`). Bei `contradictory` darunter eine `FactTable` mit je einer Zeile je `evidence`-Eintrag und dessen `value` (ohne `value`: „—“) | `OpenPoint` |
+| `view.result` | Liste mit `key` | ja | `FieldList`: Bezeichnung, Wert, darunter „aus: Land des Lieferanten, Verwendung“ als Wortverweise; `key` ist der Schlüssel der Markierung | `WithAssumptions`, `BackReference` |
 | `view.groups` | Liste | ja | Je Gruppe mit mindestens einem Fakt `usedForResult` eine Karte in der Reihenfolge der Achse `fact_group`. Die übrigen Fakten stehen nach Gruppen unter „Weitere Angaben“ | `WithAssumptions`, `AllCertain` |
-| `view` = `null` | — | — | Buchung aus der Zeit vor v3: ein Satz statt leerer Gruppen | `NoFactRecord` |
-| `legacy` | `ReactNode` | nein | Was bei `view = null` darunter steht, die heutige „Begründung“ mit Quellen aus `BookingReview`. Nichts geht verloren (Owner 2026-09-29) | `NoFactRecord` |
-| `state` | `"ready" \| "loading" \| "error"` | nein | lädt: Skeleton in der Form der Ansicht; Fehler: Satz mit „Erneut laden“ | `Loading`, `Error` |
+| `view.state = "no_fact_record"` | — | — | Buchung aus der Zeit vor v3: ein Satz statt leerer Gruppen (app-f0: Feld `state` am Kopf statt `view = null`) | `NoFactRecord` |
+| `legacy` | `ReactNode` | nein | Was bei `no_fact_record` darunter steht: die heutige „Begründung“ mit Quellen aus `BookingReview`. Nichts geht verloren (Owner 2026-09-29) | `NoFactRecord` |
+| `load` | `"loading" \| "error"` | nein | Ohne Angabe: geladen. lädt: Skeleton in der Form der Ansicht. Fehler: Satz mit „Erneut laden“. Heißt nicht `state`, weil das VM selbst `state` trägt | `Loading`, `Error` |
 | `onRetry` | `() => void` | nein | Weg aus dem Fehler; ohne ihn steht kein Knopf | `Error` |
 | `renderSourceOpen` | `(source) => (() => void) \| undefined` | nein | Öffnet eine Quelle daneben (Beleg-, Bankumsatz-Drawer); ohne ihn linkt `href` | `InUse` |
 | `bookedByHand` | `JournalLine[]` | nein | Von Hand gebucht: `DiffView` „Gebucht (von Hand)“ ↔ „Abgeleitet“ statt der einen Karte | `ByHand` |
 
-Typen: `FactView` (L-382). `Certainty`, `FactSource`, `FactSourceKind` aus
+Typen: `FactView` (L-382; App F678a, `modules/fact-records/domain/fact-view.ts`
+mit Zod-Schema). Alle Werte kommen fertig formatiert als deutsche
+Zeichenketten (Wert, Betrag, Datum, `locator`); das Set rechnet und übersetzt
+nichts. Die Wörter für Sicherheit, Gruppe, Grund, Quellenart und Herkunft
+kommen aus den Achsen. `entry.assumedCount` und der Fakt-Schalter
+`decidedByAgent` liegen im VM, zeigt Teil A aber nicht (siehe Ausbau). `Certainty`, `FactSource`, `FactSourceKind` aus
 `@/ludwig/modules/fact-records/domain/`. `JournalLine` aus dem Set.
 GLOSSARY: Faktensatz (`fact record`), offener Punkt (`open point`), Serie
 (`series`).
@@ -150,6 +155,7 @@ kommt laut F668 nicht vor.
 | Die Klappzeile im Schritt „Buchungen“ zeigt unter „Begründung“ die Ergebniszeilen mit „aus:“ (F678 W) | `BookingReviewEntry.result` und das Ergebnis als eigener Export `FactResult` | App-Spec der Faktenansicht |
 | Zeilenmarke in der Abnahme-Liste: Herkunft und Zahl der Annahmen und offenen Punkte | eine Unterzeile in `JournalEntryReviewList`, keine neue Spalte | Owner-Durchsicht Schritt 1 des Ablaufs |
 | Entitätsprofil Faktensatz | `docs/entitaeten/fact-record.md` | staging hat Faktensätze |
+| Wer einen Fakt gesetzt hat (`decidedByAgent`), für die Nachprüfung je Entscheidung | eine Marke an der `FactTable`-Zeile; das Wort kommt aus einer Achse der App | App-Spec der Nachprüfung je Entscheidung |
 
 ## Abnahmekriterien
 
@@ -172,24 +178,23 @@ Variabel (Teil A):
 - [ ] Widerspruch als zwei Zeilen mit je eigenem Wert und eigener Quelle (`OpenPoint`)
 - [ ] „aus:“ als Wörter, Klick markiert und fokussiert, Live-Region sagt an, Esc hebt erst die Markierung auf (`BackReference`)
 - [ ] `FactTable marked` gebaut, mit `@when` in einem Halbsatz und Story in `FactTable.stories` (Erweiterung 0246)
-- [ ] `NoFactRecord` zeigt den Satz und `legacy`, keine leeren Gruppen
-- [ ] lädt und Fehler ohne Sprung, Fehler mit Weg nur bei `onRetry` (`Loading`, `Error`)
+- [ ] `NoFactRecord` (`view.state = "no_fact_record"`) zeigt den Satz und `legacy`, keine leeren Gruppen
+- [ ] lädt und Fehler über `load`, ohne Sprung; Fehler mit Weg nur bei `onRetry` (`Loading`, `Error`)
 - [ ] Kein Querscroll im Drawer `md` bei 1280 px, Fokus nicht vom Sticky-Kopf verdeckt, Treffer ≥ 24 px, gemessen (`InUse`)
 - [ ] Keine lokale Definition von `FactView`: Typ aus `src/ludwig/` (L-382)
 - [ ] Ein Zeichen je Quellenart im ganzen Set (Folgeauftrag aus der S2-Abnahme von 0246): Ein gemeinsamer Export zeichnet Icon und Wort (Wort aus `fact_source_kind`) für die Buchung (`AiBookingNotes`) und die Faktenansicht. Dieselbe Art hat an Buchung und Fakt dasselbe Zeichen, auch in den `FactTable`-Stories
 
-## Offene Fragen
+## Entschieden (app-f0, 2026-11-18)
 
-1. **Wohin führt „Fakt ändern“, wenn die Leiste schon offen ist?** Bearbeiten
-   gehört nach I2 ins Detail. R15 erlaubt einen Editor in einem Drawer der
-   Klasse B. *Ohne Antwort:* in der Leiste (Teil B), wie im Brief; der
-   Kontext Liste bleibt sichtbar.
-2. **Breite `md` oder `lg`?** Mit Vorschau (Teil B) stehen zwei Sätze
-   nebeneinander. *Ohne Antwort:* `md` für Teil A, `lg` erst, wenn die
-   Vorschau gemessen nicht passt.
-3. **Wo erscheint die Zahl der Annahmen?** Nur an der Zeile der Liste (Brief
-   Schritt 1) oder auch im Kopf der Leiste? *Ohne Antwort:* nur an der Zeile.
-   In der Leiste stehen die Annahmen selbst.
+1. **Bearbeiten in der Leiste** (R15 Klasse B), nicht im Detail; die Liste
+   bleibt sichtbar (Teil B).
+2. **Drawer `md`**; `lg` erst, wenn die Vorschau (Teil B) gemessen nicht passt.
+3. **Zahl der Annahmen nur an der Zeile der Liste.** Das VM liefert
+   `assumedCount` trotzdem, für die Liste.
+4. **VM-Form F678a** (Abweichungen vom Brief): `entry.originMethod`,
+   `state` am Kopf, Ergebniszeile mit `key`, offener Punkt mit `id` und
+   `detail`, `evidence[].value` optional, Fakt mit `decidedByAgent`;
+   `editable`/`options` erst mit Teil B. Oben eingearbeitet.
 
 ## Abnahme
 
