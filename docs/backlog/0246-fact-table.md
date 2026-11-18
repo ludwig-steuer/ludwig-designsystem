@@ -8,7 +8,7 @@
 | Quelle | app-f0, F678-Brief (App `docs/backlog/F678-fact-view-design-brief.md`, Nachtrag 2026-11-18): „Eine Darstellung für die Faktenzeile (Bezeichnung, Wert, Sicherheit, Quellen)“. Konzept App `docs/concepts/booking-process.md` §7, Datenform F668 T668.2 |
 | Ersetzt | im Set die lokale Funktion `Facts` in `ClarificationCard.tsx` (0238). In der App heute nichts, die Faktenansicht F678 ist noch nicht gebaut |
 | Blockiert | die DS-Seite der Faktenansicht F678 (eigene Spec nach der Owner-Durchsicht des Ablaufs) |
-| Wartet auf | Schritt 2: L-380 (Typen und Achse `fact_certainty` im Spiegel) |
+| Wartet auf | Schritt 2: L-380 und L-381, beide mit App-Spec F681 (Achsen `fact_certainty`, `fact_source_kind`) auf `booking-v3`; app-f0 meldet den Commit zum Spiegeln |
 | Spec von / am | Designer-Sitzung, 2026-11-18 |
 
 ## Ziel
@@ -129,7 +129,7 @@ Spiegel (S2, L-380). GLOSSARY: `fact` = Fakt, `certainty` = Sicherheit,
   `kind` = Icon und Wort aus `ENTITY_ICON` über `PANEL_ICON` (fehlt die Art,
   steht kein Zeichen), `label`, `href`, `onOpen` = `select({ kind, id })`, wo
   Art, Kennung und `onSelect` da sind. Damit steht an der Quelle neu die Art
-  vor dem Namen („Beleg · Rechnung 93846778“), siehe Offene Frage 1. Sonst
+  vor dem Namen („Beleg · Rechnung 93846778“), siehe Entschieden 1. Sonst
   ändert sich nichts: Ort, Einklappen (0241) und Reihenfolge bleiben.
 - **S2 Sicherheit:** Das Wort steht in `--color-text-muted` (#5C5C5C, 6,7:1
   auf Weiß). Kein neuer Token. `unknown` mit `value: null` zeigt „—“ und
@@ -164,7 +164,6 @@ Nicht anwendbar, mit Grund:
 |---|---|---|
 | Rückverweis: Die Ergebniszeile nennt „aus: Land des Lieferanten“, ein Klick fokussiert und markiert die Fakten | `marked?: readonly string[]` (Hintergrund „ausgewählt“, Zeile `tabIndex={-1}` als Fokusziel) | DS-Spec der Faktenansicht F678 |
 | Wert ändern mit Vorschau | `onEdit?: (key, value) => void`, je Zeile `editable`, `options` aus dem Kontrakt; Eingabe über `Select`/`RadioGroup`/`Input` | F678 nach der Owner-Durchsicht des Ablaufs (Schritt 4) |
-| Die Art der Quelle aus einer Achse statt aus `SOURCE_KIND` | keine Prop, das Wort kommt aus der Registry | L-381 erledigt |
 
 ## Abnahmekriterien
 
@@ -197,24 +196,19 @@ Variabel, S2 (nach L-380):
 - [ ] Die Sicherheit kommt aus `resolveStatus("fact_certainty", …)`, der Kopf aus `AXIS_LABEL` als `StatusHeader` mit Legende. Keine Wortliste im Set (`Certainty`)
 - [ ] Alle fünf Wörter grau, keine Farbe, kein Punkt (`Certainty`, Blick)
 - [ ] Gültigkeit als Unterzeile mit `DateRange`, drei Formen (`Validity`)
-- [ ] `SourceKind` kennt die neuen Arten aus F668 `FACT_SOURCE_KINDS` und `accounting_review` mit Wort und Icon (Offene Frage 2)
+- [ ] Das Wort der Quellenart kommt aus der Achse `fact_source_kind` (F681), für die Faktentabelle **und** für `AiBookingNotes`/`BookingReview`: `SOURCE_KIND` behält nur das Icon je Art (`ENTITY_ICON`, wo es die Entität gibt), die lokale Wortliste entfällt (L-381)
 
-## Offene Fragen
+## Entschieden (app-f0, 2026-11-18)
 
-1. **Steht die Art der Quelle auch in der Rückfrage vor dem Namen?** Heute
-   zeigt die Grundlage nur „Rechnung 93846778“. *Ohne Antwort:* ja. Ein Fakt
-   sieht überall gleich aus, und die Faktenansicht braucht die Art („Regel“,
-   „Gesetz“, „Geschäftspartner“ sagen sonst nichts).
-2. **Wörter der neuen Quellenarten (S2), Wortentscheid für den Owner über
-   app-f0:** `business_partner` „Geschäftspartner“ · `client_profile`
-   „Mandant“ · `contract` „Vertrag“ · `ledger_account` „Konto“ ·
-   `external_service` „Externe Prüfung“ · `default` „Standardwert“ ·
-   `accounting_review` „Kanzlei“. Name und Zeit stehen im `label`.
-   *Ohne Antwort:* so, die Icons aus `ENTITY_ICON`, wo es die Entität gibt.
-3. **Hebt sich „angenommen“ in der Form ab** (etwa kursiv), damit man es
-   unter zwölf Fakten findet? *Ohne Antwort:* nein. Das Wort genügt, und die
-   Zahl der Annahmen steht an der Zeile der Abnahme-Liste (F678 W4). Eine
-   zweite Form für eine neutrale Stufe wäre ein Signal ohne Kritikalität.
+1. **Art der Quelle auch in der Rückfrage vor dem Namen:** ja, kein Einspruch.
+   Ein Fakt sieht überall gleich aus.
+2. **Wörter der Quellenarten:** kommen als Achse `fact_source_kind` mit App-Spec
+   F681, nicht als Liste im Set. Die Wörter liegen dem Owner als Punkt 13 des
+   Plans Booking v3 vor. Drei weichen vom heutigen Set ab („Bankumsatz“ statt
+   „Kontoauszug“, „Frühere Buchungen“ statt „Bisherige Buchungen“, „Webseite“
+   statt „Web“); das ist an app-f0 gemeldet und gehört in dieselbe Durchsicht.
+3. **„angenommen“ ohne eigene Form:** ohne Einspruch wie vorgeschlagen. Das
+   Wort genügt, die Zahl der Annahmen steht an der Zeile der Abnahme-Liste.
 
 ## Abnahme
 
