@@ -28,10 +28,15 @@ export type FactViewPartyOnTurn = (typeof FACT_VIEW_PARTIES_ON_TURN)[number];
 export const FACT_VIEW_ENTRY_SIDES = ["debit", "credit"] as const;
 export type FactViewEntrySide = (typeof FACT_VIEW_ENTRY_SIDES)[number];
 
-/** Eine Quelle für die Anzeige. `locator` ist fertiger Text („S. 2“, „Position 3“, „Feld Belegrichtung“). */
+/**
+ * Eine Quelle für die Anzeige. `locator` ist fertiger Text („S. 2“, „Position 3“, „Feld Belegrichtung“). `id` nur bei
+ * Arten mit Datensatz (Beleg, Bankumsatz, Rückfrage, Vertrag, Geschäftspartner, Konto), damit die Abnahme sie neben
+ * der Arbeit öffnen kann (F678b).
+ */
 export const FactViewSourceSchema = z
   .object({
     kind: z.enum(FACT_SOURCE_KINDS),
+    id: z.string().min(1).optional(),
     label: z.string().min(1),
     href: z.string().min(1).optional(),
     quote: z.string().min(1).optional(),
