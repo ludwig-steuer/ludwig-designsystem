@@ -28,6 +28,9 @@ export const FACT_SOURCE_KINDS_WITH_ID = [
 
 const unitInterval = z.number().min(0).max(1);
 
+/** Höchstlänge des Feldnamens einer Fundstelle `field`. */
+export const FIELD_LOCATOR_NAME_MAX = 300;
+
 /** Fundstelle in der Quelle: Fläche auf einer Seite, Rechnungszeile oder ein benanntes Feld. */
 export const FactSourceLocatorSchema = z.discriminatedUnion("type", [
   z
@@ -38,7 +41,8 @@ export const FactSourceLocatorSchema = z.discriminatedUnion("type", [
     })
     .strict(),
   z.object({ type: z.literal("invoice_line"), line_id: z.string().uuid() }).strict(),
-  z.object({ type: z.literal("field"), name: z.string().min(1).max(100) }).strict(),
+  // F734: XML-Pfade einer E-Rechnung (ZUGFeRD/CII) werden über 150 Zeichen lang.
+  z.object({ type: z.literal("field"), name: z.string().min(1).max(FIELD_LOCATOR_NAME_MAX) }).strict(),
 ]);
 export type FactSourceLocator = z.infer<typeof FactSourceLocatorSchema>;
 
