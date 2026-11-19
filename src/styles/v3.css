@@ -1938,7 +1938,10 @@ a.ki__src:hover { text-decoration: underline; color: var(--color-accent-700); }
 
 .bse { font-size: var(--fs-ui); }
 
-.bse__head {
+/* The entry's top line: document and amount, status, remainder and view
+   switch on the right — one line. Not the column head `.bse__head` below:
+   sharing that name made it a one-column grid, three lines tall (0250). */
+.bse__top {
   display: flex; align-items: center; gap: 10px;
   padding-bottom: 10px; margin-bottom: 10px;
   border-bottom: 1px solid var(--color-border-subtle);
@@ -4342,9 +4345,9 @@ button.v2oil__side:focus-visible { outline: 2px solid var(--color-focus); outlin
 
 /* ── Reading grid of the journal entry (0113) ────────────────────────────── */
 
-/* The head carries remainder and view switch on the right. The editor used an
-   inline style; here it is a class, because the grid has none. */
-.bse__head-end { margin-left: auto; display: flex; align-items: center; gap: var(--space-3); }
+/* The right end of the top line: remainder and view switch, in the editor
+   and the reading grid alike (0250). */
+.bse__top-end { margin-left: auto; display: flex; align-items: center; gap: var(--space-3); }
 /* An entry without rows is the caller's mistake — caught visibly, not laid into
    an empty surface. */
 .bse__empty { padding: var(--space-4) 0; }

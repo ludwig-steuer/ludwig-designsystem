@@ -580,13 +580,13 @@ function Head({
   // entry is not done. That is why it stands in the head, not at the end.
   const showRest = rest !== null && (full || Math.abs(rest) >= 0.005);
   return (
-    <div className="bse__head">
+    <div className="bse__top">
       <span className="bse__doc">
         {documentNumber ? `Beleg ${documentNumber}` : "Ohne Belegnummer"}
         {documentAmount == null ? "" : ` · ${euro(documentAmount)}`}
       </span>
       {status ? <StatusBadge axis="journal_entry" status={status} info={false} /> : null}
-      <span style={{ marginLeft: "auto", display: "flex", alignItems: "center", gap: 12 }}>
+      <span className="bse__top-end">
         {showRest ? (
           <span className={`bse__rest${Math.abs(rest!) < 0.005 ? " is-ok" : " is-off"}`}>
             Rest {euro(rest!)}

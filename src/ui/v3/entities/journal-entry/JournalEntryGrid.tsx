@@ -113,13 +113,13 @@ export function JournalEntryGrid({
 
   return (
     <div className="bse">
-      <div className="bse__head">
+      <div className="bse__top">
         <span className="bse__doc">
           {documentNumber ? `Beleg ${documentNumber}` : "Ohne Belegnummer"}
           {documentAmount == null ? "" : ` · ${euro(documentAmount)}`}
         </span>
         {showStatus ? <StatusBadge axis="journal_entry" status={status} info={false} /> : null}
-        <span className="bse__head-end">
+        <span className="bse__top-end">
           {rest !== null && (full || Math.abs(rest) >= 0.005) ? (
             <span className={`bse__rest${Math.abs(rest) < 0.005 ? " is-ok" : " is-off"}`}>
               Rest {euro(rest)}
