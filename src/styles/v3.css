@@ -1946,6 +1946,11 @@ a.ki__src:hover { text-decoration: underline; color: var(--color-accent-700); }
   padding-bottom: 10px; margin-bottom: 10px;
   border-bottom: 1px solid var(--color-border-subtle);
 }
+/* The right end of the top line: remainder and view switch, in the editor
+   and the reading grid alike (0250). */
+.bse__top-end { margin-left: auto; display: flex; align-items: center; gap: var(--space-3); }
+/* The view switch: 24 px tall at least (§9, WCAG 2.5.8), so the link is not a 21 px strip (0251). */
+.bse__mode { display: inline-flex; align-items: center; min-height: 24px; }
 .bse__doc { font-weight: 600; color: var(--color-text); }
 .bse__rest {
   font-family: var(--font-mono); font-size: var(--fs-ui-sm); font-weight: 600;
@@ -4345,9 +4350,6 @@ button.v2oil__side:focus-visible { outline: 2px solid var(--color-focus); outlin
 
 /* ── Reading grid of the journal entry (0113) ────────────────────────────── */
 
-/* The right end of the top line: remainder and view switch, in the editor
-   and the reading grid alike (0250). */
-.bse__top-end { margin-left: auto; display: flex; align-items: center; gap: var(--space-3); }
 /* An entry without rows is the caller's mistake — caught visibly, not laid into
    an empty surface. */
 .bse__empty { padding: var(--space-4) 0; }
@@ -4591,7 +4593,7 @@ a.v3prov:focus-visible { text-decoration: underline; }
 .v3frv__text .v2mono { font-size: inherit; color: inherit; }
 /* „aus: Land des Lieferanten, Verwendung" — a line of its own under the result. */
 .v3frv__from { display: block; }
-/* Each fact named is a button of 24 px (I8) inside running text: the padding
+/* Each fact named is a button of 24 px (§9, WCAG 2.5.8) inside running text: the padding
    makes the height, the same negative margin gives it back to the line. */
 .v3frv__ref {
   display: inline-block;
@@ -4600,7 +4602,7 @@ a.v3prov:focus-visible { text-decoration: underline; }
   font-weight: 400;
 }
 .v3frv__ref[aria-pressed="true"] { text-decoration: underline; }
-/* The source as a target of 24 px (I8), link or button alike: the padding
+/* The source as a target of 24 px (§9, WCAG 2.5.8), link or button alike: the padding
    makes the height, the same negative margin gives it back, so the text stays
    on the line of label and value — on one line and on three (measured, 0238). */
 .v3fact__src :is(a, button) {

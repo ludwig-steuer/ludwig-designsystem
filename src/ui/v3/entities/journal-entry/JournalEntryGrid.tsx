@@ -123,7 +123,6 @@ export function JournalEntryGrid({
           {rest !== null && (full || Math.abs(rest) >= 0.005) ? (
             <span className={`bse__rest${Math.abs(rest) < 0.005 ? " is-ok" : " is-off"}`}>
               Rest {euro(rest)}
-              {Math.abs(rest) < 0.005 ? " ✓" : ""}
             </span>
           ) : null}
           {/* A link, not a button: the mode is a property of the address, and
@@ -131,8 +130,8 @@ export function JournalEntryGrid({
               addresses there is no switch — and no printed key either, which
               is the case V14 forbids (0015 M5). */}
           {modeHref ? (
-            <Link className="v2link" href={full ? modeHref.simple : modeHref.full}>
-              {full ? "Einfach ◂" : "Voll ▸"}
+            <Link className="v2link bse__mode" href={full ? modeHref.simple : modeHref.full}>
+              {full ? "Einfach" : "Voll"}
             </Link>
           ) : null}
         </span>

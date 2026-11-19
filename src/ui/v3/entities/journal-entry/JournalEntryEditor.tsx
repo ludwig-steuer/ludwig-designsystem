@@ -312,7 +312,7 @@ export function JournalEntryEditor(props: JournalEntryEditorProps) {
 
       {locked ? (
         <div className="v2note v2note--soft" style={{ marginBottom: "var(--space-3)" }}>
-          <div style={{ marginBottom: locked.onAction ? 8 : 0 }}>
+          <div style={{ marginBottom: locked.onAction ? "var(--space-2)" : 0 }}>
             {locked.reason} Dieser Satz kann nicht bearbeitet werden.
           </div>
           {locked.onAction ? (
@@ -590,16 +590,15 @@ function Head({
         {showRest ? (
           <span className={`bse__rest${Math.abs(rest!) < 0.005 ? " is-ok" : " is-off"}`}>
             Rest {euro(rest!)}
-            {Math.abs(rest!) < 0.005 ? " ✓" : ""}
           </span>
         ) : null}
         <button
           type="button"
-          className="v2link"
+          className="v2link bse__mode"
           onClick={onToggleMode}
           title={full ? "Zur einfachen Sicht" : "Zur vollen Sicht — alle DATEV-Spalten"}
         >
-          {full ? "Einfach ◂" : "Voll ▸"} · Alt+V
+          {full ? "Einfach" : "Voll"} · Alt+V
         </button>
       </span>
     </div>

@@ -70,7 +70,7 @@ export const Simple: Story = {
 
 /**
  * § 13b — vier Zeilen, der Beleg ist netto. Die VSt-Zeile 1577 steht auf der
- * Belegseite, zählt aber nicht in den Rest: 8,66 gegen 8,66 → Rest 0,00 ✓ (P50).
+ * Belegseite, zählt aber nicht in den Rest: 8,66 gegen 8,66 → Rest 0,00 € (P50).
  */
 export const ReverseCharge13b: Story = {
   render: () => (
