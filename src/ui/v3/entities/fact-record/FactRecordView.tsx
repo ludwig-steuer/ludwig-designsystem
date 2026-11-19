@@ -94,8 +94,20 @@ function EntryLines({
         <Row key={i}>
           <span className="v3fact__cell">
             {l.account}
-            {l.text ? (
-              <span className="v2sub v3frv__text">{l.text}</span>
+            {/* Belegfeld 1 is the same on nearly every line of an entry, so it
+                takes no column: it leads the second line, before the text, in
+                DATEV's order (0248). */}
+            {l.documentNumber || l.text ? (
+              <span className="v2sub v3frv__text">
+                {l.documentNumber ? (
+                  <>
+                    <span className="v2vh">Belegfeld 1 </span>
+                    <span className="v2mono">{l.documentNumber}</span>
+                  </>
+                ) : null}
+                {l.documentNumber && l.text ? " · " : null}
+                {l.text}
+              </span>
             ) : null}
           </span>
           <span className="v2num lw-numeric">
@@ -315,6 +327,10 @@ export function FactRecordView({
                   r.label,
                   <span key={r.key}>
                     {r.value}
+                    {/* How the value came about, between the value and the facts it rests on (0248). */}
+                    {r.explanation ? (
+                      <span className="v2sub v3frv__text">{r.explanation}</span>
+                    ) : null}
                     {r.basedOn.length > 0 ? (
                       <span className="v2sub v3frv__from">
                         aus:{" "}

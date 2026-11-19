@@ -53,6 +53,8 @@ const FactViewEntryLineSchema = z
     amount: z.string().min(1),
     taxKey: z.string().nullable(),
     text: z.string().nullable(),
+    /** Belegfeld 1 der Zeile (F694). */
+    documentNumber: z.string().min(1).nullable(),
   })
   .strict();
 
@@ -71,6 +73,8 @@ const FactViewResultSchema = z
     key: z.string().min(1),
     label: z.string().min(1),
     value: z.string().min(1),
+    /** F694: woraus der Wert entstanden ist, ein deutscher Satz; fehlt, wenn der Satz keine Herkunft trägt. */
+    explanation: z.string().min(1).optional(),
     basedOn: z.array(z.enum(FACT_KEYS)),
   })
   .strict();

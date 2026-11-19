@@ -4582,8 +4582,10 @@ a.v3prov:focus-visible { text-decoration: underline; }
 
 /* 0247 · FactRecordView — the sections stand one under the other. */
 .v3frv { display: grid; gap: var(--space-4); }
-/* The posting text under the account, a quiet second line. */
+/* A quiet second line: number and text under the account, the origin under a result (0248). */
 .v3frv__text { display: block; }
+/* A number in a second line keeps the line's size and colour; only the face changes (0248). */
+.v3frv__text .v2mono { font-size: inherit; color: inherit; }
 /* „aus: Land des Lieferanten, Verwendung" — a line of its own under the result. */
 .v3frv__from { display: block; }
 /* Each fact named is a button of 24 px (I8) inside running text: the padding

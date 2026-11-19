@@ -27,15 +27,17 @@ const BASE: FactView = {
     provisional: false,
     assumedCount: 1,
     lines: [
-      { side: "debit", account: "4964 Aufwendungen für Lizenzen, Konzessionen", amount: "1.188,00 €", taxKey: "506", text: "Cloud Workspace 11/2026–10/2027" },
-      { side: "credit", account: "70418 Nordlicht Software Ltd.", amount: "1.188,00 €", taxKey: null, text: null },
+      { side: "debit", account: "4964 Aufwendungen für Lizenzen, Konzessionen", amount: "1.188,00 €", taxKey: "506", text: "Cloud Workspace 11/2026–10/2027", documentNumber: "INV-2026-0412" },
+      { side: "credit", account: "70418 Nordlicht Software Ltd.", amount: "1.188,00 €", taxKey: null, text: null, documentNumber: "INV-2026-0412" },
     ],
   },
   openPoints: [],
   result: [
     { key: "treatment", label: "Steuerbehandlung", value: "Leistungsempfänger schuldet die Steuer (§ 13b UStG)", basedOn: ["supplier_country", "supply_kind", "counterparty_is_business"] },
-    { key: "tax_key", label: "Steuerschlüssel", value: "506", basedOn: ["supplier_country", "supply_kind"] },
     { key: "account", label: "Konto", value: "4964 Aufwendungen für Lizenzen, Konzessionen", basedOn: ["supply_type", "use"] },
+    { key: "tax_key", label: "Steuerschlüssel", value: "506", explanation: "Sonstige Leistung eines Unternehmers aus dem übrigen Gemeinschaftsgebiet; die Steuer schuldet der Empfänger.", basedOn: ["supplier_country", "supply_kind"] },
+    { key: "document_number", label: "Belegfeld 1", value: "INV-2026-0412", explanation: "aus der Rechnungsnummer des Belegs", basedOn: [] },
+    { key: "posting_text", label: "Buchungstext", value: "Cloud Workspace 11/2026–10/2027", explanation: "wie in den früheren Buchungen der Kanzlei zu diesem Konto (Vergleich: „Nordlicht Cloud Workspace 11/2025–10/2026“)", basedOn: [] },
   ],
   groups: [
     {
@@ -105,7 +107,10 @@ export const OpenPoint: Story = {
       <FactRecordView
         view={{
           ...BASE,
-          entry: BASE.entry ? { ...BASE.entry, provisional: true } : null,
+          // The expense line has no Belegfeld 1 yet: only its text stands under the account (0248).
+          entry: BASE.entry
+            ? { ...BASE.entry, provisional: true, lines: BASE.entry.lines.map((l) => (l.side === "debit" ? { ...l, documentNumber: null } : l)) }
+            : null,
           openPoints: [
             { id: "op-1", factKey: "use", label: "Verwendung", reason: "missing", detail: "Ob das Abonnement dem eigenen Betrieb dient, steht nirgends.", onTurn: "accounting", blocksHandover: false, evidence: [] },
             {
@@ -144,11 +149,20 @@ export const Provisional: Story = {
   ),
 };
 
-/** Booked by hand: the origin says „Manuell", the facts stay visible. */
+/**
+ * Booked by hand: the origin says „Manuell", the facts stay visible. The entry
+ * carries no reasoning, so no result row says how its value came about (0248).
+ */
 export const ByHand: Story = {
   render: () => (
     <div style={FRAME}>
-      <FactRecordView view={{ ...BASE, entry: BASE.entry ? { ...BASE.entry, originMethod: "human" } : null }} />
+      <FactRecordView
+        view={{
+          ...BASE,
+          entry: BASE.entry ? { ...BASE.entry, originMethod: "human" } : null,
+          result: BASE.result.map(({ explanation: _, ...r }) => r),
+        }}
+      />
     </div>
   ),
 };
