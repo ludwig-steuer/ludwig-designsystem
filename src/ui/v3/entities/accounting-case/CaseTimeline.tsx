@@ -21,8 +21,8 @@ import {
   type CaseDisposition,
   type ClarificationType,
   type ExpectationKind,
-} from "@/ludwig/modules/accounting-cases/domain/case";
-import type { TimelineEventVM } from "@/ludwig/modules/accounting-cases/domain/overview-vm";
+} from "@/ludwig/modules/accounting-cases/domain";
+import type { TimelineEventVM } from "@/ludwig/modules/accounting-cases/domain";
 import type { Currency } from "@/ludwig/shared/money";
 import { resolveStatus } from "@/ludwig/ui/status/status-registry";
 import { calendarDay, formatAmount, formatTime } from "../../format";

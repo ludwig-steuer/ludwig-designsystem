@@ -1,12 +1,13 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { useState, type ReactNode } from "react";
 
-import { EntityIcon, type EntityKey } from "../Icons";
+import type { FactSourceKind } from "@/ludwig/modules/fact-records/domain/fact-source";
+
 import { Disclosure } from "../primitives/Disclosure";
 import { Drawer } from "../primitives/Drawer";
 import { Card, CardHead } from "../primitives/Table";
 import { FactTable, type FactTableRow } from "./FactTable";
-import type { ProvenanceSource } from "./Provenance";
+import { FactSourceKindMark, type ProvenanceSource } from "./Provenance";
 
 const meta: Meta<typeof FactTable> = {
   title: "v3/Patterns/Prüfen/FactTable",
@@ -15,17 +16,12 @@ const meta: Meta<typeof FactTable> = {
 export default meta;
 type Story = StoryObj<typeof FactTable>;
 
-/** Icon and word of a source kind — the caller's words, drawn from the icon registry. */
-const kind = (entity: EntityKey, word: string): ReactNode => (
-  <>
-    <EntityIcon entity={entity} />
-    {word}
-  </>
-);
+/** The one mark of a kind of source (0247) — as every caller draws it. */
+const kind = (source: FactSourceKind): ReactNode => <FactSourceKindMark kind={source} />;
 
 const INVOICE: ProvenanceSource = {
   key: "doc",
-  kind: kind("source-document", "Beleg"),
+  kind: kind("source_doc"),
   label: "Rechnung INV-2026-0412",
   locator: "S. 1",
   quote: "Annual subscription Cloud Workspace, 12 months",
@@ -33,14 +29,14 @@ const INVOICE: ProvenanceSource = {
 };
 const PARTNER: ProvenanceSource = {
   key: "bp",
-  kind: kind("partner", "Geschäftspartner"),
+  kind: kind("business_partner"),
   label: "Nordlicht Software Ltd.",
   locator: "Feld Land",
   href: "#partner=nordlicht",
 };
 const HISTORY: ProvenanceSource = {
   key: "hist",
-  kind: kind("journal-entry", "Bisherige Buchungen"),
+  kind: kind("vendor_history"),
   label: "Kreditor 70418, 11 Buchungen, zuletzt 14.10.2026",
 };
 
@@ -123,7 +119,7 @@ export const Edge: Story = {
             sources: [
               { ...INVOICE, key: "a", quote: "Reverse charge: VAT to be accounted for by the recipient according to Article 196 of Council Directive 2006/112/EC" },
               PARTNER,
-              { key: "law", kind: "Gesetz", label: "§ 13b Abs. 1 UStG", href: "#law=13b" },
+              { key: "law", kind: kind("law"), label: "§ 13b Abs. 1 UStG", href: "#law=13b" },
             ],
           },
           { key: "use", label: "Verwendung", value: null },
@@ -146,11 +142,17 @@ export const InUse: Story = {
       <div style={{ display: "grid", gap: "var(--space-4)" }}>
         <Card>
           <CardHead title="Rechnungsposition" headingLevel={3} />
-          <FactTable facts={LINE_FACTS} />
+          <FactTable facts={LINE_FACTS.map((f) => ({ ...f, certainty: f.key === "use" ? "inferred" : "explicit" }))} />
         </Card>
         <Card>
           <CardHead title="Geschäftspartner" headingLevel={3} />
-          <FactTable facts={PARTNER_FACTS} />
+          <FactTable
+            facts={PARTNER_FACTS.map((f) => ({
+              ...f,
+              certainty: f.key === "is_business" ? "assumed" : f.key === "vat_id" ? "confirmed" : "explicit",
+              validFrom: "2026-01-01",
+            }))}
+          />
         </Card>
         <Disclosure summary="Weitere Angaben" count={MORE_FACTS.length}>
           <Card>
@@ -160,5 +162,56 @@ export const InUse: Story = {
         </Disclosure>
       </div>
     </Drawer>
+  ),
+};
+
+/**
+ * S2 · the five steps of the axis `fact_certainty` side by side — each a grey
+ * word, no colour and no dot. „unbekannt" carries no value. The head „Sicherheit"
+ * opens the axis' legend under (i).
+ */
+export const Certainty: Story = {
+  render: () => (
+    <div style={{ maxWidth: 760 }}>
+      <FactTable
+        facts={[
+          { key: "vat_id", label: "USt-IdNr. gültig", value: "ja, geprüft am 03.11.2026", certainty: "confirmed", sources: [{ key: "ext", kind: kind("external_service"), label: "Bestätigungsabfrage beim BZSt", locator: "03.11.2026, 10:14 Uhr" }] },
+          { key: "country", label: "Land des Lieferanten", value: "Irland", certainty: "explicit", sources: [{ ...INVOICE, key: "c", locator: "S. 1, Absender", quote: "Dublin 2, Ireland" }] },
+          { key: "supply_kind", label: "Art der Leistung", value: "Leistung, kein Gegenstand", certainty: "inferred", sources: [{ ...INVOICE, key: "k", quote: "Annual subscription Cloud Workspace" }] },
+          { key: "is_business", label: "Unternehmer", value: "ja", certainty: "assumed", sources: [{ key: "def", kind: kind("default"), label: "Ltd. ohne Gegenangabe" }] },
+          { key: "use", label: "Verwendung", value: null, certainty: "unknown" },
+        ]}
+      />
+    </div>
+  ),
+};
+
+/**
+ * S2 · long-lived facts say how long they hold, under the value: from a date,
+ * until a date, or both — partner facts open-ended, client facts per fiscal year.
+ */
+export const Validity: Story = {
+  render: () => (
+    <div style={{ maxWidth: 760 }}>
+      <FactTable
+        facts={[
+          { key: "country", label: "Land des Lieferanten", value: "Irland", certainty: "explicit", validFrom: "2026-01-01", sources: [PARTNER] },
+          { key: "taxation", label: "Versteuerung", value: "Soll-Versteuerung", certainty: "confirmed", validFrom: "2026-01-01", validTo: "2026-12-31" },
+          { key: "small_business", label: "Kleinunternehmer", value: "nein", certainty: "confirmed", validTo: "2025-12-31" },
+        ]}
+      />
+    </div>
+  ),
+};
+
+/**
+ * `marked` (0247): the facts a result rests on, picked by the reader — their
+ * rows take the „selected" background, and each label is a focus target.
+ */
+export const Marked: Story = {
+  render: () => (
+    <div style={{ maxWidth: 760 }}>
+      <FactTable facts={LINE_FACTS} marked={["supply_type", "use"]} />
+    </div>
   ),
 };

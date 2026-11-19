@@ -2,7 +2,7 @@ import type { ReactNode } from "react";
 
 import type { Currency } from "@/ludwig/shared/money";
 import type { CaseFactsVM } from "@/ui/v3/entities/accounting-case/CaseFacts";
-import { caseDisplayTitle, caseKindLabel, isRecurringKind } from "@/ludwig/modules/accounting-cases/domain/case";
+import { caseDisplayTitle, caseKindLabel, isRecurringKind } from "@/ludwig/modules/accounting-cases/domain";
 
 import { EntityIcon } from "@/ui/v3/Icons";
 import { CaseAmount } from "@/ui/v3/entities/accounting-case/CaseAmount";

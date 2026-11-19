@@ -1,4 +1,4 @@
-import type { KnownDocumentNumber } from "@/ludwig/modules/accounting-cases/domain/document-number";
+import type { KnownDocumentNumber } from "@/ludwig/modules/accounting-cases/domain";
 import type {
   DocumentNumberSourceLabels,
   DocumentNumberStateLabels,

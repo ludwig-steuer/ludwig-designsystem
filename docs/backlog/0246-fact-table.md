@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Status | S1 fertig (fremde Abnahme 2026-11-18, unter Annahme H2); S2 offen, wartet auf L-380/F681 |
+| Status | S1 fertig (fremde Abnahme 2026-11-18, unter Annahme H2); S2 fertig (fremde Abnahme 2026-11-18, nachgeprüft) |
 | Stufe | `patterns/` (Gruppe Prüfen), dazu Erweiterung von `ProvenanceSources` (`patterns/Provenance.tsx`) und Umzug in `entities/clarification/ClarificationCard.tsx` |
 | Klassen-Test | „Ergäbe das auch in einer Versicherungs-App Sinn?“ → ja, sobald dort geprüft wird: „Schadenort · Hamburg · belegt · Schadenmeldung S. 1“. Ein Prozesswort (Sicherheit, Quelle), keine Entität |
 | Quelle | app-f0, F678-Brief (App `docs/backlog/F678-fact-view-design-brief.md`, Nachtrag 2026-11-18): „Eine Darstellung für die Faktenzeile (Bezeichnung, Wert, Sicherheit, Quellen)“. Konzept App `docs/concepts/booking-process.md` §7, Datenform F668 T668.2 |
@@ -86,8 +86,8 @@ export interface FactTableRow {
 | `FactTableRow.value` | `string \| null` | ja | Der Wert, wie die App ihn formuliert, mit Ziffern in `tnum`. `null` → „—“ in `--color-text-muted` mit `title="kein Wert"` | `Edge` |
 | `FactTableRow.sources` | `readonly ProvenanceSource[]` | nein | Die Quellen untereinander über `ProvenanceSources`. Die Spalte „Quelle“ gibt es nur, wenn mindestens ein Fakt eine Quelle hat (wie 0238) | `Filled`, `WithoutSources`, `OpenSource` |
 | `ProvenanceSource.locator` | `string \| null` | nein | **Neu.** Die Fundstelle in der Quelle, vom Aufrufer formuliert: „S. 2“, „Position 3“, „Feld Rechtsform“. Steht hinter dem Namen, in `--color-text-muted`, ohne Trennzeichen: Bricht sie um, beginnt die Zeile mit der Fundstelle, nicht mit einem Punkt (ein Button lässt sich nicht an Folgetext kleben, gemessen im Bau). Das Pattern liest keine Koordinaten | `Filled`, `Edge` |
-| `FactTableRow.certainty` (S2) | `Certainty \| null` aus `@/ludwig/modules/fact-records/domain/fact` (F668 `CERTAINTIES`) | nein | Wort aus `resolveStatus("fact_certainty", …)`. Grau, ohne Farbe, Punkt oder Prozent. Kopf „Sicherheit“ (`AXIS_LABEL.fact_certainty`) als `StatusHeader` mit Legende. Die Spalte gibt es nur, wenn ein Fakt eine Sicherheit hat | `Certainty` |
-| `FactTableRow.validFrom` / `validTo` (S2) | ISO-Datum | nein | Unterzeile unter dem Wert: „gilt ab 01.01.2026“, „gilt bis 31.12.2026“, beide → „gilt 01.01.2026–31.12.2026“ (`DateRange`) | `Validity` |
+| `FactTableRow.certainty` (S2) | `Certainty \| null` aus `@/ludwig/modules/fact-records/domain/fact` (F668 `CERTAINTIES`) | nein | Wort aus `resolveStatus("fact_certainty", …)`. Grau, ohne Farbe, Punkt oder Prozent. Kopf „Sicherheit“ als `StatusHeader` der Achse mit Legende (Nachtrag 6). Die Spalte gibt es nur, wenn ein Fakt eine Sicherheit hat | `Certainty` |
+| `FactTableRow.validFrom` / `validTo` (S2) | ISO-Datum | nein | Unterzeile unter dem Wert: „gilt ab 01.01.2026“, „gilt bis 31.12.2026“, beide → „gilt 01.01. – 31.12.2026“ (`DateRange`); ein offenes Ende über `Time` mit `prefix` (wie `DateRange` es selbst empfiehlt, S2-H) | `Validity` |
 
 Typen: `ProvenanceSource` aus `patterns/Provenance`. Der Typ heißt
 `FactTableRow`, weil `FactRow` in der Belegfamilie vergeben ist
@@ -110,7 +110,7 @@ Spiegel (S2, L-380). GLOSSARY: `fact` = Fakt, `certainty` = Sicherheit,
 ## Verhalten
 
 - **Raster:** Bezeichnung `minmax(0, 1fr)` · Wert `minmax(0, 1fr)` · (S2)
-  Sicherheit `max-content` · Quelle `minmax(0, 1.25fr)`. Ohne Quelle:
+  Sicherheit `6.5rem` (fest: jede Zeile ist ein eigenes Grid, `max-content` ließ die Spalten je Zeile verrutschen; `rem` statt `ch`, weil der Kopf kleiner gesetzt ist; gemessen im Bau von S2) · Quelle `minmax(0, 1.25fr)`. Ohne Quelle:
   Bezeichnung `1fr` · Wert `1.4fr` wie 0238. Text links, auch der Wert: Ein
   Fakt ist meist ein Wort, Beträge darin bleiben `tnum`, aber linksbündig wie
   heute.
@@ -151,7 +151,7 @@ Spiegel (S2, L-380). GLOSSARY: `fact` = Fakt, `certainty` = Sicherheit,
 | `InUse` | Je Gruppe eine `Card` mit `CardHead` (`h3` unter dem Drawer-Titel): „Rechnungsposition“, „Geschäftspartner“, darunter `Disclosure` „Weitere Angaben 4“ mit der Karte „Beleg“, im `Drawer` `md` | S1 |
 | `ClarificationCard`: `FactsWithSources`, `FactsSourcePick`, `FactsInDrawer`, `FactsWithoutSources` | Die Rückfrage-Karte mit offener „Grundlage“. Beweist den Umzug (ein Fakt sieht gleich aus). Die vorhandenen Stories der Rückfrage statt einer neuen: Eine Pattern-Story darf keine Entität importieren (R21, nur abwärts) | S1 |
 | `Certainty` | Alle fünf Werte nebeneinander (bestätigt · belegt · erschlossen · angenommen · unbekannt), Kopf mit (i) und Legende | S2 |
-| `Validity` | Ein Geschäftspartner-Fakt „gilt ab 01.01.2026“, ein Mandanten-Fakt „gilt 01.01.2026–31.12.2026“ | S2 |
+| `Validity` | Ein Geschäftspartner-Fakt „gilt ab 01.01.2026“, ein Mandanten-Fakt „gilt 01.01. – 31.12.2026“ | S2 |
 
 Nicht anwendbar, mit Grund:
 - **leer:** Eine Tabelle ohne Fakten rendert nichts. Eine leere Gruppe
@@ -195,10 +195,10 @@ Variabel, S1:
 
 Variabel, S2 (nach L-380):
 
-- [ ] Die Sicherheit kommt aus `resolveStatus("fact_certainty", …)`, der Kopf aus `AXIS_LABEL` als `StatusHeader` mit Legende. Keine Wortliste im Set (`Certainty`)
+- [ ] Die Sicherheit kommt aus `resolveStatus("fact_certainty", …)`, der Kopf „Sicherheit“ als `StatusHeader` der Achse mit Legende *(Nachtrag 6: nicht der Achsenname)*. Keine Wortliste im Set (`Certainty`)
 - [ ] Alle fünf Wörter grau, keine Farbe, kein Punkt (`Certainty`, Blick)
-- [ ] Gültigkeit als Unterzeile mit `DateRange`, drei Formen (`Validity`)
-- [ ] Das Wort der Quellenart kommt aus der Achse `fact_source_kind` (F681), für die Faktentabelle **und** für `AiBookingNotes`/`BookingReview`: `SOURCE_KIND` behält nur das Icon je Art (`ENTITY_ICON`, wo es die Entität gibt), die lokale Wortliste entfällt (L-381)
+- [ ] Gültigkeit als Unterzeile mit `DateRange`, drei Formen (`Validity`) *(Nachtrag 8: ein offenes Ende über `Time` mit `prefix`)*
+- [ ] Das Wort der Quellenart kommt aus der Achse `fact_source_kind` (F681), für die Faktentabelle **und** für `AiBookingNotes`/`BookingReview`: `SOURCE_KIND` behält nur das Icon je Art, die lokale Wortliste entfällt (L-381) *(Nachtrag 7: die Icons bleiben in der freigestellten Aufzählung, nicht `ENTITY_ICON`)*
 
 ## Entschieden (app-f0, 2026-11-18)
 
@@ -239,6 +239,26 @@ Einspruch jederzeit:
 4. **Keine Art in der Rückfrage:** siehe Entschieden 1.
 5. **Umzugs-Kriterium:** Es nennt jetzt Stories mit Quelle, siehe den
    Nachtrag am Kriterium (Spec-Mangel der Abnahme).
+6. **S2, Kopf der Spalte (vor dem Bau von S2):** Die Spalte heißt
+   „Sicherheit“ (Label des `StatusHeader`). Der Achsenname aus F681 lautet
+   „Sicherheit des Fakts“ und steht im (i)-Dialog. In einer Faktentabelle ist
+   jede Zeile ein Fakt, der Zusatz wäre doppelt. Mit app-f0 abgestimmt
+   (2026-11-18).
+7. **S2, Icons der Quellenarten (vor dem Bau von S2):** Nur die **Wörter**
+   wandern in die Achse `fact_source_kind`. Die Icons bleiben in der
+   Aufzählung von `AiBookingNotes`, die `check:icons` ausdrücklich freistellt
+   („the kind of source backing a statement“). Ein Wechsel auf `ENTITY_ICON`
+   hätte sichtbar andere Zeichen an jeder Buchungsbegründung gebracht, ohne
+   dass das Kriterium den Grund nennt. Für die Faktenansicht wählt der
+   Aufrufer das Icon (0247). *Nach der S2-Abnahme:* Ein Zeichen je
+   Quellenart entscheidet 0247 (Folgeauftrag S2-H, Abnehmer); bis dahin
+   zeigen die Faktentabellen-Stories Entitätszeichen und die Buchung ihre
+   eigenen.
+8. **S2, Gültigkeit mit offenem Ende (nach der S2-Abnahme):** „gilt ab …“
+   und „gilt bis …“ über `Time` mit `prefix`, nur „gilt … – …“ über
+   `DateRange`. `DateRange` empfiehlt das in seinem eigenen `@instead`, und
+   `Time` trägt das volle Datum im `title`. Die ganze Zeile steht in einer
+   Schriftstufe (S2-M1).
 
 ## Abnahme
 
@@ -354,3 +374,80 @@ warten auf L-380/F681. N1 ist behoben. H5 ist angeglichen (Story-Zeile
   wechselt zusätzlich in `--color-primary`, über das globale `a:hover`
   (`tokens.css:431`). Der Absatz „Ein Quellname, eine Gestalt“ nennt nur die
   Unterstreichung. Code oder Absatz angleichen.
+
+### Abnahme S2
+
+Schlanke Abnahme (Schnittstelle) plus Messung der S2-Layoutpunkte. Stand:
+Arbeitsbaum `designsystem-bv3`, Branch `booking-v3` auf `ec7cef8` (Spiegel
+F681), S2 uncommittet. Geprüft gegen die Fassung mit den Nachträgen 6 und 7
+und dem Spaltenmaß `6.5rem` im Verhalten. Gemessen mit Playwright im
+Storybook auf Port 6107 (aus diesem Arbeitsbaum), Fenster 1280 × 900,
+`getBoundingClientRect` und `getComputedStyle`. Präfix `FT` wie oben.
+Screenshots `.playwright-mcp/abn0246s2-*.png` im Hauptrepo. Die Konsole meldet
+je Seite einen 404 auf `vite-inject-mocker-entry.js` (Storybook-Laufzeit des
+Arbeitsbaums), sonst nichts.
+
+| Kriterium | Nachweis (Story-ID · Befehl · Screenshot) | Ergebnis |
+|---|---|---|
+| `pnpm typecheck`, `pnpm build` und `pnpm check:type` grün | Im Arbeitsbaum: `pnpm -s typecheck` Exit 0; statt `pnpm build` `pnpm exec storybook build -o /tmp/abn0246s2-sb --quiet` Exit 0 („Storybook build completed successfully“, Ordner danach gelöscht); `pnpm -s check:type` Exit 0, `--test` ok | ✓ |
+| Datei nach der Familie benannt, Story daneben, Titel in der richtigen Gruppe | Unverändert `patterns/FactTable.tsx` mit `FactTable.stories.tsx`, Titel `v3/Patterns/Prüfen/FactTable`; `Certainty`, `Validity` dort | ✓ |
+| Code englisch; `@when`/`@instead` an jedem Export | `check:language` Exit 0 (14 Fälle), `check:when` Exit 0 (11 Fälle); `@when` um „certainty“ ergänzt (`FactTable.tsx:62`). **Aber** Deutsch im CSS-Kommentar: „(F678: annahmen are neutral)“ (`v3.css:4572`), gegen „Nie Deutsch im Quellcode“ (Owner 2026-09-10); der Wächter fängt das einzelne Wort nicht (S2-M2) | ✗ |
+| ↳ Nachprüfung 2026-11-18 | S2-M2 behoben: `v3.css:4572` lautet „(F678: assumptions are neutral)“. `check:language` und `check:when` erneut Exit 0 | ✓ |
+| Kein Hex, kein px, keine lokale Label-Map; Status nur über Registry | Kein Hex, kein px in `FactTable.tsx` und `AiBookingNotes.tsx`. Spur `6.5rem` steht in `cols` wie andere Spurmaße und ist im Verhalten begründet. Sicherheit nur über `resolveStatus("fact_certainty", …)` (`FactTable.tsx:93`), Kopf über `StatusHeader` (`:89`); keine Wortliste für Sicherheit oder Quellenart im Set (Suche nach „belegt“, „erschlossen“, „angenommen“, „Webseite“ außerhalb der Registry: leer). `check:icons`, `check:contrast`, `check:domain-paths` Exit 0 (je `--test` ok); `check:classes` nur die vier Altfunde | ✓ |
+| Alle Stories oben vorhanden; ausgeschlossene Zustände begründet | `FT certainty`, `FT validity` neu, `FT in-use` mit Sicherheit und Gültigkeit; zusammen 7 eigene Stories wie in der Spec („7 nach S2“) | ✓ |
+| Prüfliste `design-guidelines.md` §9 durchgegangen | Text links, nichts zentriert; Sicherheit grau ohne Farbe; (i) mit Wort „Sicherheit“. **Schrift verletzt („dieselbe Rolle hat dieselbe Stufe“):** Die Gültigkeitszeile steht in zwei Größen. „gilt ab“ 11,5 px (`.v2sub`, `--fs-ui-xs`, Beischrift nach §2a), das Datum 12,5 px (`DateRange size="sm"` → `.v2time--sm`, `--fs-ui-sm`), gemessen in `FT validity` in allen drei Zeilen (`FactTable.tsx:54–56`) (S2-M1). Screenshot `abn0246s2-validity.png` | ✗ |
+| ↳ Nachprüfung 2026-11-18 | S2-M1 behoben: `.v3fact__valid .v2time { font-size: inherit }` (`v3.css:4579`). In `FT validity` und `FT in-use` hat jeder Textknoten der Gültigkeitszeile 11,5 px (`--fs-ui-xs`) in `rgb(113, 113, 113)` (`--color-text-subtle`), das Datum mit `tnum`. Spaltenkanten bleiben in allen Zeilen gleich, `FT in-use` ohne Querscroll (640/640). Screenshot `abn0246s2-n-validity.png` | ✓ |
+| Im Browser angesehen (Storybook), nicht nur gebaut | `FT certainty`, `validity`, `in-use`, `filled`, `without-sources`, `edge` und die Nachbarn `aibookingnotes--source-kinds`, `--sources`, `--box`, `--in-card`, `bookingreview--in-use`, `--case-editable` gerendert, Konsole bis auf den 404 leer | ✓ |
+| S2: Sicherheit aus `resolveStatus("fact_certainty", …)`, Kopf „Sicherheit“ als `StatusHeader` der Achse mit Legende (Nachtrag 6). Keine Wortliste im Set (`Certainty`) | `FT certainty`: Kopf „Sicherheit“ mit (i), `aria-label` „Sicherheit des Fakts: Zustände erklären“; per Tab erreichbar, Ring 2 px `rgb(59, 143, 196)`. Enter öffnet die Legende „Sicherheit des Fakts“ mit allen fünf Wörtern und Erklärungen, Esc schließt, der Fokus kehrt auf (i) zurück. Wort je Zeile aus der Registry, `title` = Erklärung der Achse wie bei `StatusBadge`. Die Spalte fehlt ohne Sicherheit (`filled`, `without-sources`, `edge`). Screenshot `abn0246s2-legend.png`. Nachtrag 6 trägt: Der Achsenname steht im Dialog, die Spalte wiederholt „des Fakts“ nicht | ✓ |
+| S2: Alle fünf Wörter grau, keine Farbe, kein Punkt (`Certainty`, Blick) | `FT certainty`: bestätigt · belegt · erschlossen · angenommen · unbekannt, je `rgb(92, 92, 92)` = `--color-text-muted` (6,7:1 auf Weiß), Hintergrund transparent, kein `::before`/`::after`, kein Kindelement, Registry-Ton `neutral`; „unbekannt“ mit „—“ als Wert. Eine Zeile je Wort, kein Überlauf: rechter Rand höchstens 497,9 („angenommen“) bei Zellkante 521,1, `scrollWidth − clientWidth` 0. Spaltenkanten in allen sechs Zeilen samt Kopf gleich (34 · 225,5 · 417,1 · 531,1); (i) 24 × 24 px, rechte Kante 506,7 in der Kopfzelle bis 521,1. Das Maß `6.5rem` trägt | ✓ |
+| S2: Gültigkeit als Unterzeile mit `DateRange`, drei Formen (`Validity`) | `FT validity`: „gilt ab 01.01.2026“, „gilt 01.01. – 31.12.2026“ (`DateRange` fasst das gemeinsame Jahr zusammen, `title` „01.01.2026 – 31.12.2026“), „gilt bis 31.12.2025“; je eigene Zeile unter dem Wert (`display: block`, gleiche linke Kante, 17–18 px tiefer), Farbe `--color-text-subtle`. Form ✓, Schriftgröße der Zeile siehe §9 (S2-M1) | ✓ |
+| ↳ Nachprüfung 2026-11-18, gegen Nachtrag 8 (offenes Ende über `Time` mit `prefix`) | `FactTable.tsx:54–67`: beide Enden `gilt <DateRange …/>`, ein offenes Ende `<Time … prefix="gilt ab"/"gilt bis">`. `FT validity`: „gilt ab 01.01.2026“ (`<time>`, `title` „01.01.2026“), „gilt 01.01. – 31.12.2026“ (`title` „01.01.2026 – 31.12.2026“), „gilt bis 31.12.2025“ (`<time>`, `title` „31.12.2025“); je eigene Zeile unter dem Wert, gleiche linke Kante. Nachtrag 8 trägt: Er folgt dem `@instead` von `DateRange` und gibt dem offenen Ende sein `title`. Die Story-Zeile `Validity` der Spec nennt noch „gilt 01.01. – 31.12.2026“ (S2-H2, Rest) | ✓ |
+| S2: Wort der Quellenart aus der Achse `fact_source_kind` für Faktentabelle und `AiBookingNotes`/`BookingReview`; `SOURCE_KIND` nur noch Icon, lokale Wortliste entfällt (Nachtrag 7) | `AiBookingNotes.tsx:68–76`: `SOURCE_KIND` trägt Icon und Achsenschlüssel, das Wort kommt aus `resolveStatus("fact_source_kind", kind).label` (`:230`). Im Browser (`aibookingnotes--source-kinds`): Kontoauszug, Beleg, Bisherige Buchungen, Rückfrage, Regel, Gesetz mit unveränderten Icons (banknote, file-text, rotate-ccw-clock, circle-question-mark, ruler, scale). `bookingreview--in-use` und `--case-editable`: Beleg, Bisherige Buchungen. Das sind dieselben Wörter wie vorher; `web` → „Webseite“ nur im Code belegt (Registry), keine Story zeigt die Art. Faktentabellen-Stories nehmen das Wort aus der Achse (`FactTable.stories.tsx:22–27`). `check:domain-paths` Exit 0 | ✓ |
+| `FT in-use`: kein Querscroll im Drawer `md` mit Sicherheit und Gültigkeit | Drawer `md` 640 px, `.v2drawer__b` 640/640, kein Element läuft über, rechte Kante aller Tabellen-Nachfahren 1259 ≤ 1280. Spaltenkanten je Tabelle in allen Zeilen gleich (679 · 820,7 · 962,4 · 1076,4); Wörter bis 1043,2 bei Zellkante 1066,4; (i) 24 × 24. Screenshot `abn0246s2-inuse.png` | ✓ |
+
+Abgenommen von / am: fremde Abnahme (Agent), 2026-11-18 · Ergebnis: **S2 mit
+zwei Mängeln, zurück in Arbeit.** Offene Punkte:
+
+- **S2-M1 Gültigkeitszeile in zwei Schriftgrößen** (`FactTable.tsx:54–56`):
+  Die Zeile ist nach §2a eine Beischrift (`.v2sub`, 11,5 px), das Datum
+  darin setzt `DateRange size="sm"` auf 12,5 px. Eine Stufe für die ganze
+  Zeile, z. B. die Zeit die Größe der Zeile erben lassen
+  (`.v3fact__valid .v2time { font-size: inherit }`) oder die Zeile als
+  Unterzeile in `--fs-ui-sm` setzen. Was die Zeile ist, entscheidet der
+  Designer nach §2a.
+- **S2-M2 Deutsch im CSS-Kommentar** (`v3.css:4572`): „annahmen“, englisch
+  „assumptions“.
+- **S2-H1 Nachtrag 7 trägt nur mit Folgeauftrag:** Dieselbe Quellenart hat
+  jetzt zwei Zeichen, an der Buchung (`AiBookingNotes`: Beleg `FileText`,
+  Bisherige Buchungen `History`) und in der Faktentabelle (Stories mit
+  `EntityIcon`: Beleg `Receipt`, Bisherige Buchungen `BookOpen`). Das läuft
+  gegen „Gleiches sieht gleich aus“ (CLAUDE.md §3). Der Nachtrag schiebt das
+  an 0247; dort sollte ein Zeichen je Art entschieden werden, sonst als
+  Ausnahme mit Owner und Datum benennen.
+- **S2-H2 Beispiel der Spec und `DateRange`:** Die Spec schreibt
+  „gilt 01.01.2026–31.12.2026“, `DateRange` zeigt „gilt 01.01. – 31.12.2026“.
+  Das ist die Form des Sets. Die Beispiele in Schnittstelle und Stories
+  angleichen. Mit nur einem Ende trägt `DateRange` kein `title`. Sein eigenes
+  `@instead` nennt für ein offenes Ende `Time` mit `prefix`; die Spec
+  verlangt `DateRange` für alle drei Formen.
+- **S2-H3 „Webseite“ ohne Story:** Keine Story zeigt die Art `web`. Der Wechsel
+  von „Web“ ist nur im Code belegt.
+- **S2-H4 Handgeschriebene Wörter in fremden Fixtures:**
+  `Provenance.stories.tsx` und weitere Stories schreiben „Kontoauszug“ und
+  „Bisherige Buchungen“ als Quellenart weiter von Hand. Das Kriterium nennt
+  sie nicht, gleiche Wörter, kein Mangel.
+
+Nachprüfung S2 von / am: fremde Abnahme (Agent), 2026-11-18, S2-M1, S2-M2
+und Nachtrag 8 · Ergebnis: **S2 abgenommen.** Alle Kriterien von S2 sind ✓.
+Erneut im Arbeitsbaum: `typecheck`, `check:type`, `check:when`,
+`check:language`, `check:icons`, `check:contrast` und `check:domain-paths`
+Exit 0, `check:classes` nur die vier Altfunde, Storybook-Build nach `/tmp`
+Exit 0. Die Konsole meldet nur den 404 auf `vite-inject-mocker-entry.js`.
+
+- **S2-H1** ist als Abnahmekriterium in 0247 übergeben („Ein Zeichen je
+  Quellenart im ganzen Set“, Hauptrepo `docs/backlog/0247-fact-record-view.md`).
+  Nachtrag 7 verweist darauf.
+- **S2-H2:** Für das offene Ende ist der Hinweis erledigt (Nachtrag 8). Rest:
+  Die Story-Zeile `Validity` nennt noch „gilt 01.01.2026–31.12.2026“, die
+  Schnittstelle schon „gilt 01.01. – 31.12.2026“.
+- **S2-H3** und **S2-H4** bleiben Hinweise, kein Mangel.

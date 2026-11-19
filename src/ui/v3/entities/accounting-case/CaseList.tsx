@@ -2,7 +2,7 @@ import {
   CASE_LIST_TAB_LABEL,
   type CaseListItem,
   type CaseListTab as AnyCaseListTab,
-} from "@/ludwig/modules/accounting-cases/domain/case";
+} from "@/ludwig/modules/accounting-cases/domain";
 import { DataTable, type ListPatch } from "../../patterns/DataTable";
 import type { TableDensity } from "../../primitives/Table";
 import { caseColumns, type CaseColumn } from "./case-columns";

@@ -7,8 +7,8 @@ import {
   type CaseDisposition,
   type CaseDocumentNumberMode,
   type CaseKind,
-} from "@/ludwig/modules/accounting-cases/domain/case";
-import type { KnownDocumentNumber } from "@/ludwig/modules/accounting-cases/domain/document-number";
+} from "@/ludwig/modules/accounting-cases/domain";
+import type { KnownDocumentNumber } from "@/ludwig/modules/accounting-cases/domain";
 
 import { Card, CardHead } from "../../primitives/Table";
 import { CaseDetailView } from "./CaseDetailView";

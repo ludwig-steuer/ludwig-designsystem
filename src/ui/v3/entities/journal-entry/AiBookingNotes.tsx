@@ -1,16 +1,6 @@
 "use client";
 
-import {
-  Banknote,
-  ChevronRight,
-  FileText,
-  Globe,
-  HelpCircle,
-  History,
-  Ruler,
-  Scale,
-  type LucideIcon,
-} from "lucide-react";
+import { ChevronRight } from "lucide-react";
 import { useState } from "react";
 
 // Direct import, not the barrel: `@/ui/status` also exports `FlowModal` and
@@ -19,7 +9,8 @@ import { Confidence, type ConfidenceLevel } from "../../patterns/Confidence";
 import { StateIcon, type StateKind } from "../../patterns/Review";
 import { StatusInfoButton } from "../../patterns/StatusInfoButton";
 import { resolveStatus } from "@/ludwig/ui/status/status-registry";
-import { ProvenanceRows, type ProvenanceSource } from "../../patterns/Provenance";
+import type { FactSourceKind } from "@/ludwig/modules/fact-records/domain/fact-source";
+import { FactSourceKindMark, ProvenanceRows, type ProvenanceSource } from "../../patterns/Provenance";
 import { StatusBadge } from "../../patterns/StatusBadge";
 
 /**
@@ -58,14 +49,20 @@ export type SourceKind =
   | "law"
   | "web";
 
-const SOURCE_KIND: Record<SourceKind, { Icon: LucideIcon; label: string }> = {
-  bank: { Icon: Banknote, label: "Kontoauszug" },
-  document: { Icon: FileText, label: "Beleg" },
-  history: { Icon: History, label: "Bisherige Buchungen" },
-  clarification: { Icon: HelpCircle, label: "Rückfrage" },
-  rule: { Icon: Ruler, label: "Regel" },
-  law: { Icon: Scale, label: "Gesetz" },
-  web: { Icon: Globe, label: "Web" },
+/**
+ * The sign per kind stays here (an exempt enumeration in `check:icons`); the
+ * **word** comes from the app's axis `fact_source_kind` (0246 S2, L-381) —
+ * the same words the facts of the review show, so a source is called the same
+ * at an entry and at a fact.
+ */
+const SOURCE_KIND: Record<SourceKind, FactSourceKind> = {
+  bank: "bank_transaction",
+  document: "source_doc",
+  history: "vendor_history",
+  clarification: "clarification",
+  rule: "rule",
+  law: "law",
+  web: "web",
 };
 
 /**
@@ -214,15 +211,9 @@ export function aiSourcesToProvenance(sources: readonly AiSource[]): ProvenanceS
   }));
 }
 
-/** Icon and word of a source kind — the vocabulary of this entity, not of the pattern. */
+/** Icon and word of a source kind at an entry's reasoning. */
 function SourceKindMark({ art }: { art: SourceKind }) {
-  const { Icon, label } = SOURCE_KIND[art];
-  return (
-    <>
-      <Icon size={13} strokeWidth={1.5} />
-      <span className="ki__art">{label}</span>
-    </>
-  );
+  return <FactSourceKindMark kind={SOURCE_KIND[art]} />;
 }
 
 /**

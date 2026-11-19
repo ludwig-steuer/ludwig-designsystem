@@ -97,6 +97,12 @@ export type StatusAxis =
   | "judge"
   | "export_case"
   | "export_bucket"
+  // — Fakten —
+  | "fact_certainty"
+  | "fact_group"
+  | "fact_open_point_reason"
+  | "fact_source_kind"
+  | "journal_entry_origin_method"
   // — Buchungslauf —
   | "run_outcome"
   | "agent_run_step_outcome"
@@ -1293,6 +1299,118 @@ const EXPORT_BUCKET: Record<string, StatusDescriptor> = {
   pending: { label: "Offen", kind: "warning", description: "Noch ein Vorschlag — muss erst freigegeben werden." },
   reversed: { label: "Storniert", kind: "neutral", description: "Storno oder stornierter Satz." },
   imported: { label: "Aus DATEV", kind: "neutral", description: "Bestand aus DATEV — nur zur Information, wird nicht erneut exportiert." },
+};
+
+// ══════════════════════════════════════════════════════════════════════
+// FAKTEN
+// ══════════════════════════════════════════════════════════════════════
+
+/**
+ * Sicherheit eines Fakts (F681) — Feld `certainty` je Fakt im JSON von
+ * `client_fact_record.facts` und `client_long_lived_fact.fact`, keine eigene
+ * Spalte. Wertebereich: `CERTAINTIES` (`modules/fact-records/domain/fact.ts`).
+ * Schreiber: wer den Faktensatz speichert (`saveFactRecord`,
+ * `setLongLivedFact`); die Sicherheit legt fest, welche Quellen mindestens
+ * dabei sein müssen (`checkCertainty`).
+ *
+ * Fallstricke:
+ *  - Eine Kategorie, keine Zahl und keine Ampel: alle Stufen sind `neutral`.
+ *    Die Ampel `confidence` am Buchungssatz ist eine andere Achse.
+ *  - `unknown` trägt immer den Wert `null`; jede andere Stufe braucht einen Wert.
+ *  - Ein übertragener Vorzeitraum-Wert kommt als `assumed` zurück
+ *    (`getLongLivedFactsAt`, `carriedOver`), gespeichert ist er anders.
+ */
+const FACT_CERTAINTY: Record<string, StatusDescriptor> = {
+  confirmed: { label: "bestätigt", kind: "neutral", description: "Ein Mensch oder eine Behörde hat es bestätigt." },
+  explicit: { label: "belegt", kind: "neutral", description: "Steht wörtlich in einer Quelle." },
+  inferred: { label: "erschlossen", kind: "neutral", description: "Aus anderen Angaben geschlossen, durch Regel oder Ludwig." },
+  assumed: { label: "angenommen", kind: "neutral", description: "Standardwert; nichts spricht dafür oder dagegen." },
+  unknown: { label: "unbekannt", kind: "neutral", description: "Kein Wert." },
+};
+
+/**
+ * Gruppe eines Fakts (F681) — **keine Spalte**. Wertebereich: `FACT_GROUPS`
+ * (`modules/fact-records/domain/fact-record.ts`); die Zuordnung je Schlüssel
+ * steht in `FACT_GROUP_BY_KEY`, bei langlebigen Fakten ergibt sie sich aus dem
+ * Gegenstand (`longLivedFactGroup`). Die Faktenansicht gliedert danach.
+ *
+ * Fallstrick: `payment` und `series` haben heute noch keinen Fakt im Katalog.
+ */
+const FACT_GROUP: Record<string, StatusDescriptor> = {
+  document: { label: "Beleg", kind: "neutral", description: "Was für den ganzen Beleg gilt: Richtung, Länder, Leistungsdatum, Hinweise und Sonderregelungen." },
+  line: { label: "Rechnungsposition", kind: "neutral", description: "Was je Position gilt: was geliefert oder geleistet wurde, wofür es verwendet wird und die ausgewiesene Steuer." },
+  counterparty: { label: "Geschäftspartner", kind: "neutral", description: "Was über den Geschäftspartner gilt, etwa ob er Unternehmer ist und seine USt-IdNr." },
+  client: { label: "Mandant", kind: "neutral", description: "Was über den Mandanten gilt, etwa Kleinunternehmer und Besteuerungsart." },
+  payment: { label: "Zahlung", kind: "neutral", description: "Was über die Zahlung zum Vorgang gilt." },
+  series: { label: "Serie", kind: "neutral", description: "Was für eine Serie gilt: sie hat kein Ende und erzeugt je Periode einen Sachverhalt." },
+};
+
+/**
+ * `client_fact_open_point.reason` — warum ein Fakt offen ist (F668).
+ * Wertebereich: `OPEN_POINT_REASONS`
+ * (`modules/fact-records/domain/open-point.ts`). Schreiber: `openFactOpenPoint`.
+ *
+ * Fallstrick: `contradictory` braucht mindestens zwei Nachweise
+ * (`OpenPointInputSchema`).
+ */
+const FACT_OPEN_POINT_REASON: Record<string, StatusDescriptor> = {
+  missing: { label: "fehlt", kind: "neutral", description: "Für den Fakt gibt es keinen Wert." },
+  contradictory: { label: "widersprüchlich", kind: "neutral", description: "Mindestens zwei Quellen nennen verschiedene Werte." },
+  uncertain: { label: "unsicher", kind: "neutral", description: "Es gibt einen Wert, er ist aber nicht gut genug gestützt." },
+};
+
+/**
+ * Art der Quelle eines Fakts (F681) — Feld `kind` je Quelle im JSON eines
+ * Fakts, keine eigene Spalte. Wertebereich: `FACT_SOURCE_KINDS`
+ * (`modules/fact-records/domain/fact-source.ts`): die Arten der
+ * Buchungsbegründung (`RATIONALE_SOURCE_KINDS`) plus `business_partner`,
+ * `client_profile`, `external_service`, `default`, `accounting_review`.
+ *
+ * Fallstricke:
+ *  - `Kontoauszug` und `Bisherige Buchungen` sind die Wörter, die das
+ *    Designsystem seit 2026-09-10 unter „Quellen“ zeigt; sie bleiben, damit
+ *    sich bestehende Buchungsbegründungen nicht ändern.
+ *  - `accounting_review`: die Buchhaltung hat den Wert in der Abnahme
+ *    festgestellt; die Person steht im `label` der Quelle.
+ */
+const FACT_SOURCE_KIND: Record<string, StatusDescriptor> = {
+  source_doc: { label: "Beleg", kind: "neutral", description: "Der Wert steht auf einem Beleg des Mandanten." },
+  contract: { label: "Vertrag", kind: "neutral", description: "Der Wert steht in einem Vertrag des Mandanten." },
+  bank_transaction: { label: "Kontoauszug", kind: "neutral", description: "Der Wert stammt aus einem Umsatz auf dem Kontoauszug." },
+  clarification: { label: "Rückfrage", kind: "neutral", description: "Jemand hat den Wert in einer Rückfrage beantwortet." },
+  vendor_history: { label: "Bisherige Buchungen", kind: "neutral", description: "Der Wert stammt aus den bisherigen Buchungen zu diesem Geschäftspartner." },
+  ledger_account: { label: "Konto", kind: "neutral", description: "Der Wert stammt aus einem Konto des Mandanten." },
+  rule: { label: "Regel", kind: "neutral", description: "Eine Regel hat den Wert ergeben." },
+  law: { label: "Gesetz", kind: "neutral", description: "Der Wert folgt aus einer Vorschrift; die Fundstelle steht an der Quelle." },
+  web: { label: "Webseite", kind: "neutral", description: "Der Wert stammt von einer Webseite; die Adresse steht an der Quelle." },
+  business_partner: { label: "Geschäftspartner", kind: "neutral", description: "Der Wert stammt aus den Stammdaten des Geschäftspartners." },
+  client_profile: { label: "Mandant", kind: "neutral", description: "Der Wert stammt aus den Stammdaten des Mandanten." },
+  external_service: { label: "Externe Prüfung", kind: "neutral", description: "Eine externe Stelle hat den Wert geprüft, etwa eine Behörde." },
+  default: { label: "Standardwert", kind: "neutral", description: "Ein Standardwert, weil nichts dafür oder dagegen spricht." },
+  accounting_review: { label: "Kanzlei", kind: "neutral", description: "Die Kanzlei hat den Wert in der Abnahme festgestellt." },
+};
+
+/**
+ * `client_journal_entry.origin_method` — wie der Buchungssatz entschieden
+ * wurde (buchung.md R37). Wertebereich: `ORIGIN_METHODS`
+ * (`modules/entries/domain/entry.ts`), DB-CHECK
+ * `client_journal_entry_origin_method_check`.
+ *
+ * Fallstricke:
+ *  - Nicht dasselbe wie `origin` (Achse `journal_entry_origin`): `origin` sagt
+ *    den Kanal, das hier die Entscheidung.
+ *  - `model_call` und `model_agent` tragen dasselbe Wort: für die Kanzlei ist
+ *    beides ein Vorschlag von Ludwig.
+ *  - `derivation` ist „vom Programm aus Fakten abgeleitet“ — dafür gibt es
+ *    keinen eigenen Wert in `origin`.
+ */
+const JOURNAL_ENTRY_ORIGIN_METHOD: Record<string, StatusDescriptor> = {
+  rule: { label: "Regel", kind: "info", description: "Eine Regel hat den Buchungssatz bestimmt." },
+  derivation: { label: "Aus Fakten abgeleitet", kind: "info", description: "Das Programm hat den Buchungssatz aus den Fakten abgeleitet." },
+  model_call: { label: "Vorschlag von Ludwig", kind: "info", description: "Ludwig hat den Buchungssatz mit einem einzelnen Modellaufruf vorgeschlagen." },
+  model_agent: { label: "Vorschlag von Ludwig", kind: "info", description: "Ludwig hat den Buchungssatz im Buchungslauf vorgeschlagen." },
+  human: { label: "Manuell", kind: "neutral", description: "Ein Mensch hat den Buchungssatz entschieden." },
+  import: { label: "Importiert", kind: "info", description: "Der Buchungssatz wurde importiert." },
 };
 
 // ══════════════════════════════════════════════════════════════════════
@@ -2623,6 +2741,12 @@ export const STATUS_REGISTRY: Record<StatusAxis, Record<string, StatusDescriptor
   export_case: EXPORT_CASE,
   export_bucket: EXPORT_BUCKET,
   export_batch: EXPORT_BATCH,
+  // — Fakten —
+  fact_certainty: FACT_CERTAINTY,
+  fact_group: FACT_GROUP,
+  fact_open_point_reason: FACT_OPEN_POINT_REASON,
+  fact_source_kind: FACT_SOURCE_KIND,
+  journal_entry_origin_method: JOURNAL_ENTRY_ORIGIN_METHOD,
   run_outcome: RUN_OUTCOME,
   agent_run_step_outcome: AGENT_RUN_STEP_OUTCOME,
   agent_run_banner: AGENT_RUN_BANNER,
@@ -3175,6 +3299,12 @@ export const AXIS_LABEL: Record<StatusAxis, string> = {
   journal_entry_datev_stage: "Weg nach DATEV",
   journal_entry_origin: "Herkunft",
   confidence: "Sicherheit",
+  // — Fakten —
+  fact_certainty: "Sicherheit des Fakts",
+  fact_group: "Faktengruppe",
+  fact_open_point_reason: "Offener Punkt",
+  fact_source_kind: "Quellenart",
+  journal_entry_origin_method: "Entscheidungsweg",
   judge: "Judge",
   export_case: "DATEV-Export",
   export_bucket: "DATEV-Export",
@@ -3275,6 +3405,12 @@ export const AXIS_SOURCE: Record<StatusAxis, string> = {
   journal_entry: "client_journal_entry.status",
   journal_entry_datev_stage: "abgeleitet — status + exported_at + datev_mirror_entry_id (keine Spalte)",
   journal_entry_origin: "client_journal_entry.origin",
+  // — Fakten —
+  fact_certainty: "fact-records/domain/fact.ts (CERTAINTIES; Feld certainty in client_fact_record.facts und client_long_lived_fact.fact)",
+  fact_group: "fact-records/domain/fact-record.ts (FACT_GROUPS, keine Spalte)",
+  fact_open_point_reason: "fact-records/domain/open-point.ts (OPEN_POINT_REASONS; client_fact_open_point.reason)",
+  fact_source_kind: "fact-records/domain/fact-source.ts (FACT_SOURCE_KINDS; Feld kind je Quelle eines Fakts)",
+  journal_entry_origin_method: "client_journal_entry.origin_method",
   confidence: "abgeleitet — client_journal_entry.proposal_confidence gebandet (entryConfLevel); Zeilen-Spalte seit 2026-08-29 tot",
   judge: "client_journal_entry.proposal_rationale (JSON, keine Spalte)",
   export_case: "abgeleitet — deriveCaseExportStatus (keine Spalte)",

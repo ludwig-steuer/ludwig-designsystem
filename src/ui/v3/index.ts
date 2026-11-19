@@ -298,6 +298,7 @@ export {
   ProvenanceNote,
   ProvenanceRows,
   ProvenanceSources,
+  FactSourceKindMark,
   type Provenance,
   type ProvenanceSource,
 } from "./patterns/Provenance";
@@ -722,6 +723,8 @@ export {
   type MirrorEntryLine,
 } from "./entities/datev-mirror-entry/MirrorEntry";
 
+/* Faktensatz — what an entry rests on, in the side panel of the review (0247) */
+export { FactRecordView } from "./entities/fact-record/FactRecordView";
 /* Lauf — Ludwig's run as a bar over the page and in a row (0225) */
 export { AgentRunBanner, AgentRunCell, type AgentRunAction } from "./entities/agent-run/AgentRun";
 

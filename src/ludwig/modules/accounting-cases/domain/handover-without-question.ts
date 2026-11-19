@@ -1,4 +1,4 @@
-import { formatCaseNumber } from "./case";
+import { formatCaseNumber } from "./cases/case";
 
 /**
  * F492 (K10) — Gate-Note für Bankumsätze an abgegebenen Sachverhalten ohne offene Frage: sie zählen als offen, die

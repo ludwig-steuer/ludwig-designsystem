@@ -14,7 +14,7 @@ import {
   TAX_KEY_RATE_PERCENT,
   taxAccountFor,
   taxAccountNumbersForFramework,
-} from "./tax-keys";
+} from "./vat/tax-keys";
 
 export const AUTOMATIC_TAX_LINE_MERGED = "B3_AUTOMATIC_TAX_LINE_MERGED";
 export const AUTOMATIC_TAX_LINE_CONFLICT = "B3_AUTOMATIC_TAX_LINE_CONFLICT";

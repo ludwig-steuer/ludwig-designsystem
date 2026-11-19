@@ -1,7 +1,7 @@
 import type { ReactNode } from "react";
 
-import type { CaseKind } from "@/ludwig/modules/accounting-cases/domain/case";
-import type { ReviewReason } from "@/ludwig/modules/accounting-cases/domain/review-score";
+import type { CaseKind } from "@/ludwig/modules/accounting-cases/domain";
+import type { ReviewReason } from "@/ludwig/modules/accounting-cases/domain";
 import type { Currency } from "@/ludwig/shared/money";
 
 import { formatCount, formatTime } from "../../format";

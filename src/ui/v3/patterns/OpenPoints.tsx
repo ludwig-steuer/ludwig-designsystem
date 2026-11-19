@@ -47,6 +47,11 @@ export interface OpenPoint {
   state?: StateKind;
   /** Raw text of the source where it says more than the sentence — set as such. */
   raw?: string | null;
+  /**
+   * What belongs under **this** point and no other — the sources that disagree
+   * at a contradiction, each with its own value (0247). Drawn by the caller.
+   */
+  more?: ReactNode;
 }
 
 /**
@@ -64,6 +69,7 @@ export function OpenPoints({
   extraCount = 0,
   moreHref,
   emptyText = "An diesem Vorgang ist nichts offen.",
+  headingLevel = 2,
 }: {
   /** The heading. „Offen" on a case, „Befunde und Klärungen" on a document. */
   title?: string;
@@ -83,12 +89,15 @@ export function OpenPoints({
   moreHref?: string;
   /** „Nothing open" is a **result**, not an empty box (L6). */
   emptyText?: string;
+  /** `3` inside a drawer, whose own title is the `h2` (A14, 0247). */
+  headingLevel?: 2 | 3;
 }) {
   const count = points.length + extraCount;
   return (
     <Card>
       <CardHead
         title={title}
+        headingLevel={headingLevel}
         sub={count === 0 ? "nichts offen" : `${count} offen`}
         {...(moreHref ? { actions: <TextButton href={moreHref}>Alle ansehen</TextButton> } : {})}
       />
@@ -108,6 +117,7 @@ export function OpenPoints({
                   visibly raw. Dressing them up as German would claim a
                   translation nobody made. */}
               {point.raw ? <span className="v3open__raw">{point.raw}</span> : null}
+              {point.more ? <div className="v3open__more">{point.more}</div> : null}
             </div>
             {point.action ? <div className="v3open__way">{point.action}</div> : null}
           </div>

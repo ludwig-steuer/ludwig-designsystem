@@ -1,7 +1,7 @@
 import { PRUEFPUNKT_KURZWORT, type PruefpunktCode } from "@/ludwig/core/accounting/pruefpunkte";
 import { REVERSE_CHARGE_CASE_LABEL, isPassThroughTaxKey, taxKeyEntry } from "@/ludwig/core/datev/tax-keys";
 
-import type { ReviewReasonCode } from "./review-reason";
+import type { ReviewReasonCode } from "../review-reason";
 import { CLARIFICATION_PARKING_TASK } from "@/ludwig/core/accounting/clarification-handling";
 
 /**
