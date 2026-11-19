@@ -125,6 +125,29 @@ Variabel:
 - H2 und H7 betreffen die Wörter und `basedOn` der App; sie gehen mit der
   Rückmeldung an ll-ceo, nicht in das Set.
 
+## Nachtrag: Beispieldaten an F699, F721, F726 (Spec-Autor, 2026-11-19)
+
+Nur Beispieldaten, kein Typwechsel, keine Änderung an der Komponente
+(ll-ceo nach dem Merge auf main):
+
+- Herkünfte in der Form der App (F699): Nennform mit großem Anfang, ohne
+  einleitendes „aus“, ohne Punkt. Der Grund des Steuerschlüssels bleibt ein
+  Satz aus dem Buchungskern.
+- „Konto“ ruht auf keinem Fakt mehr und trägt einen Erklärsatz (F721).
+  Neue Ergebniszeile „Gegenkonto“ mit ihrer Herkunft (F726).
+  „Steuerschlüssel“ ruht auf den gelesenen Fakten der Bewertung.
+  „Was wurde gekauft“ und „Verwendung“ liest die Bewertung nicht. Beide
+  stehen deshalb unter „Weitere Angaben“.
+- `ByHand`: keine Herkunft und kein „aus:“ an Konto und Steuerschlüssel
+  (F699).
+- `BackReference` zeigt den Rundlauf jetzt an „Art der Leistung“ unter
+  „Steuerschlüssel“ (drei Fakten). Unter „Konto“ steht kein „aus:“ mehr.
+  `Provisional` hängt am offenen Punkt „Art der Leistung“, einem Fakt, auf
+  dem das Ergebnis ruht.
+- Im Browser angesehen (Storybook, 1280 px): Rundlauf markiert drei Fakten,
+  Fokus auf dem ersten, Live-Region und Esc wie bisher; kein Querscroll,
+  keine Fehleranzeige.
+
 ## Abnahme
 
 Fremde Abnahme (Agent), 2026-11-19, gemessen. Geprüft im Arbeitsbaum

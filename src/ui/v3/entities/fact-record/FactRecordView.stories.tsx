@@ -34,10 +34,12 @@ const BASE: FactView = {
   openPoints: [],
   result: [
     { key: "treatment", label: "Steuerbehandlung", value: "Leistungsempfänger schuldet die Steuer (§ 13b UStG)", basedOn: ["supplier_country", "supply_kind", "counterparty_is_business"] },
-    { key: "account", label: "Konto", value: "4964 Aufwendungen für Lizenzen, Konzessionen", basedOn: ["supply_type", "use"] },
-    { key: "tax_key", label: "Steuerschlüssel", value: "506", explanation: "Sonstige Leistung eines Unternehmers aus dem übrigen Gemeinschaftsgebiet; die Steuer schuldet der Empfänger.", basedOn: ["supplier_country", "supply_kind"] },
-    { key: "document_number", label: "Belegfeld 1", value: "INV-2026-0412", explanation: "aus der Rechnungsnummer des Belegs", basedOn: [] },
-    { key: "posting_text", label: "Buchungstext", value: "Cloud Workspace 11/2026–10/2027", explanation: "wie in den früheren Buchungen der Kanzlei zu diesem Konto (Vergleich: „Nordlicht Cloud Workspace 11/2025–10/2026“)", basedOn: [] },
+    // The account rests on no fact since F721: where it comes from, the explanation says.
+    { key: "account", label: "Konto", value: "4964 Aufwendungen für Lizenzen, Konzessionen", explanation: "Einziges Konto in den früheren Buchungen dieses Lieferanten", basedOn: [] },
+    { key: "counter_account", label: "Gegenkonto", value: "70418 Nordlicht Software Ltd.", explanation: "Personenkonto des Sachverhalts", basedOn: [] },
+    { key: "tax_key", label: "Steuerschlüssel", value: "506", explanation: "Sonstige Leistung eines Unternehmers aus dem übrigen Gemeinschaftsgebiet; die Steuer schuldet der Empfänger.", basedOn: ["supplier_country", "supply_kind", "counterparty_is_business"] },
+    { key: "document_number", label: "Belegfeld 1", value: "INV-2026-0412", explanation: "Rechnungsnummer des Belegs", basedOn: [] },
+    { key: "posting_text", label: "Buchungstext", value: "Cloud Workspace 11/2026–10/2027", explanation: "Wie in den früheren Buchungen der Kanzlei zu diesem Konto (Vergleich: „Nordlicht Cloud Workspace 11/2025–10/2026“)", basedOn: [] },
   ],
   groups: [
     {
@@ -51,9 +53,9 @@ const BASE: FactView = {
     {
       group: "line",
       facts: [
-        { key: "supply_type", label: "Was wurde gekauft", value: "Software-Abonnement", certainty: "explicit", sources: [{ ...INVOICE, quote: "Annual subscription Cloud Workspace, 12 months" }], usedForResult: true, decidedByAgent: false },
+        { key: "supply_type", label: "Was wurde gekauft", value: "Software-Abonnement", certainty: "explicit", sources: [{ ...INVOICE, quote: "Annual subscription Cloud Workspace, 12 months" }], usedForResult: false, decidedByAgent: false },
         { key: "supply_kind", label: "Art der Leistung", value: "Leistung, kein Gegenstand", certainty: "inferred", sources: [{ ...INVOICE, quote: "Annual subscription Cloud Workspace" }], usedForResult: true, decidedByAgent: true },
-        { key: "use", label: "Verwendung", value: "eigener Verbrauch", certainty: "inferred", sources: [HISTORY], usedForResult: true, decidedByAgent: true },
+        { key: "use", label: "Verwendung", value: "eigener Verbrauch", certainty: "inferred", sources: [HISTORY], usedForResult: false, decidedByAgent: true },
       ],
     },
     {
@@ -142,7 +144,7 @@ export const Provisional: Story = {
         view={{
           ...BASE,
           entry: BASE.entry ? { ...BASE.entry, provisional: true } : null,
-          openPoints: [{ id: "op-1", factKey: "use", label: "Verwendung", reason: "uncertain", detail: "Erschlossen aus den bisherigen Buchungen, nicht bestätigt.", onTurn: "accounting", blocksHandover: false, evidence: [] }],
+          openPoints: [{ id: "op-1", factKey: "supply_kind", label: "Art der Leistung", reason: "uncertain", detail: "Erschlossen aus der Rechnungszeile, nicht bestätigt.", onTurn: "accounting", blocksHandover: false, evidence: [] }],
         }}
       />
     </div>
@@ -151,7 +153,8 @@ export const Provisional: Story = {
 
 /**
  * Booked by hand: the origin says „Manuell", the facts stay visible. The entry
- * carries no reasoning, so no result row says how its value came about (0248).
+ * carries no reasoning, so no result row says how its value came about (0248),
+ * and account and tax key rest on no fact (F699).
  */
 export const ByHand: Story = {
   render: () => (
@@ -160,7 +163,7 @@ export const ByHand: Story = {
         view={{
           ...BASE,
           entry: BASE.entry ? { ...BASE.entry, originMethod: "human" } : null,
-          result: BASE.result.map(({ explanation: _, ...r }) => r),
+          result: BASE.result.map(({ explanation: _, ...r }) => (r.key === "account" || r.key === "tax_key" ? { ...r, basedOn: [] } : r)),
         }}
       />
     </div>
@@ -196,9 +199,10 @@ export const LoadError: Story = {
 };
 
 /**
- * Round trip of the back reference: a click on „Verwendung" under „Konto"
- * marks both facts the account rests on, moves focus to the first and says
- * so; the same click or Esc lifts the marking.
+ * Round trip of the back reference: a click on „Art der Leistung" under
+ * „Steuerschlüssel" marks the three facts the tax key rests on — the same as
+ * the tax treatment's, so both rows show pressed —, moves focus to the first
+ * and says so; the same click or Esc lifts the marking.
  */
 export const BackReference: Story = { render: () => <div style={FRAME}><FactRecordView view={BASE} /></div> };
 
