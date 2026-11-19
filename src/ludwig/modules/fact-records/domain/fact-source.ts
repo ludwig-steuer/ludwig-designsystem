@@ -17,7 +17,7 @@ export const FACT_SOURCE_KINDS = [
 export type FactSourceKind = (typeof FACT_SOURCE_KINDS)[number];
 
 /** Arten, die auf einen Datensatz des Mandanten zeigen und deshalb eine `id` tragen. */
-const FACT_SOURCE_KINDS_WITH_ID = [
+export const FACT_SOURCE_KINDS_WITH_ID = [
   "source_doc",
   "contract",
   "bank_transaction",
