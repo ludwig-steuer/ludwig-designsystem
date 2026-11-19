@@ -47,6 +47,8 @@ export const FactSourceSchema = RationaleSourceObjectSchema.extend({
   locator: FactSourceLocatorSchema.optional(),
   label: z.string().min(1).max(200),
   observed_at: z.string().datetime({ offset: true }).optional(),
+  // F734: die Lesung des Beleglesers, aus der die Quelle stammt (`client_document_reading.id`).
+  reading_id: z.string().uuid().optional(),
 })
   .strict()
   .superRefine((source, ctx) => {
