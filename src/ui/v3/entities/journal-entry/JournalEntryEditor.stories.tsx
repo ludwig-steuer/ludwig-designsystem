@@ -450,3 +450,26 @@ export const S20_EditorOnly: Story = {
     );
   },
 };
+
+/**
+ * 0249 — **Booked by hand** („Selbst buchen", F760): a case without a
+ * proposal opens with a draft from the invoice — date, gross amount,
+ * Belegfeld 1; the account is still open. The draft is not saved yet and has
+ * no status, so the head shows no badge, not „Vorschlag".
+ */
+export const DraftByHand: Story = {
+  render: () => {
+    const { status: _, ...base } = BASE;
+    return (
+      <Frame>
+        <JournalEntryEditor
+          {...base}
+          rows={[{ ...ROW, bu: "", account: "", accountName: "", text: "", candidates: { partner: CANDIDATES.partner } }]}
+          editable
+          onCancel={() => {}}
+          onSave={() => {}}
+        />
+      </Frame>
+    );
+  },
+};

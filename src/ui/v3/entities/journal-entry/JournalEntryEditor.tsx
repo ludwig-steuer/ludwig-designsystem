@@ -101,7 +101,11 @@ export interface JournalEntryEditorProps {
   documentNumber?: string | null;
   documentAmount?: number | null;
   documentSide?: Side;
-  status: EditorStatus;
+  /**
+   * The stored status of the entry. Absent: a draft that is not saved yet
+   * (booked by hand) — it has no status, so the head shows no badge (0249).
+   */
+  status?: EditorStatus;
   editable: boolean;
   mode?: EditorMode;
   /** The entry is locked — with the reason and the one allowed way out. */
@@ -567,7 +571,7 @@ function Head({
 }: {
   documentNumber?: string | null;
   documentAmount?: number | null;
-  status: EditorStatus;
+  status?: EditorStatus;
   rest: number | null;
   full: boolean;
   onToggleMode: () => void;
@@ -581,7 +585,7 @@ function Head({
         {documentNumber ? `Beleg ${documentNumber}` : "Ohne Belegnummer"}
         {documentAmount == null ? "" : ` · ${euro(documentAmount)}`}
       </span>
-      <StatusBadge axis="journal_entry" status={status} info={false} />
+      {status ? <StatusBadge axis="journal_entry" status={status} info={false} /> : null}
       <span style={{ marginLeft: "auto", display: "flex", alignItems: "center", gap: 12 }}>
         {showRest ? (
           <span className={`bse__rest${Math.abs(rest!) < 0.005 ? " is-ok" : " is-off"}`}>
