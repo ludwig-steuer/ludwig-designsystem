@@ -4,7 +4,7 @@ import type { ReactNode } from "react";
 import type { FactSourceKind } from "@/ludwig/modules/fact-records/domain/fact-source";
 import { resolveStatus } from "@/ludwig/ui/status/status-registry";
 
-import { ENTITY_ICON } from "../Icons";
+import { ACTION_ICON, ENTITY_ICON } from "../Icons";
 
 import { MonoCell } from "../primitives/Cells";
 import { Disclosure } from "../primitives/Disclosure";
@@ -84,8 +84,9 @@ export interface Provenance {
  * **One sign per kind of source**, in the whole set (0247): the same kind looks
  * the same at an entry's reasoning and at a fact. Where the kind is an entity,
  * its sign is the entity's (`ENTITY_ICON`) — a document is a receipt here as
- * everywhere else; the rest keep a sign of their own. An exempt enumeration in
- * `check:icons`, like `StateIcon`'s.
+ * everywhere else; what a language model closed carries Ludwig's sign
+ * (`ACTION_ICON.agent`, 0252); the rest keep a sign of their own. An exempt
+ * enumeration in `check:icons`, like `StateIcon`'s.
  */
 const SOURCE_ICON: Record<FactSourceKind, LucideIcon> = {
   source_doc: ENTITY_ICON["source-document"].icon,
@@ -102,6 +103,9 @@ const SOURCE_ICON: Record<FactSourceKind, LucideIcon> = {
   external_service: BadgeCheck,
   default: CircleDashed,
   accounting_review: UserCheck,
+  // A language model closed the value from the document's text: it comes from
+  // Ludwig, not from a person — `ACTION_ICON.agent`, not the default's (0252).
+  model: ACTION_ICON.agent.icon,
 };
 
 /**

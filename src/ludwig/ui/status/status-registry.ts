@@ -1364,7 +1364,7 @@ const FACT_OPEN_POINT_REASON: Record<string, StatusDescriptor> = {
  * Fakts, keine eigene Spalte. Wertebereich: `FACT_SOURCE_KINDS`
  * (`modules/fact-records/domain/fact-source.ts`): die Arten der
  * Buchungsbegründung (`RATIONALE_SOURCE_KINDS`) plus `business_partner`,
- * `client_profile`, `external_service`, `default`, `accounting_review`.
+ * `client_profile`, `external_service`, `default`, `accounting_review`, `model`.
  *
  * Fallstricke:
  *  - `Kontoauszug` und `Bisherige Buchungen` sind die Wörter, die das
@@ -1388,6 +1388,7 @@ const FACT_SOURCE_KIND: Record<string, StatusDescriptor> = {
   external_service: { label: "Externe Prüfung", kind: "neutral", description: "Eine externe Stelle hat den Wert geprüft, etwa eine Behörde." },
   default: { label: "Standardwert", kind: "neutral", description: "Ein Standardwert, weil nichts dafür oder dagegen spricht." },
   accounting_review: { label: "Kanzlei", kind: "neutral", description: "Die Kanzlei hat den Wert in der Abnahme festgestellt." },
+  model: { label: "Modell", kind: "neutral", description: "Ein Sprachmodell hat den Wert geschlossen; der Zweck steht an der Quelle." },
 };
 
 /**

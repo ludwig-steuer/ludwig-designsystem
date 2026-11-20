@@ -168,7 +168,9 @@ export const InUse: Story = {
 /**
  * S2 · the five steps of the axis `fact_certainty` side by side — each a grey
  * word, no colour and no dot. „unbekannt" carries no value. The head „Sicherheit"
- * opens the axis' legend under (i).
+ * opens the axis' legend under (i). „erschlossen" twice: once from the invoice,
+ * once by a language model (kind „Modell", Ludwig's sign — not the default's
+ * dashed circle, 0252).
  */
 export const Certainty: Story = {
   render: () => (
@@ -178,6 +180,7 @@ export const Certainty: Story = {
           { key: "vat_id", label: "USt-IdNr. gültig", value: "ja, geprüft am 03.11.2026", certainty: "confirmed", sources: [{ key: "ext", kind: kind("external_service"), label: "Bestätigungsabfrage beim BZSt", locator: "03.11.2026, 10:14 Uhr" }] },
           { key: "country", label: "Land des Lieferanten", value: "Irland", certainty: "explicit", sources: [{ ...INVOICE, key: "c", locator: "S. 1, Absender", quote: "Dublin 2, Ireland" }] },
           { key: "supply_kind", label: "Art der Leistung", value: "Leistung, kein Gegenstand", certainty: "inferred", sources: [{ ...INVOICE, key: "k", quote: "Annual subscription Cloud Workspace" }] },
+          { key: "line_use", label: "Verwendung der Position", value: "Verbrauch", certainty: "inferred", sources: [{ key: "m", kind: kind("model"), label: "Modell (line_use)" }] },
           { key: "is_business", label: "Unternehmer", value: "ja", certainty: "assumed", sources: [{ key: "def", kind: kind("default"), label: "Ltd. ohne Gegenangabe" }] },
           { key: "use", label: "Verwendung", value: null, certainty: "unknown" },
         ]}

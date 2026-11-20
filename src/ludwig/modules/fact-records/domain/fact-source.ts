@@ -13,6 +13,8 @@ export const FACT_SOURCE_KINDS = [
   "default",
   // F681: die Buchhaltung hat den Wert in der Abnahme festgestellt; die Person steht im `label`.
   "accounting_review",
+  // F763: ein Modellaufruf hat den Wert geschlossen (ohne `id`); der Zweck steht im `label`, z. B. „Modell (line_use)“.
+  "model",
 ] as const;
 export type FactSourceKind = (typeof FACT_SOURCE_KINDS)[number];
 
