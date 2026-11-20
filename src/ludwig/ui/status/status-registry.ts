@@ -1388,7 +1388,7 @@ const FACT_SOURCE_KIND: Record<string, StatusDescriptor> = {
   external_service: { label: "Externe Prüfung", kind: "neutral", description: "Eine externe Stelle hat den Wert geprüft, etwa eine Behörde." },
   default: { label: "Standardwert", kind: "neutral", description: "Ein Standardwert, weil nichts dafür oder dagegen spricht." },
   accounting_review: { label: "Kanzlei", kind: "neutral", description: "Die Kanzlei hat den Wert in der Abnahme festgestellt." },
-  model: { label: "Modell", kind: "neutral", description: "Ein Sprachmodell hat den Wert geschlossen; der Zweck steht an der Quelle." },
+  model: { label: "Ludwig", kind: "neutral", description: "Ludwig hat den Wert aus dem Beleg geschlossen; wofür, steht an der Quelle." },
 };
 
 /**

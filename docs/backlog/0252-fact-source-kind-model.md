@@ -81,6 +81,19 @@ Variabel:
 - [ ] Kein lokales Wort „Modell“ im Set außerhalb des Registry-Spiegels und der Story-Daten
 - [ ] `check:icons` grün (Ausnahme `Provenance.tsx` bleibt die einzige Aufzählung)
 
+## Nachtrag nach der Abnahme (Spec-Autor, 2026-11-20)
+
+- H1: Das Wort der Art heißt jetzt „Ludwig“ statt „Modell“. Grund:
+  GLOSSARY, in der Oberfläche „Ludwig“, nie „KI“, und das Zeichen bedeutet
+  schon „Kommt von Ludwig“. Es gilt vorläufig, die Wortfrage liegt beim
+  Owner (Plan Booking v3, Punkt 13). Spiegel aus App `81c88ce8a`
+  (`fact_source_kind.model` und der Kommentar in `fact-source.ts`). Wo oben
+  „Modell“ als Wort an der Quelle steht, gilt jetzt „Ludwig“; Zeichen und
+  Art `model` bleiben.
+- H2: Das Label nennt den Zweck im Klartext. Das Beispiel in `FactTable` ·
+  `Certainty` heißt „Verwendung aus dem Positionstext“, wie die Konstante
+  `LINE_USE_SOURCE_LABEL` der App (F763, T763.3).
+
 ## Abnahme
 
 | Kriterium | Nachweis (Story-ID · Befehl · Screenshot) | Ergebnis |
