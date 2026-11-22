@@ -787,7 +787,9 @@ body { background: #FAFBFC; }
   display: flex; align-items: center; gap: 12px;
 }
 /* The avatar keeps the gradient of `.sb__client-avatar` — the client's sign in
-   the sidebar; part of the named exception of this file (owner 2026-09-03). */
+   the sidebar; part of the named exception of this file (owner 2026-09-03),
+   which names this avatar explicitly although the band stands in the work
+   surface (owner 2026-11-22). */
 .ludwig-client-band__avatar {
   width: 30px; height: 30px; border-radius: 6px; flex-shrink: 0;
   background: linear-gradient(180deg, #2B5C8E 0%, #1A3A5C 100%);

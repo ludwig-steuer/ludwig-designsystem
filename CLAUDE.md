@@ -61,8 +61,10 @@ Ein guter Baustein besteht alle vier. Ein Verstoß in einer ist ein Mangel.
   bestätigt, Bestätigungsdialog nur bei Unumkehrbarem, sonst Undo.
 - Bewegung respektiert `prefers-reduced-motion`; Statuswechsel (gespeichert,
   „5 Treffer") werden per Live-Region angesagt.
-- Desktop ab 1280 px Innenbreite; kein Mobile-Ziel, darunter Sperre mit einem
-  Satz. 200 % Zoom bleibt bedienbar.
+- Desktop ab 1280 px Innenbreite ist der Hauptfall; Tablet (640–1279 px) und
+  Handy (unter 640 px) werden unterstützt, ohne Sperre (L1, Owner 2026-11-22):
+  eine Spalte, Zeilenkarten, Leiste unten, nichts fällt weg. Eine Regel für
+  schmale Breiten ändert am Desktop nichts. 200 % Zoom bleibt bedienbar.
 
 **Logik** (V8, V9, Z1–Z7, I3, I4, L2, L3)
 - Jede Seite hat **eine Frage**; jede Spalte beantwortet sie. Eine Spalte, die

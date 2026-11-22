@@ -275,6 +275,12 @@ Die Hinweise der Nachprüfung sind umgesetzt. Kein Kriterium ändert sich.
 - **H10:** Der Build ist nach diesen Änderungen neu gelaufen (Exit 0). Die Wächter sind grün; `check:classes` meldet nur die vier Altfunde. `png-diff` über alle 37 endet mit Exit 0, 36 × 0,000 % und 1 × 0,001 %.
 - **H5 (Owner):** Die Ausnahme A5 in der Guideline nennt wörtlich nur die dunkle Seitenleiste. Der Verlauf des Avatars im Mandantenband (wie `.sb__client-avatar`) liegt in der Arbeitsfläche. Diese Frage geht an den Owner. Bis zur Antwort bleibt der Verlauf, weil die App ihn heute schon inline so zeigt.
 
+## Nachtrag 3 · 2026-11-22 (Owner-Entscheide)
+
+- **Wörter bestätigt (Owner 2026-11-22):** „Menü“, „Menü schließen“ und „Schritt n von m“ stehen so in der Oberfläche (offene Frage 2).
+- **Verlauf am Avatar des Mandantenbands:** gehört zur benannten Ausnahme A5 von `app-chrome.css` (`design-guidelines.md`, Abschnitt „Nicht hier“).
+- **CLAUDE.md** §2 Bedienung ist an L1 angeglichen („kein Mobile-Ziel, darunter Sperre“ ersetzt).
+
 ## Abnahme
 
 Gemessen mit Playwright-MCP gegen `localhost:6118/iframe.html`, bei 390 × 844, 820 × 1180 und 1440 × 900. Die Bilder liegen in `.playwright-mcp/f783-review/` und `.playwright-mcp/f783-review-desktop/`.

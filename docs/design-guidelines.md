@@ -21,7 +21,10 @@ Tabellen statt Prosa, jede Regel mit erkennbarem Verstoß.
 Anwendungsrahmen in `src/styles/app-chrome.css` behält seine rohen Hex- und
 `rgba()`-Werte. Die dunkle Seitenleiste mit Verlauf ist die eine Fläche, die
 bewusst außerhalb der Palette steht; sie auf Tokens zu ziehen hieße, Tokens
-für eine einzige Fläche zu erfinden. Die Ausnahme gilt **nur** für diese
+für eine einzige Fläche zu erfinden. Dazu gehört das Zeichen des Mandanten im
+Mandantenband (`.ludwig-client-band__avatar`, derselbe Verlauf wie
+`.sb__client-avatar`), obwohl das Band in der Arbeitsfläche steht (Owner
+2026-11-22, 0253). Die Ausnahme gilt **nur** für diese
 Datei — jede Komponente und jedes andere Stylesheet bleibt bei Tokens. Code-Regeln
 der Oberfläche: die Design-Anteile in `docs/web-ui-regeln.md` (R2, R3, R4, R7,
 R9, R15, R18, R21), das Fachliche drüben in `docs/topics/web-ui.md` und
