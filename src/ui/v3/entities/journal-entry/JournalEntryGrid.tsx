@@ -14,6 +14,8 @@ import {
   documentSideTotal,
   journalBalanceText,
   journalGridTracks,
+  JOURNAL_CELL_WORD,
+  type JournalCell,
   journalLines,
   rowAmount,
   type ContraAccount,
@@ -224,7 +226,7 @@ function Row({
   taxKeyHref?: (taxKey: string) => string;
 }) {
   const account = (
-    <span className="bse__account-cell">
+    <span className="bse__account-cell" data-cell="account">
       <span className="v2mono">{row.account}</span>
       {row.accountName ? <span className="v2muted bse__account-name">{row.accountName}</span> : null}
       {accountHref ? (
@@ -254,28 +256,48 @@ function Row({
   return (
     <div className="bse__row">
       <div className="bse__cells" role="row">
-        <span>
+        <span data-cell="date">
+          <Word cell="date" />
           {/* ISO (the date input needs it) reads as TT.MM.JJJJ (T7); a date that
               comes German already stands as given — not every caller sends ISO. */}
           {ISO_DATE.test(row.datum) ? <Time value={row.datum} format="date" size="sm" /> : row.datum}
         </span>
-        {full ? <span className="v2muted">{row.currency ?? "EUR"}</span> : null}
-        <span className="v2num">{euro(rowAmount(row.amount))}</span>
-        <span>{row.side}</span>
-        <span>
+        {full ? (
+          <span className="v2muted" data-cell="currency">
+            <Word cell="currency" />
+            {row.currency ?? "EUR"}
+          </span>
+        ) : null}
+        <span className="v2num" data-cell="amount">
+          {euro(rowAmount(row.amount))}
+        </span>
+        <span data-cell="side">{row.side}</span>
+        <span data-cell="taxKey">
+          <Word cell="taxKey" />
           <TaxKeyCell taxKey={row.bu} {...(taxKeyHref ? { taxKeyHref } : {})} />
         </span>
         {full ? account : null}
-        {full ? <span className="v2mono">{row.externalDocumentNumber}</span> : account}
-        {full ? <span className="v2mono">{row.externalDocumentNumber2 ?? ""}</span> : null}
-        {full ? null : <span className="v2mono">{row.externalDocumentNumber}</span>}
-        <span className="v2trunc" title={row.text}>
+        {full ? <span className="v2mono" data-cell="doc1"><Word cell="doc1" of={row.externalDocumentNumber ?? ""} />{row.externalDocumentNumber}</span> : account}
+        {full ? <span className="v2mono" data-cell="doc2"><Word cell="doc2" of={row.externalDocumentNumber2 ?? ""} />{row.externalDocumentNumber2 ?? ""}</span> : null}
+        {full ? null : <span className="v2mono" data-cell="doc1"><Word cell="doc1" of={row.externalDocumentNumber ?? ""} />{row.externalDocumentNumber}</span>}
+        <span className="v2trunc" title={row.text} data-cell="text">
+          <Word cell="text" of={row.text ?? ""} />
           {row.text}
         </span>
-        {full ? <span className="v2muted">{row.costCenter1 ?? ""}</span> : null}
+        {full ? <span className="v2muted" data-cell="cost"><Word cell="cost" of={row.costCenter1 ?? ""} />{row.costCenter1 ?? ""}</span> : null}
       </div>
     </div>
   );
+}
+
+/**
+ * The word of a cell, only in the phone card (0257) — the head says it above
+ * 640 px. With `of`, no word over an empty value, as in the row card (0255,
+ * M2); callers pass `?? ""`, so a missing field counts as empty.
+ */
+function Word({ cell, of }: { cell: JournalCell; of?: string | null }): ReactNode {
+  if (of !== undefined && !of) return null;
+  return <span className="v2tbl__cardlabel">{JOURNAL_CELL_WORD[cell]} </span>;
 }
 
 /**

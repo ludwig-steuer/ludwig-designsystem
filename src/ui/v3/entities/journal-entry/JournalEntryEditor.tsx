@@ -1,10 +1,17 @@
 "use client";
 
 import { Trash2, Undo2 } from "lucide-react";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState, type ReactNode } from "react";
 
 import { deriveTax } from "./tax-assist";
-import { ISO_DATE, REVERSE_CHARGE_TAX_ACCOUNTS, journalBalanceText, journalLines } from "./journal-entry";
+import {
+  ISO_DATE,
+  JOURNAL_CELL_WORD,
+  REVERSE_CHARGE_TAX_ACCOUNTS,
+  journalBalanceText,
+  journalLines,
+  type JournalCell,
+} from "./journal-entry";
 // Direct import, not the barrel: `@/ui/status` also exports `FlowModal` and
 // pulls `@/modules/invoices` with the DB driver into the bundle (P22).
 import { ActionIcon } from "../../Icons";
@@ -652,10 +659,18 @@ function EditorRow({
       <div className="bse__cells">
         {editable ? (
           <>
-            <input className="v2in" type="date" value={row.datum} onChange={(e) => onChange({ datum: e.target.value })} aria-label="Buchungsdatum" />
+            {/* Each field in a `.bse__f` (0257): `display: contents` above
+                640 px, so the grid is untouched; on the phone the field with
+                its word above it, in DATEV order — the order of the tab key. */}
+            <Field cell="date">
+              <input className="v2in" type="date" value={row.datum} onChange={(e) => onChange({ datum: e.target.value })} aria-label="Buchungsdatum" />
+            </Field>
             {full ? (
-              <input className="v2in" value={row.currency ?? "EUR"} onChange={(e) => onChange({ currency: e.target.value })} aria-label="Währung" />
+              <Field cell="currency">
+                <input className="v2in" value={row.currency ?? "EUR"} onChange={(e) => onChange({ currency: e.target.value })} aria-label="Währung" />
+              </Field>
             ) : null}
+            <Field cell="amount">
             <input
               className="v2in v2num"
               value={row.amount}
@@ -664,21 +679,27 @@ function EditorRow({
               onBlur={(e) => onChange({ amount: euro(toNumber(e.target.value)).replace(/\s?€/, "") })}
               aria-label="Umsatz"
             />
+            </Field>
+            <Field cell="side">
             <button
               type="button"
               className="bse__sh"
               onClick={() => onChange({ side: row.side === "S" ? "H" : "S" })}
-              aria-label={`Side: ${row.side === "S" ? "Soll" : "Haben"}`}
+              aria-label={`S/H: ${row.side === "S" ? "Soll" : "Haben"}`}
             >
               {row.side}
             </button>
+            </Field>
+            <Field cell="taxKey">
             <select
               className="v2in"
               value={row.bu}
               disabled={row.buLocked}
               title={row.buLocked ? "Automatikkonto — der Schlüssel steht am Konto" : undefined}
               onChange={(e) => onChange({ bu: e.target.value })}
-              aria-label="Steuerschlüssel"
+              // „BU" is the word on the card and the column head — it has to be
+              // part of the name (WCAG 2.5.3, 0257).
+              aria-label="BU-Schlüssel"
             >
               <option value="">—</option>
               <option value="9">9</option>
@@ -688,6 +709,8 @@ function EditorRow({
               <option value="94">94</option>
               <option value="40">40</option>
             </select>
+            </Field>
+            <Field cell="account">
             <AccountField
               value={row.account}
               // The loaded name belongs in the field, not only in the
@@ -710,10 +733,12 @@ function EditorRow({
               {...(onOpenLedger ? { onOpenLedger } : {})}
               ariaLabel="Konto"
             />
+            </Field>
             {/* Document number 1 is its own building block (0014): 36
                 characters, where the current number comes from, the way into
                 the register. A bare `<input>` here would be a second truth
                 about the same rule. */}
+            <Field cell="doc1">
             {documentNumberSourceLabel ? (
               <DocumentNumberField
                 value={row.externalDocumentNumber}
@@ -727,14 +752,22 @@ function EditorRow({
             ) : (
               <input className="v2in" value={row.externalDocumentNumber} onChange={(e) => onChange({ externalDocumentNumber: e.target.value })} aria-label="Belegfeld 1" />
             )}
+            </Field>
             {full ? (
-              <input className="v2in" value={row.externalDocumentNumber2 ?? ""} onChange={(e) => onChange({ externalDocumentNumber2: e.target.value })} aria-label="Belegfeld 2" />
+              <Field cell="doc2">
+                <input className="v2in" value={row.externalDocumentNumber2 ?? ""} onChange={(e) => onChange({ externalDocumentNumber2: e.target.value })} aria-label="Belegfeld 2" />
+              </Field>
             ) : null}
-            <input className="v2in" value={row.text} onChange={(e) => onChange({ text: e.target.value })} aria-label="Buchungstext" />
+            <Field cell="text">
+              <input className="v2in" value={row.text} onChange={(e) => onChange({ text: e.target.value })} aria-label="Buchungstext" />
+            </Field>
             {full ? (
-              <input className="v2in" value={row.costCenter1 ?? ""} onChange={(e) => onChange({ costCenter1: e.target.value })} aria-label="KOST 1" />
+              <Field cell="cost">
+                <input className="v2in" value={row.costCenter1 ?? ""} onChange={(e) => onChange({ costCenter1: e.target.value })} aria-label="KOST 1" />
+              </Field>
             ) : null}
-            <span>
+            {/* Not wrapped: the pinned last cell of the editing grid. */}
+            <span data-cell="action">
               {removable ? (
                 <button type="button" className="v2link v2link--quiet" onClick={onRemove} aria-label="Zeile entfernen">
                   <Trash2 size={13} strokeWidth={1.5} />
@@ -744,15 +777,17 @@ function EditorRow({
           </>
         ) : (
           <>
-            <span>
+            <span data-cell="date">
+              <Word cell="date" />
               {/* ISO (the date input needs it) reads as TT.MM.JJJJ (T7); a date that
                   comes German already stands as given — not every caller sends ISO. */}
               {ISO_DATE.test(row.datum) ? <Time value={row.datum} format="date" size="sm" /> : row.datum}
             </span>
-            {full ? <span>{row.currency ?? "EUR"}</span> : null}
-            <span className="v2num">{row.amount}</span>
-            <span>{row.side}</span>
-            <span>
+            {full ? <span data-cell="currency"><Word cell="currency" />{row.currency ?? "EUR"}</span> : null}
+            <span className="v2num" data-cell="amount">{row.amount}</span>
+            <span data-cell="side">{row.side}</span>
+            <span data-cell="taxKey">
+              <Word cell="taxKey" />
               {onOpenTaxKey && row.bu ? (
                 // The same way as in the note line below: the reading row had
                 // the key as dead text while the line under it linked it
@@ -764,14 +799,14 @@ function EditorRow({
                 <TaxKeyCell taxKey={row.bu} />
               )}
             </span>
-            <span className="bse__account">
+            <span className="bse__account" data-cell="account">
               {row.account} <span className="v2muted">{row.accountName}</span>
             </span>
-            <span>{row.externalDocumentNumber || "—"}</span>
-            {full ? <span>{row.externalDocumentNumber2 || "—"}</span> : null}
-            <span className="bse__text">{row.text}</span>
-            {full ? <span>{row.costCenter1 || "—"}</span> : null}
-            <span>
+            <span data-cell="doc1"><Word cell="doc1" />{row.externalDocumentNumber || "—"}</span>
+            {full ? <span data-cell="doc2"><Word cell="doc2" />{row.externalDocumentNumber2 || "—"}</span> : null}
+            <span className="bse__text" data-cell="text">{row.text ? <Word cell="text" /> : null}{row.text}</span>
+            {full ? <span data-cell="cost"><Word cell="cost" />{row.costCenter1 || "—"}</span> : null}
+            <span data-cell="action">
               {onOpenLedger && row.account ? (
                 <IconButton
                   size="sm"
@@ -941,5 +976,23 @@ function MessageBlock({
         </div>
       ))}
     </div>
+  );
+}
+
+/** The word of a cell, only in the phone card (0257) — the head says it above 640 px. */
+function Word({ cell }: { cell: JournalCell }): ReactNode {
+  return <span className="v2tbl__cardlabel">{JOURNAL_CELL_WORD[cell]} </span>;
+}
+
+/**
+ * A field with its word for the phone (0257). `display: contents` above
+ * 640 px — the field stays the grid's own cell.
+ */
+function Field({ cell, children }: { cell: JournalCell; children: ReactNode }): ReactNode {
+  return (
+    <span className="bse__f" data-cell={cell}>
+      <Word cell={cell} />
+      {children}
+    </span>
   );
 }

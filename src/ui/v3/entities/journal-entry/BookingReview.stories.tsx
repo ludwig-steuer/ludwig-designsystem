@@ -288,7 +288,7 @@ export const ExpenseWithPayment: Story = {
  */
 export const InUse: Story = {
   render: () => (
-    <div style={{ width: 728 }}>
+    <div style={{ maxWidth: 728 }}>
       <BookingReview
         lines="full"
         entries={[

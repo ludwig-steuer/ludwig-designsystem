@@ -188,6 +188,29 @@ export function journalBalanceText(lines: readonly JournalBatchLine[]): string {
   return `Σ S ${euro(debit)} ${Math.abs(debit - credit) < 0.005 ? "=" : "≠"} Σ H ${euro(credit)}`;
 }
 
+/** The role of a cell in an entry row — its place in the phone card (0257). */
+export type JournalCell =
+  | "date" | "currency" | "amount" | "side" | "taxKey" | "account"
+  | "doc1" | "doc2" | "text" | "cost";
+
+/**
+ * The word of a cell in the phone card (0257). The column heads say the same
+ * on the desktop; the card writes „Belegfeld" and „Währung" out, so that the
+ * visible word is part of the field's name (WCAG 2.5.3).
+ */
+export const JOURNAL_CELL_WORD: Record<JournalCell, string> = {
+  date: "Datum",
+  currency: "Währung",
+  amount: "Umsatz",
+  side: "S/H",
+  taxKey: "BU",
+  account: "Konto",
+  doc1: "Belegfeld 1",
+  doc2: "Belegfeld 2",
+  text: "Text",
+  cost: "KOST",
+};
+
 /**
  * The column tracks of the reading grid, in both modes.
  *
