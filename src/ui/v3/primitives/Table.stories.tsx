@@ -224,3 +224,48 @@ export const Density: Story = {
     </div>
   ),
 };
+
+/**
+ * Die Zeilenkarte (0253): unter 640 px Tabellenbreite — und nur in einem
+ * Fenster unter 1280 px — wird jede Zeile eine Karte. `priority` je Zelle:
+ * Gegenpartei und Betrag in Zeile 1 (Betrag rechts), Stand und Fällig klein
+ * in Zeile 2, die Belegnummer nur am Desktop. Ansehen bei 390 px Fensterbreite;
+ * am Desktop steht dieselbe Tabelle mit fünf Spalten. Der lange Name bricht um.
+ */
+export const PhoneCards: Story = {
+  render: () => (
+    <Card>
+      <CardHead title="Offene Posten" sub="3 Posten · 1 überfällig" />
+      <Table cols="1.6fr 120px 150px 110px 110px" priority={["primary", "primary", "meta", "meta", "hidden"]}>
+        <HeadRow>
+          <span>Gegenpartei</span>
+          <span className="v2num">Betrag</span>
+          <span>Stand</span>
+          <span>Fällig</span>
+          <span>Beleg</span>
+        </HeadRow>
+        <Row href="#">
+          <span className="v2main">Vermietungsgesellschaft Musterstraße 12 GmbH &amp; Co. KG</span>
+          <AmountCell value={18450} />
+          <DotStatus tone="danger" label="12 Tage überfällig" />
+          <span>21.08.2026</span>
+          <span className="v2mono">RE-2026-0812</span>
+        </Row>
+        <Row href="#">
+          <span className="v2main">Werbeagentur Nord</span>
+          <AmountCell value={-420} />
+          <DotStatus tone="neutral" label="Gutschrift" />
+          <span>30.08.2026</span>
+          <span className="v2mono">GS-118</span>
+        </Row>
+        <Row href="#">
+          <span className="v2main">Bürobedarf GmbH</span>
+          <AmountCell value={64.9} />
+          <DotStatus tone="neutral" label="Offen" />
+          <span>14.09.2026</span>
+          <span className="v2mono">4711</span>
+        </Row>
+      </Table>
+    </Card>
+  ),
+};

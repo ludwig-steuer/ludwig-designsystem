@@ -2,6 +2,8 @@ import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { useState } from "react";
 
 import { Button } from "../primitives/Button";
+import { AmountCell } from "../primitives/Cells";
+import { MenuItem, OverflowMenu } from "../primitives/OverflowMenu";
 import { FileDrop } from "../primitives/FileDrop";
 import { Field, Input } from "../primitives/Form";
 import { Card, CardHead, HeadRow, Row, Table } from "../primitives/Table";
@@ -93,6 +95,59 @@ export const WithFooter: Story = {
       <Field label="Buchungskreis" htmlFor="buchungskreis">
         <Input id="buchungskreis" defaultValue="Musterfirma GmbH · 2026" />
       </Field>
+    </Wizard>
+  ),
+};
+
+/**
+ * Zweitaktionen und die untere Leiste (0253). Am Desktop steht
+ * „Als Entwurf sichern" neben „Zurück" und „Weiter". Unter 640 px klebt der
+ * Fuß am unteren Rand: Die Zweitaktion (`is-secondary`) weicht, und dieselbe
+ * Handlung steht im ⋯ (`.v2bar__more`), denn nichts fällt weg. Die Schaltflächen
+ * sind dort 44 px hoch. Ansehen bei 390 px; der lange Inhalt lässt den Fuß
+ * kleben, während er scrollt.
+ */
+export const SecondaryActions: Story = {
+  render: () => (
+    <Wizard
+      steps={[...THREE, { label: "Abschluss" }]}
+      current={1}
+      states={["done", "active", "pending", "pending"]}
+      progress="Schritt 2 von 4"
+      footer={
+        <>
+          <Button variant="secondary" className="is-secondary">
+            Als Entwurf sichern
+          </Button>
+          <span className="v2bar__more">
+            <OverflowMenu>
+              <MenuItem onClick={() => {}}>Als Entwurf sichern</MenuItem>
+            </OverflowMenu>
+          </span>
+          <Button variant="secondary">Zurück</Button>
+          <Button variant="primary" hotkey="⏎">
+            Weiter
+          </Button>
+        </>
+      }
+    >
+      <Card>
+        <CardHead title="Vorschau" sub="20 von 214 Zeilen" />
+        <Table cols="110px 1fr 120px">
+          <HeadRow>
+            <span>Datum</span>
+            <span>Verwendungszweck</span>
+            <span className="v2num">Betrag</span>
+          </HeadRow>
+          {Array.from({ length: 20 }, (_, i) => (
+            <Row key={i}>
+              <span>{`${String(i + 1).padStart(2, "0")}.09.2026`}</span>
+              <span>{i % 3 === 0 ? "Miete Büro Musterstraße 12, September" : "Kartenzahlung Bürobedarf GmbH"}</span>
+              <AmountCell value={i % 3 === 0 ? -1800 : -64.9} />
+            </Row>
+          ))}
+        </Table>
+      </Card>
     </Wizard>
   ),
 };

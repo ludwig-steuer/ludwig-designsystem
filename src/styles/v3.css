@@ -480,28 +480,10 @@ a.v3stepbar__step.is-current:hover { background: var(--color-accent-50); }
   font-size: var(--fs-ui-sm); color: var(--color-text-subtle); margin-top: 6px;
 }
 
-/* Screen too small — a real limit, not a preview artefact: sidebar (240) +
-   rail (224) + two workspace columns need about 1280 px. */
-.review__toosmall { display: none; }
-@media (max-width: 1279px) {
-  /* A lock, not a hint: below 1280 px rail, list and detail stack, and checking
-     turns into guessing. */
-  .review__toosmall {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    gap: 10px;
-    text-align: center;
-    min-height: 60vh;
-    padding: var(--space-8);
-    background: var(--color-surface);
-    border: 1px solid var(--color-border);
-    border-radius: var(--radius-lg);
-  }
-  .review__toosmall .t { font-size: var(--fs-ui-lg); font-weight: 600; color: var(--color-text); }
-  .review__toosmall .s { font-size: var(--fs-ui); color: var(--color-text-muted); max-width: 46ch; }
-  .review { display: none; }
+/* Narrower than 1024 px rail and work surface stack (0253, L1 since owner
+   2026-11-22) — the lock below 1280 px is gone. */
+@media (max-width: 1023.98px) {
+  .review { grid-template-columns: minmax(0, 1fr); }
 }
 
 /* --- Freigabe-Checkliste (Schritt 8) ----------------------------------- */
@@ -5370,3 +5352,221 @@ a.v3bbr__val:hover { text-decoration-color: currentColor; }
 .v2radiogrp__group.is-open > .v2radioline .v2radioline__chev { transform: rotate(90deg); }
 @media (prefers-reduced-motion: reduce) { .v2radioline__chev { transition: none; } }
 .v2radiogrp--rows .v2radiogrp__group, .v2radiogrp--rows .v2radiogrp__sub { display: grid; gap: var(--space-2); }
+
+/* ==========================================================================
+   0253 · Phone and tablet (L1 since owner 2026-11-22, F783 M0)
+
+   Desktop from 1280 px does not move by a pixel: every rule below sits in a
+   query up to 1279.98 px, except the `display: none` of what only exists
+   narrow. Breakpoints `--bp-phone` 640, `--bp-tablet` 1024, `--bp-desktop`
+   1280 (tokens.css) — as numbers, a custom property does not work in `@media`.
+   ========================================================================== */
+
+/* Only narrow: the compact step bar, the ⋯ of a bottom bar. */
+.v3stepbar__compact, .v2bar__more { display: none; }
+
+@media (max-width: 1279.98px) {
+  /* The table answers to its own width, not the window's — but only below
+     1280, so a table in a narrow drawer on the desktop stays a table. The
+     scroll box is the container of the inner box (which carries the minimum
+     width), the table that of its rows. */
+  .v2tbl__scroll, .v2tbl { container: v2tbl / inline-size; }
+
+  /* Tabs never wrap; the strip scrolls sideways. The line under the strip
+     becomes an inset shadow, so the active tab's underline no longer needs a
+     -1 px overlap — that overlap would make the strip scroll by 1 px. */
+  .v2tabs {
+    overflow-x: auto; overflow-y: hidden; scrollbar-width: thin;
+    border-bottom: 0; box-shadow: inset 0 -1px 0 var(--color-border);
+  }
+  .v2tab { flex-shrink: 0; white-space: nowrap; margin-bottom: 0; }
+}
+
+/* The row card: below 640 px of table width every row is a card — `primary`
+   in the first line, the first amount flush right, `meta` small in the
+   second, `hidden` gone — never the cell with the row link, which is the way
+   into the row. No minimum width, no sideways scroller. The head row
+   follows the same order and stays visible as the card's legend: its sort
+   links and the select-all box remain reachable and focusable. Rows with a
+   spanning cell (group, empty, error, fold-out) stay blocks. */
+@container v2tbl (max-width: 639.98px) {
+  .v2tbl__inner { min-width: 0; }
+  .v2tbl__head,
+  .v2tbl__row {
+    display: flex; flex-wrap: wrap; align-items: baseline;
+    column-gap: var(--space-2); row-gap: 0;
+  }
+  .v2tbl__head > :where(th, td),
+  .v2tbl__row > :where(th, td) { flex: 0 1 auto; min-width: 0; }
+  /* The amount stands top right of every card, so amounts form a column the
+     eye runs down, and a long name wraps beside it instead of pushing it into
+     a line of its own. The first text cell keeps room for it (below).
+     ponytail: one amount per card; room for 8em („1.234.567,89 €" at the row
+     size) — two primary amounts would overlap. */
+  .v2tbl__head,
+  .v2tbl__row { position: relative; }
+  .v2tbl__head > :is(th, td):is(.v2num, :has(> .v2num)),
+  .v2tbl__row > :is(th, td):is(.v2num, :has(> .v2num)) { position: absolute; right: 18px; top: var(--v2-row-y, 12px); }
+  .v2tbl__head > :is(th, td):is(.v2num, :has(> .v2num)) { top: var(--v2-head-y, 9px); }
+  /* One fixed order, whatever the length (the same thing looks the same): the
+     first text cell fills the first line next to the handles and the amount,
+     and wraps inside it; every further primary text cell takes a line of its
+     own under it. So a short and a long name stand in the same place. Text
+     cell = not a handle (selection box, chevron), not a number, not empty. */
+  /* In `:where()`, specificity 0-1-0: the `:has()` inside `:not()` would
+     otherwise outweigh the `meta` rule below and give every meta cell a line. */
+  .v2tbl__head > :where(:is(th, td):not(.v2num, :has(> .v2num), :has(.v2check), .v2tbl__chev, :empty, :has(> :empty:only-child))),
+  .v2tbl__row > :where(:is(th, td):not(.v2num, :has(> .v2num), :has(.v2check), .v2tbl__chev, :empty, :has(> :empty:only-child))) { flex: 1 1 0%; }
+  .v2tbl__head > :where(:is(th, td):not(.v2num, :has(> .v2num), :has(.v2check), .v2tbl__chev, :empty, :has(> :empty:only-child))) ~ :where(:is(th, td):not(.v2num, :has(> .v2num), :has(.v2check), .v2tbl__chev, :empty, :has(> :empty:only-child))),
+  .v2tbl__row > :where(:is(th, td):not(.v2num, :has(> .v2num), :has(.v2check), .v2tbl__chev, :empty, :has(> :empty:only-child))) ~ :where(:is(th, td):not(.v2num, :has(> .v2num), :has(.v2check), .v2tbl__chev, :empty, :has(> :empty:only-child))) { flex: 1 1 100%; }
+  /* Room for the amount only in the first line: the first text cell keeps
+     clear of it, the lines below use the full width. `:has()` does not nest —
+     one selector per form of the amount cell.
+     ponytail: the first text column of the table carries the room; if that
+     column is `meta`, the primary text in line 1 can run under the amount —
+     put a primary column first. */
+  .v2tbl__head:has(> th.v2num, > th > .v2num) > :where(:is(th, td):not(.v2num, :has(> .v2num), :has(.v2check), .v2tbl__chev, :empty, :has(> :empty:only-child))):not(:where(:is(th, td):not(.v2num, :has(> .v2num), :has(.v2check), .v2tbl__chev, :empty, :has(> :empty:only-child))) ~ *),
+  .v2tbl__row:has(> td.v2num, > td > .v2num) > :where(:is(th, td):not(.v2num, :has(> .v2num), :has(.v2check), .v2tbl__chev, :empty, :has(> :empty:only-child))):not(:where(:is(th, td):not(.v2num, :has(> .v2num), :has(.v2check), .v2tbl__chev, :empty, :has(> :empty:only-child))) ~ *) { margin-right: calc(8em + var(--space-2)); }
+  /* The line break between the two lines of the card. */
+  .v2tbl__head::after,
+  .v2tbl__row::after { content: ""; order: 1; flex-basis: 100%; height: 0; }
+  .v2tbl[data-meta~="1"] > :where(thead, tbody, tfoot) > tr > :nth-child(1):not([colspan]),
+  .v2tbl[data-meta~="2"] > :where(thead, tbody, tfoot) > tr > :nth-child(2):not([colspan]),
+  .v2tbl[data-meta~="3"] > :where(thead, tbody, tfoot) > tr > :nth-child(3):not([colspan]),
+  .v2tbl[data-meta~="4"] > :where(thead, tbody, tfoot) > tr > :nth-child(4):not([colspan]),
+  .v2tbl[data-meta~="5"] > :where(thead, tbody, tfoot) > tr > :nth-child(5):not([colspan]),
+  .v2tbl[data-meta~="6"] > :where(thead, tbody, tfoot) > tr > :nth-child(6):not([colspan]),
+  .v2tbl[data-meta~="7"] > :where(thead, tbody, tfoot) > tr > :nth-child(7):not([colspan]),
+  .v2tbl[data-meta~="8"] > :where(thead, tbody, tfoot) > tr > :nth-child(8):not([colspan]),
+  .v2tbl[data-meta~="9"] > :where(thead, tbody, tfoot) > tr > :nth-child(9):not([colspan]),
+  .v2tbl[data-meta~="10"] > :where(thead, tbody, tfoot) > tr > :nth-child(10):not([colspan]),
+  .v2tbl[data-meta~="11"] > :where(thead, tbody, tfoot) > tr > :nth-child(11):not([colspan]),
+  .v2tbl[data-meta~="12"] > :where(thead, tbody, tfoot) > tr > :nth-child(12):not([colspan]),
+  .v2tbl[data-meta~="13"] > :where(thead, tbody, tfoot) > tr > :nth-child(13):not([colspan]),
+  .v2tbl[data-meta~="14"] > :where(thead, tbody, tfoot) > tr > :nth-child(14):not([colspan]),
+  .v2tbl[data-meta~="15"] > :where(thead, tbody, tfoot) > tr > :nth-child(15):not([colspan]),
+  .v2tbl[data-meta~="16"] > :where(thead, tbody, tfoot) > tr > :nth-child(16):not([colspan]),
+  .v2tbl[data-meta~="17"] > :where(thead, tbody, tfoot) > tr > :nth-child(17):not([colspan]),
+  .v2tbl[data-meta~="18"] > :where(thead, tbody, tfoot) > tr > :nth-child(18):not([colspan]),
+  .v2tbl[data-meta~="19"] > :where(thead, tbody, tfoot) > tr > :nth-child(19):not([colspan]),
+  .v2tbl[data-meta~="20"] > :where(thead, tbody, tfoot) > tr > :nth-child(20):not([colspan]) {
+    order: 2; margin-top: 2px; position: static; flex: 0 1 auto;
+    font-size: var(--fs-ui-sm); line-height: var(--lh-ui-sm); color: var(--color-text-muted);
+  }
+  .v2tbl[data-hide~="1"] > :where(thead, tbody, tfoot) > tr > :nth-child(1):not([colspan]):not(.v2tbl__lead, :has(.v2rowlink)),
+  .v2tbl[data-hide~="2"] > :where(thead, tbody, tfoot) > tr > :nth-child(2):not([colspan]):not(.v2tbl__lead, :has(.v2rowlink)),
+  .v2tbl[data-hide~="3"] > :where(thead, tbody, tfoot) > tr > :nth-child(3):not([colspan]):not(.v2tbl__lead, :has(.v2rowlink)),
+  .v2tbl[data-hide~="4"] > :where(thead, tbody, tfoot) > tr > :nth-child(4):not([colspan]):not(.v2tbl__lead, :has(.v2rowlink)),
+  .v2tbl[data-hide~="5"] > :where(thead, tbody, tfoot) > tr > :nth-child(5):not([colspan]):not(.v2tbl__lead, :has(.v2rowlink)),
+  .v2tbl[data-hide~="6"] > :where(thead, tbody, tfoot) > tr > :nth-child(6):not([colspan]):not(.v2tbl__lead, :has(.v2rowlink)),
+  .v2tbl[data-hide~="7"] > :where(thead, tbody, tfoot) > tr > :nth-child(7):not([colspan]):not(.v2tbl__lead, :has(.v2rowlink)),
+  .v2tbl[data-hide~="8"] > :where(thead, tbody, tfoot) > tr > :nth-child(8):not([colspan]):not(.v2tbl__lead, :has(.v2rowlink)),
+  .v2tbl[data-hide~="9"] > :where(thead, tbody, tfoot) > tr > :nth-child(9):not([colspan]):not(.v2tbl__lead, :has(.v2rowlink)),
+  .v2tbl[data-hide~="10"] > :where(thead, tbody, tfoot) > tr > :nth-child(10):not([colspan]):not(.v2tbl__lead, :has(.v2rowlink)),
+  .v2tbl[data-hide~="11"] > :where(thead, tbody, tfoot) > tr > :nth-child(11):not([colspan]):not(.v2tbl__lead, :has(.v2rowlink)),
+  .v2tbl[data-hide~="12"] > :where(thead, tbody, tfoot) > tr > :nth-child(12):not([colspan]):not(.v2tbl__lead, :has(.v2rowlink)),
+  .v2tbl[data-hide~="13"] > :where(thead, tbody, tfoot) > tr > :nth-child(13):not([colspan]):not(.v2tbl__lead, :has(.v2rowlink)),
+  .v2tbl[data-hide~="14"] > :where(thead, tbody, tfoot) > tr > :nth-child(14):not([colspan]):not(.v2tbl__lead, :has(.v2rowlink)),
+  .v2tbl[data-hide~="15"] > :where(thead, tbody, tfoot) > tr > :nth-child(15):not([colspan]):not(.v2tbl__lead, :has(.v2rowlink)),
+  .v2tbl[data-hide~="16"] > :where(thead, tbody, tfoot) > tr > :nth-child(16):not([colspan]):not(.v2tbl__lead, :has(.v2rowlink)),
+  .v2tbl[data-hide~="17"] > :where(thead, tbody, tfoot) > tr > :nth-child(17):not([colspan]):not(.v2tbl__lead, :has(.v2rowlink)),
+  .v2tbl[data-hide~="18"] > :where(thead, tbody, tfoot) > tr > :nth-child(18):not([colspan]):not(.v2tbl__lead, :has(.v2rowlink)),
+  .v2tbl[data-hide~="19"] > :where(thead, tbody, tfoot) > tr > :nth-child(19):not([colspan]):not(.v2tbl__lead, :has(.v2rowlink)),
+  .v2tbl[data-hide~="20"] > :where(thead, tbody, tfoot) > tr > :nth-child(20):not([colspan]):not(.v2tbl__lead, :has(.v2rowlink)) { display: none; }
+}
+
+/* Below 1024: two side-by-side contents become one column, the main one
+   first, the side one under it (F783: one column, the main thing first). */
+@media (max-width: 1023.98px) {
+  .v3cols--split > .v3cols__main,
+  .v3cols--split > .v3cols__aside { flex-basis: 100%; }
+  .v3docreview { grid-template-columns: minmax(0, 1fr); }
+  .v2clc--side { grid-template-columns: minmax(0, 1fr); }
+}
+
+@media (max-width: 639.98px) {
+  /* Key figures: two tiles a row at most. */
+  .v2kpigrid { grid-template-columns: repeat(auto-fit, minmax(max(140px, calc(50% - var(--space-4))), 1fr)); }
+
+  /* The question's answers: rows over the full width, 44 px for the thumb;
+     „empfohlen" keeps its mark in the row. */
+  .v2clc__reply .v2radioline { width: 100%; min-height: 44px; align-items: center; }
+
+  /* Compact step bar: one line „Schritt n von m · Name", the list on tap. */
+  .v3stepbar > .v3stepbar__step { display: none; }
+  .v3stepbar__compact { display: block; flex: 1 1 100%; min-width: 0; }
+  .v3stepbar__sum {
+    display: flex; align-items: center; gap: var(--space-2);
+    min-height: 44px; padding: 0 var(--space-2);
+    border-radius: var(--radius-md); cursor: pointer; list-style: none;
+    font-weight: 600; color: var(--color-text);
+  }
+  .v3stepbar__sum::-webkit-details-marker { display: none; }
+  .v3stepbar__sum:hover { background: var(--color-bg-sunken); }
+  .v3stepbar__sum:focus-visible { outline: 2px solid var(--color-focus); outline-offset: -2px; }
+  .v3stepbar__sumtext { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .v3stepbar__chev { flex-shrink: 0; transition: transform var(--duration-fast) var(--ease-standard); }
+  .v3stepbar__compact[open] .v3stepbar__chev { transform: rotate(180deg); }
+  .v3stepbar__list {
+    display: flex; flex-direction: column; gap: var(--space-1);
+    padding-top: var(--space-2); margin-top: var(--space-1);
+    border-top: 1px solid var(--color-border-subtle);
+  }
+  .v3stepbar__list > .v3stepbar__step { min-height: 44px; }
+
+  /* The bottom bar: Weiter, Zurück and the step's main action stay at the
+     thumb. Sticky, not fixed — it covers no content, so the page needs no
+     padding for it. The wizard clips instead of hiding its overflow: hidden
+     would make it the sticky container, and the foot would stick to nothing. */
+  .v2wiz { overflow: clip; }
+  .v2wiz__foot,
+  .s3bar { position: sticky; bottom: 0; z-index: 5; }
+  .v2wiz__foot {
+    flex-wrap: wrap; justify-content: flex-end;
+    padding: var(--space-2) var(--space-4) calc(var(--space-2) + env(safe-area-inset-bottom));
+  }
+  /* The progress gets its own line above the buttons instead of three. */
+  .v2wiz__progress { flex-basis: 100%; }
+  .s3bar { padding-bottom: calc(var(--space-4) + env(safe-area-inset-bottom)); }
+  /* The selection bar sits in the card head — at the top of the list; on the
+     phone it goes to the bottom edge of the window. */
+  .v2selbar--sticky {
+    position: fixed; left: 0; right: 0; bottom: 0; top: auto; z-index: 50;
+    padding: var(--space-2) var(--space-4) calc(var(--space-2) + env(safe-area-inset-bottom));
+    background: var(--color-accent-50);
+    border-top: 1px solid var(--color-border); box-shadow: var(--shadow-sm);
+    flex-wrap: wrap; row-gap: var(--space-1);
+  }
+  /* Two lines: the count and „Auswahl aufheben" above, the actions below —
+     the actions' own wrapper dissolves so its children can be ordered. */
+  .v2selbar--sticky .v2selbar__actions { display: contents; }
+  .v2selbar--sticky .v2selbar__count { order: 0; }
+  .v2selbar--sticky .v2selbar__actions > :last-child { order: 1; margin-left: auto; }
+  .v2selbar--sticky::after { content: ""; order: 1; flex-basis: 100%; height: 0; }
+  .v2selbar--sticky .v2selbar__actions > :not(:last-child) { order: 2; }
+  /* Room under the list for the fixed bar.
+     ponytail: the measured height of the two-line bar (113 px) plus air,
+     raise it if the actions wrap to a third line. */
+  /* On the scroll container of the app, not as the card's margin: a last
+     child's margin adds no scroll room. */
+  .app__main:has(.v2selbar--sticky) {
+    padding-bottom: calc(120px + env(safe-area-inset-bottom));
+    scroll-padding-bottom: calc(120px + env(safe-area-inset-bottom));
+  }
+  :is(.v2wiz__foot, .s3bar, .v2selbar--sticky) :is(.v2btn, .v2menu__sum) { min-height: 44px; }
+  :is(.v2wiz__foot, .s3bar, .v2selbar--sticky) .v2link { display: inline-flex; align-items: center; min-height: 44px; }
+  /* Second actions go into the ⋯ (`.v2bar__more` around an OverflowMenu with
+     the same actions); the app marks them `is-secondary` (F783: nothing is
+     dropped). */
+  :is(.v2wiz__foot, .s3bar, .v2selbar) .is-secondary { display: none; }
+  .v2bar__more { display: inline-flex; }
+  /* A focused element never ends up under the bottom bar (2.4.11). */
+  .app__main { scroll-padding-bottom: calc(72px + env(safe-area-inset-bottom)); }
+
+  /* Drawers fill the screen; the close button grows to the thumb. */
+  .v2drawer, .v2drawer--sm, .v2drawer--md, .v2drawer--lg { width: 100%; }
+  .v2drawer__h .v2ibtn { width: 44px; height: 44px; }
+}
+@media (max-width: 639.98px) and (prefers-reduced-motion: reduce) {
+  .v3stepbar__chev { transition: none; }
+}

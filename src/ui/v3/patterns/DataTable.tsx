@@ -45,6 +45,7 @@ import {
   HeadRow,
   Row,
   Table,
+  type ColumnPriority,
   type TableDensity,
 } from "../primitives/Table";
 import { TextButton } from "../primitives/TextButton";
@@ -154,6 +155,12 @@ export interface ColumnDef<T> {
   align?: "start" | "end";
   /** Opt-in; without it no arrow and no link. */
   sortable?: boolean;
+  /**
+   * Where the column stands in the row card below 640 px (0253): `primary`
+   * (default) first line, `meta` second line, `hidden` desktop only. The
+   * first column carries the row link (`rowHref`) and is never hidden.
+   */
+  priority?: ColumnPriority;
 }
 
 /* ── Value columns (0198) ────────────────────────────────────────────────── */
@@ -582,6 +589,15 @@ export function DataTable<T>(props: DataTableProps<T>) {
     .filter(Boolean)
     .join(" ");
 
+  // The same order as `cols`: the handles stay in the card's first line, the
+  // actions go to its second (0253).
+  const priority: ColumnPriority[] = [
+    ...(selection ? ["primary" as const] : []),
+    ...(expand ? ["primary" as const] : []),
+    ...columns.map((c) => c.priority ?? "primary"),
+    ...(rowActions ? ["meta" as const] : []),
+  ];
+
   const headRow = (
     <HeadRow>
       {selection ? <SelectAllCell /> : null}
@@ -705,6 +721,7 @@ export function DataTable<T>(props: DataTableProps<T>) {
           })
         }
         density={density}
+        priority={priority}
         {...(sections ? { sections } : {})}
         {...(foot ? { foot } : {})}
       >

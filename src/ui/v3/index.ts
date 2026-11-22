@@ -156,6 +156,7 @@ export {
   GroupRow,
   EmptyRow,
   type TableDensity,
+  type ColumnPriority,
 } from "./primitives/Table";
 export {
   AmountCell,

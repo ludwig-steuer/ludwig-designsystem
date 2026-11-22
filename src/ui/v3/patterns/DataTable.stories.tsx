@@ -1203,3 +1203,45 @@ export const FilteredListTemplate: Story = {
     );
   },
 };
+
+/**
+ * **Die Zeilenkarte** (0253). `priority` je Spalte: Sachverhalt (mit dem
+ * Zeilenlink, der nie wegfällt) und Betrag in Zeile 1, Nummer und Bearbeitung
+ * klein in Zeile 2, „Eröffnet" nur am Desktop. Die Auswahl bleibt in Zeile 1,
+ * die Aktionen kommen in Zeile 2. Ansehen bei 390 px Fensterbreite: kein seitlicher Scroller, und
+ * mit einer gewählten Zeile sitzt die Auswahlleiste am unteren Rand. Am
+ * Desktop steht dieselbe Tabelle wie in `Selection`.
+ */
+export const PhoneCards: Story = {
+  parameters: { layout: "fullscreen" },
+  render: () => (
+    // In the work surface of the shell, as on the page: its scroll box makes
+    // room for the selection bar at the bottom edge.
+    <main className="app__main" style={{ height: "100dvh" }}>
+    <DataTable<CaseListItem>
+      rows={PAGE.slice(0, 12)}
+      columns={[
+        TITLE,
+        AMOUNT,
+        { ...NUMBER, priority: "meta" },
+        { ...LIFECYCLE, priority: "meta" },
+        { ...OPENED, priority: "hidden" },
+      ]}
+      rowKey={rowKey}
+      head={{ title: "Sachverhalte 2026", sub: "12 von 583" }}
+      sort={SORT}
+      href={href}
+      rowHref={(c) => `#sachverhalt-${rowKey(c)}`}
+      selection={{
+        actions: [
+          { label: "Freigeben", hotkey: "F", action: async () => {} },
+          { label: "Zurückstellen", action: async () => {} },
+        ],
+        label: (c) => `Sachverhalt ${rowKey(c)} auswählen`,
+        sticky: true,
+      }}
+      rowActions={() => [{ label: "Zurückstellen", action: async () => {} }]}
+    />
+    </main>
+  ),
+};

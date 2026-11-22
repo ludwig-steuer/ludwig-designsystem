@@ -129,11 +129,25 @@ export function CardFoot({ children }: { children: ReactNode }) {
 export type TableDensity = "compact" | "default" | "wide";
 
 /**
+ * Where a column stands once the table is narrower than 640 px (0253):
+ * `primary` in the first line of the row card, `meta` small in the second,
+ * `hidden` only on the desktop — its content stays reachable through the row.
+ */
+export type ColumnPriority = "primary" | "meta" | "hidden";
+
+/** 1-based positions of one priority, as a word list for `[data-…~="n"]`. */
+function positions(priority: readonly ColumnPriority[] | undefined, of: ColumnPriority): string | undefined {
+  const list = priority?.flatMap((p, i) => (p === of ? [String(i + 1)] : []));
+  return list && list.length > 0 ? list.join(" ") : undefined;
+}
+
+/**
  * Grid table. `cols` is a `grid-template-columns` value; `minWidth` forces
  * horizontal scrolling instead of squeezing.
  *
  * @when    Records of the same kind in columns, even with three rows; `density`
- *          when a page needs the tighter or the roomier row.
+ *          when a page needs the tighter or the roomier row; `priority` for
+ *          the row card below 640 px.
  * @instead Label/value pairs → FieldList. Click does something client-side → ClickRow, ExpandableRow.
  */
 export function Table({
@@ -141,6 +155,7 @@ export function Table({
   sections,
   minWidth,
   density = "default",
+  priority,
   foot,
   children,
 }: {
@@ -159,13 +174,27 @@ export function Table({
   density?: TableDensity;
   /** Rows under all data and sections — the totals row (0211). */
   foot?: ReactNode;
+  /**
+   * One entry per cell of a row, in their order (0253). Below 640 px of table
+   * width — and only in a window narrower than 1280 px — each row becomes a
+   * card: `primary` first line, `meta` second line, `hidden` gone. A missing
+   * entry is `primary`. At most 20 columns carry one (the CSS counts to 20).
+   * The cell with the row link is never hidden: it is the way into the row.
+   */
+  priority?: readonly ColumnPriority[];
   children: ReactNode;
 }) {
   const body = (
     // A real `<table>`, and the grid stays on the row: `display: block` on the
     // table and the body, `display: grid` on `tr` — measured in the review of
     // 0094 (finding B2) to give the full tree table · row · columnheader · cell.
-    <table className="v2tbl" data-density={density} style={{ "--v2-cols": cols } as CSSProperties}>
+    <table
+      className="v2tbl"
+      data-density={density}
+      data-meta={positions(priority, "meta")}
+      data-hide={positions(priority, "hidden")}
+      style={{ "--v2-cols": cols } as CSSProperties}
+    >
       {/* The column head row keeps its own body, sections or not — it belongs
           to the table, not to any one of them. */}
       <tbody className="v2tbl__body">{children}</tbody>

@@ -60,7 +60,12 @@ export function OverflowMenu({
     const wanted = align === "start" ? r.left : r.right - p.offsetWidth;
     const room = window.innerWidth - p.offsetWidth - EDGE;
     p.style.position = "fixed";
-    p.style.top = `${r.bottom}px`;
+    // In a bottom bar (0253) there is no room below: then the panel opens
+    // upwards, above its trigger, instead of hanging off the screen.
+    const below = window.innerHeight - r.bottom - EDGE;
+    // Upwards it mirrors the 4 px gap below: the panel's own 4 px top margin
+    // plus 4 px, so it ends 4 px above its trigger instead of covering it.
+    p.style.top = `${p.offsetHeight > below && r.top > below ? r.top - p.offsetHeight - 8 : r.bottom}px`;
     p.style.right = "auto";
     p.style.left = `${Math.max(EDGE, Math.min(wanted, room))}px`;
   }

@@ -16,6 +16,7 @@ import {
 import { Badge } from "../../primitives/Badge";
 import { Link } from "../../primitives/Link";
 import { AmountCell } from "../../primitives/Cells";
+import type { ColumnPriority } from "../../primitives/Table";
 import { Time } from "../../primitives/Time";
 import { caseTitle } from "../accounting-case/case-title";
 import { SourceDocumentRefCell } from "../source-document/SourceDocumentRefCell";
@@ -381,8 +382,32 @@ export function proposalReviewColumns(options: ProposalColumnOptions = {}): Colu
     .filter((k) => !without.includes(k))
     .filter((k) => accountNames || !NAMES.includes(k))
     .filter((k) => !OPTIONAL.includes(k) || include.includes(k))
-    .map((k) => all[k]);
+    .map((k) => ({ ...all[k], priority: PHONE_PRIORITY[k] }));
 }
+
+/**
+ * The row card below 640 px (0253, F783 „Buchungen", ll-ceo 2026-11-22): date,
+ * case and amount in the first line; accounts, tax key, Ludwig's check and the
+ * review reason in the second; number, document, precedent and kind only on
+ * the desktop — they stand in the fold-out and on the case.
+ */
+const PHONE_PRIORITY: Record<ProposalColumn, ColumnPriority> = {
+  number: "hidden",
+  date: "primary",
+  case: "primary",
+  accounts: "meta",
+  debit: "meta",
+  debitName: "meta",
+  credit: "meta",
+  creditName: "meta",
+  amount: "primary",
+  taxKey: "meta",
+  document: "hidden",
+  precedent: "hidden",
+  verdict: "meta",
+  kind: "hidden",
+  reviewReason: "meta",
+};
 
 type Shape =
   | { rows: readonly ProposalRow[]; groups?: never }

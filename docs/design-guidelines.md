@@ -214,7 +214,7 @@ Vorzeichen.
 
 | | Regel |
 |---|---|
-| **L1 Desktop ab 1280 px** Innenbreite | Kein Mobile-, kein Tablet-Ziel. Darunter Sperre mit einem Satz (`.abn__toosmall`), kein zusammengeschobener Screen. Ludwig-Rahmen (Header, Sidebar) außerhalb der Rechnung (R16). |
+| **L1 Desktop zuerst, Handy und Tablet bedienbar** (Owner 2026-11-22, F783; Umsetzung 0253) | Desktop ab 1280 px Innenbreite bleibt der Hauptfall, für ihn wird gestaltet. Tablet (640–1279 px) und Handy (unter 640 px) werden unterstützt: eine Spalte, Hauptsache zuerst; Tabellen werden Zeilenkarten (`priority` je Spalte: `primary` · `meta` · `hidden`); die Leiste mit Weiter und Zurück sitzt unten; unter 640 px ist die Seitenleiste eine Schublade, darüber bis 1279 px eingeklappt auf 64 px (Symbole ohne Wort wie die eingeklappte Leiste am Desktop, das Wort bleibt für Vorlesehilfen — benannte Ausnahme zu V14, Owner 2026-11-22 über F783). Keine Sperre mehr. **Nichts fällt weg:** jede Handlung ist auch schmal erreichbar, notfalls über ⋯; jede Taste hat eine sichtbare Schaltfläche. **Am Desktop ändert eine Regel für schmale Breiten nichts** — sie steht in `@media (max-width: 1279.98px)` oder enger. Rasterpunkte `--bp-phone` 640 · `--bp-tablet` 1024 · `--bp-desktop` 1280 (`tokens.css`). Ludwig-Rahmen (Header, Sidebar) außerhalb der Rechnung (R16). |
 | **L2 Master-Detail statt Modal** | Bis drei Spalten: Schritt-Rail (sticky, Zähler + Ampel je Schritt) · Liste · Detail. Auswahl in URL `?sel=` (R8). Dialog nur für Bestätigung mit irreversibler Folge (I2). Formulare, Rückfragen, Begründungen leben im Detail. |
 | **L3 Bestehendes öffnet als Drawer** | Beleg, Sachverhalt, Kontenblatt, Partner: über der Arbeit per Search-Param, `Esc` schließt, Listenposition bleibt. Nie Seitenwechsel. |
 | **L4 Linksbündig, immer** | Auch Leerzustand und Dialog. Zentrierte Illustration = lesendes Register. |
@@ -305,7 +305,7 @@ Registry-Entscheid im Handoff, nicht still im Screen (F123 §2.4).
 
 Vor der Migration und bei der Abnahme jeder Route aus §11.4:
 
-- [ ] Register bestimmt (§1); produktiv → Sperre unter 1280 px (L1)
+- [ ] Register bestimmt (§1); produktiv → bei 390 und 820 px bedienbar, am Desktop unverändert (L1, 0253)
 - [ ] Die **Frage der Seite** in einem Satz; jede Spalte beantwortet sie; Spalten, die > 50 % leer sind, fliegen in `.v2sub` oder Detail (V8)
 - [ ] Spaltenordnung DATEV, wo DATEV eine hat; Kontonummern/BU mono (L5)
 - [ ] Jede Tabelle in einer Karte mit Kopf + Spaltenkopf (V5); Zeilen ≤ `.v2tbl__row` (V1)
@@ -515,7 +515,7 @@ Aufgabe in `docs/backlog/NNNN-*.md` (Stand der Auswertung: 2026-09-03).
 | UserMenu + Rollen-Badge | `UserMenu`, `RoleBadge` | **App-Komposition** (2026-09-04): `OverflowMenu`; Rolle = `StatusBadge axis="rolle"` |
 | Experiment-Kennzeichnung | `ExperimentBadge`, `ExperimentMandantBanner` | **App-Komposition** (2026-09-04): `Badge` + `Banner` |
 | Bereitschafts-/Deckungs-Banner je Mandant | `ReadinessBanner`, `EmbeddingCoverageBanner` | **App-Komposition** (2026-09-04): `StatusCallout` / `Banner` |
-| Sperre unter 1280 px (L1) | in `AppShell` (0030); `.abn__toosmall` war nur in der Abnahme | v2 (0030) |
+| Schmale Breiten (L1) | `AppShell` + `app-chrome.css` (0253): Schublade unter 640 px, 64 px bis 1279 px; die Sperre unter 1280 px ist seit 2026-11-22 weg | v3 (0253) |
 | Marketing-Header 72 px · Portal-Rahmen | `ui_kits/marketing`; `client-portal` | prüfen (Register, F111 B6) |
 
 #### Stufe 1 — Primitives

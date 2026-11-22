@@ -244,7 +244,7 @@ export const Flat: Story = {
 /** Compact, for a drawer or the tab „Zum Schließen": accounts as „A an B", no kind, the review reason last. */
 export const Compact: Story = {
   render: () => (
-    <div style={{ width: 680 }}>
+    <div style={{ maxWidth: 680 }}>
       <JournalEntryReviewList rows={ROWS.slice(5, 11)} variant="compact" head={{ title: "Zum Schließen" }} bulkActions={BULK} {...HREFS} />
     </div>
   ),

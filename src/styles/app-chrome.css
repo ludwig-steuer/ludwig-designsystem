@@ -755,19 +755,164 @@ body { background: #FAFBFC; }
    exist.
    ========================================================================== */
 
-/* Lock below 1280 px (L1): below it rail, list and detail stack, and checking
-   turns into guessing. */
-.app__toonarrow { display: none; }
-@media (max-width: 1279px) {
-  .app__toonarrow {
-    position: fixed; inset: 0; z-index: 200;
-    display: flex; flex-direction: column; align-items: center; justify-content: center;
-    gap: var(--space-2); padding: var(--space-8);
-    background: var(--color-surface); color: var(--color-text);
-    font-size: var(--fs-ui); line-height: 1.55; text-align: center;
+/* ==========================================================================
+   Narrow frames (0253, L1 since owner 2026-11-22 via F783).
+
+   Desktop from 1280 px stays the main case and does not move by a pixel:
+   every rule of this block sits in a query up to 1279.98 px — except the
+   `display: none` of the elements that only exist narrow, and the client band
+   below, which reproduces the app's inline styles one to one. Breakpoints:
+   `--bp-phone` 640, `--bp-desktop` 1280 (tokens.css) — written as numbers,
+   because a custom property does not work inside `@media`.
+   ========================================================================== */
+
+/* Only narrow: „Menü", „Suchen", the scrim, the drawer-only block. „Menü" and
+   „Suchen" are `.v2btn`s, and `v3.css` loads after this file — so the rule
+   names the top bar too, or `.v2btn { display: inline-flex }` wins. */
+.app__topbar .tb__menu, .app__topbar .tb__searchbtn, .app__scrim, .sb__phone { display: none; }
+/* The top bar's wrapper in AppShell, only there to carry `inert`. Not
+   `.app__top`: the print rule in v3.css names that one. */
+.app__topwrap { display: contents; }
+
+/* The client band (0253): what `ClientBand.tsx` in the app set inline, as
+   classes — same values, so the switch is pixel-identical. The band breaks
+   out of the 32 px padding of `.app__main` sideways only; the top gap is taken
+   by `.app__main:has(> .ludwig-client-band:first-child)`. */
+.ludwig-client-band {
+  margin-left: -32px; margin-right: -32px; margin-bottom: 24px;
+  padding: 10px 32px;
+  background: #fff;
+  border-bottom: 1px solid var(--color-border);
+  position: sticky; top: 0; z-index: 5;
+  display: flex; align-items: center; gap: 12px;
+}
+/* The avatar keeps the gradient of `.sb__client-avatar` — the client's sign in
+   the sidebar; part of the named exception of this file (owner 2026-09-03). */
+.ludwig-client-band__avatar {
+  width: 30px; height: 30px; border-radius: 6px; flex-shrink: 0;
+  background: linear-gradient(180deg, #2B5C8E 0%, #1A3A5C 100%);
+  color: #fff; font-size: var(--fs-ui-2xs); font-weight: 600;
+  display: inline-flex; align-items: center; justify-content: center;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.18);
+}
+.ludwig-client-band__text { min-width: 0; flex: 1; line-height: 1.25; }
+.ludwig-client-band__line { display: flex; align-items: baseline; gap: 8px; flex-wrap: wrap; }
+.ludwig-client-band__name {
+  font-size: var(--fs-ui-md); font-weight: 600; color: var(--color-primary);
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 60ch;
+}
+.ludwig-client-band__num {
+  font-family: var(--font-mono); font-size: var(--fs-ui-xs);
+  color: var(--color-text-subtle); font-variant-numeric: tabular-nums;
+}
+.ludwig-client-band__legal { font-size: var(--fs-ui-xs); color: var(--color-text-muted); margin-top: 1px; }
+.ludwig-client-band__tech {
+  display: inline-flex; align-items: center; padding: 5px; border-radius: 6px;
+  color: var(--color-text-muted); flex-shrink: 0;
+}
+/* The year switch stays the band's own flex item, wrapper or not. */
+.ludwig-client-band__year { display: contents; }
+
+/* Below 1280: phone and tablet. */
+@media (max-width: 1279.98px) {
+  /* The dynamic viewport: on a phone 100vh reaches under the browser bar. */
+  .app { height: 100dvh; min-height: 0; }
+  .app__main { padding: 24px; }
+  .tb__search { max-width: 320px; }
+  .ludwig-client-band { margin-left: -24px; margin-right: -24px; padding-left: 24px; padding-right: 24px; }
+  .bd-page { margin: -24px; }
+}
+
+/* Tablet, 640–1279: the sidebar always stands collapsed to 64 px, symbols
+   only (F783), with or without `.is-collapsed`, and without the toggle — it
+   would change nothing. Words stay for screen readers (clipped, not removed). */
+@media (min-width: 640px) and (max-width: 1279.98px) {
+  .app, .app--collapsed { grid-template-columns: 64px 1fr; }
+  .app__sidebar .sb__logo { padding: 0; justify-content: center; }
+  .app__sidebar .sb__logo > *, .app__sidebar .sb__toggle { display: none; }
+  .app__sidebar .sb__client { width: 40px; height: 40px; margin: 12px auto 8px; padding: 0; justify-content: center; }
+  .app__sidebar .sb__navitem { justify-content: center; padding: 10px; }
+  .app__sidebar .sb__navlabel,
+  .app__sidebar .sb__client .chev,
+  .app__sidebar .sb__user > svg { display: none; }
+  .app__sidebar .sb__navitem .label,
+  .app__sidebar .sb__navitem .count,
+  .app__sidebar .sb__client-text,
+  .app__sidebar .sb__user-text {
+    position: absolute; width: 1px; height: 1px; margin: -1px; overflow: hidden;
+    clip-path: inset(50%); white-space: nowrap;
   }
-  .app__toonarrow strong { font-size: var(--fs-ui-lg); }
-  .app__toonarrow span { max-width: 46ch; color: var(--color-text-muted); }
+  .app__sidebar .sb__user { justify-content: center; padding: 12px 0; }
+}
+
+/* Phone, below 640: one column; the sidebar is a drawer from the left behind
+   „Menü", always expanded — `.is-collapsed` from the desktop does not count
+   here. The top bar keeps „Menü" · place · „Suchen"; role badge and area
+   switch move into the drawer (`.sb__phone`). */
+@media (max-width: 639.98px) {
+  .app, .app--collapsed { grid-template-columns: minmax(0, 1fr); grid-template-rows: 48px minmax(0, 1fr); }
+  .app__topbar, .app__main { grid-column: 1; }
+  .app__topbar { padding: 0 var(--space-2); gap: var(--space-1); }
+  .app__main { padding: 16px; }
+  .tb__search, .tb__actions { display: none; }
+  .tb__crumb { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  /* 36 px in the 48 px bar (47 inside its line): the focus ring (2 px + 2 px
+     offset) stays inside the window — measured 1.5 px clear; still far above
+     the 24 px of 2.5.8. */
+  .app__topbar .tb__menu, .app__topbar .tb__searchbtn { display: inline-flex; min-height: 36px; flex-shrink: 0; }
+
+  .app__sidebar {
+    position: fixed; top: 0; bottom: 0; left: 0; z-index: 71;
+    width: min(300px, 85vw);
+    transform: translateX(-100%); visibility: hidden;
+    transition: transform var(--duration-slow) var(--ease-standard), visibility 0s linear var(--duration-slow);
+  }
+  /* The entries carry `transition: all` for their hover; inherited, that
+     would fade `visibility` too, and an entry would still be hidden in the
+     frame the drawer opens — it could not take the focus. */
+  .app__sidebar * { transition-property: background-color, color, border-color, box-shadow, opacity, transform; }
+  /* `visibility 0s` named on opening too, or the delay of the closing rule
+     stays in force. */
+  .app--nav-open .app__sidebar {
+    transform: none; visibility: visible;
+    transition: transform var(--duration-slow) var(--ease-standard), visibility 0s;
+  }
+  .app__scrim {
+    display: block; position: fixed; inset: 0; z-index: 70;
+    border: 0; padding: 0; background: var(--color-scrim); cursor: pointer;
+    opacity: 0; visibility: hidden;
+    transition: opacity var(--duration-base) var(--ease-standard), visibility 0s linear var(--duration-base);
+  }
+  .app--nav-open .app__scrim { opacity: 1; visibility: visible; transition: opacity var(--duration-base) var(--ease-standard), visibility 0s; }
+  /* The scrim fills the window — its ring goes inside, or it lies off screen. */
+  .app__scrim:focus-visible { outline: 2px solid var(--color-focus); outline-offset: -4px; }
+
+  .sb__toggle { display: none; }
+  .sb__phone { display: block; }
+  .is-collapsed .sb__logo { padding: 0 18px; justify-content: space-between; }
+  .is-collapsed .sb__client { width: calc(100% - 16px); height: auto; margin: 12px 8px 8px; padding: 8px 10px; justify-content: flex-start; }
+  .is-collapsed .sb__navitem { justify-content: flex-start; padding: 8px 12px; }
+  .is-collapsed .sb__navitem .label,
+  .is-collapsed .sb__navitem .count,
+  .is-collapsed .sb__client .chev,
+  .is-collapsed .sb__user > svg { display: revert; }
+  .is-collapsed .sb__navlabel,
+  .is-collapsed .sb__client-text,
+  .is-collapsed .sb__user-text { display: block; }
+  .is-collapsed .sb__user { justify-content: flex-start; padding: 12px 14px; }
+
+  /* The band: name and year in one line, and it scrolls away — only the
+     48 px of the top bar stay (0253 question 1, ll-ceo 2026-11-22). Legal
+     form, DATEV number and the technical link stand in the drawer. */
+  .ludwig-client-band { margin-left: -16px; margin-right: -16px; padding: 8px 16px; position: static; gap: var(--space-2); }
+  .ludwig-client-band__avatar,
+  .ludwig-client-band__num,
+  .ludwig-client-band__legal,
+  .ludwig-client-band__tech { display: none; }
+  .bd-page { margin: -16px; }
+}
+@media (max-width: 639.98px) and (prefers-reduced-motion: reduce) {
+  .app__sidebar, .app--nav-open .app__sidebar, .app__scrim, .app--nav-open .app__scrim { transition: none; }
 }
 
 /* Entry without icon: the first letter holds the place, so no empty button

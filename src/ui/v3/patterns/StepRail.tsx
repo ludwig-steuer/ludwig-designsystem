@@ -67,6 +67,7 @@ export function StepRail({
     return (
       <nav className="v3stepbar" aria-label={ariaLabel}>
         {head ? <div className="v3stepbar__head">{head}</div> : null}
+        <CompactBar items={items} />
         {items.map((it) => (
           <BarStep key={it.key} item={it} />
         ))}
@@ -160,6 +161,32 @@ function BarStep({ item }: { item: RailItem }) {
     <Link className={cls} href={item.href} prefetch="auto" aria-current={item.current ? "step" : undefined}>
       {inner}
     </Link>
+  );
+}
+
+/**
+ * The bar below 640 px (0253, F783): one line „Schritt n von m · Name" that
+ * opens the list of all steps — the same `BarStep`s, with circle and counter,
+ * each still the link. A native `<details>`, so the rail stays a server
+ * component; above 640 px it is `display: none` and the bar shows as before.
+ */
+function CompactBar({ items }: { items: RailItem[] }) {
+  const current = items.find((it) => it.current);
+  const last = items.reduce((max, it) => Math.max(max, it.index), 0);
+  return (
+    <details className="v3stepbar__compact">
+      <summary className="v3stepbar__sum">
+        <span className="v3stepbar__sumtext">
+          {current ? `Schritt ${current.index} von ${last} · ${current.label}` : `Schritte · ${items.length}`}
+        </span>
+        <ActionIcon action="expand" size={16} className="v3stepbar__chev" />
+      </summary>
+      <div className="v3stepbar__list">
+        {items.map((it) => (
+          <BarStep key={it.key} item={it} />
+        ))}
+      </div>
+    </details>
   );
 }
 

@@ -39,6 +39,7 @@ import {
   Layers2,
   List,
   ListTree,
+  Menu,
   MessageCircleQuestionMark,
   PanelRight,
   Paperclip,
@@ -368,6 +369,12 @@ export const ACTION_ICON = {
     icon: Ellipsis,
     label: "Mehr",
     meaning: "Die selteneren Wege im Überlaufmenü.",
+  },
+  menu: {
+    icon: Menu,
+    label: "Menü",
+    meaning: "Die Seitenleiste auf dem Handy öffnen (0253).",
+    instead: "Die selteneren Wege einer Zeile oder Leiste → `more`.",
   },
   filter: {
     icon: SlidersHorizontal,

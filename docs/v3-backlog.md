@@ -120,8 +120,8 @@ Nicht zu vergessen bei der Umstellung: `.btn` ist heute **37 px**, `.btn-sm`
   `booking/types.ts` und die drei Kopien (Badge, Dialog, `cn`) sind gelöscht.
   Der Ordner existiert nicht mehr.
 - ~~**`.v2tbl__empty` ist zentriert**~~ — behoben am 2026-09-03, zusammen mit
-  `.v2lp__empty`. Zentriert bleibt nur die Vollbild-Sperre unter 1280 px, und
-  die ist kein Inhalt.
+  `.v2lp__empty`. Zentriert blieb nur die Vollbild-Sperre unter 1280 px, und
+  die war kein Inhalt. Seit 2026-11-22 gibt es sie nicht mehr (0253, L1).
 - **`AiBookingNotes` hat keine Story.** Einziger v3-Export ohne eine (Stand
   2026-09-03 unverändert).
 - **Sammeldateien**: `Surface.tsx` und `Interactive.tsx` sind bereits in

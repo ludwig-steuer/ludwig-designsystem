@@ -219,6 +219,16 @@
   --drawer-sm: clamp(340px, 34vw, 560px);
   --drawer-md: clamp(360px, 50vw, 880px);
   --drawer-lg: min(1100px, 94vw);
+
+  /* Breakpoints (0253, owner 2026-11-22 via F783): phone below 640, tablet
+     640–1279, desktop from 1280 — the main case. A custom property does not
+     work inside an `@media` condition, so the queries write the number
+     (`max-width: 639.98px`, `1023.98px`, `1279.98px`); these three are the one
+     named source next to them. 1024 splits the tablet: below it two columns
+     become one. */
+  --bp-phone:   640px;
+  --bp-tablet:  1024px;
+  --bp-desktop: 1280px;
 }
 
 /* ==========================================================================
