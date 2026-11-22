@@ -5451,8 +5451,23 @@ a.v3bbr__val:hover { text-decoration-color: currentColor; }
      words (`--col`): a caller of `Table` may follow its word with bare text,
      which `:only-child` does not count (M3). */
   .v2tbl__cardlabel--col:only-child { display: none; }
-  .v2tbl:has(.v2tbl__cardlabel) > :where(thead, tbody, tfoot) > tr.v2tbl__head:not(:has(a, button, input, select)),
-  .v2tbl:has(.v2tbl__cardlabel) > :where(thead, tbody, tfoot) > tr.v2tbl__head > :is(th, td):not(:has(a, button, input, select)) { display: none; }
+  /* Words in the data cells, not the one beside „alle auswählen" (0260). */
+  .v2tbl:has(td .v2tbl__cardlabel) > :where(thead, tbody, tfoot) > tr.v2tbl__head:not(:has(a, button, input, select)),
+  .v2tbl:has(td .v2tbl__cardlabel) > :where(thead, tbody, tfoot) > tr.v2tbl__head > :is(th, td):not(:has(a, button, input, select)) { display: none; }
+  /* „Alle auf dieser Seite auswählen" beside its box (0260). */
+  .v2selall { display: inline-flex; align-items: center; gap: var(--space-2); cursor: pointer; }
+  .v2selall > .v2tbl__cardlabel { margin-right: 0; }
+  /* Cut text wraps in the card (0260): a one-line truncation is a desktop
+     column's habit; in the card the line has the width. */
+  .v2tbl__row :is(.v2trunc, .v2chk__label) { white-space: normal; overflow-wrap: anywhere; }
+  /* Checklist (0260): sign and check share the first line, the check wraps
+     there — the sign alone filled it and pushed the check into a line where
+     it ran past the card. The sign's cell is the lead (row button) or holds
+     `.v2chk__icon`. */
+  .v2chk .v2tbl__row > :is(.v2tbl__lead, :has(> .v2chk__icon)) { flex: 0 0 auto; margin-right: 0; }
+  /* The room for the count on the right belongs to the check, not to the sign
+     (the general rule gives it to the first text cell — here the sign). */
+  .v2chk .v2tbl__row > :has(> .v2chk__label) { flex: 1 1 0%; min-width: 0; margin-right: calc(8em + var(--space-2)); }
   /* The line break between the two lines of the card. */
   .v2tbl__head::after,
   .v2tbl__row::after { content: ""; order: 1; flex-basis: 100%; height: 0; }
@@ -5508,6 +5523,10 @@ a.v3bbr__val:hover { text-decoration-color: currentColor; }
   .v3cols--split > .v3cols__aside { flex-basis: 100%; }
   .v3docreview { grid-template-columns: minmax(0, 1fr); }
   .v2clc--side { grid-template-columns: minmax(0, 1fr); }
+  /* MasterDetail too (0260): its detail is 420 px fixed, so below that the
+     list column fell to 0 px. List first, the detail under it, not sticky. */
+  .v2md { grid-template-columns: minmax(0, 1fr); }
+  .v2md__detail { position: static; max-height: none; overflow: visible; }
 }
 
 @media (max-width: 639.98px) {
@@ -5642,7 +5661,10 @@ a.v3bbr__val:hover { text-decoration-color: currentColor; }
      field in them shrinks to the card. Before, the title was squeezed to a
      few pixels and broke letter by letter while the select ran out of the
      card (inbox, „Dateikorb"). */
-  .v2card__h { flex-wrap: wrap; }
+  /* No row gap: the head's `gap: 12px` would stand between the lines, also
+     over an action line that holds only the fixed selection bar (0260, H2);
+     the actions bring their own space when they show something. */
+  .v2card__h { flex-wrap: wrap; row-gap: 0; }
   .v2card__h > div:not(.actions):not(.v2card__meta) { flex: 1 1 0; }
   .v2card__h .actions { flex: 1 1 100%; flex-wrap: wrap; min-width: 0; }
   /* Room above the actions only when they show something: an empty one (no

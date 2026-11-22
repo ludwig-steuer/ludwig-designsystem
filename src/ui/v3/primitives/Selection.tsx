@@ -225,6 +225,10 @@ export function SelectAllCell({
     if (box.current) box.current.indeterminate = some;
   }, [some]);
   return (
+    // The word stands beside the box only in the row card (0260): there the
+    // head is no legend any more, and a bare box says nothing. It is the box's
+    // own name, so the visible word is the name (WCAG 2.5.3).
+    <label className="v2selall">
     <input
       ref={box}
       type="checkbox"
@@ -238,6 +242,8 @@ export function SelectAllCell({
       onChange={(e) => setAll(e.target.checked)}
       onClick={(e) => e.stopPropagation()}
     />
+    <span className="v2tbl__cardlabel">{label}</span>
+    </label>
   );
 }
 
