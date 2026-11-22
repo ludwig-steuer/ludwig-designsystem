@@ -15,6 +15,7 @@ import { AmountCell } from "./Cells";
 import { IconButton } from "./IconButton";
 import { Input } from "./Form";
 import { NavList, type NavSection } from "./NavList";
+import { MenuItem, OverflowMenu } from "./OverflowMenu";
 import { PageHeader } from "./PageHeader";
 import { Card, CardHead, HeadRow, Row, Table } from "./Table";
 
@@ -141,8 +142,10 @@ export const Narrow: Story = {
  * scrollt mit der Seite weg. „Menü" öffnet die Seitenleiste als Schublade von
  * links. Sie ist immer ausgeklappt und trägt dazu, was oben keinen Platz hat
  * (`.sb__phone`), hier Rechtsform und DATEV-Nummer. `Esc`, der Schleier und ein
- * Eintrag schließen sie, und der Fokus kehrt auf „Menü" zurück. Ansehen bei
- * 390 px Fensterbreite; darüber ist es die Shell aus `InUse`.
+ * Eintrag schließen sie, und der Fokus kehrt auf „Menü" zurück. Im Seitenkopf
+ * weicht „Exportieren" (`is-secondary`) auf dem Handy dem ⋯ (`is-phone-only`,
+ * 0255) mit derselben Handlung. Ansehen bei 390 px Fensterbreite; darüber ist es
+ * die Shell aus `InUse`.
  */
 export const Phone: Story = {
   parameters: { layout: "fullscreen" },
@@ -197,7 +200,26 @@ export const Phone: Story = {
             <Button size="sm" variant="secondary">2026</Button>
           </span>
         </div>
-        <PageHeader title="Sachverhalte" description="3 offen, davon einer überfällig." />
+        <PageHeader
+          title="Sachverhalte"
+          description="3 offen, davon einer überfällig."
+          actions={
+            <>
+              {/* Second-rank on the phone, and the ⋯ stands in for it (0255). */}
+              <Button size="sm" variant="secondary" className="is-secondary">
+                Exportieren
+              </Button>
+              <span className="is-phone-only">
+                <OverflowMenu>
+                  <MenuItem onClick={() => {}}>Exportieren</MenuItem>
+                </OverflowMenu>
+              </span>
+              <Button size="sm" variant="primary">
+                Sachverhalt anlegen
+              </Button>
+            </>
+          }
+        />
         <Card>
           <CardHead title="Offen" sub="3 von 148" />
           <Table cols="140px 1fr 140px">

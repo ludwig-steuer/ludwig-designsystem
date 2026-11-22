@@ -5362,8 +5362,16 @@ a.v3bbr__val:hover { text-decoration-color: currentColor; }
    1280 (tokens.css) — as numbers, a custom property does not work in `@media`.
    ========================================================================== */
 
-/* Only narrow: the compact step bar, the ⋯ of a bottom bar. */
-.v3stepbar__compact, .v2bar__more { display: none; }
+/* Only narrow: the compact step bar, the ⋯ of a bottom bar, the word of a
+   `meta` value in the row card (0255 — in the table the head says it). */
+.v3stepbar__compact, .v2bar__more, .v2tbl__cardlabel { display: none; }
+/* `is-phone-only` (0255): the counterpart of `is-secondary` — there only below
+   640 px, with the element's own display; from 640 px it is gone. What stands
+   in for something `is-secondary` on the phone: the ⋯ with „Details" and
+   „Technik", „Beleg öffnen" instead of the PDF frame. */
+@media (min-width: 640px) {
+  .is-phone-only { display: none !important; }
+}
 
 @media (max-width: 1279.98px) {
   /* The table answers to its own width, not the window's — but only below
@@ -5427,6 +5435,20 @@ a.v3bbr__val:hover { text-decoration-color: currentColor; }
      put a primary column first. */
   .v2tbl__head:has(> th.v2num, > th > .v2num) > :where(:is(th, td):not(.v2num, :has(> .v2num), :has(.v2check), .v2tbl__chev, :empty, :has(> :empty:only-child))):not(:where(:is(th, td):not(.v2num, :has(> .v2num), :has(.v2check), .v2tbl__chev, :empty, :has(> :empty:only-child))) ~ *),
   .v2tbl__row:has(> td.v2num, > td > .v2num) > :where(:is(th, td):not(.v2num, :has(> .v2num), :has(.v2check), .v2tbl__chev, :empty, :has(> :empty:only-child))):not(:where(:is(th, td):not(.v2num, :has(> .v2num), :has(.v2check), .v2tbl__chev, :empty, :has(> :empty:only-child))) ~ *) { margin-right: calc(8em + var(--space-2)); }
+  /* The word before a `meta` value (0255). Once the values carry their words,
+     the head row is no legend any more: it keeps only what can be operated —
+     sort links, „alle auswählen", the (i) — and goes when nothing is left
+     (ll-ceo 2026-11-22: no head row over the cards on the dashboard). */
+  .v2tbl__cardlabel { display: inline; margin-right: var(--space-1); color: var(--color-text-subtle); }
+  /* Word and value side by side, also where the value is a stack (account
+     number over „+2 weitere") — inline the word would stand above it (M1). */
+  .v2tbl__row > :is(th, td) > :has(> .v2tbl__cardlabel) { display: inline-flex; align-items: baseline; }
+  /* A word whose value rendered nothing stays away (M2) — only DataTable's own
+     words (`--col`): a caller of `Table` may follow its word with bare text,
+     which `:only-child` does not count (M3). */
+  .v2tbl__cardlabel--col:only-child { display: none; }
+  .v2tbl:has(.v2tbl__cardlabel) > :where(thead, tbody, tfoot) > tr.v2tbl__head:not(:has(a, button, input, select)),
+  .v2tbl:has(.v2tbl__cardlabel) > :where(thead, tbody, tfoot) > tr.v2tbl__head > :is(th, td):not(:has(a, button, input, select)) { display: none; }
   /* The line break between the two lines of the card. */
   .v2tbl__head::after,
   .v2tbl__row::after { content: ""; order: 1; flex-basis: 100%; height: 0; }
@@ -5561,6 +5583,9 @@ a.v3bbr__val:hover { text-decoration-color: currentColor; }
      phone or reachable another way carries it (F783: nothing is dropped).
      `!important`: a helper class has to beat every form class. */
   .is-secondary { display: none !important; }
+  /* A header slot whose only content gives way goes with it, or its margin
+     stays as a gap (0255, hint H2 of 0254). Only this slot, not any wrapper. */
+  .v2ehead__summary:has(> .is-secondary:only-child) { display: none; }
   .v2bar__more { display: inline-flex; }
   /* A focused element never ends up under the bottom bar (2.4.11). */
   .app__main { scroll-padding-bottom: calc(72px + env(safe-area-inset-bottom)); }

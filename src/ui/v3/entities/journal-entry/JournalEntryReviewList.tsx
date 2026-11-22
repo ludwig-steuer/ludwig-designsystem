@@ -382,8 +382,20 @@ export function proposalReviewColumns(options: ProposalColumnOptions = {}): Colu
     .filter((k) => !without.includes(k))
     .filter((k) => accountNames || !NAMES.includes(k))
     .filter((k) => !OPTIONAL.includes(k) || include.includes(k))
-    .map((k) => ({ ...all[k], priority: PHONE_PRIORITY[k] }));
+    .map((k) => ({
+      ...all[k],
+      priority: PHONE_PRIORITY[k],
+      ...(SPEAKS_FOR_ITSELF.includes(k) ? { cardLabel: false as const } : {}),
+    }));
 }
+
+/**
+ * No word before these in the row card (0255): the entry picture carries S/H
+ * itself, and Ludwig's check is a dot with its word. „Soll", „Haben", „BU" and
+ * „Prüfgrund" keep their heads — the badge „Steuerschlüssel" alone does not
+ * say that it is a review reason.
+ */
+const SPEAKS_FOR_ITSELF: readonly ProposalColumn[] = ["accounts", "verdict"];
 
 /**
  * The row card below 640 px (0253, F783 „Buchungen", ll-ceo 2026-11-22): date,

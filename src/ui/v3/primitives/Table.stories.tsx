@@ -231,6 +231,8 @@ export const Density: Story = {
  * Gegenpartei und Betrag in Zeile 1 (Betrag rechts), Stand und Fällig klein
  * in Zeile 2, die Belegnummer nur am Desktop. Ansehen bei 390 px Fensterbreite;
  * am Desktop steht dieselbe Tabelle mit fünf Spalten. Der lange Name bricht um.
+ * „Fällig" trägt sein Wort in der Karte selbst (`v2tbl__cardlabel`, 0255), der
+ * Stand spricht für sich; deshalb steht über den Karten keine Kopfzeile.
  */
 export const PhoneCards: Story = {
   render: () => (
@@ -248,21 +250,30 @@ export const PhoneCards: Story = {
           <span className="v2main">Vermietungsgesellschaft Musterstraße 12 GmbH &amp; Co. KG</span>
           <AmountCell value={18450} />
           <DotStatus tone="danger" label="12 Tage überfällig" />
-          <span>21.08.2026</span>
+          <span>
+            <span className="v2tbl__cardlabel">Fällig</span>
+            21.08.2026
+          </span>
           <span className="v2mono">RE-2026-0812</span>
         </Row>
         <Row href="#">
           <span className="v2main">Werbeagentur Nord</span>
           <AmountCell value={-420} />
           <DotStatus tone="neutral" label="Gutschrift" />
-          <span>30.08.2026</span>
+          <span>
+            <span className="v2tbl__cardlabel">Fällig</span>
+            30.08.2026
+          </span>
           <span className="v2mono">GS-118</span>
         </Row>
         <Row href="#">
           <span className="v2main">Bürobedarf GmbH</span>
           <AmountCell value={64.9} />
           <DotStatus tone="neutral" label="Offen" />
-          <span>14.09.2026</span>
+          <span>
+            <span className="v2tbl__cardlabel">Fällig</span>
+            14.09.2026
+          </span>
           <span className="v2mono">4711</span>
         </Row>
       </Table>

@@ -161,6 +161,20 @@ export interface ColumnDef<T> {
    * first column carries the row link (`rowHref`) and is never hidden.
    */
   priority?: ColumnPriority;
+  /**
+   * The word before the value in the row card (0255), only for `meta`: a value
+   * in the card's second line is unreadable without it. Default: `header`
+   * when that is a string. A short word where the head is long („Belege" for
+   * „Belege im Eingang"); `false` where the value speaks for itself (a status
+   * badge, „12 Tage überfällig").
+   */
+  cardLabel?: string | false;
+}
+
+/** The word of a `meta` column in the row card: `cardLabel`, else a string head. */
+function cardLabelOf<T>(col: ColumnDef<T>): string | null {
+  if (col.cardLabel === false) return null;
+  return col.cardLabel ?? (typeof col.header === "string" ? col.header : null);
 }
 
 /* ── Value columns (0198) ────────────────────────────────────────────────── */
@@ -911,9 +925,20 @@ function bodyRow<T>(row: T, props: DataTableProps<T>): ReactNode {
 
   // Every column gets exactly one grid cell, whatever `cell` returns.
   const cells = columns.map((col, i) => {
-    const content = col.cell(row);
+    const raw = col.cell(row);
+    const empty = raw === null || raw === undefined || raw === false || raw === "";
+    // No word over nothing (0255, M2). A word before a value that renders
+    // nothing itself is caught in the CSS (`--col:only-child`) — for that,
+    // plain text gets its own element, or the word would count as the only
+    // child. Only this table's own words carry `--col`: a caller of `Table`
+    // may write its value as bare text after the word (M3).
+    const label = col.priority === "meta" && !empty ? cardLabelOf(col) : null;
+    const content = label && (typeof raw === "string" || typeof raw === "number") ? <span>{raw}</span> : raw;
     return (
       <span key={col.key} className={col.align === "end" ? "v2num" : undefined}>
+        {/* Only visible in the row card (0255); in the table the head says it.
+            The trailing space keeps word and value apart for screen readers. */}
+        {label ? <span className="v2tbl__cardlabel v2tbl__cardlabel--col">{label} </span> : null}
         {/* The whole row leads to the detail (I11), and it does so without an
             `<a>` inside an `<a>`: the link of the first column covers the row
             through `.v2rowlink`, keeps its own text and stays the one focus

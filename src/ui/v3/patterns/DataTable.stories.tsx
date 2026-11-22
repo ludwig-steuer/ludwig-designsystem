@@ -1206,9 +1206,12 @@ export const FilteredListTemplate: Story = {
 
 /**
  * **Die Zeilenkarte** (0253). `priority` je Spalte: Sachverhalt (mit dem
- * Zeilenlink, der nie wegfällt) und Betrag in Zeile 1, Nummer und Bearbeitung
- * klein in Zeile 2, „Eröffnet" nur am Desktop. Die Auswahl bleibt in Zeile 1,
- * die Aktionen kommen in Zeile 2. Ansehen bei 390 px Fensterbreite: kein seitlicher Scroller, und
+ * Zeilenlink, der nie wegfällt) und Betrag in Zeile 1, Nummer, Bearbeitung
+ * und Klärungen klein in Zeile 2, „Eröffnet" nur am Desktop. Die Auswahl
+ * bleibt in Zeile 1, die Aktionen kommen in Zeile 2. In der Karte trägt jeder
+ * Wert der Zeile 2 sein Wort (0255): „Nummer" aus dem Kopf, „Klärungen" als
+ * Kurzwort für „Offene Klärungen", keins am Abzeichen der Bearbeitung. Die
+ * Kopfzeile zeigt dann nur noch, was sich bedienen lässt. Ansehen bei 390 px Fensterbreite: kein seitlicher Scroller, und
  * mit einer gewählten Zeile sitzt die Auswahlleiste am unteren Rand. Am
  * Desktop steht dieselbe Tabelle wie in `Selection`.
  */
@@ -1224,7 +1227,16 @@ export const PhoneCards: Story = {
         TITLE,
         AMOUNT,
         { ...NUMBER, priority: "meta" },
-        { ...LIFECYCLE, priority: "meta" },
+        { ...LIFECYCLE, priority: "meta", cardLabel: false },
+        {
+          ...countColumn<CaseListItem>({
+            key: "openClarificationsCount",
+            header: "Offene Klärungen",
+            value: (c) => c.openClarificationsCount,
+          }),
+          priority: "meta",
+          cardLabel: "Klärungen",
+        },
         { ...OPENED, priority: "hidden" },
       ]}
       rowKey={rowKey}
