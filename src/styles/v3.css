@@ -5637,6 +5637,22 @@ a.v3bbr__val:hover { text-decoration-color: currentColor; }
      running past the case. */
   .bse__foot { flex-wrap: wrap; }
 
+  /* The card head (0259): the title gets the room beside sign and meta, the
+     actions wrap into a line of their own below it, full width; a select or
+     field in them shrinks to the card. Before, the title was squeezed to a
+     few pixels and broke letter by letter while the select ran out of the
+     card (inbox, „Dateikorb"). */
+  .v2card__h { flex-wrap: wrap; }
+  .v2card__h > div:not(.actions):not(.v2card__meta) { flex: 1 1 0; }
+  .v2card__h .actions { flex: 1 1 100%; flex-wrap: wrap; min-width: 0; }
+  /* Room above the actions only when they show something: an empty one (no
+     selection yet) or one holding only the fixed selection bar would add a
+     line of nothing (0259, H1). */
+  .v2card__h .actions:empty { display: none; }
+  .v2card__h .actions:has(> :not(.v2selbar)) { margin-top: var(--space-2); }
+  .v2card__h .actions > * { max-width: 100%; min-width: 0; }
+  .v2card__h .actions :is(select, .v2in) { min-width: 0; max-width: 100%; }
+
   /* Drawers fill the screen; the close button grows to the thumb. */
   .v2drawer, .v2drawer--sm, .v2drawer--md, .v2drawer--lg { width: 100%; }
   .v2drawer__h .v2ibtn { width: 44px; height: 44px; }

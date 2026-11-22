@@ -1,6 +1,9 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { BookOpen, Layers } from "lucide-react";
 import { AmountCell, DotStatus, ErrorRow, TableLoading } from "./Cells";
+import { Badge } from "./Badge";
+import { Button } from "./Button";
+import { Select } from "./Form";
 import { Progress } from "./Progress";
 import { Card, CardFoot, CardHead, CardSection, EmptyRow, GroupRow, HeadRow, Row, Table } from "./Table";
 import { TextButton } from "./TextButton";
@@ -275,6 +278,40 @@ export const PhoneCards: Story = {
             14.09.2026
           </span>
           <span className="v2mono">4711</span>
+        </Row>
+      </Table>
+    </Card>
+  ),
+};
+
+/**
+ * Der Kartenkopf auf dem Handy (0259), wie im Eingang: Titel, Unterzeile,
+ * Abzeichen und rechts eine Auswahl mit langer Option und eine Schaltfläche.
+ * Unter 640 px bekommt der Titel den Platz neben dem Abzeichen; die Aktionen
+ * stehen in einer eigenen Zeile darunter, die Auswahl schrumpft auf die
+ * Karte. Ansehen bei 390 px; darüber steht alles in einer Zeile.
+ */
+export const HeadPhone: Story = {
+  render: () => (
+    <Card>
+      <CardHead
+        title="Dateikorb: K-2026-0001"
+        sub="22.11.2026 – offen"
+        meta={<Badge tone="neutral">Offen</Badge>}
+        actions={
+          <>
+            <Select aria-label="Dateikorb wählen" defaultValue="k1">
+              <option value="k1">K-2026-0001 · 22.11.2026 – offen, 44 Belege</option>
+              <option value="k2">K-2026-0002 · 18.11.2026 – verarbeitet, 12 Belege</option>
+            </Select>
+            <Button size="sm" variant="primary">Korb verarbeiten</Button>
+          </>
+        }
+      />
+      <Table cols="1fr 120px">
+        <Row>
+          <span className="v2main">RE-4471 Bürobedarf Meier GmbH</span>
+          <AmountCell value={1249.9} />
         </Row>
       </Table>
     </Card>
