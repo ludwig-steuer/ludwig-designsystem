@@ -1241,7 +1241,9 @@ export const PhoneCards: Story = {
       ]}
       rowKey={rowKey}
       head={{ title: "Sachverhalte 2026", sub: "12 von 583" }}
-      sort={SORT}
+      // Sorted by amount: a hidden column that carries the active sort would
+      // come back as `meta` (0258) — „Eröffnet" stays desktop-only here.
+      sort={{ key: "totalAmount", dir: "desc" }}
       href={href}
       rowHref={(c) => `#sachverhalt-${rowKey(c)}`}
       selection={{

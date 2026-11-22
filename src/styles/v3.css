@@ -5555,8 +5555,10 @@ a.v3bbr__val:hover { text-decoration-color: currentColor; }
   .v2wiz__progress { flex-basis: 100%; }
   .s3bar { padding-bottom: calc(var(--space-4) + env(safe-area-inset-bottom)); }
   /* The selection bar sits in the card head — at the top of the list; on the
-     phone it goes to the bottom edge of the window. */
-  .v2selbar--sticky {
+     phone it goes to the bottom edge of the window. Every one of them, sticky
+     or not (0258, F783 „Eingang"): on the phone the thumb is at the bottom
+     whatever the list is; `sticky` keeps its meaning on the desktop. */
+  .v2selbar {
     position: fixed; left: 0; right: 0; bottom: 0; top: auto; z-index: 50;
     padding: var(--space-2) var(--space-4) calc(var(--space-2) + env(safe-area-inset-bottom));
     background: var(--color-accent-50);
@@ -5565,22 +5567,22 @@ a.v3bbr__val:hover { text-decoration-color: currentColor; }
   }
   /* Two lines: the count and „Auswahl aufheben" above, the actions below —
      the actions' own wrapper dissolves so its children can be ordered. */
-  .v2selbar--sticky .v2selbar__actions { display: contents; }
-  .v2selbar--sticky .v2selbar__count { order: 0; }
-  .v2selbar--sticky .v2selbar__actions > :last-child { order: 1; margin-left: auto; }
-  .v2selbar--sticky::after { content: ""; order: 1; flex-basis: 100%; height: 0; }
-  .v2selbar--sticky .v2selbar__actions > :not(:last-child) { order: 2; }
+  .v2selbar .v2selbar__actions { display: contents; }
+  .v2selbar .v2selbar__count { order: 0; }
+  .v2selbar .v2selbar__actions > :last-child { order: 1; margin-left: auto; }
+  .v2selbar::after { content: ""; order: 1; flex-basis: 100%; height: 0; }
+  .v2selbar .v2selbar__actions > :not(:last-child) { order: 2; }
   /* Room under the list for the fixed bar.
      ponytail: the measured height of the two-line bar (113 px) plus air,
      raise it if the actions wrap to a third line. */
   /* On the scroll container of the app, not as the card's margin: a last
      child's margin adds no scroll room. */
-  .app__main:has(.v2selbar--sticky) {
+  .app__main:has(.v2selbar) {
     padding-bottom: calc(120px + env(safe-area-inset-bottom));
     scroll-padding-bottom: calc(120px + env(safe-area-inset-bottom));
   }
-  :is(.v2wiz__foot, .s3bar, .v2selbar--sticky) :is(.v2btn, .v2menu__sum) { min-height: 44px; }
-  :is(.v2wiz__foot, .s3bar, .v2selbar--sticky) .v2link { display: inline-flex; align-items: center; min-height: 44px; }
+  :is(.v2wiz__foot, .s3bar, .v2selbar) :is(.v2btn, .v2menu__sum) { min-height: 44px; }
+  :is(.v2wiz__foot, .s3bar, .v2selbar) .v2link { display: inline-flex; align-items: center; min-height: 44px; }
   /* `is-secondary` (0254): second-rank, not there on the phone — the one class
      for it in the set. In a bar the same action goes into the ⋯ (`.v2bar__more`
      around an OverflowMenu); elsewhere only content that is dispensable on the
@@ -5641,6 +5643,16 @@ a.v3bbr__val:hover { text-decoration-color: currentColor; }
 }
 @media (max-width: 639.98px) and (prefers-reduced-motion: reduce) {
   .v3stepbar__chev { transition: none; }
+}
+
+/* Key signs on touch (0258, ll-ceo 2026-11-22): on a device without hover and
+   with a coarse pointer there is no keyboard to press „Strg+Enter", A or J on
+   — the sign is noise. The button stays; only the sign in a button, link or
+   the record pager goes. A key in running text („mit J weiter") stays, or the
+   sentence would get a hole. A tablet with keyboard or mouse reports
+   `pointer: fine` and keeps them; a desktop never matches. */
+@media (hover: none) and (pointer: coarse) {
+  :is(.v2btn, button, a, .v2pager) .v2kbd { display: none; }
 }
 
 /* The entry card (`.v2je`) below 420 px of its own width (0257): its 640-px

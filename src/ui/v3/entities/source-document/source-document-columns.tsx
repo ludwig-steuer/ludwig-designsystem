@@ -2,6 +2,7 @@ import { formatDocumentForm } from "@/ludwig/modules/source-docs/domain/document
 import { sourceDocTypeLabel } from "@/ludwig/modules/source-docs/domain/source-doc-type";
 import type { ReactNode } from "react";
 import type { ColumnDef } from "../../patterns/DataTable";
+import type { ColumnPriority } from "../../primitives/Table";
 import { StatusBadge } from "../../patterns/StatusBadge";
 import { StatusInfoButton } from "../../patterns/StatusInfoButton";
 import { Amount } from "../../primitives/Amount";
@@ -110,6 +111,52 @@ const CATALOG_ORDER: SourceDocumentColumn[] = [
   "recommendation",
   "decision",
 ];
+
+/**
+ * Where a column stands in the row card below 640 px (0258, F783 „Eingang"):
+ * document and amount first; basket (Einordnung), state (Fortschritt), date
+ * and the review words second; the rest only on the desktop — it stays one
+ * tap away in the document. Every view of these columns follows it.
+ */
+const PHONE_PRIORITY: Record<SourceDocumentColumn, ColumnPriority> = {
+  document: "primary",
+  counterparty: "hidden",
+  fileName: "hidden",
+  classification: "meta",
+  kind: "hidden",
+  form: "hidden",
+  pages: "hidden",
+  confidence: "hidden",
+  size: "hidden",
+  amount: "primary",
+  documentDate: "meta",
+  identifier: "hidden",
+  uploadedAt: "hidden",
+  receivedDate: "hidden",
+  progress: "meta",
+  status: "meta",
+  stuckState: "meta",
+  reviewReason: "meta",
+  reason: "meta",
+  case: "hidden",
+  batch: "hidden",
+  booking: "hidden",
+  recommendation: "meta",
+  decision: "meta",
+};
+
+/**
+ * Words before `meta` values in the card (0255) where the head is not the
+ * right one: the date's head is a sort link, not a string; basket and state
+ * are badges that say what they are.
+ */
+const CARD_LABEL: Partial<Record<SourceDocumentColumn, string | false>> = {
+  documentDate: "Datum",
+  classification: false,
+  progress: false,
+  status: false,
+  stuckState: false,
+};
 
 /** V1 · Eingang — is every file there and recognised right, before the basket is released? */
 export const INBOX_VIEW: SourceDocumentColumn[] = ["document", "classification", "pages", "confidence", "documentDate", "progress"];
@@ -905,7 +952,13 @@ export function sourceDocumentColumns({
   };
   // The catalogue's order is the order (owner E2, F335, 2026-09-29) — a view
   // selects, it does not reorder. This supersedes the caller's order of F328.
-  return CATALOG_ORDER.filter((c) => picked.has(c)).map((c) => defs[c]);
+  // The row card below 640 px (0258, F783 „Eingang"): the column that carries
+  // the row link is always first line, whatever the view leads with.
+  return CATALOG_ORDER.filter((c) => picked.has(c)).map((c) => ({
+    ...defs[c],
+    priority: c === lead ? "primary" : PHONE_PRIORITY[c],
+    ...(c in CARD_LABEL ? { cardLabel: CARD_LABEL[c] } : {}),
+  }));
 }
 
 /**

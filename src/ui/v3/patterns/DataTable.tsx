@@ -553,7 +553,7 @@ export function DataTable<T>(props: DataTableProps<T>) {
   const {
     rows,
     groups,
-    columns,
+    columns: declared,
     rowKey,
     head,
     density = "default",
@@ -579,6 +579,14 @@ export function DataTable<T>(props: DataTableProps<T>) {
     pager?: TablePager;
     groups?: readonly TableGroup<T>[];
   };
+
+  // The column of the active sort is never hidden in the row card (0258, H4):
+  // its head is the only place that says what the list is sorted by, and the
+  // way back. Its value then stands in the second line, with its word.
+  const columns = declared.map((c) =>
+    c.priority === "hidden" && sort?.key === c.key ? { ...c, priority: "meta" as const } : c,
+  );
+  const rowProps = { ...props, columns } as DataTableProps<T>;
 
   // One grip track in front for each of selection and chevron, `max-content`
   // behind for the actions — the columns fall back to one share each. The
@@ -658,7 +666,7 @@ export function DataTable<T>(props: DataTableProps<T>) {
     </EmptyRow>
   ) : null;
 
-  const body = state ?? (groups ? null : rows?.map((row) => bodyRow(row, props)));
+  const body = state ?? (groups ? null : rows?.map((row) => bodyRow(row, rowProps)));
 
   // A section without rows **is not rendered** — a heading over nothing is
   // noise. Unless the caller says what its emptiness means: that no line of
@@ -667,7 +675,7 @@ export function DataTable<T>(props: DataTableProps<T>) {
     groups && !state
       ? groups
           .filter((g) => g.rows.length > 0 || g.emptyHint)
-          .map((g) => ({ key: g.key, children: section(g, props) }))
+          .map((g) => ({ key: g.key, children: section(g, rowProps) }))
       : undefined;
 
   // Zone 5 only stands under rows: a pager under „nothing here" would be a
