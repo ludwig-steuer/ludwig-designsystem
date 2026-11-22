@@ -16,6 +16,7 @@ import { IconButton } from "./IconButton";
 import { Input } from "./Form";
 import { NavList, type NavSection } from "./NavList";
 import { MenuItem, OverflowMenu } from "./OverflowMenu";
+import { Segmented } from "./Nav";
 import { PageHeader } from "./PageHeader";
 import { Card, CardHead, HeadRow, Row, Table } from "./Table";
 
@@ -168,6 +169,20 @@ export const Phone: Story = {
               <div style={{ color: "var(--color-text-on-dark)", fontSize: "var(--fs-ui-sm)" }}>
                 Musterbau GmbH &amp; Co. KG · DATEV 10234
               </div>
+              {/* The area switch and the firm view, as the app puts them here (0256). */}
+              <div className="sb__navlabel" style={{ padding: "var(--space-3) 0 var(--space-1)" }}>Bereich</div>
+              <Segmented
+                ariaLabel="Bereich"
+                active="workspace"
+                options={[
+                  { key: "workspace", label: "Kanzlei-Arbeit", href: "#workspace" },
+                  { key: "care", label: "Kundenbetreuung", href: "#care" },
+                  { key: "technical", label: "Technik", href: "#technical" },
+                ]}
+              />
+              <a className="v2link" href="#firm-view" style={{ display: "inline-block", marginTop: "var(--space-2)" }}>
+                Wie die Kanzlei
+              </a>
             </div>
           </>
         }
