@@ -172,7 +172,8 @@ function BatchHistory({ vm }: { vm: ClientYearVM }) {
 function Counts({ vm }: { vm: ClientYearVM }): ReactNode {
   const c = vm.counts;
   return (
-    <span className="cy-counts">
+    // The jumps into the counts are desktop work — not there on the phone (0254).
+    <span className="cy-counts is-secondary">
       <Link href="#documents">{c.documents.toLocaleString("de-DE")} Belege</Link>
       <Link href="#cases">{c.openCases.toLocaleString("de-DE")} Sachverhalte offen</Link>
       {c.inDatevUntil ? <Link href="#datev">in DATEV gebucht bis {c.inDatevUntil}</Link> : <span>noch nichts in DATEV</span>}

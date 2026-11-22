@@ -5555,10 +5555,12 @@ a.v3bbr__val:hover { text-decoration-color: currentColor; }
   }
   :is(.v2wiz__foot, .s3bar, .v2selbar--sticky) :is(.v2btn, .v2menu__sum) { min-height: 44px; }
   :is(.v2wiz__foot, .s3bar, .v2selbar--sticky) .v2link { display: inline-flex; align-items: center; min-height: 44px; }
-  /* Second actions go into the ⋯ (`.v2bar__more` around an OverflowMenu with
-     the same actions); the app marks them `is-secondary` (F783: nothing is
-     dropped). */
-  :is(.v2wiz__foot, .s3bar, .v2selbar) .is-secondary { display: none; }
+  /* `is-secondary` (0254): second-rank, not there on the phone — the one class
+     for it in the set. In a bar the same action goes into the ⋯ (`.v2bar__more`
+     around an OverflowMenu); elsewhere only content that is dispensable on the
+     phone or reachable another way carries it (F783: nothing is dropped).
+     `!important`: a helper class has to beat every form class. */
+  .is-secondary { display: none !important; }
   .v2bar__more { display: inline-flex; }
   /* A focused element never ends up under the bottom bar (2.4.11). */
   .app__main { scroll-padding-bottom: calc(72px + env(safe-area-inset-bottom)); }
