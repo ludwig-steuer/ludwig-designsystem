@@ -130,7 +130,7 @@ export const SOURCE_DOCUMENT_DETAILS: {
           value:
             d.originalGross === null || d.originalGross === undefined
               ? d.originalCurrency
-              : `${d.originalGross.toLocaleString("de-DE", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} ${d.originalCurrency}`,
+              : `${formatAmount(d.originalGross, null)} ${d.originalCurrency}`,
         });
       }
       return rows;

@@ -226,7 +226,7 @@ export const InUse: Story = {
               padding: "var(--space-5)",
             }}
           >
-            <span className="lw-numeric">-1.249,90 €</span>
+            <span className="lw-numeric">−1.249,90 €</span>
             <span>Rechnung RE-4471 Wartung Klimaanlage</span>
             <CasePicker
               label="Sachverhalt"

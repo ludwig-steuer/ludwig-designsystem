@@ -2,6 +2,7 @@
 
 import { DeviationCell, AmountCell, type CellTone } from "../primitives/Cells";
 import { StateIcon } from "./Review";
+import { formatCount } from "../format";
 import { Card, CardHead, EmptyRow, HeadRow, Table, rowCells } from "../primitives/Table";
 
 /**
@@ -34,11 +35,10 @@ export interface ComparisonRow {
   acknowledged?: boolean;
 }
 
-const NUM = new Intl.NumberFormat("de-DE", { maximumFractionDigits: 0 });
 
 function cell(v: number | null, unit: "count" | "amount") {
   if (v === null) return <span className="v2num v2muted">—</span>;
-  return unit === "amount" ? <AmountCell value={v} /> : <span className="v2num">{NUM.format(v)}</span>;
+  return unit === "amount" ? <AmountCell value={v} /> : <span className="v2num">{formatCount(v)}</span>;
 }
 
 /**

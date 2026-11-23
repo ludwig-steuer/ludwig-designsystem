@@ -48,9 +48,10 @@ Daraus folgt zweierlei, und beides ist ein Abnahmekriterium:
 
 - Das Vorzeichen bekommt **keine Farbe** (V3/A7). Rot ist im Set die
   Kritikalität, nicht die Richtung; ein Ausgang ist kein Fehler.
-- Das Minus ist der Hyphen-Minus, den `formatAmount` (`de-DE`) schreibt —
-  U+2212 wäre eine eigene Formatierung und wurde in der Freigabe gestrichen.
-  Was bleibt, ist die Farbe: keine.
+- Das Minus ist das echte Minus (U+2212), das `formatAmount` seit 0261
+  schreibt (Owner 2026-11-23). Die Streichung aus der Freigabe vom 2026-09-06
+  ist damit aufgehoben; die Messung „U+002D" in der Wiederabnahme gilt für
+  den Stand von damals. Was bleibt, ist die Farbe: keine.
 
 ## Schnittstelle
 

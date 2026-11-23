@@ -4,6 +4,7 @@ import type {
   CaseTimelineEvent,
 } from "@/ui/v3/entities/accounting-case/CaseTimeline";
 import type { JournalLine } from "@/ui/v3/entities/journal-entry/JournalEntryCompact";
+import { formatAmount } from "@/ui/v3/format";
 import { StatusBadge } from "@/ui/v3/patterns/StatusBadge";
 import { TextButton } from "@/ui/v3/primitives/TextButton";
 
@@ -41,7 +42,7 @@ const dayOf = (start: string, offset: number) => {
   d.setUTCDate(d.getUTCDate() + offset);
   return d.toISOString().slice(0, 10);
 };
-const euro = (n: number) => n.toLocaleString("de-DE", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+const euro = (n: number) => formatAmount(n, null);
 
 /* ── A5 — the client's own batch: 508 events, 12 open questions ──────────── */
 

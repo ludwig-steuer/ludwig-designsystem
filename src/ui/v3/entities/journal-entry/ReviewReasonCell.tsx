@@ -36,10 +36,8 @@ const TONE: Record<StatusKind, BadgeTone> = {
   neutral: "neutral",
 };
 
-/** „−25" — the true minus, never a hyphen (T7). */
-const count = (n: number) => `${n < 0 ? "−" : ""}${formatCount(Math.abs(n))}`;
-/** „+60", „−25". */
-const signed = (n: number) => (n < 0 ? count(n) : `+${formatCount(n)}`);
+/** „+60", „−25" — `formatCount` writes the true minus (0261). */
+const signed = (n: number) => (n < 0 ? formatCount(n) : `+${formatCount(n)}`);
 
 /**
  * @when    Why one entry should be looked at, in a row: the strongest reason
@@ -105,7 +103,7 @@ export function ReviewReasonCell({
             <tfoot>
               <tr>
                 <th scope="row">Summe</th>
-                <td className="v2num">{count(score.score)}</td>
+                <td className="v2num">{formatCount(score.score)}</td>
               </tr>
               <tr>
                 <th scope="row">Schwelle „{tab}"</th>

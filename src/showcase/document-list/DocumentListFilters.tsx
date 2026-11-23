@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { formatAmount } from "@/ui/v3/format";
 import { CATEGORY_ICON, CategoryIcon, type DocCategoryKey } from "@/ui/v3/Icons";
 import { ActiveFilters, type ActiveFilter } from "@/ui/v3/primitives/ActiveFilters";
 import { AmountInput } from "@/ui/v3/primitives/AmountInput";
@@ -89,7 +90,7 @@ const BATCHES: [string, string][] = [
 ];
 
 const day = (iso: string) => iso.split("-").reverse().join(".");
-const euro = (n: number) => n.toLocaleString("de-DE", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+const euro = (n: number) => formatAmount(n, null);
 
 /** Every set filter in words — the chips of rank 5. The quick filter and the categories show themselves as pressed chips and are not repeated. */
 export function describe(s: FilterState, set: (next: FilterState) => void): ActiveFilter[] {

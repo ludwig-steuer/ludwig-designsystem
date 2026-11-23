@@ -22,7 +22,16 @@ const MONEY = new Map<string, Intl.NumberFormat>();
 const DECIMAL = new Intl.NumberFormat(LOCALE, {
   minimumFractionDigits: 2,
   maximumFractionDigits: 2,
+  signDisplay: "negative",
 });
+
+/**
+ * The true minus (U+2212) instead of the hyphen `Intl` writes for `de-DE`
+ * (Owner 2026-11-23, 0261): as long as the plus, at its height, and read as
+ * „minus" by a screen reader. `signDisplay: "negative"` keeps a zero that
+ * rounds from below from wearing one.
+ */
+const minus = (text: string) => text.replace("-", "\u2212");
 
 function moneyFormat(currency: Currency) {
   let f = MONEY.get(currency);
@@ -32,6 +41,7 @@ function moneyFormat(currency: Currency) {
       currency,
       minimumFractionDigits: 2,
       maximumFractionDigits: 2,
+      signDisplay: "negative",
     });
     MONEY.set(currency, f);
   }
@@ -61,11 +71,11 @@ export function formatAmount(
   const n = isMoney ? value.amount.toNumber() : value;
   const c = isMoney ? value.currency : currency;
   if (c === undefined) throw new Error("formatAmount: eine nackte Zahl braucht eine Währung.");
-  const text = c === null ? DECIMAL.format(n) : moneyFormat(c).format(n);
+  const text = minus(c === null ? DECIMAL.format(n) : moneyFormat(c).format(n));
   return signed && n > 0 ? `+${text}` : text;
 }
 
-const COUNT = new Intl.NumberFormat(LOCALE, { maximumFractionDigits: 0 });
+const COUNT = new Intl.NumberFormat(LOCALE, { maximumFractionDigits: 0, signDisplay: "negative" });
 
 /**
  * `3.400` — a whole number, the way this country reads it.
@@ -84,7 +94,7 @@ const COUNT = new Intl.NumberFormat(LOCALE, { maximumFractionDigits: 0 });
  *          share of something → Progress.
  */
 export function formatCount(value: number, unit?: readonly [one: string, other: string]): string {
-  const n = COUNT.format(value);
+  const n = minus(COUNT.format(value));
   // Singular only for exactly one — „0 Seiten", like the language says it.
   return unit ? `${n} ${value === 1 ? unit[0] : unit[1]}` : n;
 }
@@ -117,10 +127,14 @@ export function formatPercent(value: number | null, digits = 0): string {
   if (value === null) return "—";
   let f = PERCENT.get(digits);
   if (!f) {
-    f = new Intl.NumberFormat(LOCALE, { minimumFractionDigits: digits, maximumFractionDigits: digits });
+    f = new Intl.NumberFormat(LOCALE, {
+      minimumFractionDigits: digits,
+      maximumFractionDigits: digits,
+      signDisplay: "negative",
+    });
     PERCENT.set(digits, f);
   }
-  return `${f.format(value)}\u00a0%`;
+  return `${minus(f.format(value))}\u00a0%`;
 }
 
 /**

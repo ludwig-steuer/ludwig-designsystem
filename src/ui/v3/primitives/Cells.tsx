@@ -346,7 +346,7 @@ export function DeviationCell({
   return (
     <span className={`v2num${tone === "neutral" ? "" : ` v2num--${tone}`}`} title={explanation}>
       {sign}
-      {new Intl.NumberFormat("de-DE", { maximumFractionDigits: 0 }).format(pct)} %
+      {formatPercent(pct)}
     </span>
   );
 }

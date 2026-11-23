@@ -2,6 +2,7 @@
 
 import { useEffect, useId, useState } from "react";
 import { parseGermanAmount, type Currency } from "@/ludwig/shared/money";
+import { formatAmount } from "../format";
 import { Field, Input } from "./Form";
 
 /**
@@ -34,7 +35,13 @@ export type ParsedAmount = number | null | "invalid";
  *          comes from data rather than from a person → parseGermanAmount.
  */
 export function parseAmount(raw: string): ParsedAmount {
-  const t = raw.replace(/[\s ]/g, "");
+  // What Ludwig writes must read back (0261): the true minus becomes the one
+  // `parseGermanAmount` knows — it drops U+2212 and would flip the sign
+  // (L-384) — and a currency behind the number, symbol or ISO code, goes.
+  const t = raw
+    .replace(/\s/g, "")
+    .replace(/\u2212/g, "-")
+    .replace(/(?:\p{Sc}|[A-Z]{3})$/u, "");
   if (!t) return null;
   // Either German grouping ("1.234.567,89") or a plain number with at most one
   // separator ("1234.56", "1234,56", "1234").
@@ -42,15 +49,6 @@ export function parseAmount(raw: string): ParsedAmount {
   if (!wellFormed) return "invalid";
   const n = parseGermanAmount(t);
   return n === null ? "invalid" : n;
-}
-
-function format(value: number, currency: Currency | null) {
-  return new Intl.NumberFormat("de-DE", {
-    style: currency ? "currency" : "decimal",
-    currency: currency ?? undefined,
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
-  }).format(value);
 }
 
 /**
@@ -82,13 +80,13 @@ export function AmountInput({
   name?: string;
 }) {
   const autoId = useId();
-  const [text, setText] = useState(value === null ? "" : format(value, currency));
+  const [text, setText] = useState(value === null ? "" : formatAmount(value, currency));
   const [ownError, setOwnError] = useState<string | null>(null);
 
   // The caller stays the owner of the value: when it changes from outside
   // (reset, loaded record), the field follows.
   useEffect(() => {
-    setText(value === null ? "" : format(value, currency));
+    setText(value === null ? "" : formatAmount(value, currency));
     setOwnError(null);
   }, [value, currency]);
 
@@ -103,7 +101,7 @@ export function AmountInput({
       return;
     }
     setOwnError(null);
-    setText(parsed === null ? "" : format(parsed, currency));
+    setText(parsed === null ? "" : formatAmount(parsed, currency));
     if (parsed !== value) onChange(parsed);
   }
 

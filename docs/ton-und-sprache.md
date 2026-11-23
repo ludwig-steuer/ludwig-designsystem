@@ -135,7 +135,7 @@ Quelle: `design/Ludwig Design System v2/ui_kits/app/`. Spiegel im Repo unter `ap
 
 1. **Ton: Sie, kein Du, keine Vornamen, kein Marketing-Sprech**, keine Emojis, keine Unicode-Glyphen.
 2. **Naming aus `GLOSSARY.md`** im UI. Englische Spaltennamen aus dem DB-Schema bleiben in Code, **DE-Labels** im UI.
-3. **Beträge mit Currency, immer tabular-nums**, DE-Format `1.234,56 €`. Datum DE `dd.MM.yyyy`.
+3. **Beträge mit Currency, immer tabular-nums**, DE-Format `1.234,56 €`, negativ mit echtem Minus `−1.234,56 €` (U+2212, Owner 2026-11-23). Datum DE `dd.MM.yyyy`.
 4. **Keine Tailwind-Default-Farben** im UI-Code. Nur Tokens (`bg-primary`, `text-accent-700`, etc.).
 5. **Card: Border ODER Shadow** — nicht beides.
 6. **Tabellen: keine Zebra-Streifen, keine vertikalen Linien**, klare horizontale Trenner.
