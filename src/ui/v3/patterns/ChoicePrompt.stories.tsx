@@ -253,6 +253,55 @@ export const OptionNote: Story = {
   },
 };
 
+/**
+ * A prefilled note (0262): Ludwig already knows the sentence for the client,
+ * so the recommended option opens with it and the button is free. Switching
+ * without typing shows the other option's own field, empty; back, the prefill
+ * stands again. Once typed, the typed text holds across switches.
+ */
+export const OptionNotePrefilled: Story = {
+  render: () => {
+    const [last, setLast] = useState<ChoiceAnswer | null>(null);
+    return (
+      <div style={{ maxWidth: 640 }}>
+        <ChoicePrompt
+          question="Wohin gehört dieser Beleg?"
+          hideQuestion
+          optionsLabel="Entscheidung"
+          optionStyle="rows"
+          options={[
+            {
+              id: "process",
+              label: "Mit Kommentar noch verarbeiten",
+              hint: "Geht an Ludwig zurück, er bucht ihn im nächsten Durchgang.",
+              note: { label: "Kommentar an Ludwig", placeholder: "Was soll mit dem Beleg passieren?", required: true },
+            },
+            { id: "archive", label: "Archivieren", hint: "Kein Buchungsbeleg; bleibt beim Mandanten abgelegt (z. B. Kontoauszug, Vertrag)." },
+            {
+              id: "client",
+              label: "Beim Mandanten klären",
+              hint: "Kommt mit Ihrer Notiz in die Liste für den Mandanten.",
+              recommended: true,
+              note: {
+                label: "Notiz für den Mandanten",
+                placeholder: "Was soll der Mandant beantworten oder liefern?",
+                required: true,
+                defaultValue: "Es liegen 4 von 6 Seiten vor, bitte vollständig hochladen.",
+              },
+            },
+          ]}
+          submitLabel="Entscheiden und weiter"
+          onSubmit={async (a) => {
+            await wait(400);
+            setLast(a);
+          }}
+        />
+        <p className="lw-ui-hint">{last ? `Entschieden: ${last.optionId} · ${last.text ?? "ohne Text"}` : "Noch nichts entschieden."}</p>
+      </div>
+    );
+  },
+};
+
 /** Five places to file without a booking (owner 2026-10-27). */
 const FILE_GROUP = {
   id: "file",

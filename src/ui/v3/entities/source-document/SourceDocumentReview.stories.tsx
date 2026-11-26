@@ -39,8 +39,11 @@ ${lines.map(([a, b]) => `<tr><td>${a}</td><td class="num">${b}</td></tr>`).join(
 <tr><td><strong>Gesamt</strong></td><td class="num"><strong>${total}</strong></td></tr></table></section>`)}`;
 }
 
-/** The decisions of the review (concept §12, owner decisions 1 and 2 of 2026-10-24) — fixture words, as the app's choice model would send them. */
-function decisions(recommended: string | null): ChoiceOption[] {
+/**
+ * The decisions of the review (concept §12, owner decisions 1 and 2 of 2026-10-24) — fixture words, as the app's choice model would send them.
+ * `clientNote` prefills the note for the client (0262): the one already marked, or the sentence Ludwig brings from the document check.
+ */
+function decisions(recommended: string | null, clientNote?: string): ChoiceOption[] {
   const all: ChoiceOption[] = [
     {
       id: "process",
@@ -67,7 +70,7 @@ function decisions(recommended: string | null): ChoiceOption[] {
       id: "client",
       label: "Beim Mandanten klären",
       hint: "Kommt mit Ihrer Notiz in die Liste für den Mandanten auf der Seite „Übergeben“.",
-      note: { label: "Notiz für den Mandanten", placeholder: "Was soll der Mandant beantworten oder liefern?", required: true },
+      note: { label: "Notiz für den Mandanten", placeholder: "Was soll der Mandant beantworten oder liefern?", required: true, defaultValue: clientNote },
     },
   ];
   const mark = (o: ChoiceOption): ChoiceOption => ({
@@ -84,9 +87,12 @@ interface ReviewItem {
   reasonNote: string | null;
   recommended: string | null;
   why: string | null;
+  clientNote?: string;
+  /** Pages uploaded; one when absent. */
+  pages?: number;
 }
 
-/** Five documents of batch 2026-0001 that Ludwig did not book — fictional, modelled on the kinds of the wireframe; the credit note first, as in the spec. */
+/** Six documents of batch 2026-0001 that Ludwig did not book — fictional, modelled on the kinds of the wireframe; the credit note first, as in the spec, the one missing pages last (0262). */
 const ITEMS: ReviewItem[] = [
   {
     document: {
@@ -173,6 +179,26 @@ const ITEMS: ReviewItem[] = [
     recommended: "irrelevant",
     why: "Ein Rundschreiben ohne Betrag und ohne Bezug zu einer Zahlung.",
   },
+  {
+    // Pages missing (0262): the note for the client comes prefilled from the document check.
+    document: {
+      id: "doc-pages",
+      fileName: "2026-01-22_Kanzleibedarf_Weber_Rechnung_R-26-0417.pdf",
+      sourceDocType: "invoice",
+      counterparty: "Kanzleibedarf Weber KG",
+      detail: { kind: "invoice", number: "R-26-0417", gross: null, currency: "EUR" },
+      documentDate: "2026-01-22",
+      receivedDate: "2026-01-23",
+      status: "human_review",
+      reviewReason: "open_findings",
+    },
+    url: original("Kanzleibedarf Weber KG", "Rechnung R-26-0417", [["Aktenschränke, 3 Stück", "1.785,00 €"], ["Übertrag auf Seite 2", "—"]], "—"),
+    reasonNote: "Die Rechnung hat laut Fußzeile sechs Seiten, hochgeladen sind vier. Die Summe und die Umsatzsteuer stehen auf Seite 6.",
+    recommended: "client",
+    why: "Ohne die letzte Seite fehlen Gesamtbetrag und Umsatzsteuer; nur der Mandant hat die vollständige Rechnung.",
+    clientNote: "Es liegen 4 von 6 Seiten vor, bitte vollständig hochladen.",
+    pages: 4,
+  },
 ];
 
 const LABEL: Record<string, string> = Object.fromEntries(decisions(null).flatMap((o) => o.options ?? [o]).map((o) => [o.id, o.label]));
@@ -183,7 +209,7 @@ function Preview({ item }: { item: ReviewItem }) {
       url={item.url}
       title={item.document.sourceDocType === "bank_statement_pdf" ? "Kontoauszug" : "Rechnung"}
       fileName={item.document.fileName}
-      pageCount={1}
+      pageCount={item.pages ?? 1}
     />
   );
 }
@@ -231,7 +257,7 @@ export const Interactive: Story = {
           document={item.document}
           preview={<Preview item={item} />}
           reasonNote={item.reasonNote}
-          options={decisions(item.recommended)}
+          options={decisions(item.recommended, item.clientNote)}
           recommendation={item.why}
           submitLabel={last ? "Entscheiden und zur Übersicht" : "Entscheiden und weiter"}
           pending={pending}
@@ -334,7 +360,7 @@ export const PreviewLoading: Story = {
 
 /**
  * The way into the step (0223, owner 2026-10-26): an overview, not a list.
- * One sentence and the counts; under them the main way, „3 Belege
+ * One sentence and the counts; under them the main way, „4 Belege
  * durchgehen" — it starts the single review at document 1 — and the side
  * way „Überspringen: Konten". The table of every document to check stays,
  * folded (`DataTable` `head.collapsed`); no „Weiter" under it. Below: the
@@ -377,7 +403,7 @@ export const Overview: Story = {
                   tone="soft"
                   rows={[
                     ["Eingegangen", "61"],
-                    ["Gebucht", items.length === 0 ? "58" : "53"],
+                    ["Gebucht", items.length === 0 ? "58" : "52"],
                     ["Warten auf eine Rückfrage", "3"],
                     ["Ohne Buchung oder von Ludwig als nicht buchungsrelevant eingestuft", String(items.length)],
                   ]}

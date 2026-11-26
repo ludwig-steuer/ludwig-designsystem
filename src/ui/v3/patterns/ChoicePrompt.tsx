@@ -26,10 +26,13 @@ export interface ChoiceOption {
   /**
    * Chosen, this option asks for a sentence (0223): a field with this word
    * stands under it (0229) — a comment for Ludwig, a note for the client.
-   * It shares its text with the free text, so switching options loses
-   * nothing.
+   * Typed text is shared with the free text, so switching options loses
+   * nothing. `defaultValue` fills the field while nothing is typed yet
+   * (0262) — a prefill stays with its own option and never travels to
+   * another. What stands in the visible field is sent, an untouched prefill
+   * too, and it meets `required`.
    */
-  note?: { label: string; placeholder?: string; required?: boolean };
+  note?: { label: string; placeholder?: string; required?: boolean; defaultValue?: string };
   /**
    * A group of answers under one row (owner 2026-10-27: „Ablegen ohne Buchung
    * ›" with five places to file). Chosen, the row unfolds its options; a
@@ -109,7 +112,9 @@ export function ChoicePrompt({
   const [choice, setChoice] = useState<string | null>(
     defaultOptionId ?? answers.find((o) => o.recommended)?.id ?? null,
   );
-  const [text, setText] = useState(freeText?.defaultValue ?? "");
+  // `null` until the reader types: the visible field then shows its own
+  // prefill (`note.defaultValue` or `freeText.defaultValue`, 0262).
+  const [typedText, setTypedText] = useState<string | null>(null);
   const [freeOpen, setFreeOpen] = useState(!freeText?.toggle);
   // Set by the click on the free-text button only. The field moves with the
   // choice and mounts anew each time, so `autoFocus` would pull the focus off
@@ -134,6 +139,7 @@ export function ChoicePrompt({
   const openGroup = options.find((o) => o.id === choice && o.options?.length);
   const answer = openGroup ? null : choice;
   const field = note ?? (freeText && freeOpen ? freeText : null);
+  const text = typedText ?? field?.defaultValue ?? "";
   // Only what stands in a visible field is sent: a note typed for one option
   // must not travel with another that shows no field (acceptance 0223, M1).
   const typed = field ? text.trim() : "";
@@ -183,7 +189,7 @@ export function ChoicePrompt({
             placeholder={field.placeholder}
             disabled={pending}
             readOnly={sending}
-            onChange={(e) => setText(e.target.value)}
+            onChange={(e) => setTypedText(e.target.value)}
           />
         </Field>
       ) : null}
