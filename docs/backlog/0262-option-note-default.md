@@ -105,6 +105,7 @@ vorhandenen Stories `Pending` und `Error`. Die Vorbelegung ändert daran nichts.
 1. Soll neben einem vorbelegten Feld ein Satz stehen, der sagt, dass Ludwig den
    Text vorbereitet hat? **Ohne Antwort:** nein. Das Feld trägt sein Label, die
    Herkunft gehört in den `hint` der Option. Ein neues Wort braucht den Owner.
+   **Antwort ll-ceo 2026-11-26:** Es bleibt beim Default, kein Satz.
 
 ## Abnahmekriterien
 
