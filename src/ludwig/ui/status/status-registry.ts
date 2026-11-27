@@ -2258,9 +2258,9 @@ const DOCUMENT_NUMBER_SOURCE: Record<string, StatusDescriptor> = {
  * (`intake/domain/duo-sync-states.ts`), Wörter und Stufen vom Owner freigegeben (ludwig-plugin `docs/spec-bausteine.md`).
  *
  * Fallstricke:
- *  - `cancelled` entsteht nur durch das System (Fehler, Seite geschlossen), nie durch den Nutzer, und verlangt immer
- *    eine Reaktion. Hält der Nutzer einen Durchgang an, läuft der laufende Mandant zu Ende, die übrigen stehen auf
- *    `skipped` mit dem Grund „angehalten“.
+ *  - `cancelled` entsteht durch einen Fehler, eine geschlossene Seite oder den Knopf „Abgleich abbrechen“ an einem
+ *    einzelnen Mandanten. Hält der Nutzer dagegen einen Durchgang über mehrere Mandanten an, läuft der laufende
+ *    Mandant zu Ende, die übrigen stehen auf `skipped` mit dem Grund „angehalten“.
  *  - `skipped` steht nie allein: das Plugin zeigt den Grund als Text daneben.
  */
 const DUO_SYNC: Record<string, StatusDescriptor> = {
@@ -2268,7 +2268,7 @@ const DUO_SYNC: Record<string, StatusDescriptor> = {
   running: { label: "Läuft", kind: "info", description: "Das Plugin gleicht diesen Mandanten gerade mit DATEV Unternehmen online ab." },
   succeeded: { label: "Fertig", kind: "success", description: "Der Abgleich ist ohne Probleme durchgelaufen." },
   succeeded_with_issues: { label: "Fertig mit Problemen", kind: "warning", description: "Der Abgleich ist zu Ende gelaufen, aber nicht alles ist gelungen. Was fehlt, zeigt das Plugin am Mandanten." },
-  cancelled: { label: "Abgebrochen", kind: "warning", description: "Der Abgleich endete vor dem Ziel durch einen Fehler oder weil die Seite geschlossen wurde. Er braucht eine Reaktion." },
+  cancelled: { label: "Abgebrochen", kind: "warning", description: "Der Abgleich endete vor dem Ziel: durch einen Fehler, weil die Seite geschlossen wurde, oder weil jemand ihn abgebrochen hat." },
   skipped: { label: "Übersprungen", kind: "neutral", description: "Dieser Mandant wurde im Durchgang nicht abgeglichen, etwa weil der Durchgang angehalten wurde. Der Grund steht daneben." },
 };
 
