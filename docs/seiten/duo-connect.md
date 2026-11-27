@@ -85,7 +85,7 @@ liegt, Baustein ist im Entwurf nachgestellt und als Entwurf gekennzeichnet.
 | A6 | Übersicht vor dem Durchgang (aufgeklappt in A5) | Tabelle: Auswahl · Mandant · Letzter Abgleich · Abrufzeitraum; darunter Gruppe „Werden übersprungen“ mit Grund („Keine DATEV-Mandantennummer in Ludwig“, „Einrichtung in Ludwig noch nicht abgeschlossen“); Abwahl gilt nur für diesen Durchgang | `DataTable`, `Selection`, `Badge` | — |
 | A7 | Läuft · ein Mandant | Hinweis oben: „Lassen Sie diese Seite und das DATEV-Fenster geöffnet, bis der Abgleich fertig ist.“ Kopf „Musterfirma GmbH wird abgeglichen“; vier Schritte als Zeilen: fertig („4 Ablageorte“) · läuft („Beleg 37 von 120“, Balken) · offen · offen; ausgeschaltete Belegübergabe erscheint nicht; Knopf **Abgleich abbrechen** (tertiary) | `Callout`, `Progress` | 0265, 0268 |
 | A7b | Läuft · erster Belegabruf | in A7 über den Schritten Hinweisfläche info: **Erster Belegabruf für Musterfirma GmbH.** In DATEV liegen 214 Belege seit dem 01.01.2026, 38 kennt Ludwig schon, 176 werden übertragen. Das dauert einige Minuten. Knopf **Belegabruf abbrechen** (tertiary). Der Abgleich läuft weiter, ohne auf eine Antwort zu warten | `Callout` | — |
-| A8 | Läuft · Durchgang | Gesamt „Mandant 3 von 12“ mit Balken; Block „Jetzt“: der laufende Mandant mit seinen Schritten (wie A7, kompakt); darunter die Liste aller Mandanten in fester Reihenfolge, je Zeile Status (Wartet, Läuft, Fertig, Fertig mit Problemen, Abgebrochen, Übersprungen + Grund) und Kurzergebnis; fertige Zeilen aufklappbar; Schnellfilter „Probleme (1) · Übersprungen (2)“; Knopf **Durchgang anhalten** | `Progress`, `DataTable`, `ExpandableRow`, `Badge`, `FilterBar`-Schnellfilter | 0265 |
+| A8 | Läuft · Durchgang | Gesamt „Mandant 3 von 10 · 2 übersprungen“ mit Balken; Block „Jetzt“: der laufende Mandant mit seinen Schritten (wie A7, kompakt); darunter die Liste aller Mandanten in fester Reihenfolge, je Zeile Status (Wartet, Läuft, Fertig, Fertig mit Problemen, Abgebrochen, Übersprungen + Grund) und Kurzergebnis; fertige Zeilen aufklappbar; Schnellfilter „Probleme (1) · Übersprungen (2)“; Knopf **Durchgang anhalten** | `Progress`, `DataTable`, `ExpandableRow`, `Badge`, `FilterBar`-Schnellfilter | 0265 |
 | A8b | Läuft · Durchgang wird angehalten | Zeile: „Wird angehalten. Bäckerei Schneider e.K. wird noch fertig abgeglichen, die übrigen 9 werden übersprungen.“ Knopf **Doch weitermachen** — keine Rückfrage, weil umkehrbar (U13) | `Callout`, `Button` | — |
 | A9 | Wartet auf DATEV-Anmeldung | Variante von A7/A8: Hinweisfläche warning hervorgehoben **Bitte melden Sie sich bei DATEV an.** Der Abgleich wartet, bis die Anmeldung im DATEV-Fenster abgeschlossen ist. Knopf **DATEV-Fenster zeigen**; der laufende Schritt zeigt „wartet auf Anmeldung“ statt Zahl | `Callout`, `Button` | 0265 |
 | A10 | Ergebnis · alles gut | Satz groß: „Fertig. 12 Belege übertragen, Kontoumsätze von 2 Konten geholt.“ Zahlen: Belege übertragen 12 · schon in Ludwig 47 · einsortiert 4 · Konten 2. Nächster Schritt: **Belege in Ludwig ansehen** (Link) · **Erneut abgleichen** (secondary). Eingeklappt: Ergebnis im Einzelnen, Protokoll | `Disclosure`, `DataTable`, `LogList`, `CopyTextButton`, `Link` | 0269 (`StatusCallout` mit `figures`, kein eigener Baustein) |
@@ -112,6 +112,8 @@ liegt, Baustein ist im Entwurf nachgestellt und als Entwurf gekennzeichnet.
 | C3 | Fehlermeldungen | wie C2: Karte „Fehlermeldungen senden“, Zustandswort, Knopf **Fehlermeldungen senden** bzw. **Fehlermeldungen nicht mehr senden**, Erklärtext „Technische Meldungen ohne Mandantendaten an den Anbieter. Hilft, Fehler zu finden, die nicht an Ihnen liegen.“ | `Card`, `ActionButton` | 0266 |
 | C4 | Alles bereit? | Satz oben („Alles bereit.“ / „1 Punkt braucht Sie.“), zehn Prüfpunkte mit Zustand, Erklärtext und Aktion; Knöpfe **Erneut prüfen** · **Gründlich prüfen** (Punkt 7, öffnet einen DATEV-Tab) · **Bericht kopieren** | `CheckItems`, `CopyTextButton` | 0270 |
 | C5 | Diagnose (eingeklappt) | Umgebung (Auswahl, nur entpackt), Zeitraum von Hand (zwei Datumsfelder), einzelne Schritte (Ankreuzfelder), Probeablage, Rohprotokoll als Text und JSON. Ein Abgleich von hier ist im Protokoll gekennzeichnet und verschiebt den Stand nicht | `Disclosure`, `Select`, `DateRangeField`, `Checkbox`, `Button` | — |
+| C5a | Diagnose › Verbindung, technisch (Owner 2026-11-27) | Wertepaare, immer sichtbar: Art („über „Mit Ludwig verbinden“ erzeugt“ / „von Hand eingetragen“) · Nutzer · Gerät · gültig bis · Umgebung · Token `lag_…a1b2` (mono). Knopf **Token anzeigen** (tertiary, nur Wort, kein Zeichen) → voller Wert in fester Breite, daneben **Kopieren**, darunter „Wird nach 30 Sekunden wieder ausgeblendet.“ und **Ausblenden**; blendet auch beim Verlassen des Bereichs aus; der Fokus springt dann auf **Token anzeigen** zurück, „Token ausgeblendet“ wird angesagt. Darunter **Token austauschen**: Feld „Neues Token“ (0267), Knopf **Token prüfen und speichern** — erst geprüft, dann gespeichert | `FieldList`, `RawValue`, `CopyTextButton`, `TextButton`, `Field` + `Input type="password"`, `ActionButton` | — (Komposition an der Aufrufstelle; benannte Ausnahme zu 0267, siehe dort) |
+| C5b | Diagnose › Gespeicherte Daten | Satz: „Gespeichert sind die Einstellungen von Ludwig und der Stand der letzten Belegabrufe dieser Umgebung. Die Verbindung bleibt bestehen.“ Knopf **Gespeicherte Daten löschen** (danger). Rückfrage: Titel „Gespeicherte Daten löschen?“, Text „Der nächste Abgleich bestimmt den Abrufzeitraum neu aus Ludwig. Die Verbindung bleibt bestehen.“, Primärknopf **Gespeicherte Daten löschen** | `Card`, `Button`, `Dialog` | — |
 
 Version steht nicht als eigene Karte da (U8): Fußzeile und Prüfpunkt 1.
 
@@ -125,6 +127,29 @@ Version steht nicht als eigene Karte da (U8): Fußzeile und Prüfpunkt 1.
 | D4 | letzter Abgleich mit Problemen (Vorschlag U11) | Statuszeile mit Badge „Fertig mit Problemen“ und „3 Belege nicht übertragen“; Knopf **Ergebnis ansehen** | 0263 |
 
 Der Knopf wechselt zu einer offenen Hauptseite, statt eine zweite zu öffnen (C5).
+
+## Nachtrag 2026-11-27 — aus dem Bau der Entwürfe
+
+- **A8 zählt nur, was läuft:** „Mandant 3 von 10 · 2 übersprungen“, nicht
+  „3 von 12“ — Übersprungene laufen nie; A8b nennt „die übrigen 7“.
+- **Der Ergebnissatz wiederholt den Zustand nicht** (A10–A13): Die Marke
+  trägt „Fertig“ bzw. „Abgebrochen“, der Satz beginnt mit dem Inhalt
+  („12 Belege übertragen …“); A12: „Stehen geblieben bei „Neue Belege aus
+  DATEV holen“, Beleg 37 von 120.“
+- **Punkt am Reiter Abgleich:** Alarm (rot) nur bei Fehler (A3, A14), sonst
+  der graue Punkt — auch bei Warnung und Abbruch (Farbe = Kritikalität).
+- **Problemkarte (0264):** Die Karte trägt ihre eigene Stufe, unabhängig vom
+  Zustand des Abgleichs: Seite geschlossen (A12a) ist Warnung, Ludwig nicht
+  erreichbar und „liegt nicht an Ihnen“ (A12b, A12c) sind Fehler. Text in
+  Textfarbe, der Knopf unter dem Satz, nicht rechts im Kopf (drückte den Text
+  auf ein Drittel).
+- **Lücke im Set (an 0263):** L1 macht Tabellen unter 1280 px **Fenster**
+  zu Zeilenkarten. Die Erweiterung liegt neben DATEV oft bei rund 960 px und
+  zeigte Karten, obwohl die 720-px-Spalte die Tabelle trägt. Weg: Der Rahmen
+  setzt `container-type: inline-size` auf seinen Inhalt, und der Wechsel zu
+  Zeilenkarten richtet sich dort nach der Spaltenbreite (`@container`, unter
+  640 px), nicht nach dem Fenster. Am Desktop der App ändert sich nichts.
+  Bis dahin sind die Entwürfe bei 1440 px fotografiert.
 
 ## Schmale Fläche
 
@@ -169,9 +194,10 @@ Der Knopf wechselt zu einer offenen Hauptseite, statt eine zweite zu öffnen (C5
 | U10 | Drei Reiter geprüft: Verlauf in den Abgleich zu legen, mischt „jetzt abgleichen“ mit „im Zweifel nachsehen“ | Aufteilung bleibt | ja |
 | U11 | Popup kennt keinen Problemfall | vierter Zustand „letzter Abgleich mit Problemen“ mit **Ergebnis ansehen** | ja |
 | U12 | Knopftexte ohne Objekt („Abgleichen“, „Anhalten“, „Trennen“) | **Mandant abgleichen** · **Alle Mandanten abgleichen** · **Durchgang anhalten** · **Verbindung trennen** (T-Regel: Imperativ mit Objekt) | ja |
-| U13 | Rückfrage „Durchgang anhalten?“ (Liste in spec-bausteine) — Anhalten ist umkehrbar | keine Rückfrage, sondern „Doch weitermachen“, solange der laufende Mandant fertig wird; Rückfragen nur bei „Verbindung trennen“ und „Alle Protokolle löschen“ | ja |
+| U13 | Rückfrage „Durchgang anhalten?“ (Liste in spec-bausteine) — Anhalten ist umkehrbar | keine Rückfrage, sondern „Doch weitermachen“, solange der laufende Mandant fertig wird; Rückfragen nur bei „Verbindung trennen“, „Gespeicherte Daten löschen“ (U16) und „Alle Protokolle löschen“ | ja |
 | U14 | Nach „Fertig“ fehlt der nächste Schritt | Link **Belege in Ludwig ansehen** (Eingang des Mandanten in Ludwig) | ja |
 | U15 | Die Einrichtung kennt den Zustand nach dem Klick nicht (Tab offen, Bestätigung aussteht, Link in anderem Browser) | Zustand A1b mit **Ludwig-Tab zeigen** und **Erneut verbinden** | ja |
+| U16 | „Verbindung zurücksetzen“ (Token + Einstellungen + Stand + Widerruf) deckt sich zu vier Fünfteln mit „Verbindung trennen“ und nennt sein Objekt nicht — zwei Knöpfe für fast dasselbe werden verwechselt | jede Handlung tut eine Sache und nennt sie: **Verbindung trennen** (Karte Verbindung: Token löschen und in Ludwig widerrufen) und **Gespeicherte Daten löschen** (Diagnose: Einstellungen von Ludwig und gemerkter Stand, Token bleibt). Wer alles will, tut beides. Hält der Owner am Gesamtknopf fest: nur in der Diagnose, Wortlaut **Verbindung trennen und gespeicherte Daten löschen**, nie „zurücksetzen“ | ja |
 
 ## Was hier nicht hingehört
 

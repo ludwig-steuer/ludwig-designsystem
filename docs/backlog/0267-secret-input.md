@@ -183,6 +183,42 @@ Variabel (aus dieser Spec):
 - [ ] Höhe des Felds mindestens 24 px, Fokusring sichtbar, Hover antwortet. Gemessen bei 1280 px und bei 360 px Breite, ohne waagerechten Scroll
 - [ ] Keine Fehlermeldung in der Konsole. Kein Token-Wert erscheint in der Konsole, auch nicht in den Story-Logs
 
+## Nachtrag 2026-11-27 — Token anzeigen in der Diagnose (Owner)
+
+Simon (Owner, über plugin-mananger) will das gespeicherte Token an **einer**
+Stelle ansehen können: in der Erweiterung unter Einstellungen › Diagnose ›
+„Verbindung, technisch“ (Seitenprofil `docs/seiten/duo-connect.md`, C5a).
+Das ist eine **benannte Ausnahme** zu offener Frage 1 dieser Spec; überall
+sonst gilt die Spec unverändert (kein „Anzeigen“ am Feld, die Oberfläche
+kennt sonst nur „gesetzt: ja/nein“).
+
+- **Kein neuer Baustein.** Eine Verwendung, Zustand an der Aufrufstelle
+  (§3 Regel 3 und 4 greifen nicht). Komposition: `FieldList`-Zeile „Token“
+  mit Kennung `lag_…` + letzte vier Zeichen in `RawValue`; `TextButton`
+  „Token anzeigen“ — **nur Wort**, kein Zeichen, deshalb kein neuer Eintrag
+  in `ACTION_ICON` (der Einwand unter Einordnung betraf das Zeichen);
+  aufgedeckt `RawValue` mit vollem Wert, `CopyTextButton` „Kopieren“, ein
+  ruhiger Satz „Wird nach 30 Sekunden wieder ausgeblendet.“ (kein
+  laufender Zähler: nichts springt) und `TextButton` „Ausblenden“.
+- **Ausblenden:** nach 30 s, beim Verlassen des Abschnitts (Reiterwechsel,
+  Diagnose zugeklappt, `visibilitychange`) und auf „Ausblenden“. Stand der
+  Fokus im aufgedeckten Teil, springt er auf „Token anzeigen“; die
+  Live-Region der Seite sagt „Token ausgeblendet“. 2.2.1 (Zeitlimit) ist
+  nicht berührt: Aufdecken kostet jederzeit einen Klick, nichts geht
+  verloren.
+- **Nie** im Seitentitel, in einem `title`-Attribut, im Lauf-Protokoll oder
+  im Bericht für den Support; der aufgedeckte Wert ist nicht Teil der
+  URL oder des gemerkten Zustands.
+
+Zusätzliche Kriterien (gelten für die Story in diesem Set und für die
+Aufrufstelle im Plugin):
+
+- [ ] Verdeckt zeigt die Zeile nur `lag_…` und vier Zeichen; im DOM steht
+  der volle Wert erst nach „Token anzeigen“
+- [ ] Nach 30 s, beim Zuklappen der Diagnose und beim Reiterwechsel ist der
+  Wert aus dem DOM verschwunden; der Fokus steht auf „Token anzeigen“
+- [ ] „Kopieren“ meldet „kopiert“ wie überall (`CopyTextButton`)
+
 ## Abnahme
 
 | Kriterium | Nachweis (Story-ID · Befehl · Screenshot) | Ergebnis |
