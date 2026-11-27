@@ -502,7 +502,7 @@ Aufgabe in `docs/backlog/NNNN-*.md` (Stand der Auswertung: 2026-09-03).
 |---|---|---|
 | Tokens: Farbe, Schrift, Raum, Radius, Schatten, Bewegung, Fokus; Konventionen Hover/Zustand/Ebenen | `tokens.css`, `v2.css`; Nachweis Schrift 0037, Farbe/Raum/Icons 0055 | v2 (0037, 0055) |
 | Icon-Set Lucide, Leiter je Register (A8), Stroke 1.5, nie ohne Wort | 12 Dateien mit Unicode-Icons (§11.5); in `src/ui/v3` Maße 12.5/13/15 und Strokes 1.75/2 neben der Leiter | heben (0055 zeigt) |
-| Marke: Wordmark, Mark, Light-Variante | `reference/design-system-v2/assets/`; Storybook schreibt „Ludwig" als Text | v2 (0056) |
+| Marke: Wordmark, Mark, Light-Variante | `reference/design-system-v2/assets/`; Storybook schreibt „Ludwig" als Text. Abgeleitetes Produktzeichen **Ludwig DUO-Connect** (Browser-Erweiterung): dieselbe Kachel, dasselbe L, der Querstrich wird zu zwei Harpunen ⇌ (hin und zurück); eigene Pixelzeichnung für 16 px; keine DATEV-Marken oder -Farben. Quelle im Plugin-Repo `docs/store-assets/` (Auftrag Owner 2026-11-27) | v2 (0056) |
 | Ein Formatter: Betrag (`tnum`, Vorzeichen), Datum/Zeit Europe/Berlin, Kontonummer/BU mono | `src/ui/v3/format.ts` + `Amount`/`Time`/`MonoCell`; in der App noch 7 Betrags-, 9 Datums-Formatierer und 83 `toLocale*`-Stellen | v2 (0032, 0033); App-Seite offen (T7, P24) |
 | Zwei Register: produktiv (13.5–14 px) · lesend (16 px) | A1 | v2; lesend prüfen |
 
