@@ -153,6 +153,7 @@ export type StatusAxis =
   // — Betrieb —
   | "actor_kind"
   | "bridge_datev"
+  | "duo_sync"
   | "input_tax_fact"
   | "input_tax_rule"
   | "input_tax_verdict"
@@ -2251,6 +2252,26 @@ const DOCUMENT_NUMBER_SOURCE: Record<string, StatusDescriptor> = {
  *    Er sagt, dass die Bridge selbst gestolpert ist, nicht DATEV — und er
  *    kann gemeldet werden, bevor überhaupt ein Lauf angefangen hat.
  */
+/**
+ * Owner 2026-11-27 — `duo_sync`: der Zustand eines Abgleichs je Mandant im DUO-Sync-Plugin. Keine Spalte in Ludwig;
+ * das Plugin schreibt und zeigt ihn mit `StatusBadge` aus dem DS. Wertebereich `DUO_SYNC_STATES`
+ * (`intake/domain/duo-sync-states.ts`), Wörter und Stufen vom Owner freigegeben (ludwig-plugin `docs/spec-bausteine.md`).
+ *
+ * Fallstricke:
+ *  - `cancelled` entsteht nur durch das System (Fehler, Seite geschlossen), nie durch den Nutzer, und verlangt immer
+ *    eine Reaktion. Hält der Nutzer einen Durchgang an, läuft der laufende Mandant zu Ende, die übrigen stehen auf
+ *    `skipped` mit dem Grund „angehalten“.
+ *  - `skipped` steht nie allein: das Plugin zeigt den Grund als Text daneben.
+ */
+const DUO_SYNC: Record<string, StatusDescriptor> = {
+  queued: { label: "Wartet", kind: "neutral", description: "Der Mandant gehört zum Durchgang, sein Abgleich hat noch nicht begonnen." },
+  running: { label: "Läuft", kind: "info", description: "Das Plugin gleicht diesen Mandanten gerade mit DATEV Unternehmen online ab." },
+  succeeded: { label: "Fertig", kind: "success", description: "Der Abgleich ist ohne Probleme durchgelaufen." },
+  succeeded_with_issues: { label: "Fertig mit Problemen", kind: "warning", description: "Der Abgleich ist zu Ende gelaufen, aber nicht alles ist gelungen. Was fehlt, zeigt das Plugin am Mandanten." },
+  cancelled: { label: "Abgebrochen", kind: "warning", description: "Der Abgleich endete vor dem Ziel durch einen Fehler oder weil die Seite geschlossen wurde. Er braucht eine Reaktion." },
+  skipped: { label: "Übersprungen", kind: "neutral", description: "Dieser Mandant wurde im Durchgang nicht abgeglichen, etwa weil der Durchgang angehalten wurde. Der Grund steht daneben." },
+};
+
 const BRIDGE_DATEV: Record<string, StatusDescriptor> = {
   ok: { label: "DATEV in Ordnung", kind: "success", description: "Die Bridge erreicht DATEV und sieht Mandanten." },
   no_clients: { label: "Keine Mandanten sichtbar", kind: "warning", description: "Erreichbar, aber null Mandanten — meist ein Rechteproblem." },
@@ -2793,6 +2814,7 @@ export const STATUS_REGISTRY: Record<StatusAxis, Record<string, StatusDescriptor
   token: TOKEN,
   actor_kind: ACTOR_KIND,
   bridge_datev: BRIDGE_DATEV,
+  duo_sync: DUO_SYNC,
   input_tax_fact: INPUT_TAX_FACT,
   input_tax_rule: INPUT_TAX_RULE,
   input_tax_verdict: INPUT_TAX_VERDICT,
@@ -3355,6 +3377,7 @@ export const AXIS_LABEL: Record<StatusAxis, string> = {
   token: "Token",
   actor_kind: "Akteur",
   bridge_datev: "Bridge",
+  duo_sync: "DUO-Abgleich",
   input_tax_fact: "Vorsteuer-Fakt",
   input_tax_rule: "Vorsteuer-Regel",
   input_tax_verdict: "Vorsteuer-Verdikt",
@@ -3462,6 +3485,7 @@ export const AXIS_SOURCE: Record<StatusAxis, string> = {
   token: "berechnet — platform_agent_tokens.revoked_at + expires_at",
   actor_kind: "platform_audit_events.actor_kind",
   bridge_datev: "berechnet — DatevApiStatus, von der on-prem Bridge gemeldet (ephemer)",
+  duo_sync: "im DUO-Sync-Plugin — Zustand eines Abgleichs je Mandant, in Ludwig nicht gespeichert",
   input_tax_fact: "berechnet — VatFact.value aus den Belegdaten (ephemer)",
   input_tax_rule: "berechnet — Katalog-Regel über den Vorsteuer-Fakten (ephemer)",
   input_tax_verdict: "berechnet — VatVerdict über den Regelergebnissen (ephemer)",
