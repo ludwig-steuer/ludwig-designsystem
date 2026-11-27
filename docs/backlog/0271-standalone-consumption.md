@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Status | spec |
+| Status | fertig — fremd abgenommen 2026-11-27 (M1: `dist/ludwig.css` gegen den Commit-Stand gebaut, `check:css` 0; Anleitung H3 ergänzt; App-Build mit `sideEffects` bei der nächsten Zeigerhebung) |
 | Stufe | keine Komponente. Infrastruktur: `src/styles/`, `src/compat/`, `scripts/`, `package.json`, `.storybook/`, Doku |
 | Klassen-Test | gilt nicht, denn es entsteht kein Baustein. Die Aufgabe macht die vorhandenen Bausteine für einen zweiten Verbraucher nutzbar |
 | Quelle | Anfrage plugin-mananger 2026-11-27 (Simon), Fragen 2, 3, 7 und 9: `ludwig-plugin/docs/spec-bausteine.md` (Branch `umbau`), Rahmen „Alles wird mit der Erweiterung ausgeliefert. Kein Nachladen …“; Entscheidung Simon 2026-11-27: React 19 gebündelt, das Set als Git-Submodul auf festem Commit (Plugin-Paket D1) |
@@ -251,13 +251,63 @@ Variabel (aus dieser Spec):
 - [ ] `docs/einbindung-ohne-next.md` enthält Punkte 1–8 und das esbuild-Beispiel, das im Probelauf lief, Zeichen für Zeichen; `README.md` verlinkt sie
 - [ ] Die App ist unverändert (`git -C ../app status` zeigt nichts aus dieser Aufgabe)
 
+## Nachtrag 2026-11-27 — aus der Abnahme (S1–S4)
+
+- **S3:** `date-fns` braucht der Verbraucher für `tsc` (`src/ludwig/shared/index.ts` reicht `dates.ts` weiter), nicht für das Bündel — die Anleitung sagt es richtig; der Satz im Ablauf, es werde nicht gebraucht, gilt nur fürs Bündel.
+- **S1:** „Schrift geladen“ wird über `document.fonts` mit `status === "loaded"` des Faces bzw. das Netzwerk-Log belegt, nicht über `document.fonts.check()` (liefert auch für ein ungeladenes Face `true`).
+- **S2:** „kein zod/cmdk im Bündel“ meint die `outputs` des Metafiles; in den `inputs` stehen beide, weil esbuild sie auflösen muss.
+- **S4:** Der Barrel-Export `Link` ist neu (öffentliche Schnittstelle) und steht in der Commit-Nachricht.
+- **M1:** `dist/ludwig.css` wird unmittelbar vor dem Commit gegen genau den Commit-Stand gebaut; `pnpm check:css` endet auf diesem Stand mit 0.
+
 ## Abnahme
+
+Schlanke Abnahme (Schnittstelle) plus Probelauf. Der Prüfer hat nicht gebaut. Grundlage: Spec, Arbeitsbaum am
+2026-11-27 ab 20:20 (DS `HEAD` `a29883b` + uncommittete 0271-Dateien; im selben Baum arbeitet 0263),
+App `staging` `4e5fc3657`. Probe, Spiegel und Bilder liegen unter
+`/private/tmp/claude-501/-Users-simonfakir-dev-ludwig-designsystem/4d48fa12-621c-46ef-bacc-7e19c29ac4dd/scratchpad/abn0271/`
+(unten `abn0271/`).
 
 | Kriterium | Nachweis (Befehl · Screenshot) | Ergebnis |
 |---|---|---|
-| … | … | ✓ / ✗ |
+| `pnpm typecheck` und `pnpm build` grün | `pnpm typecheck` Exit 0, im Arbeitsbaum und im Baum „`HEAD` + nur die 0271-Dateien“ (`abn0271/only0271`). `pnpm build --output-dir abn0271/sb-static` Exit 0. Der Build ging in den Scratchpad statt nach `storybook-static/`, damit er anderen Sitzungen nichts leert | ✓ |
+| Datei nach Familie, Story daneben, Titel | gilt nicht: keine Komponente, keine Story | – |
+| Code englisch; `@when`/`@instead` | Gelesen: `src/compat/next-link.tsx`, `scripts/check-css.mjs`, `fonts.css`, `fonts-serif.css` und die neuen Kommentare in `index.css`, `.storybook/preview.ts` und `scripts/check-type.mjs` sind englisch. Deutsch steht nur in der Meldung von `check:css` und in der Doku. `next-link.tsx` hat begründet kein `@when`. Der neue Barrel-Export `Link` trägt `@when`/`@instead` | ✓ |
+| Kein Hex, kein px, keine Label-Map | `fonts.css` und `fonts-serif.css` enthalten nur `@font-face`: Familie, `src`, Gewicht, Stil, `font-display`. Keine Farbe, keine Größe | ✓ |
+| Stories vorhanden, Ausschlüsse begründet | keine neue Story, Begründung unter „Stories“ | ✓ |
+| `check:type`, `check:language`, `check:when` ohne neue Altfunde | Im Arbeitsbaum: `check:type` 0, `check:when` 0, `check:language` 1. Die einzige Meldung ist `v3.css:832` (Kommentar „Rahmen einer Browser-Erweiterung (0263)“) und gehört nicht zu 0271. In `abn0271/only0271` enden alle drei mit 0. Nebenbei `check:classes`: Exit 1 mit 4 Funden (`v3clt`, `v3clt__step`, `v2tbl__foot`, `cy-page`). Dieselben 4 meldet `HEAD`, sie sind Altbestand und nicht aus 0271 | ✓ |
+| Im Browser angesehen | Storybook :6107: `v3/Grundlagen/Typografie` (Roles, Headings, Registers) und `v3/Grundlagen/Marke` (Marks). Keine Konsolenfehler | ✓ |
+| woff2 und OFL byteidentisch mit `apps/web/src/app/fonts/` | `cmp`: alle sechs Exit 0. SHA-256 paarweise gleich | ✓ |
+| `fonts*.css` wie `localFont` der App | `layout.tsx` Z. 7–31: Inter `400 700`, Source Serif 4 `400 600`, JetBrains Mono `400 500`, jeweils `normal` und `swap`. `fonts.css` und `fonts-serif.css` tragen genau diese Werte. Die Familiennamen sind die Rückfallnamen aus `tokens.css` | ✓ |
+| `grep -rn "googleapis\|gstatic" src .storybook dist` leer | Exit 1, kein Treffer | ✓ |
+| Storybook: Netzwerk-Log, `fonts.check`, Bildvergleich `Roles` ≤ 0,5 % | **Netz:** Manager-Seite plus iframe `…typografie--roles`: 118 Requests, keiner nach außen. Die woff2 kommen nur von `localhost:6107/src/styles/fonts/` (Inter, JetBrains Mono). Bei Headings und Marke ebenso, kein `preconnect`. Source Serif 4 lädt erst, wenn Text sie nutzt. Ein eingefügtes Element mit `var(--font-serif)` holt `source-serif-4-latin.woff2` von localhost, Status `loaded 400 600`. **`fonts.check`:** alle drei `true` (siehe Spec-Mangel S1). **Bild:** Vorher ist ein statischer Build von `HEAD` (Google-Fonts), nachher einer des Arbeitsbaums, beide bei 1280 px nach `document.fonts.ready`. `scripts/png-diff.mjs`: Roles 0,000 %, Headings 0,000 %, Registers 0,000 %, Marke 0,000 %. Alle Textknoten haben dieselbe Breite, Höhe, Lage und Zeilenzahl, ohne jede Abweichung. **Grund:** Google liefert für Inter und JetBrains Mono (latin) dieselbe Datei wie `src/styles/fonts/` (SHA-256 gleich, `inter/v20`, `jetbrainsmono/v24`). Nur Source Serif 4 weicht ab: Google `v15` hat 50.952 B, die Kopie der App 50.924 B. Die vom Bauer gemeldeten 0,88 % und 2,28 % lassen sich deshalb nicht mit einer anderen Binärdatei erklären. Bei Marke stammt die Abweichung zwischen Dev-Server und statischem Build (1,45 %) von den Logo-SVGs, die im statischen Build fehlen, nicht von der Schrift. Das Kriterium gilt wie geschrieben und muss nicht neu gefasst werden | ✓ |
+| `build:css` ohne Netz; kein `@tailwind`/`@import`/`@font-face`; `check:css` 0, nach Klassenänderung 1 mit Satz | `pnpm build:css` lief in einem Klon unter `sandbox-exec` mit gesperrtem Netz: Exit 0, 3,3 s, Ausgabe byte-gleich mit `dist/ludwig.css`. `@tailwind`, `@import` und `@font-face` kommen je 0-mal vor, `url(` gar nicht. `check:css` Exit 0. Nach `.v2tabs` `gap: 4px → 6px` in `v3.css`: Exit 1 mit „`dist/ludwig.css` ist veraltet. Bitte `pnpm build:css` ausführen.“ Ebenso nach einer neuen Klasse und bei fehlender Datei. **Aber:** Um 20:27 hat die 0263-Sitzung `v3.css` geändert, seitdem endet `pnpm check:css` im Arbeitsbaum mit 1. Auch `abn0271/only0271` endet mit 1, weil `dist/ludwig.css` Klassen von 0263/0268 enthält (`.v3ext…`). Der Wächter wirkt, aber die Datei passt weder zum heutigen Arbeitsbaum noch zu einem Commit, der nur 0271 enthält | ✗ M1 |
+| `next-link.tsx`: Default + `LinkProps`; kein `prefetch` im DOM; `ref` am `<a>`; Set importiert sie nie | Beide Exporte vorhanden. Der `prefetch`-Typ gleicht Next 16.3.4 (`next/dist/client/link.d.ts` Z. 59). In der Probe hat `<Link href="/belege" ref={…} prefetch="auto">` gerendert `<a href="/belege" id="probe-link-ref">`, ohne `prefetch`. `ref.current` ist `A#probe-link-ref`. `grep -rn compat src` außerhalb von `src/compat/` findet nichts | ✓ |
+| `"sideEffects": ["*.css"]`; App baut unverändert | `package.json` trägt den Eintrag, `exports` ist unverändert. Ob die App damit baut, ist laut Spec offen (App) | ✓ · offen (App) |
+| **Probelauf** leerer Ordner, ohne Netz | Der Ordner `abn0271/probe` war leer. Jeder Schritt lief unter `sandbox-exec '(deny network-outbound (remote ip))'`. Gegenprobe: `curl registry.npmjs.org` endet darin mit 7, außerhalb mit 200. **Set:** Einen DS-Commit gibt es noch nicht. Deshalb wurde der Arbeitsbaum in einem Klon `abn0271/ds-origin` als Commit `4456299` festgehalten (nur dort). Darauf folgten `git submodule add` aus dem lokalen Pfad und `checkout`. **node_modules:** Der Spiegel `abn0271/mirror` sind Tarballs aus dem installierten `node_modules` des Sets. `npm install --offline` holte die 7 Pakete, mit Abhängigkeiten 34. **Bau:** `node build.mjs` (das Beispiel der Anleitung, wörtlich) Exit 0. In `out/` liegen `main.js` (200.794 B), `main.css` (243.274 B) und genau zwei woff2 (Inter, JetBrains Mono). **Metafile, `outputs`:** kein `zod`, `cmdk` oder `next`. Das Bündel besteht aus react-dom 180,1 kB, react 8,1 kB, Set 5,4 kB und scheduler 3,7 kB. Gegenprobe ohne `sideEffects`: 438.269 B, darin zod 59,7 kB, Set 130,6 kB, decimal.js 32,3 kB und lucide 16,0 kB. Das bestätigt die Tabelle der Spec. **`file://`:** 5 Requests (HTML, CSS, JS, 2 woff2), alle `file://`, keine Konsolenmeldung. Inter hat Status `loaded`. Nach `CSS.getPlatformFontsForNode` setzen Callout, Button, Link und „−„“–€“ nur Inter (web), Mono nur JetBrains Mono (web). **Link:** `<a href="/sync" id="probe-link">` ohne `prefetch`. **Bild:** `abn0271/probe-vs-storybook.png` zeigt links die Probe, rechts die Stories Tabs, Button, Badge und Callout. Primärbutton, aktiver Reiter, Badge und Callout haben in Probe und Story dieselben berechneten Stile (Höhe, Schrift, Farben, Innenabstand, Radius) | ✓ (H2) |
+| `tsc --noEmit` mit der `tsconfig.json` der Anleitung | Dazu kamen aus dem Spiegel typescript 5.9.3, @types/react 19.2.18 und @types/react-dom 19.2.5. Ohne `date-fns` meldet tsc 2× TS2307 in `src/ludwig/shared/dates.ts`, wie Punkt 3 der Anleitung sagt. Mit `date-fns` 4.4.0: Exit 0, 314 Dateien des Sets geprüft. Der Bau gelingt auch mit dieser `tsconfig.json` im Probe-Ordner | ✓ |
+| Anleitung: Punkte 1–8, esbuild-Beispiel zeichengleich; README verlinkt | Punkte 1–8 und „Für das Set selbst“ sind vorhanden. `build.mjs`, `tsconfig.json` und `index.html` der Anleitung gleichen der Probe des Bauers (`diff` leer) und liefen in dieser Probe wörtlich. `README.md` verlinkt die Anleitung. Mit der Anleitung allein kam die Probe durch. Es fehlt nur, siehe H3: `typescript` als Paket, ein Mount-Beispiel (`createRoot`) und `protocol.file.allow` für ein Submodul aus lokalem Pfad | ✓ |
+| App unverändert | `git -C ../app status` zeigt keinen Pfad aus 0271. `packages/designsystem` zeigt auf `e4c0181`, ältere DS-Arbeit und nicht 0271. Die Schriftdateien der App stammen vom 1. Okt. und sind unverändert | ✓ |
+| Spec-Mangel S1: `document.fonts.check()` als Ladebeweis | `check('16px "Source Serif 4"')` ist `true`, obwohl das Face in Storybook `unloaded` ist. In der Probe ist es ebenfalls `true`, wo gar kein Serif-Face existiert. Einen Beweis liefern nur der Status in `[...document.fonts]` und das Netzwerk-Log, beide stehen oben | H |
+| Spec-Mangel S2: „Metafile zeigt kein zod, cmdk“ | Gemeint sind die `outputs`. In den `inputs` stehen zod (10 Dateien) und cmdk (2) zwangsläufig, denn esbuild löst sie auf und wirft sie dann weg | H |
+| Spec-Mangel S3: Ablauf Punkt 3 „date-fns … braucht sie nicht“ | Das gilt nur fürs Bündel, `tsc` braucht es. Die Anleitung ist richtig, die Spec nicht | H |
+| Spec-Mangel S4: Lieferumfang ohne Barrel-Export `Link` | `src/ui/v3/index.ts` Z. 71 `export { Link }` ist neu und erweitert die öffentliche Schnittstelle. Das Kriterium braucht den Export, aber er steht nicht in „Was sich an bestehenden Dateien ändert“. Er gehört in die Commit-Nachricht | H |
 
-Abgenommen von / am: … · Offene Punkte: …
+Abgenommen von / am: fremder Prüfer, 2026-11-27 · **Ergebnis: Mängel** · Offene Punkte:
+
+- **M1** `dist/ludwig.css` stimmt nicht mit dem Stand, der committet wird. Die Datei ist aus dem
+  geteilten Arbeitsbaum gebaut und enthält 0263/0268-CSS. Seit der 0263-Änderung um 20:27 endet
+  `check:css` mit 1. Vor dem Commit muss die Datei genau gegen den Commit-Stand gebaut werden
+  (`git stash -k` oder gemeinsam mit 0263/0268), und `pnpm check:css` muss auf diesem Stand mit 0
+  enden. Den Hash nennen.
+- **H2** Der Probelauf lief gegen einen synthetischen Commit (Arbeitsbaum in einer Kopie), nicht
+  gegen einen DS-Commit. Nach M1 kostet eine Wiederholung gegen den echten Hash eine Minute
+  (`abn0271/probe`, Submodul-Zeiger heben, `node build.mjs`).
+- **H3** Anleitung: In Punkt 6 `typescript` als Paket nennen. In Punkt 5 ein Mount-Beispiel für
+  `src/main.tsx` mit `createRoot` geben.
+- **H4** Außerhalb von 0271: Im statischen Storybook-Build zeigen die Logo-SVGs in `Marke` ein
+  defektes Bild, vorher wie nachher. Im Dev-Server sind sie da.
+- S1–S4 sind Spec-Mängel (Messvorschrift und Text). Die Kriterien bleiben unverändert und können
+  per datiertem Nachtrag geschärft werden.
 
 ## Befund an die App
 

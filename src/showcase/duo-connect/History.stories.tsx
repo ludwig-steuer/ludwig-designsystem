@@ -273,12 +273,12 @@ const B4 = () => (
 const page = "page" as const;
 
 const HISTORY_STATES: StateSpec[] = [
-  { id: "B1", title: "Verlauf · leer", uses: "Card, EmptyState, Button", missing: "0263", surface: page, render: () => <B1 /> },
-  { id: "B2", title: "Verlauf · je Mandant", uses: "Card, SearchInput, Table, ExpandableRow, Badge, Time, TextButton", missing: "0263", surface: page, render: () => <B2Body /> },
-  { id: "B3", title: "Suche nach Beleg-Nummer", uses: "SearchInput, Table, Badge, Time", missing: "0263", surface: page, render: () => <Findings query="7c1e4b20-5d3a-4f6e-9a21-0b8e3f4d1c77" findings={BY_NUMBER} /> },
-  { id: "B3b", title: "Suche nach Eingangsdatum", uses: "SearchInput, Table, Badge, Time", missing: "0263", surface: page, render: () => <Findings query="24.11.2026" findings={BY_DATE} /> },
-  { id: "B3c", title: "Suche ohne Treffer", uses: "SearchInput, EmptyState (leer nach Filter), TextButton", missing: "0263", surface: page, render: () => <Findings query="3f9a0d11-77c2-4b8e-a1f0-5c2d9e6b4a10" findings={[]} /> },
-  { id: "B4", title: "Protokoll", uses: "Card, Button, CopyTextButton, LogList, ActionButton (Rückfrage); Hilfe vom Support aus Card, CopyTextButton, Button", missing: "0263", surface: page, render: () => <B4 /> },
+  { id: "B1", title: "Verlauf · leer", uses: "Card, EmptyState, Button", missing: "", surface: page, render: () => <B1 /> },
+  { id: "B2", title: "Verlauf · je Mandant", uses: "Card, SearchInput, Table, ExpandableRow, Badge, Time, TextButton", missing: "", surface: page, render: () => <B2Body /> },
+  { id: "B3", title: "Suche nach Beleg-Nummer", uses: "SearchInput, Table, Badge, Time", missing: "", surface: page, render: () => <Findings query="7c1e4b20-5d3a-4f6e-9a21-0b8e3f4d1c77" findings={BY_NUMBER} /> },
+  { id: "B3b", title: "Suche nach Eingangsdatum", uses: "SearchInput, Table, Badge, Time", missing: "", surface: page, render: () => <Findings query="24.11.2026" findings={BY_DATE} /> },
+  { id: "B3c", title: "Suche ohne Treffer", uses: "SearchInput, EmptyState (leer nach Filter), TextButton", missing: "", surface: page, render: () => <Findings query="3f9a0d11-77c2-4b8e-a1f0-5c2d9e6b4a10" findings={[]} /> },
+  { id: "B4", title: "Protokoll", uses: "Card, Button, CopyTextButton, LogList, ActionButton (Rückfrage); Hilfe vom Support aus Card, CopyTextButton, Button", missing: "", surface: page, render: () => <B4 /> },
 ];
 
 interface Args {

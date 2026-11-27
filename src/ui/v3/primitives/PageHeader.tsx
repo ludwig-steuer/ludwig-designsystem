@@ -14,7 +14,8 @@ import { Link } from "./Link";
  * @when    The top of every page: what this is, in what context, what can be
  *          done with it.
  * @instead The head of a card inside the page → CardHead. Switching views
- *          below the head → Tabs. Narrowing a list → FilterBar.
+ *          below the head → Tabs. Narrowing a list → FilterBar. The head of a
+ *          browser extension's page (mark, product name) → ExtensionShell.
  */
 export function PageHeader({
   overline,

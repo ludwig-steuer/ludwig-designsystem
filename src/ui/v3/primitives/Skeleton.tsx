@@ -14,7 +14,8 @@ const LINE_WIDTHS = ["100%", "84%", "62%", "91%", "70%"];
 /**
  * @when    A card, a detail pane or a form field is still loading.
  * @instead Rows inside a table → TableLoading. Nothing there at all →
- *          EmptyState. Loading failed → ErrorRow.
+ *          EmptyState. Loading failed → ErrorRow. A short wait whose result
+ *          has no shape to sketch → Spinner.
  */
 export function Skeleton({
   variant = "lines",

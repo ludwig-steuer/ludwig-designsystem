@@ -558,8 +558,8 @@ export const Motion: Story = {
           Zahl veraltet mit dem nächsten Commit.{" "}
           <strong>Seit 0093 (b) ist die Lücke zu:</strong> <strong>Übergänge</strong> fallen sämtlich weg — eine Regel über{" "}
           <code className="lw-mono">*</code> statt einer Selektorliste, die jede neue Transition von Hand
-          nachtragen müsste. <strong>Animationen</strong> bleiben: Spinner und Skelett sagen etwas, solange sie
-          laufen. Diese Seite kann die Media-Query nicht umschalten; wer abnimmt, stellt sie im Betriebssystem an
+          nachtragen müsste. <strong>Animationen</strong> bleiben, wo sie etwas sagen: das Skelett, solange es lädt. Der
+          Kreis des Spinners steht seit 0268 still, der Bogen allein sagt „läuft“. Diese Seite kann die Media-Query nicht umschalten; wer abnimmt, stellt sie im Betriebssystem an
           und misst nach.
         </p>
       </Section>

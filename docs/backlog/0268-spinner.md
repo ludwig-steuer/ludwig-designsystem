@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Status | spec |
+| Status | fertig — fremd abgenommen 2026-11-27 (21/21 ✓, Protokoll unten); H1 (Sprung im Block, `vertical-align: top`), H2 (Kommentare zu reduce), H4 („ …“ an laufenden Wörtern) behoben; offene Fragen nach Default gebaut |
 | Stufe | `primitives/` — neue Primitive, gehoben aus dem `.v2spin`-Span in `Button.tsx` |
 | Klassen-Test | ja: jede Oberfläche hat Wartezeiten von Sekunden, deren Ergebnis noch keine Form hat, die man vorzeichnen könnte |
 | Quelle | Anfrage plugin-mananger 2026-11-27 (Simon): `ludwig-plugin/docs/spec-bausteine.md` (Branch `umbau`), Zeile „Laufanzeige — kurze Wartezeiten, „wird geprüft“ — klein in der Zeile, groß in der Fläche“; `docs/spec-oberflaeche-und-fehler.md` C1 („Nach dem Verbinden läuft die Prüfung von selbst“) und C6 (Bereitschaftsprüfung, Prüfpunkt „wird geprüft“) |
@@ -181,3 +181,78 @@ Variabel (aus dieser Spec):
 - [ ] `@when`/`@instead` am Spinner nennen kurze Wartezeit gegen `Skeleton` (Form bekannt), `Progress` (Anteil bekannt) und `PhaseProgress`/`AgentRunBanner` (dauert Minuten). Das `@instead` von `Skeleton` und das JSDoc von `Button.loading` verweisen auf `Spinner`
 - [ ] `RunMark` und `.v3runmark` bleiben unverändert (`git diff` von `AgentRun.tsx` und den `v3runmark`-Regeln leer)
 - [ ] Export in `index.ts` in der Gruppe Fläche
+
+## Abnahme
+
+Gemessene Abnahme (nicht schlank), 2026-11-27, durch einen fremden Prüfer,
+der nicht gebaut hat. Grundlage: diese Spec und der Arbeitsbaum, nicht der
+Chat. Gemessen mit Playwright gegen das laufende Storybook (Port 6107), in
+einer eigenen Seite, mit `getBoundingClientRect` und `offsetWidth`.
+Drehende Kreise wurden vor jeder Maßnahme bei 0 ms angehalten, sonst misst
+das Rechteck den gedrehten Kreis (18,2 statt 14 px). Story-IDs kurz:
+`sp--*` = `v3-primitives-fläche-spinner--*`, `btn--loading` =
+`v3-primitives-aktion-button--loading`. Bilder liegen im Scratchpad der
+Prüfsitzung (`abnahme0268/`) und sind flüchtig.
+
+| Kriterium | Nachweis (Story-ID · Befehl · Messung) | Ergebnis |
+|---|---|---|
+| Fest: `pnpm typecheck` und `pnpm build` grün | `pnpm typecheck` Exit 0 · `pnpm build -o <Scratchpad>/sb-build` Exit 0 („Storybook build completed successfully“), bewusst nicht nach `storybook-static/`, damit die Messungen der anderen Sitzungen stehen bleiben · `pnpm check:type` Exit 0 („0 older findings“) · `check:when` Exit 0 · `check:icons` Exit 0 · Selbstprüfungen `--test` von when, type, icons, language, classes und contrast grün. Nicht Spinner, nur benannt: `check:language` Exit 1 allein wegen `v3.css` Z. 832 (0263), `check:classes` Exit 1 mit den vier Altfunden (`v3clt__step`, `v3clt`, `v2tbl__foot`, `cy-page`), `check:css` Exit 1 (`dist/ludwig.css` veraltet, 0271). Keine Meldung nennt `v3spinner` oder `v2spin` | ✓ |
+| Fest: Datei nach der Familie benannt, Story daneben, Titel in der richtigen Gruppe | `src/ui/v3/primitives/Spinner.tsx` (eine Komponente `Spinner`, dazu die Typen), `Spinner.stories.tsx` daneben, Titel `v3/Primitives/Fläche/Spinner`; IDs `sp--sizes`, `sp--in-row`, `sp--in-area`, `sp--in-button`, `sp--long-label` aus `/index.json` | ✓ |
+| Fest: Code englisch; `@when`/`@instead` an jedem Export | Bezeichner, Kommentare und JSDoc in `Spinner.tsx` und den Stories englisch. Deutsch steht nur in sichtbaren Strings und als zitiertes UI-Wort im JSDoc („wird geprüft …“). `check:language` meldet in den Spinner-Dateien nichts. `@when`/`@instead` an `Spinner`, `check:when` grün | ✓ |
+| Fest: kein Hex, kein px, keine lokale Label-Map; Status nur über Registry | `grep -nE "#[0-9a-fA-F]{3,8}\b\|[0-9]px"` über `Spinner.tsx` und `Spinner.stories.tsx`: 0 Treffer. Die 280 px in `LongLabel` sind `calc(var(--space-20) * 3 + var(--space-10))`, gemessen 280. Die Maße 14 und 20 px stehen nur in `v3.css`. Keine Label-Map, kein Status-Text; die Nachbarzeilen in `InRow` zeigen ihr Zeichen über `StateIcon` | ✓ |
+| Fest: alle Stories oben vorhanden; ausgeschlossene Zustände begründet | 5 von 5 Stories, Untergrenze 3. Jede Prop hat ihre Story: `label` als String in `Sizes`, `InRow`, `InArea` und `LongLabel`, `label={null}` in `InButton`, `size` sm/lg in `Sizes` und `InArea`. Leer, leer nach Filter und Fehler sind unter „Stories“ begründet (der Spinner ist selbst der Ladezustand), ebenso reduced-motion ohne Story (gemessen, siehe unten). In `Sizes` stehen sm und lg je Grund untereinander, die drei Gründe nebeneinander | ✓ |
+| Fest: Prüfliste `design-guidelines.md` §9 durchgegangen | Stufe `primitives/`, `Spinner.tsx` importiert nichts. Die Story importiert `StateIcon` aus `patterns/`, wie sechs andere Primitive-Stories. v1-Gegenstück und §11 entfallen (App). Nichts zentriert (`text-align: start`, linke Kante gemessen, siehe `InArea`). Zeilenhöhe sm 20,9 px. Farbe: Akzent für „läuft“ (info), kein Rot, das Wort ist per Typ immer dabei. Kontrast und Bewegung siehe unten. Nicht klickbar, also kein Hover und keine Trefferfläche. Kein Icon, der Kreis ist ein CSS-Rand. Schrift 13,5 und 14 px aus `--fs-ui` und `--fs-ui-md`, Gewicht 400. `min-width: 0` und `overflow-wrap: anywhere` am Wort. Texte nach T1–T5 | ✓ |
+| Fest: im Browser angesehen (Storybook) | Alle fünf `sp--*`, dazu `btn--loading`, `v3-primitives-aktion-button--sizes` und im Einsatz `seiten-duo-connect-abgleich--a-01-b-awaiting-confirmation`, `seiten-duo-connect-einstellungen--c-02-c-handover-saving`, `seiten-duo-connect-abgleich--a-08-running-batch`. Jede Story zeigt Inhalt, die Konsole bleibt ohne Fehler und Warnungen, auch ohne `pageerror` | ✓ |
+| `label` und `size` im Typ wie in der Tabelle; `label` Pflicht ohne Default | `Spinner.tsx`: `label: string \| null` ohne Default, `size?: SpinnerSize` (`"sm" \| "lg"`), Default `"sm"`. Typcheck von Aufrufstellen (`tsc` mit der Repo-`tsconfig`, Prüfdatei im Scratchpad): `<Spinner />` und `<Spinner size="lg" />` → TS2741 „Property 'label' is missing“, `label={undefined}` → TS2322, `size="md"` → TS2322. `label={null}` und `label="wird geprüft …" size="lg"` gehen ohne Fehler durch | ✓ |
+| `size` gemessen: sm 14 × 14, Wort `--fs-ui`; lg 20 × 20, Wort `--fs-ui-md` | `sp--sizes` bei 1280, auf allen drei Gründen: sm Kreis 14 × 14 (`offsetWidth` 14, Rechteck bei 0 ms 14), Wort 13,5 px = `--fs-ui`. lg Kreis 20 × 20, Wort 14 px = `--fs-ui-md` | ✓ |
+| `label` als String: Wort sichtbar rechts, Kreis `aria-hidden`, kein `role`/`aria-live`/`aria-busy` | `sp--sizes`: Kreis links 33 bis 47, Wort ab 55 (8 px Abstand). `ariaSnapshot`: je Grund nur `text: wird geprüft … Verbindung wird geprüft …`, der Kreis fehlt. `sp--in-row`: `text: … Anmeldung in DATEV wird geprüft …`. Kreis `aria-hidden="true"`. Im ganzen DOM des Spinners kommen nur die Attribute `class` und `aria-hidden` vor, und kein Vorfahr in den Stories trägt `role` oder `aria-live` | ✓ |
+| `label={null}`: nur der Kreis, `aria-hidden`, ohne Text; Name des Knopfs bleibt | `sp--in-button`: in jedem der sechs Knöpfe `SPAN.v2spin[aria-hidden]` ohne Text vor `SPAN` mit dem Wort, kein `.v3spinner`. `getByRole('button', { name: 'Speichere …', exact: true })` ergibt 3 Treffer, „Stapel prüfen“ ebenfalls 3; `aria-busy="true"`, `disabled` | ✓ |
+| Ersatz: `Button.inner` rendert `Spinner label={null}`; `Button/Loading` und `InButton` pixelgleich (≤ 0,5 %), auch der 12-px-Kreis in `xs` | `Button.tsx` Z. 85: `{loading ? <Spinner label={null} /> : icon}`. Vorher-Stand ohne Worktree: (a) `git show HEAD:src/ui/v3/primitives/Button.tsx` mit esbuild gebündelt, das Story-JSX von `Button/Loading` und `InButton` per `renderToStaticMarkup` mit dem HEAD-Button und dem heutigen Button gerendert. Das Markup ist zeichengleich (529 bzw. 1313 Zeichen) und gleich dem Live-DOM (`isEqualNode` nach Stil-Normalisierung). (b) Im Storybook bei 1280 × 900: „nachher“ ist die Story wie gebaut, Animationen bei 0 ms angehalten. „Vorher“ ist dieselbe Seite mit dem CSSOM auf HEAD zurückgesetzt (die fünf `.v3spinner`-Regeln gelöscht, die Reduce-Regel wieder `animation-duration: 2.4s`) und der Story-Wurzel als HEAD-Markup, ebenfalls bei 0 ms. `node scripts/png-diff.mjs before after 0.5` → Exit 0: `loading.png` 0,000 %, `inButton.png` 0,000 %. xs-Kreis 12 × 12 mit 1,5 px Rand, sm/md 14 × 14 mit 2 px, Deckkraft 0,7, Farbe = Knopftext. Gegenprobe: alle sechs Kreise um 90° gedreht ergeben 0,030 % (siehe Spec-Mangel unten) | ✓ |
+| Bewegung: genau eine Animation `v2spin`, 700 ms, linear, endlos; mit reduce keine, Bogen sichtbar, auch im Knopf | `sp--sizes` und `sp--in-button` ohne Emulation: je Kreis genau 1 Animation, `v2spin`, 700, `linear`, `Infinity` (je 6 Kreise). Mit `page.emulateMedia({ reducedMotion: 'reduce' })` (Playwright, intern `Emulation.setEmulatedMedia`) ist `matchMedia('(prefers-reduced-motion: reduce)')` wahr, `document.getAnimations()` für `.v2spin` 0 in beiden Stories, auch nach Neuladen unter reduce (0 Animationen insgesamt). Kreis `animation-name: none`, `transform: none`, sichtbar 14/20 px (xs 12), drei Ränder in Farbe, der rechte transparent. Bildausschnitte je Kreis: 56–124 farbige Pixel, die Lücke rechts | ✓ |
+| Kontrast: Kreis ≥ 3:1, Wort ≥ 4,5:1 auf surface, bg-soft, accent-50 | `sp--sizes`, berechnet aus den gemessenen Farben: Kreis `rgb(43, 111, 156)` (= `--color-accent-700`, Deckkraft 1 über die ganze Kette) auf surface 5,45:1, auf bg-soft 5,03:1, auf accent-50 5,04:1. Wort `rgb(92, 92, 92)` (= `--color-text-muted`) 6,69 / 6,17 / 6,19:1 | ✓ |
+| Zeile: gleich hoch (± 0,5 px); Kreismitte ≤ 1 px neben der Mitte der ersten Textzeile | `sp--in-row` bei 700, 1100, 1280, 1400 und 1920: drei Zeilen je 37,92 px (Δ 0). Kreismitte 144,45 = Mitte der Zeilenbox des Worts 144,45 = Mitte der Beschriftung links 144,45. Glyphenmitte 144,24 (0,21 px) | ✓ |
+| Fläche: linksbündig zum Kartentext; Kartenkopf springt beim Wechsel nicht | `sp--in-area` bei 700, 1100, 1280, 1400 und 1920: Spinner links 35 = Inhaltskante des Kartenkörpers 35 = Kartentitel „Einrichtung“ 35, `text-align: start`. Wechsel mit „Ergebnis zeigen“ und zurück: Kartenkopf oben 31, Höhe 42,07, vorher = nachher = zurück. Der Ergebnis-Satz steht ebenfalls bei 35. Der Körper darunter springt allerdings (H1) | ✓ |
+| Rand: `LongLabel` bricht bei 280 px um, Kreis 14 px auf der ersten Zeile, kein waagrechtes Scrollen | `sp--long-label` bei 700, 1280 und 1920: Rahmen 280 px, Wort in 2 Zeilen, Kreis 14 × 14 (`offsetWidth` 14). Kreismitte 40 = Mitte der ersten Zeile 40. Rahmen `scrollWidth` 278 = `clientWidth` 278, das Dokument hat keinen waagrechten Scroll | ✓ |
+| Nicht fokussierbar, kein Hover-Stil | `sp--in-row` hat kein bedienbares Element, achtmal Tab bleibt auf `body`. Gegenprobe: je ein Knopf vor und hinter den Spinner gesetzt, Tab von A landet auf B. `tabIndex` −1 an allen drei Spans, kein `tabindex`-Attribut. In `sp--in-area` erreicht Tab nur „Ergebnis zeigen“. Hover: Im CSSOM tragen 8 Regeln `.v3spinner` oder `.v2spin`, keine mit `:hover`. Farbe, Grund, Cursor (`auto`), Unterstreichung und Umriss sind vor und nach `hover()` gleich | ✓ |
+| `@when`/`@instead` gegen Skeleton, Progress, PhaseProgress/AgentRunBanner; Skeleton und `Button.loading` verweisen auf Spinner | `Spinner.tsx`: `@when` kurze Wartezeit ohne Form (Zeile, Fläche, Knopf mit `label={null}`). `@instead`: Form bekannt → Skeleton, Anteil bekannt → Progress, Minuten → PhaseProgress oder AgentRunBanner. `Skeleton.tsx` `@instead` „… → Spinner“. `Button.tsx`, JSDoc von `loading`: „The circle is `Spinner` with `label={null}` …“. `PhaseProgress` gibt es noch nicht (0265), wie die Spec es vorsieht | ✓ |
+| `RunMark` und `.v3runmark` unverändert | `git diff HEAD -- src/ui/v3/entities/agent-run/` leer. Der `v3.css`-Diff berührt keine `v3runmark`-Regel, der einzige Treffer ist der Kommentar im Reduce-Block | ✓ |
+| Export in `index.ts` in der Gruppe Fläche | `src/ui/v3/index.ts` Z. 121 `export { Spinner, type SpinnerProps, type SpinnerSize } from "./primitives/Spinner";` unter `/* Fläche */` (Z. 107), direkt nach `Skeleton` | ✓ |
+| Spec-Mangel: Schwelle des Bildvergleichs | Bei „≤ 0,5 %“ über das ganze Bild von 1280 × 900 macht ein ganzer 14-px-Kreis nur 0,017 % des Bildes aus. Die Gegenprobe (sechs Kreise um 90° gedreht) ergibt 0,030 %, eine Änderung nur am Kreis bliebe also unter der Schwelle. Hier ohne Folge, weil das Ergebnis 0,000 % ist. Für künftige Kriterien an kleinen Zeichen: Ausschnitt um den Baustein oder Schwelle 0 | H |
+
+**Hinweise**, keine Mängel gegen die Kriterien:
+
+- **H1** `v3.css`, `.v3spinner`: `inline-flex` mit Ausrichtung an der
+  Grundlinie. In einem Block-Elternteil (`CardSection` in `sp--in-area`) wird
+  die Zeilenbox 26,07 px hoch, der Spinner selbst nur 20,3 px. Beim Wechsel
+  auf das Ergebnis schrumpft der Kartenkörper von 50,07 auf 44,92 px, und der
+  Knopf darunter springt um 5,15 px. Im Browser probiert:
+  `vertical-align: top` am `.v3spinner` ergibt 44,92 px, gleich dem
+  Ergebnis. Das Kriterium (Kopf) ist erfüllt, die Hausregel „Layout springt
+  nicht“ nicht ganz. Vor 0263 beheben.
+- **H2** Die Doku zu reduced-motion ist veraltet: `Surface.stories.tsx`
+  Z. 561 („Animationen bleiben: Spinner und Skelett sagen etwas, solange sie
+  laufen“) und der Kommentar zum Bewegungsblock in `v3.css` (0093 b,
+  „`.v2spin` … stay“) widersprechen dem neuen Stillstand.
+- **H3** `src/showcase/duo-connect/drafts.tsx` behält zwei rohe
+  `<span className="v2spin" … style={{ color: "var(--color-accent-700)" }} />`
+  (Z. 178 `stepSign` für busy und count, Z. 561 `ReadinessRows`). Beide
+  standen schon in HEAD und sind Stellvertreter für 0270, aber eine zweite
+  Quelle für „Kreis in Akzent“. `stepSign` zeigt den Kreis auch für `count`,
+  einen Abgleichschritt, der dauert. Das widerspricht „der Kreis heißt kurz“.
+- **H4** Zwei Wörter ohne „ …“ in den Entwürfen: „wird gespeichert“
+  (`drafts.tsx` Z. 381) und „Warten auf Ihre Bestätigung in Ludwig“
+  (`Sync.stories.tsx` Z. 205). Laut Spec sagt das Wort mit „ …“, was läuft;
+  bei reduced motion trägt es die Bedeutung allein.
+- **H5** `label=""` besteht den Typ und ergibt einen Kreis ohne Wort (V7).
+  Die Spec verlangt es nicht.
+- **H6** Offene Frage 1 (Stillstand auch im Knopf) bleibt eine
+  Owner-Entscheidung. Gebaut ist der Default, und die Abnahme ersetzt die
+  Antwort nicht.
+- **H7** `Sync.stories.tsx`, `BatchRowView`: Die laufende Stapelzeile zeigt
+  keinen Kreis mehr, nur `r.summary`. Das passt zu offener Frage 3
+  („Abgleich läuft“ ohne Kreis) und steht hier, damit es nicht als
+  verlorenes Feature gilt.
+
+Abgenommen von / am: fremder Prüfer (designsystem), 2026-11-27 · Alle 21
+Kriterien ✓, Spec-Mangel und H1–H7 als Hinweise · Die Status-Zeile ist
+nicht angefasst (Auftrag: nur das Protokoll eintragen).

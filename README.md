@@ -8,7 +8,12 @@ und importiert die Bausteine als `@ludwig/designsystem` — die Quelle, kein
 Build (Remote: `git@github.com:ludwig-steuer/ludwig-designsystem.git`, Plan:
 `docs/backlog/0064-einbettung-in-ludwig.md`). Von den Styles lädt die App die
 Einzeldateien unter `src/styles/`; `index.css` ist die Kette der Werkbank und
-lädt zusätzlich Fonts und Tailwind-Base.
+lädt zusätzlich Tailwind-Base. Die Schriften liegen als Dateien unter
+`src/styles/fonts/` (`fonts.css`, `fonts-serif.css`), nicht im Netz.
+
+Ein Verbraucher ohne Next und ohne Tailwind-Lauf (die Browser-Erweiterung
+Ludwig DUO-Connect) nimmt `dist/ludwig.css` und bündelt die Quellen selbst:
+**`docs/einbindung-ohne-next.md`**.
 
 **Dieses Repo ist das Design-SSOT.** Designsprache, Ton und die Bausteine
 werden hier entschieden — nicht mehr in `ludwig/app/docs/`.

@@ -55,6 +55,7 @@ export { Kbd } from "./primitives/Kbd";
 
 /* Rahmen — the shell, outside the tiers (target catalogue §11.7) */
 export { AppShell, TopBar } from "./primitives/AppShell";
+export { ExtensionShell, ExtensionPopup } from "./primitives/ExtensionShell";
 
 /* Navigation */
 export {
@@ -67,6 +68,7 @@ export {
   type SegmentOption,
   type TabItem,
 } from "./primitives/Nav";
+export { Link } from "./primitives/Link";
 export { FilterBar, matchPreset, type FilterPreset, type FilterValue } from "./primitives/FilterBar";
 export {
   NavList,
@@ -116,6 +118,7 @@ export { TechnicalFields, type TechnicalField } from "./primitives/TechnicalFiel
 export { PageHeader } from "./primitives/PageHeader";
 export { ToastHost, useToast, type Toast, type ToastTone } from "./primitives/Toast";
 export { Skeleton, type SkeletonVariant } from "./primitives/Skeleton";
+export { Spinner, type SpinnerProps, type SpinnerSize } from "./primitives/Spinner";
 export { Markdown, parseInline, parseMarkdown } from "./primitives/Markdown";
 
 /* Werte — an amount, a point in time, a rule (P24) */

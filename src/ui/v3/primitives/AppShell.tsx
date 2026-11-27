@@ -31,7 +31,8 @@ const FOCUSABLE = 'a[href], button:not([disabled]), input:not([disabled]), selec
 /**
  * @when    Around every screen of the app: sidebar, top bar, work surface.
  * @instead Splitting one work surface → MasterDetail. The head of a page
- *          inside the surface → PageHeader.
+ *          inside the surface → PageHeader. The page of a browser extension,
+ *          a few areas as tabs and no sidebar → ExtensionShell.
  */
 export function AppShell({
   sidebar,

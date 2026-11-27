@@ -19,6 +19,7 @@ import {
   CopyTextButton,
   Progress,
   StateIcon,
+  Spinner,
   StatusCallout,
 } from "@/ui/v3";
 import { STEP_TEXT, SYNC_STATE, type StepKey, type SyncState } from "./fixtures";
@@ -73,49 +74,6 @@ export function Draft({
       </span>
       {children}
     </div>
-  );
-}
-
-/* ── 0268 Spinner ───────────────────────────────────────────────────── */
-
-/**
- * Running indicator. `sm` sits next to a word in a row, `lg` stands in an area
- * with its word. The word is always there — visible, or for screen readers
- * only (`hideLabel`), never missing.
- */
-export function Spinner({
-  size = "sm",
-  label,
-  hideLabel,
-}: {
-  size?: "sm" | "lg";
-  label: string;
-  hideLabel?: boolean;
-}) {
-  const big = size === "lg";
-  return (
-    <Draft spec="0268" name="Spinner" inline>
-      <span
-        role="status"
-        style={{
-          display: "inline-flex",
-          alignItems: "center",
-          gap: big ? "var(--space-3)" : "var(--space-2)",
-          color: "var(--color-text-muted)",
-          fontSize: big ? "var(--fs-ui-md)" : "var(--fs-ui-sm)",
-        }}
-      >
-        <span
-          className="v2spin"
-          aria-hidden="true"
-          style={{
-            color: "var(--color-accent-700)",
-            ...(big ? { width: "var(--space-6)", height: "var(--space-6)" } : {}),
-          }}
-        />
-        <span className={hideLabel ? "v2vh" : undefined}>{label}</span>
-      </span>
-    </Draft>
   );
 }
 
@@ -420,7 +378,7 @@ export function SettingSwitch({
             </span>
           </span>
           <span style={{ display: "inline-flex", alignItems: "center", gap: "var(--space-2)" }}>
-            {locked ? <Spinner label="wird gespeichert" /> : null}
+            {locked ? <Spinner label="wird gespeichert …" /> : null}
             <span className="lw-ui-hint" aria-hidden="true" style={{ minWidth: "var(--space-6)", textAlign: "right" }}>
               {on ? "An" : "Aus"}
             </span>

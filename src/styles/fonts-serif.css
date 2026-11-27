@@ -1,0 +1,12 @@
+/* The serif face for the reading register and the wordmark (0271) — kept apart
+   from fonts.css so a consumer that never reads long text (the browser
+   extension) does not ship it. Mirrors the app's `localFont` call
+   (apps/web/src/app/layout.tsx). File and OFL text: ./fonts/. */
+
+@font-face {
+  font-family: "Source Serif 4";
+  src: url("./fonts/source-serif-4-latin.woff2") format("woff2");
+  font-weight: 400 600;
+  font-style: normal;
+  font-display: swap;
+}

@@ -23,6 +23,7 @@ import {
   Row,
   SearchInput,
   SelectCell,
+  Spinner,
   StepRail,
   Table,
   TextButton,
@@ -52,7 +53,6 @@ import {
   DraftsVisible,
   ProblemCard,
   ReadinessRows,
-  Spinner,
   StepProgress,
   SupportHelp,
   SyncResult,
@@ -202,7 +202,7 @@ const A1b = () => (
       <CardHead title="Mit Ludwig verbinden" />
       <CardSection>
         <div style={stack}>
-          <Spinner label="Warten auf Ihre Bestätigung in Ludwig" />
+          <Spinner label="Warten auf Ihre Bestätigung in Ludwig …" />
           <p className="lw-ui-text">
             Bitte bestätigen Sie im Ludwig-Tab mit „Verbinden“. Der Tab schließt sich danach von selbst, und es geht hier
             weiter.
@@ -584,7 +584,7 @@ function BatchRowView({ r, open }: { r: BatchRow; open?: boolean }) {
     <>
       <span>{r.client.name}</span>
       <span>{stateBadge(r)}</span>
-      <span>{r.state === "running" ? <Spinner label={r.summary} /> : r.summary}</span>
+      <span>{r.summary}</span>
     </>
   );
   return ended ? (
@@ -951,27 +951,27 @@ const A14 = () => (
 const page = "page" as const;
 
 const SYNC_STATES: StateSpec[] = [
-  { id: "A1", title: "Einrichtung · nicht verbunden", uses: "StepRail (bar), Card, Button, Disclosure, Field, Input (Passwort)", missing: "0263", surface: page, render: () => <A1 /> },
-  { id: "A1b", title: "Einrichtung · wartet auf Bestätigung", uses: "StepRail, Card, Button", missing: "0263, 0268 Spinner", surface: page, render: () => <A1b /> },
-  { id: "A1c", title: "Einrichtung · Prüfung läuft", uses: "StepRail, Card, Button", missing: "0263, 0270 Prüfpunkt-Zeile", surface: page, render: () => <A1c /> },
-  { id: "A2", title: "Einrichtung · Verbindung abgelaufen", uses: "Callout, Card, Button, Disclosure", missing: "0263", surface: page, render: () => <A2 /> },
-  { id: "A3", title: "Plugin zu alt", uses: "Button", missing: "0263, 0264 ProblemCard", surface: page, render: () => <A3 /> },
-  { id: "A4", title: "Bereit · ein Mandant", uses: "RadioGroup, Combobox, Button, Badge, Time, TextButton", missing: "0263", surface: page, render: () => <A4 /> },
-  { id: "A4b", title: "Bereit · Stichtag fragen", uses: "RadioGroup, Combobox, Field, DateField, Button", missing: "0263", surface: page, render: () => <A4bBody /> },
-  { id: "A5", title: "Bereit · alle", uses: "RadioGroup, Disclosure, Button, Badge", missing: "0263", surface: page, render: () => <ReadyAll open={false} /> },
-  { id: "A6", title: "Übersicht vor dem Durchgang (aufgeklappt)", uses: "RadioGroup, Disclosure, Table, GroupRow, SelectCell, Time, DateRange", missing: "0263", surface: page, render: () => <ReadyAll open /> },
-  { id: "A7", title: "Läuft · ein Mandant", uses: "Callout, Card, Progress, Button", missing: "0263, 0265, 0268", surface: page, render: () => <A7 /> },
-  { id: "A7b", title: "Läuft · erster Belegabruf", uses: "Callout, TextButton, Progress", missing: "0263, 0265", surface: page, render: () => <A7b /> },
-  { id: "A8", title: "Läuft · Durchgang", uses: "Progress, Card, Table, GroupRow, ExpandableRow, Badge, TextButton", missing: "0263, 0265, 0268, Zählzeile", surface: page, render: () => <BatchRunning rows={BATCH_RUNNING} /> },
-  { id: "A8b", title: "Läuft · Durchgang wird angehalten", uses: "Callout, Button, Progress, Table", missing: "0263, 0265, Zählzeile", surface: page, render: () => <BatchRunning rows={BATCH_RUNNING} stopping /> },
-  { id: "A9", title: "Wartet auf DATEV-Anmeldung", uses: "Callout, Button", missing: "0263, 0265", surface: page, render: () => <A9 /> },
-  { id: "A10", title: "Ergebnis · alles gut", uses: "Card, Button, Disclosure, Table, LogList", missing: "0263, 0265, 0269 Ergebnis", surface: page, render: () => <A10 /> },
-  { id: "A11", title: "Ergebnis · mit Problemen", uses: "Callout, StatusCallout, Disclosure, CopyTextButton, Button", missing: "0263, 0264, 0265, 0269", surface: page, render: () => <A11 /> },
-  { id: "A12a", title: "Ergebnis · abgebrochen (Seite geschlossen)", uses: "Callout, StatusCallout, Button, CopyTextButton", missing: "0263, 0264, 0265, 0269", surface: page, render: () => <A12a /> },
-  { id: "A12b", title: "Ergebnis · abgebrochen (Ludwig nicht erreichbar)", uses: "Callout, StatusCallout, Disclosure, CopyTextButton, Button", missing: "0263, 0264, 0265, 0269", surface: page, render: () => <A12b /> },
-  { id: "A12c", title: "Ergebnis · abgebrochen (liegt nicht an Ihnen)", uses: "Callout, StatusCallout, Disclosure, CopyTextButton, Button", missing: "0263, 0264, 0265, 0269", surface: page, render: () => <A12c /> },
-  { id: "A13", title: "Ergebnis · Durchgang", uses: "Callout, Table, GroupRow, ExpandableRow, Badge, TextButton", missing: "0263, 0264, 0269, Zählzeile", surface: page, render: () => <A13 /> },
-  { id: "A14", title: "Stille Prüfung sperrt den Start", uses: "RadioGroup, Combobox, Button, TextButton", missing: "0263, 0264", surface: page, render: () => <A14 /> },
+  { id: "A1", title: "Einrichtung · nicht verbunden", uses: "StepRail (bar), Card, Button, Disclosure, Field, Input (Passwort)", missing: "", surface: page, render: () => <A1 /> },
+  { id: "A1b", title: "Einrichtung · wartet auf Bestätigung", uses: "StepRail, Card, Button", missing: "", surface: page, render: () => <A1b /> },
+  { id: "A1c", title: "Einrichtung · Prüfung läuft", uses: "StepRail, Card, Button", missing: "0270 Prüfpunkt-Zeile", surface: page, render: () => <A1c /> },
+  { id: "A2", title: "Einrichtung · Verbindung abgelaufen", uses: "Callout, Card, Button, Disclosure", missing: "", surface: page, render: () => <A2 /> },
+  { id: "A3", title: "Plugin zu alt", uses: "Button", missing: "0264 ProblemCard", surface: page, render: () => <A3 /> },
+  { id: "A4", title: "Bereit · ein Mandant", uses: "RadioGroup, Combobox, Button, Badge, Time, TextButton", missing: "", surface: page, render: () => <A4 /> },
+  { id: "A4b", title: "Bereit · Stichtag fragen", uses: "RadioGroup, Combobox, Field, DateField, Button", missing: "", surface: page, render: () => <A4bBody /> },
+  { id: "A5", title: "Bereit · alle", uses: "RadioGroup, Disclosure, Button, Badge", missing: "", surface: page, render: () => <ReadyAll open={false} /> },
+  { id: "A6", title: "Übersicht vor dem Durchgang (aufgeklappt)", uses: "RadioGroup, Disclosure, Table, GroupRow, SelectCell, Time, DateRange", missing: "", surface: page, render: () => <ReadyAll open /> },
+  { id: "A7", title: "Läuft · ein Mandant", uses: "Callout, Card, Progress, Button", missing: "0265, 0268", surface: page, render: () => <A7 /> },
+  { id: "A7b", title: "Läuft · erster Belegabruf", uses: "Callout, TextButton, Progress", missing: "0265", surface: page, render: () => <A7b /> },
+  { id: "A8", title: "Läuft · Durchgang", uses: "Progress, Card, Table, GroupRow, ExpandableRow, Badge, TextButton", missing: "0265, 0268, Zählzeile", surface: page, render: () => <BatchRunning rows={BATCH_RUNNING} /> },
+  { id: "A8b", title: "Läuft · Durchgang wird angehalten", uses: "Callout, Button, Progress, Table", missing: "0265, Zählzeile", surface: page, render: () => <BatchRunning rows={BATCH_RUNNING} stopping /> },
+  { id: "A9", title: "Wartet auf DATEV-Anmeldung", uses: "Callout, Button", missing: "0265", surface: page, render: () => <A9 /> },
+  { id: "A10", title: "Ergebnis · alles gut", uses: "Card, Button, Disclosure, Table, LogList", missing: "0265, 0269 Ergebnis", surface: page, render: () => <A10 /> },
+  { id: "A11", title: "Ergebnis · mit Problemen", uses: "Callout, StatusCallout, Disclosure, CopyTextButton, Button", missing: "0264, 0265, 0269", surface: page, render: () => <A11 /> },
+  { id: "A12a", title: "Ergebnis · abgebrochen (Seite geschlossen)", uses: "Callout, StatusCallout, Button, CopyTextButton", missing: "0264, 0265, 0269", surface: page, render: () => <A12a /> },
+  { id: "A12b", title: "Ergebnis · abgebrochen (Ludwig nicht erreichbar)", uses: "Callout, StatusCallout, Disclosure, CopyTextButton, Button", missing: "0264, 0265, 0269", surface: page, render: () => <A12b /> },
+  { id: "A12c", title: "Ergebnis · abgebrochen (liegt nicht an Ihnen)", uses: "Callout, StatusCallout, Disclosure, CopyTextButton, Button", missing: "0264, 0265, 0269", surface: page, render: () => <A12c /> },
+  { id: "A13", title: "Ergebnis · Durchgang", uses: "Callout, Table, GroupRow, ExpandableRow, Badge, TextButton", missing: "0264, 0269, Zählzeile", surface: page, render: () => <A13 /> },
+  { id: "A14", title: "Stille Prüfung sperrt den Start", uses: "RadioGroup, Combobox, Button, TextButton", missing: "0264", surface: page, render: () => <A14 /> },
 ];
 
 /* ── Stories ───────────────────────────────────────────────────────────── */

@@ -47,8 +47,7 @@ Aufteilung bleibt. Die Reiter sind Sichten mit eigener Form, keine Filter
 Rahmen (0263): Kopf mit Zeichen, „Ludwig DUO-Connect“, Kennzeichen der
 Umgebung nur außerhalb der Produktion („Staging“); die drei Reiter; Inhalt in
 `--container-narrow` (720 px), weil die Seite eine Entscheidung und eine
-Liste trägt, keine breite Tabelle; Fußzeile „Ludwig DUO-Connect 0.11.0 ·
-Datenschutz“. Während eines Abgleichs trägt der Reiter Abgleich einen Punkt
+Liste trägt, keine breite Tabelle; Fußzeile „Version 0.11.0 · Datenschutz“ (der Produktname steht schon im Kopf; Nachtrag 2026-11-27 aus dem Bau von 0263). Während eines Abgleichs trägt der Reiter Abgleich einen Punkt
 (`Tabs dot`), bei einem Problem den Alarm.
 
 ## Fragen, in dieser Reihenfolge (Reiter Abgleich)

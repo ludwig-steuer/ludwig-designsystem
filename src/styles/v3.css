@@ -829,6 +829,88 @@ a.v3stepbar__step.is-current:hover { background: var(--color-accent-50); }
 .v2tab .n { font-variant-numeric: tabular-nums lining-nums; opacity: 0.6; }
 .v2tab .n.is-alarm { opacity: 1; font-weight: 700; color: var(--color-danger); }
 
+/* --- Browser extension frame (0263) ------------------------------------- */
+/* The page in a tab: head and tabs outside the scroll area, `main` the only
+   scroll container — no fixed head can cover a focus ring (2.4.11) and no
+   scroll-padding has to be computed. Every band caps its content at
+   `--container-narrow` by growing side padding (as `.app__main`), so mark,
+   first tab, card edge and footer stand on one edge. `height: 100%` fills the
+   extension's page (`html, body, #root` are 100 %); under a parent of auto
+   height (a story tile) it falls back to the content. */
+.v3ext {
+  --v3ext-pad: var(--space-8);
+  /* `minmax(0, 1fr)` for the column too: an `auto` column grows to the
+     tab strip's minimum width, and at 320 px the page would scroll sideways
+     instead of the strip (0263, M3). */
+  display: grid; grid-template-rows: auto minmax(0, 1fr); grid-template-columns: minmax(0, 1fr);
+  height: 100%; min-height: 0;
+  background: var(--color-bg-soft);
+  font-size: var(--fs-ui); line-height: var(--lh-ui);
+}
+.v3ext__top { background: var(--color-bg); border-bottom: var(--border-1); }
+.v3ext__head, .v3ext__nav, .v3ext__main {
+  padding-inline: max(var(--v3ext-pad), calc((100% - var(--container-narrow)) / 2));
+}
+.v3ext__head { padding-block: var(--space-3); }
+.v3ext__brand { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-2) var(--space-3); }
+.v3ext__mark { width: var(--space-8); height: var(--space-8); flex: none; }
+/* The name is the brand, not the content: a card title's size (A14), even as the `h1`. */
+.v3ext__name {
+  margin: 0; min-width: 0;
+  font-size: var(--fs-ui-lg); line-height: var(--lh-ui-lg); font-weight: 600;
+  color: var(--color-text);
+}
+/* The tabs' own line would run only across the column; the band's line runs
+   across the window, and the active underline sits on it. */
+.v3ext__nav .v2tabs { border-bottom: 0; box-shadow: none; }
+/* `scrollbar-gutter: stable`: with classic scroll bars (Windows) the column
+   keeps its width whether the area scrolls or not — no jump between a short
+   and a long area; the left edge stays with the head's (0263, H3). */
+.v3ext__main { overflow: auto; scrollbar-gutter: stable; padding-top: var(--space-6); }
+/* `minmax(0, 1fr)`: a wide block (a log) scrolls inside its card instead of
+   pushing the column open. */
+.v3ext__body { display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--space-4); }
+.v3ext__foot {
+  margin-top: var(--space-8); padding-block: var(--space-4);
+  border-top: var(--border-1-subtle);
+  font-size: var(--fs-ui-sm); line-height: var(--lh-ui-sm); color: var(--color-text-muted);
+}
+/* Tables answer to the column, not the window (0263 Nachtrag): the container
+   is set at every window width, so a table in a card stays a table down to
+   640 px of its own width and becomes row cards below — next to DATEV at
+   960 px the same as at 1440 px. Outside the frame nothing changes. */
+.v3ext__main :is(.v2tbl__scroll, .v2tbl) { container: v2tbl / inline-size; }
+@media (max-width: 639.98px) {
+  .v3ext { --v3ext-pad: var(--space-4); }
+}
+
+/* The toolbar popup: 320 px — Chrome's popup, the one fixed width of this
+   family (like the 240 px sidebar in app-chrome.css) — and the height of its
+   content. It draws no border or shadow: the browser frames the popup. */
+.v3extpop {
+  width: 320px; box-sizing: border-box;
+  padding: var(--space-4);
+  display: grid; gap: var(--space-3);
+  background: var(--color-bg);
+  font-size: var(--fs-ui); line-height: var(--lh-ui);
+  /* A whole pixel of height: Chrome sizes the popup window to the content
+     rounded down, and 135.72 px of content in a 135 px window scrolled by one
+     pixel (0263, M4). Rounded up, the window takes all of it — nothing is cut,
+     the document never scrolls. `calc-size()` from Chrome/Edge 129. */
+  height: calc-size(auto, round(up, size, 1px));
+}
+.v3extpop .v3ext__mark { width: var(--space-6); height: var(--space-6); }
+.v3extpop .v3ext__name { font-size: var(--fs-ui-md); line-height: var(--lh-ui-md); }
+.v3extpop__status { color: var(--color-text); }
+/* The spinner's word is muted on its own (0268); as the popup's state it reads
+   like every other state, so the line looks the same in all of them (0263, H11). */
+.v3extpop__status .v3spinner { color: inherit; }
+/* Outside the live region (0263, Nachtrag 2): a counter here does not speak. */
+.v3extpop__detail {
+  display: grid; gap: var(--space-1);
+  font-size: var(--fs-ui-sm); line-height: var(--lh-ui-sm); color: var(--color-text-muted);
+}
+
 /* --- Segment-Schalter --------------------------------------------------- */
 .v2seg {
   display: inline-flex; gap: 3px;
@@ -2227,9 +2309,40 @@ a.ki__src:hover { text-decoration: underline; color: var(--color-accent-700); }
 }
 .v2btn--xs .v2spin { width: 12px; height: 12px; border-width: 1.5px; }
 
-/* Who wants less motion does not get it (WCAG 2.3.3). */
+/* Who wants less motion does not get it (WCAG 2.3.3): the circle stands
+   still, the arc stays visible, the word next to it says what runs — like
+   `.v2skel` and `.v3runmark` (0268, open question 1). */
 @media (prefers-reduced-motion: reduce) {
-  .v2spin { animation-duration: 2.4s; }
+  .v2spin { animation: none; }
+}
+
+/* Spinner (0268): a short wait outside the button — circle left, word right,
+   both flush left. The circle sits on the middle of the first text line and
+   never shrinks; a long word wraps under itself, the circle stays on top.
+   Circle in the accent at full strength (running is `info`, not a
+   criticality), word muted. Not clickable: no hover, no focus. */
+.v3spinner {
+  display: inline-flex;
+  vertical-align: top; /* on the baseline a block parent grows by ~6 px and the
+                          card jumps when the spinner gives way (0268, H1) */
+  align-items: flex-start;
+  gap: var(--space-2);
+  max-width: 100%;
+  font-size: var(--fs-ui);
+  line-height: var(--lh-ui);
+  color: var(--color-text-muted);
+}
+.v3spinner > .v2spin {
+  color: var(--color-accent-700);
+  opacity: 1;
+  margin-top: calc((var(--fs-ui) * var(--lh-ui) - 14px) / 2);
+}
+.v3spinner__label { min-width: 0; overflow-wrap: anywhere; }
+.v3spinner--lg { font-size: var(--fs-ui-md); line-height: var(--lh-ui-md); }
+.v3spinner--lg > .v2spin {
+  width: 20px;
+  height: 20px;
+  margin-top: calc((var(--fs-ui-md) * var(--lh-ui-md) - 20px) / 2);
 }
 
 /* ==========================================================================
@@ -4118,8 +4231,9 @@ button.v2ibtn[aria-disabled="true"] > * { opacity: 0.5; }
 /* --- Motion: whoever opted out gets none (0093 b) --------------------------
    **One rule instead of a list**: a selector list needs every new transition
    added by hand and missed some. **Transitions** are decoration and all go.
-   **Animations** do not: spinner and skeleton *say* something while they run —
-   the three blocks already serving them (`.v2skel`, `.v2spin`, `.v2toast`) stay. */
+   **Animations** do not: the skeleton and the toast *say* something while they
+   run — the blocks serving them (`.v2skel`, `.v2toast`) stay. The spinner's
+   circle stands still under reduce since 0268 (the arc alone says „busy“). */
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,

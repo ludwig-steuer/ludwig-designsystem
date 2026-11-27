@@ -1,0 +1,23 @@
+/* The two working typefaces as local files (0271) — no request leaves the
+   page. Family names, weight ranges and `font-display` mirror the app's
+   `localFont` calls (apps/web/src/app/layout.tsx); `tokens.css` falls back to
+   exactly these names when `--font-*-loaded` is not set, which is the case
+   everywhere except the app. Files and OFL texts: ./fonts/ (byte-identical
+   copies of apps/web/src/app/fonts/). The serif face lives in
+   fonts-serif.css, so a consumer without the reading register skips it. */
+
+@font-face {
+  font-family: "Inter";
+  src: url("./fonts/inter-latin.woff2") format("woff2");
+  font-weight: 400 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "JetBrains Mono";
+  src: url("./fonts/jetbrains-mono-latin.woff2") format("woff2");
+  font-weight: 400 500;
+  font-style: normal;
+  font-display: swap;
+}

@@ -223,6 +223,7 @@ Die Punkte, die am häufigsten reißen:
 ```bash
 pnpm typecheck        # muss grün sein
 pnpm check:type       # Schrift nur aus der Skala
+pnpm check:css        # nach CSS-/Klassenänderung: dist/ludwig.css aktuell? sonst pnpm build:css (0271)
 pnpm storybook        # Port 6107
 ```
 

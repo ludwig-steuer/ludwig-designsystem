@@ -1,32 +1,30 @@
 "use client";
 
 /**
- * Draft of 0263: the frame of the extension's main page (a browser tab) and of
- * its popup, plus the board that lays the states side by side for review.
+ * The frame of the drafts: the real 0263 `ExtensionShell`/`ExtensionPopup`
+ * with the plugin's mark, name, tabs and footer filled in, plus the board that
+ * lays the states side by side for review.
  */
-import type { CSSProperties, ReactNode } from "react";
-import { Badge, Tabs, TextButton } from "@/ui/v3";
+import type { ReactNode } from "react";
+import { ExtensionPopup as Popup, ExtensionShell as Shell, Tabs } from "@/ui/v3";
 import logoAsset from "./duo-connect-logo.svg?url";
-import { Draft } from "./drafts";
 import { VERSION } from "./fixtures";
 
 export type Area = "sync" | "history" | "settings";
 
 const logoUrl = typeof logoAsset === "string" ? logoAsset : logoAsset.src;
+const PRODUCT = "Ludwig DUO-Connect";
+const LINKS = [{ label: "Datenschutz", href: "https://www.fakir.tech/de/datenschutz/duo-connect" }];
 
-/** Chrome popups: 320 px. */
-export const POPUP_WIDTH = "calc(var(--space-20) * 4)";
+/** A tile has the window of the page: the 720 px column plus the frame's side padding. */
+const PAGE_WIDTH = "calc(var(--container-narrow) + 2 * var(--space-8))";
 
-const productName: CSSProperties = {
-  fontSize: "var(--fs-ui-lg)",
-  lineHeight: "var(--lh-ui-lg)",
-  fontWeight: 600,
-  color: "var(--color-text)",
-};
+/** In a tile the frame stands in for a browser window: one line around it. */
+const windowLine = { border: "var(--border-1)", borderRadius: "var(--radius-lg)", overflow: "hidden" } as const;
 
 /**
  * Main page: head with the mark, the product name and — outside production —
- * the environment; three tabs; content in the narrow container; footer.
+ * the environment; three tabs; content in the narrow column; footer.
  */
 export function ExtensionShell({
   area,
@@ -40,95 +38,44 @@ export function ExtensionShell({
   staging?: boolean;
   children: ReactNode;
 }) {
-  const column: CSSProperties = {
-    width: "100%",
-    maxWidth: "var(--container-narrow)",
-    margin: "0 auto",
-    boxSizing: "border-box",
-    paddingInline: "var(--space-4)",
-  };
   return (
-    <Draft spec="0263" name="ExtensionShell">
-      <div
-        style={{
-          background: "var(--color-bg-soft)",
-          border: "var(--border-1)",
-          borderRadius: "var(--radius-lg)",
-          overflow: "hidden",
-          display: "flex",
-          flexDirection: "column",
-        }}
+    <div style={windowLine}>
+      <Shell
+        markSrc={logoUrl}
+        productName={PRODUCT}
+        environment={staging ? "Staging" : undefined}
+        nav={
+          <Tabs
+            ariaLabel="Bereiche"
+            active={area}
+            items={[
+              { key: "sync", label: "Abgleich", href: "#abgleich", dot: mark !== undefined, alarm: mark === "alarm" },
+              { key: "history", label: "Verlauf", href: "#verlauf" },
+              { key: "settings", label: "Einstellungen", href: "#einstellungen" },
+            ]}
+          />
+        }
+        version={VERSION}
+        links={LINKS}
       >
-        <header style={{ background: "var(--color-surface)", borderBottom: "var(--border-1-subtle)" }}>
-          <div style={{ ...column, paddingTop: "var(--space-3)", display: "grid", gap: "var(--space-2)" }}>
-            <div style={{ display: "flex", alignItems: "center", gap: "var(--space-3)" }}>
-              <img src={logoUrl} alt="" style={{ width: "var(--space-8)", height: "var(--space-8)" }} />
-              <span style={productName}>Ludwig DUO-Connect</span>
-              {staging ? <Badge tone="neutral">Staging</Badge> : null}
-            </div>
-            <Tabs
-              ariaLabel="Bereiche"
-              active={area}
-              items={[
-                { key: "sync", label: "Abgleich", dot: mark !== undefined, alarm: mark === "alarm" },
-                { key: "history", label: "Verlauf" },
-                { key: "settings", label: "Einstellungen" },
-              ]}
-            />
-          </div>
-        </header>
-        {/* `minmax(0, 1fr)`: a wide table scrolls inside its card instead of pushing the column open. */}
-        <div
-          style={{
-            ...column,
-            paddingBlock: "var(--space-6)",
-            display: "grid",
-            gridTemplateColumns: "minmax(0, 1fr)",
-            gap: "var(--space-5)",
-          }}
-        >
-          {children}
-        </div>
-        <footer
-          className="lw-ui-hint"
-          style={{ ...column, paddingBlock: "var(--space-4)", borderTop: "var(--border-1-subtle)" }}
-        >
-          Ludwig DUO-Connect {VERSION} ·{" "}
-          <TextButton href="#datenschutz" tone="quiet">
-            Datenschutz
-          </TextButton>
-        </footer>
-      </div>
-    </Draft>
+        {children}
+      </Shell>
+    </div>
   );
 }
 
-/** The popup: 320 px, one column, one button at full width. */
-export function ExtensionPopup({ children }: { children: ReactNode }) {
+/** The popup: 320 px, the state in its live region, the detail outside it, one button at full width. */
+export function ExtensionPopup({ status, detail, action }: { status: ReactNode; detail?: ReactNode; action: string }) {
   return (
-    <Draft spec="0263" name="ExtensionPopup">
-      <div
-        style={{
-          width: POPUP_WIDTH,
-          boxSizing: "border-box",
-          background: "var(--color-surface)",
-          border: "var(--border-1)",
-          borderRadius: "var(--radius-lg)",
-          boxShadow: "var(--shadow-md)",
-          padding: "var(--space-4)",
-          display: "grid",
-          gap: "var(--space-3)",
-        }}
-      >
-        <div style={{ display: "flex", alignItems: "center", gap: "var(--space-2)" }}>
-          <img src={logoUrl} alt="" style={{ width: "var(--space-6)", height: "var(--space-6)" }} />
-          <span style={{ ...productName, fontSize: "var(--fs-ui-md)", lineHeight: "var(--lh-ui-md)" }}>
-            Ludwig DUO-Connect
-          </span>
-        </div>
-        {children}
-      </div>
-    </Draft>
+    <div style={{ ...windowLine, width: "fit-content", boxShadow: "var(--shadow-md)" }}>
+      <Popup
+        markSrc={logoUrl}
+        productName={PRODUCT}
+        status={status}
+        detail={detail}
+        action={{ label: action, onClick: () => {} }}
+      />
+    </div>
   );
 }
 
@@ -154,7 +101,8 @@ export function StateTile({ spec }: { spec: StateSpec }) {
     <section
       data-state={spec.id}
       style={{
-        width: spec.surface === "popup" ? POPUP_WIDTH : "var(--container-narrow)",
+        // The popup brings its own 320 px (`ExtensionPopup`).
+        width: spec.surface === "popup" ? undefined : PAGE_WIDTH,
         maxWidth: "100%",
         display: "grid",
         gap: "var(--space-2)",

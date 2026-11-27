@@ -9,10 +9,15 @@
     "./styles.css": "./src/styles/index.css",
     "./styles/*": "./src/styles/*"
   },
+  "sideEffects": [
+    "*.css"
+  ],
   "description": "Ludwig Design System v3 — die wiederverwendbaren UI-Bausteine, unabhängig von der App entwickelbar.",
   "scripts": {
     "storybook": "storybook dev --port 6107",
     "build": "storybook build",
+    "build:css": "node scripts/check-css.mjs --write",
+    "check:css": "node scripts/check-css.mjs",
     "typecheck": "tsc --noEmit",
     "check:icons": "node scripts/check-icons.mjs",
     "check:contrast": "node scripts/check-contrast.mjs",

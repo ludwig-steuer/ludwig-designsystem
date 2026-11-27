@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import type { ReactNode } from "react";
-import { Badge, Button, Progress, Time } from "@/ui/v3";
+import { Badge, Progress, Spinner, Time } from "@/ui/v3";
 import { NOW, STEP_TEXT, SYNC_STATE, USER } from "./fixtures";
 import { DraftsVisible } from "./drafts";
 import { Board as StateBoard, ExtensionPopup, Single, type StateSpec } from "./Frame";
@@ -21,60 +21,48 @@ function LastLine({ state, text }: { state: "succeeded" | "succeeded_with_issues
 }
 
 const D1 = () => (
-  <ExtensionPopup>
-    <p className="lw-ui-text" role="status">
-      Verbunden als {USER.name}
-    </p>
-    <LastLine state="succeeded" text="" />
-    <Button variant="primary" fullWidth>
-      Abgleich öffnen
-    </Button>
-  </ExtensionPopup>
+  <ExtensionPopup action="Abgleich öffnen" status={`Verbunden als ${USER.name}`} detail={<LastLine state="succeeded" text="" />} />
 );
 
 const D2 = () => (
-  <ExtensionPopup>
-    <p className="lw-ui-text" role="status">
-      <strong>Nicht verbunden.</strong> Richten Sie das Plugin einmal ein.
-    </p>
-    <Button variant="primary" fullWidth>
-      Einrichten
-    </Button>
-  </ExtensionPopup>
+  <ExtensionPopup
+    action="Einrichten"
+    status={
+      <p className="lw-ui-text">
+        <strong>Nicht verbunden.</strong> Richten Sie das Plugin einmal ein.
+      </p>
+    }
+  />
 );
 
 const D3 = () => (
-  <ExtensionPopup>
-    <span className="lw-ui-text">Abgleich läuft · Musterfirma GmbH</span>
-    <div style={{ display: "grid", gap: "var(--space-1)" }}>
-      <span className="lw-ui-hint">{STEP_TEXT.fetch}</span>
-      <Progress done={37} total={120} size="sm" label="Beleg 37 von 120" />
-    </div>
-    <Button variant="primary" fullWidth>
-      Abgleich öffnen
-    </Button>
-  </ExtensionPopup>
+  <ExtensionPopup
+    action="Abgleich öffnen"
+    status={<Spinner size="sm" label="Abgleich läuft · Musterfirma GmbH" />}
+    detail={
+      <>
+        <span>{STEP_TEXT.fetch}</span>
+        <Progress done={37} total={120} size="sm" label="Beleg 37 von 120" />
+      </>
+    }
+  />
 );
 
 const D4 = () => (
-  <ExtensionPopup>
-    <p className="lw-ui-text" role="status">
-      Verbunden als {USER.name}
-    </p>
-    <LastLine state="succeeded_with_issues" text="3 Belege nicht übertragen" />
-    <Button variant="primary" fullWidth>
-      Ergebnis ansehen
-    </Button>
-  </ExtensionPopup>
+  <ExtensionPopup
+    action="Ergebnis ansehen"
+    status={`Verbunden als ${USER.name}`}
+    detail={<LastLine state="succeeded_with_issues" text="3 Belege nicht übertragen" />}
+  />
 );
 
 const popup = "popup" as const;
 
 const POPUP_STATES: StateSpec[] = [
-  { id: "D1", title: "Popup · verbunden", uses: "Badge, Time, Button (volle Breite)", missing: "0263 ExtensionPopup", surface: popup, render: () => <D1 /> },
-  { id: "D2", title: "Popup · nicht verbunden", uses: "Button (volle Breite)", missing: "0263", surface: popup, render: () => <D2 /> },
-  { id: "D3", title: "Popup · Abgleich läuft", uses: "Progress, Button", missing: "0263", surface: popup, render: () => <D3 /> },
-  { id: "D4", title: "Popup · letzter Abgleich mit Problemen (Vorschlag U11)", uses: "Badge, Time, Button", missing: "0263", surface: popup, render: () => <D4 /> },
+  { id: "D1", title: "Popup · verbunden", uses: "ExtensionPopup, Badge, Time", missing: "", surface: popup, render: () => <D1 /> },
+  { id: "D2", title: "Popup · nicht verbunden", uses: "ExtensionPopup", missing: "", surface: popup, render: () => <D2 /> },
+  { id: "D3", title: "Popup · Abgleich läuft", uses: "ExtensionPopup, Spinner, Progress", missing: "", surface: popup, render: () => <D3 /> },
+  { id: "D4", title: "Popup · letzter Abgleich mit Problemen (Vorschlag U11)", uses: "ExtensionPopup, Badge, Time", missing: "", surface: popup, render: () => <D4 /> },
 ];
 
 interface Args {

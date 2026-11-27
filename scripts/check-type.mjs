@@ -39,7 +39,9 @@ import { existsSync, readFileSync, readdirSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 
 const ROOTS = ["src"];
-const SKIP = ["src/ludwig/", "src/styles/tokens.css"];
+// fonts*.css define the families and weight ranges (`font-weight: 400 700`),
+// the way tokens.css defines the scale — they are the source, not a use (0271).
+const SKIP = ["src/ludwig/", "src/styles/tokens.css", "src/styles/fonts.css", "src/styles/fonts-serif.css"];
 const BASELINE = "scripts/type-baseline.json";
 
 // A token, a relative size (`0.92em` keeps code in step with its sentence), or

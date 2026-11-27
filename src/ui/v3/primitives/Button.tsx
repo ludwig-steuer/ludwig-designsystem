@@ -1,5 +1,6 @@
 import { Kbd } from "./Kbd";
 import { Link } from "./Link";
+import { Spinner } from "./Spinner";
 import type { ButtonHTMLAttributes, ReactNode } from "react";
 
 /**
@@ -28,7 +29,9 @@ type Common = {
   /**
    * The action is running: locked, `aria-busy`, spinner before the label.
    * Purely presentational — the caller passes it. Whoever wants the button to
-   * run the action, show the error and confirm takes `ActionButton`.
+   * run the action, show the error and confirm takes `ActionButton`. The
+   * circle is `Spinner` with `label={null}`; a short wait outside a button is
+   * `Spinner` with its word.
    */
   loading?: boolean;
   /** Replaces the label while `loading`. Without it the label stays. */
@@ -79,7 +82,7 @@ function inner(
 ) {
   return (
     <>
-      {loading ? <span className="v2spin" aria-hidden="true" /> : icon}
+      {loading ? <Spinner label={null} /> : icon}
       <span>{loading && loadingLabel ? loadingLabel : children}</span>
       {loading ? null : iconEnd}
       {hotkey ? <Kbd>{hotkey}</Kbd> : null}
