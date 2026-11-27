@@ -132,7 +132,7 @@ Der Knopf wechselt zu einer offenen Hauptseite, statt eine zweite zu öffnen (C5
 
 - **A8 zählt nur, was läuft:** „Mandant 3 von 10 · 2 übersprungen“, nicht
   „3 von 12“ — Übersprungene laufen nie; A8b nennt „die übrigen 7“.
-- **Der Ergebnissatz wiederholt den Zustand nicht** (A10–A13): Die Marke
+- ~~**Der Ergebnissatz wiederholt den Zustand nicht**~~ (abgelöst durch Nachtrag 2: keine Marke mehr über dem Satz, der Satz beginnt mit dem Zustandswort) (A10–A13): Die Marke
   trägt „Fertig“ bzw. „Abgebrochen“, der Satz beginnt mit dem Inhalt
   („12 Belege übertragen …“); A12: „Stehen geblieben bei „Neue Belege aus
   DATEV holen“, Beleg 37 von 120.“
@@ -150,6 +150,22 @@ Der Knopf wechselt zu einer offenen Hauptseite, statt eine zweite zu öffnen (C5
   Zeilenkarten richtet sich dort nach der Spaltenbreite (`@container`, unter
   640 px), nicht nach dem Fenster. Am Desktop der App ändert sich nichts.
   Bis dahin sind die Entwürfe bei 1440 px fotografiert.
+
+## Nachtrag 2 2026-11-27 — Simons Feedback zu den Entwürfen (17e044a)
+
+U1–U16 und alle hier nicht genannten Zustände sind angenommen. Diese Punkte
+ersetzen die Zeilen oben (Quelle: `ludwig-plugin` Branch `umbau`,
+`docs/spec-oberflaeche-und-fehler.md`, „Feedback von Simon zu den
+Entwürfen“).
+
+| Zustand | Neu |
+|---|---|
+| A4, A5 Bereit | Die Wahl ist immer sichtbar: zwei Optionen untereinander (`RadioGroup`) **Ein Mandant** — darunter das Suchfeld mit der gemerkten Auswahl — und **Alle Mandanten (12)** — darunter „10 werden abgeglichen · 2 übersprungen“ und der Aufklapper zur Liste (A6). Der Knopf heißt nach der Wahl **Mandant abgleichen** bzw. **Alle Mandanten abgleichen**. Die Schritte stehen nicht mehr einzeln da, sondern als eine Zeile: „Alle Schritte“ bzw. „Alle Schritte, ohne Belegübergabe“ (Standard, weil die Belegübergabe aus ist) · **Schritte ändern** |
+| A9 und jede Hinweisfläche mit Aktion im Plugin | Der Knopf steht in einer eigenen Zeile unter dem Text, linksbündig — nie rechts neben dem Text |
+| A10–A12 Ergebnis | **Keine Zahlenkacheln, keine Marke über dem Satz.** Oben ein Satz, der mit dem Zustandswort beginnt: „**Fertig.** 12 Belege übertragen, Kontoumsätze von 2 Konten geholt.“ · „**Fertig mit Problemen.** 9 Belege übertragen, 3 Belege nicht übertragen.“ · „**Abgebrochen.** Stehen geblieben bei „Neue Belege aus DATEV holen“, Beleg 37 von 120.“ Bei Problemen und Abbruch trägt die Fläche Zeichen und Ton der Stufe (warning), damit der Zustand deutlich ist, ohne dass eine Marke daneben schwebt. Darunter die Ergebnisliste: **dieselben Schrittzeilen wie im Fortschritt (0265), jetzt im Endzustand** — Haken bzw. Warnzeichen, Anwendertext, rechts das Ergebnis: „4 Belege einsortiert“ · „12 übertragen, 47 schon in Ludwig“ (A11: Warnzeichen, „9 übertragen, 3 nicht übertragen“) · „2 Konten“. So läuft das Bild vom Fortschritt ins Ergebnis, ohne dass etwas springt. Dann die Problemkarten, dann eingeklappt Ergebnis im Einzelnen und Protokoll |
+| A11, A12, B4 Support | Ein Block **Hilfe vom Support** am Ende des Ergebnisses (und im Protokoll B4): Satz „Das Protokoll enthält Mandantendaten. Geben Sie es nur an den Ludwig-Support weiter.“ Knöpfe **Angaben kopieren** (technische Angaben ohne Mandantendaten: Fehler-Code, Schritt, Plugin-Version, Browser, Kennung des Abgleichs) und **E-Mail an den Support**; darunter: „Ihr E-Mail-Programm öffnet sich mit allen Angaben. Das Protokoll wird dabei heruntergeladen — hängen Sie die Datei an.“ Gesendet wird erst, wenn Sie selbst senden. In der Problemkarte bleibt „Technische Angaben für den Support“ eingeklappt mit **Kopieren** |
+| A8, A13 Durchgang | Über der Liste eine **Zählzeile** in fester Reihenfolge: Mit Problemen · Abgebrochen · Läuft · Wartet · Fertig · Übersprungen, je Wort und Zahl; Zahl 0 grau. Jede Zahl ist zugleich Schnellfilter (ersetzt „Zeigen: Alle · Probleme · Übersprungen“). Darunter zuerst die Gruppe **Mit Problemen** (Fertig mit Problemen und Abgebrochen), dann **Alle übrigen** in fester Reihenfolge. Ein Mandant wechselt nur einmal die Gruppe, wenn sein Abgleich mit Problem endet — das ist ein Ereignis, kein Springen. A13: die Gruppe Mit Problemen aufgeklappt, die übrigen eingeklappt mit Zahl |
+| C2, C3 Einstellungen | **Schalter** (Owner 2026-11-27, hebt 0018 für sofort wirkende, umkehrbare Einstellungen auf; 0266 wird zur Spec des `Switch`): Zeile mit Titel, Erklärtext darunter, rechts der Schalter mit sichtbarem Zustandswort „An“/„Aus“. Wirkt sofort. Während des Speicherns gesperrt mit „wird gespeichert“; misslingt es, springt er zurück und der Fehler steht darunter (angesagt); gelingt es, sagt die Seite „Belegübergabe eingeschaltet“ an |
 
 ## Schmale Fläche
 

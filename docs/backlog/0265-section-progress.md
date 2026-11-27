@@ -5,10 +5,10 @@
 | Status | spec |
 | Stufe | `patterns/`, Gruppe Prozess. Die Schritte stehen als Zeilen mit denselben Zeichen wie die Schrittliste im `ProcessDialog` (`.pz-steps`), die Kurzform nutzt die Spur von `ProcessMini` |
 | Klassen-Test | ja, sobald es dort einen Ablauf in festen Schritten gibt: Ein Datenimport einer Versicherung mit „Policen lesen · Abgleichen · Übertragen“ braucht dasselbe Bild |
-| Quelle | Seitenprofil `docs/seiten/duo-connect.md` (Commit b4a9660, Owner angenommen 2026-11-27): **U5** (Schritte als Zeilen statt waagerechtem Abschnittsbalken), **U6** (ausgeschaltete Schritte erscheinen nicht), **A7** (läuft · ein Mandant), **A8** (läuft · Durchgang), **A9** (wartet auf DATEV-Anmeldung). Anfrage plugin-mananger 2026-11-27: `ludwig-plugin/docs/spec-bausteine.md` (Branch `umbau`), Zeile „Fortschrittsbalken in Abschnitten“. `docs/spec-oberflaeche-und-fehler.md` C2: Menge sobald bekannt, sonst laufende Anzeige; „nie rückwärts“; Ansage nur beim Wechsel. Begriffe und Anwendertexte aus `docs/begriffe.md` |
+| Quelle | Seitenprofil `docs/seiten/duo-connect.md` (Commit b4a9660, Owner angenommen 2026-11-27): **U5** (Schritte als Zeilen statt waagerechtem Abschnittsbalken), **U6** (ausgeschaltete Schritte erscheinen nicht), **A7** (läuft · ein Mandant), **A8** (läuft · Durchgang), **A9** (wartet auf DATEV-Anmeldung). Abschnitt „Nachtrag 2 2026-11-27 — Simons Feedback zu den Entwürfen“, **A10–A12**: Die Ergebnisliste sind dieselben Schrittzeilen im Endzustand. Anfrage plugin-mananger 2026-11-27: `ludwig-plugin/docs/spec-bausteine.md` (Branch `umbau`), Zeile „Fortschrittsbalken in Abschnitten“. `docs/spec-oberflaeche-und-fehler.md` C2: Menge sobald bekannt, sonst laufende Anzeige; „nie rückwärts“; Ansage nur beim Wechsel. Begriffe und Anwendertexte aus `docs/begriffe.md` |
 | Ersetzt | nichts im Set und in `ludwig/app`. Im Plugin die heutige Fortschrittsanzeige der Sync-Seite (Plugin-Code, hier nicht geprüft) |
 | Blockiert | Plugin-Paket „Designsystem einbauen“ (Seitenprofil A7, A8, A9) |
-| Spec von / am | designsystem, 2026-11-27; überarbeitet am selben Tag nach Annahme des Seitenprofils (U5) |
+| Spec von / am | designsystem, 2026-11-27; überarbeitet am selben Tag nach Annahme des Seitenprofils (U5) und nach Nachtrag 2 (Endzustand als Ergebnisliste) |
 
 ## Ziel
 
@@ -28,6 +28,12 @@ Wartet der Abgleich auf die DATEV-Anmeldung, steht das rechts in der Zeile
 statt der Zahl. Bricht er ab, bleibt der Balken stehen, wo er war, und rechts
 steht der Grund. Im Durchgang über zwölf Mandanten zeigt der Block „Jetzt“
 denselben Lauf als eine Zeile, also als Kurzform.
+
+Ist der Abgleich durch, bleiben dieselben Zeilen als **Ergebnisliste**
+stehen (Nachtrag 2, A10–A12): Haken bzw. Warnzeichen, rechts das Ergebnis
+(„4 Belege einsortiert“, „12 übertragen, 47 schon in Ludwig“, „2 Konten“).
+Das Bild läuft vom Fortschritt ins Ergebnis, ohne zu springen, und es sagt
+nichts mehr an.
 
 Ein waagerechter Balken mit vier Abschnitten ist verworfen (U5): Die
 Anwendertexte passen nicht hinein, und unter 640 px bricht er.
@@ -64,8 +70,10 @@ Anwendertexte passen nicht hinein, und unter 640 px bricht er.
     `AgentRunBanner` ist ein Lauf ohne Schritte.
 - **Neu, weil:** §3 Regel 4. Die Komposition hat einen eigenen Ansageweg:
   eine Live-Region, die nur spricht, wenn der Schritt oder sein Zustand
-  wechselt, nie bei einer Zahl (C2). Sie kommt an zwei Orten vor: A7 groß,
-  A8 als Kurzform im Block „Jetzt“. Die Statuszeile des Popups (D3, 0263)
+  wechselt, nie bei einer Zahl (C2), und die im Endzustand schweigt. Sie
+  kommt an drei Orten vor: A7 groß, A8 als Kurzform im Block „Jetzt“, A10–A12
+  als Ergebnisliste im Endzustand (damit auch im Verlauf, U9: dieselbe Form
+  wie das Ergebnis). Die Statuszeile des Popups (D3, 0263)
   kann die Kurzform ebenfalls nehmen.
 - **Hausregel Familie** („jede mehrstufige Kette zeigt dasselbe
   Prozessbild“): Der Zustandstyp ist `ProcessPhaseStatus` aus `Process.tsx`.
@@ -105,9 +113,10 @@ Anwendertexte passen nicht hinein, und unter 640 px bricht er.
   - Ihr Vokabular ist das des Prozessbilds.
   - Der Zustand des **Abgleichs** dagegen (Wartet, Läuft, Fertig, Fertig mit
     Problemen, Abgebrochen, Übersprungen) steht im Verlauf und in der
-    Durchgangsliste (A8) als Badge. Er gehört als Achse `duo_sync` in die
-    Registry der App, das ist bei Simon offen. Bis dahin steht dort `Badge`,
-    als benannter Übergang.
+    Durchgangsliste (A8) als Badge. Dafür hat die App die Achse `duo_sync`
+    (Owner 2026-11-27, `apps/web/src/ui/status/status-registry.ts`). Im
+    Spiegel `src/ludwig/` des Sets fehlt sie noch, `pnpm sync:ludwig` holt
+    sie. Bis dahin steht dort `Badge`, als benannter Übergang.
 
 ## Schnittstelle
 
@@ -115,7 +124,7 @@ Anwendertexte passen nicht hinein, und unter 640 px bricht er.
 |---|---|---|---|---|
 | `phases` | `readonly PhaseProgressItem[]` | ja | Die Schritte eines Laufs, oben nach unten in Laufreihenfolge. **`phases` enthält nur, was läuft (U6):** Eine ausgeschaltete Belegübergabe gibt der Aufrufer nicht mit, sie erscheint nicht als ewig offener Schritt. `[]` rendert nichts | `Running`, `Edge` |
 | `label` | `string` | ja | Der zugängliche Name des Ganzen (`role="group"` mit `aria-label`), z. B. „Fortschritt des Abgleichs Musterfirma GmbH“. Auch der Anfang jeder Ansage, siehe Verhalten | `Live`, `InUse` |
-| `density` | `"regular" \| "compact"` | nein (`"regular"`) | `regular`: alle Schritte als Zeilen untereinander (A7). `compact`: einzeilige Kurzform, die Spur von `.pz-mini` und eine Zeile für den aktuellen Schritt (A8, Block „Jetzt“) | `Densities`, `InUse` |
+| `density` | `"regular" \| "compact"` | nein (`"regular"`) | `regular`: alle Schritte als Zeilen untereinander (A7). `compact`: einzeilige Kurzform, die Spur von `.pz-mini` und eine Zeile für den aktuellen Schritt (A8, Block „Jetzt“) | `Statuses`, `InUse` |
 
 `PhaseProgressItem`, je Schritt:
 
@@ -125,8 +134,8 @@ Anwendertexte passen nicht hinein, und unter 640 px bricht er.
 | `label` | `string` | ja | der Anwendertext des Schritts aus `begriffe.md`: „Gebuchte Belege in DATEV einsortieren“, „Neue Belege aus DATEV holen“, „Belege aus Ludwig an DATEV übergeben“, „Kontoumsätze aus DATEV holen“ | `Running` |
 | `status` | `ProcessPhaseStatus` (`"pending" \| "active" \| "held" \| "done" \| "failed"`) | ja | der Zustand des Schritts im Vokabular des Prozessbilds | `Statuses` |
 | `count` | `{ done: number; total: number; unit: string } \| null` | nein | Bekannte Menge. Rechts steht „{unit} {done} von {total}“ mit `formatCount`: „Beleg 37 von 120“, „Konto 2 von 3“, „Ablageort 1 von 4“. Darunter füllt sich der Balken (`Progress`) zu `done/total`. Die Menge wirkt bei `active`, bei `held` und `failed` bleibt der Balken beim Anteil stehen. Bei `pending` und `done` wird sie nicht gezeigt. `total ≤ 0` zählt als keine Menge, `done > total` wird auf `total` begrenzt | `Running`, `Failed`, `Edge` |
-| `note` | `string` | nein | Die rechte Spalte, wenn es keine Zahl gibt oder die Zahl nicht gilt. Bei `active` ohne Menge, was gerade passiert („DATEV wird geöffnet …“). Bei `held` der Grund („wartet auf Anmeldung“). Bei `failed` die Ursache („DATEV-Sitzung abgelaufen“). Bei `done` das Ergebnis in wenigen Wörtern („4 Ablageorte“, „12 übertragen“, „nichts abzurufen“) | `Starting`, `WaitingForLogin`, `Failed`, `Statuses` |
-| `issue` | `string` | nein | Nur bei `done`: Der Schritt ist durch, aber nicht alles ging („3 Belege nicht übertragen“). Zeichen Warnung und rechts dieser Satz | `Statuses` |
+| `note` | `string` | nein | Die rechte Spalte, wenn es keine Zahl gibt oder die Zahl nicht gilt. Bei `active` ohne Menge, was gerade passiert („DATEV wird geöffnet …“). Bei `held` der Grund („wartet auf Anmeldung“). Bei `failed` die Ursache („DATEV-Sitzung abgelaufen“). Bei `done` das Ergebnis in wenigen Wörtern (Nachtrag 2: „4 Belege einsortiert“, „12 übertragen, 47 schon in Ludwig“, „2 Konten“, „nichts abzurufen“). Bei `pending` nur im Endzustand nach einem Abbruch: „nicht ausgeführt“ | `Starting`, `WaitingForLogin`, `Failed`, `Finished` |
+| `issue` | `string` | nein | Nur bei `done`: Der Schritt ist durch, aber nicht alles ging („9 übertragen, 3 nicht übertragen“). Zeichen Warnung und rechts dieser Satz | `Statuses`, `Finished` |
 
 **Die Zustände aus Anfrage und Seitenprofil, auf die Felder gelegt:**
 
@@ -136,9 +145,18 @@ Anwendertexte passen nicht hinein, und unter 640 px bricht er.
 | läuft ohne Menge | `active` | `note` optional | gefüllter Kreis, Text halbfett | `note`, ohne `note` „läuft“ | gleitendes Stück |
 | läuft mit Menge | `active` | `count` | gefüllter Kreis, Text halbfett | „Beleg 37 von 120“ | `Progress` bis zum Anteil, Ton Akzent |
 | wartet auf Anmeldung (A9) | `held` | `note`, `count` optional | Warnung | `note` („wartet auf Anmeldung“) statt der Zahl | steht: mit Menge `Progress` beim Anteil im Ton Warnung, ohne Menge leere Spur |
-| fertig | `done` | `note` optional | erledigt | `note` („4 Ablageorte“), sonst leer | keine |
-| Problem | `done` | `issue` | Warnung | `issue` | keine |
-| abgebrochen | `failed` | `note`, `count` optional | Fehler | `note` | steht: mit Menge `Progress` beim Anteil im Ton Fehler, ohne Menge leere Spur |
+| fertig | `done` | `note` optional | erledigt | `note` („4 Belege einsortiert“), sonst leer | keine |
+| Problem | `done` | `issue` | Warnung | `issue` („9 übertragen, 3 nicht übertragen“) | keine |
+| abgebrochen, Ursache Stufe Fehler (Ludwig nicht erreichbar, liegt nicht an Ihnen) | `failed` | `note`, `count` optional | Fehler | `note` | steht: mit Menge `Progress` beim Anteil im Ton Fehler, ohne Menge leere Spur |
+| abgebrochen, Ursache Stufe Warnung (Seite geschlossen, von Ihnen abgebrochen) | `held` | `note`, `count` optional | Warnung | `note` („Seite geschlossen“, „von Ihnen abgebrochen“) | steht: mit Menge `Progress` beim Anteil im Ton Warnung, ohne Menge leere Spur |
+| nicht ausgeführt (nach einem Abbruch) | `pending` | `note` „nicht ausgeführt“ | offener Kreis, Zeile gedämpft | `note` | keine |
+
+Die Stufe des Abbruchs folgt der Stufe der Problemkarte (0264, Nachtrag 1
+des Profils): Eine geschlossene Seite ist Warnung, „Ludwig nicht erreichbar“
+und „liegt nicht an Ihnen“ sind Fehler. **Endzustand** heißt: Kein Schritt ist
+`active`, der Lauf ist vorbei. Die Zeilen bleiben stehen, rechts steht das
+Ergebnis, und eine Spur gibt es nur noch unter einem gehaltenen bzw.
+gescheiterten Schritt, beim Anteil, wo er stand.
 
 Typen aus `src/ludwig/`: keine. Der Lauf ist ein Begriff des Plugins
 (`begriffe.md`: Abgleich, Kennung `lauf`), nicht der App.
@@ -152,9 +170,10 @@ Was die Komponente **nicht** kann (bewusst):
 - **Kein Ziel.** Eine Zeile ist nicht klickbar. Wer springen will, nimmt
   `StepRail`.
 - **Keine Staffel, keine Schleifen.** Das ist `ProcessStepper`.
-- **Sie sagt das Ende nicht an.** Wird der Lauf fertig, tauscht die Seite auf
-  das Ergebnis (A10–A12), und das sagt die Region der Seite an (vgl. 0225,
-  H3).
+- **Sie sagt weder das Ende noch den Halt an.** Wird der Lauf fertig, setzt
+  die Seite den Ergebnissatz darüber (0269), und den sagt die Region der Seite
+  an (vgl. 0225, H3). Den Halt bei der Anmeldung sagt die hervorgehobene
+  Hinweisfläche der Seite an (A9).
 - **Keine ausgeschalteten Schritte** (U6). Was nicht läuft, gibt der
   Aufrufer nicht mit. Die Bereit-Zeile (A4) nennt die eingeschalteten
   Schritte.
@@ -226,13 +245,16 @@ Die Liste zeigt den laufenden Mandanten **nicht** ein zweites Mal als
 - **Ansage:**
   - **Eine** Region je Instanz: ein visuell verborgenes Element mit
     `role="status"`, immer gerendert, auch leer.
-  - Ihr Text ist der Satz des aktuellen Schritts **ohne Zahl**: „{label}:
-    {Anwendertext} läuft“ bzw. „{label}: {Anwendertext} · {note}“ bei laufend
-    mit `note`, gehalten und gescheitert. Bei gehalten und gescheitert steht
-    davor das Wort des Zeichens („Warnung“, „Fehler“).
-  - Ohne aktuellen Schritt ist sie leer.
-  - Der Text ändert sich nur, wenn der Schritt, sein Zustand oder seine
-    `note` wechselt, nie bei „Beleg 38 von 120“ (C2).
+  - Ihr Text ist der Satz des **laufenden** Schritts (`active`) **ohne Zahl**:
+    „{label}: {Anwendertext} läuft“, mit `note` „{label}: {Anwendertext} ·
+    {note}“.
+  - Läuft kein Schritt, ist sie leer. Das gilt für gehalten (A9),
+    abgebrochen und fertig, also im ganzen Endzustand. Eine Instanz, die
+    schon im Endzustand erscheint (Ergebnis, Verlauf), hat eine leere Region
+    und sagt nichts.
+  - Der Text ändert sich nur, wenn der laufende Schritt oder seine `note`
+    wechselt, nie bei „Beleg 38 von 120“ (C2). Geht der Lauf weiter (gehalten
+    → läuft), sagt sie den Schritt wieder an.
   - Der Wechsel des Mandanten im Durchgang gehört der Region der Seite.
 - **Schmal:** Es gibt keine Sonderregel. `regular` ist auf allen Breiten
   einspaltig (U5). Bei 320 px bricht der Anwendertext um, die rechte Spalte
@@ -242,6 +264,7 @@ Die Liste zeigt den laufenden Mandanten **nicht** ein zweites Mal als
   - gefüllt (`Running`)
   - lädt (`Starting`: der erste Schritt läuft ohne Menge)
   - Fehler (`Failed`)
+  - Endzustand als Ergebnisliste (`Finished`)
   - leer: `phases=[]` rendert nichts. Einen Lauf ohne Schritte gibt es
     nicht, und eine leere Liste würde „nichts zu tun“ behaupten.
   - leer nach Filter: entfällt, es gibt keinen Filter.
@@ -261,9 +284,9 @@ Ablageorte, Anwendertexte aus `begriffe.md`.
 | `Starting` | lädt: Der erste Schritt läuft ohne Menge, `note` „DATEV wird geöffnet …“, gleitendes Stück unter der Zeile, die übrigen offen |
 | `WaitingForLogin` | A9: Belegabruf `held` mit `count` 37/120 und `note` „wartet auf Anmeldung“. Rechts der Satz statt der Zahl, der Balken steht beim Anteil im Ton Warnung |
 | `Failed` | Fehler: Belegabruf `failed` bei 37 von 120, `note` „DATEV-Sitzung abgelaufen“, Balken steht im Ton Fehler, danach offen |
-| `Statuses` | alle Zeilen der Zuordnungstabelle als Zeilen einer Liste, dazu „alle erledigt“ und „alle erledigt, einer mit Problem“ je in `regular` und `compact`. Nur `compact` ohne Problem steht grün durch |
-| `Densities` | `regular` und `compact` mit denselben Daten nebeneinander |
-| `Live` | Rundlauf: Ein Takt in der Story führt einen Abgleich durch alle Schritte, die Menge zählt mit. Unter der Komponente steht ein Protokoll jeder Änderung des Region-Texts: Er ändert sich nur beim Wechsel des Schritts, nie bei einer Zahl |
+| `Statuses` | alle Zeilen der Zuordnungstabelle als Zeilen einer Liste, dazu „alle erledigt“ und „alle erledigt, einer mit Problem“, je in `regular` und `compact` nebeneinander (beweist auch `density`). Nur `compact` ohne Problem steht grün durch |
+| `Finished` | Endzustand als Ergebnisliste (Nachtrag 2), in `regular` untereinander. **A10:** alle `done` mit „4 Belege einsortiert“ · „12 übertragen, 47 schon in Ludwig“ · „2 Konten“. **A11:** Belegabruf `done` mit `issue` „9 übertragen, 3 nicht übertragen“. **A12:** Belegabruf `held` bei 37 von 120 mit „Seite geschlossen“ bzw. `failed` mit „Ludwig nicht erreichbar“, danach `pending` mit „nicht ausgeführt“. Die Region ist in allen leer. Ein Schalter in der Story wechselt vom letzten laufenden Stand in den Endzustand: dieselben Zeilen in derselben Reihenfolge, nur die Spur fällt weg, und es entsteht keine Mutation der Region mit Text |
+| `Live` | Rundlauf: Ein Takt in der Story führt einen Abgleich durch alle Schritte, die Menge zählt mit. Unter der Komponente steht ein Protokoll jeder Änderung des Region-Texts: Er ändert sich nur beim Wechsel des laufenden Schritts oder seiner `note`, nie bei einer Zahl. Ein Halt bei der Anmeldung leert ihn, das Weiterlaufen sagt den Schritt wieder an, am Ende ist er leer |
 | `Narrow` | Umbruch langer Texte bei 320 px: „Belege aus Ludwig an DATEV übergeben“ mit „Beleg 1.234 von 12.480“. Der Text bricht um, die rechte Spalte bleibt ganz, nichts scrollt waagerecht; `compact` ebenso |
 | `InUse` | A7 und A8 nebeneinander. A7: `Card` „Musterfirma GmbH wird abgeglichen“, darüber `Callout` „Lassen Sie diese Seite und das DATEV-Fenster geöffnet, bis der Abgleich fertig ist.“, darin `regular`. A8: `Progress` „Mandant 3 von 12“, Block „Jetzt“ mit `compact`, darunter vier Mandantenzeilen mit `Badge` (Übergang bis `duo_sync`): Fertig · Fertig mit Problemen · Läuft · Wartet. Die laufende Zeile zeigt kein zweites `PhaseProgress` |
 | `Edge` | Rand: große Mengen („Beleg 1.234 von 12.480“), `total` 0 (keine Menge, gleitendes Stück), `done` > `total` (Balken voll, Zahl begrenzt), lange `note` in der rechten Spalte, drei Schritte neben vier |
@@ -311,15 +334,16 @@ Variabel (aus dieser Spec):
 - [ ] `regular` ist eine `<ol>` mit einer Zeile je Schritt, in jedem Zustand und jeder Breite einspaltig: Zeichen links, Anwendertext Mitte, rechte Spalte rechtsbündig mit `tnum` (`Running`)
 - [ ] Jede Zeile der Zuordnungstabelle sieht aus und spricht wie dort beschrieben: Zeichen samt zugänglichem Namen, rechte Spalte, Spur (`Statuses`)
 - [ ] Spur: genau eine, nur unter dem aktuellen Schritt. Mit Menge ist es `Progress`, Anteil `done/total` ± 1 px (37/120 → 30,8 %), ohne eigenes Label. Rechts steht „Beleg 37 von 120“ (`Running`). `total` 0 → gleitendes Stück, keine Zahl. `done` > `total` → voller Balken, „Beleg 120 von 120“ (`Edge`)
-- [ ] Gehalten und gescheitert: Der Balken steht beim Anteil im Ton Warnung bzw. Fehler, rechts steht `note` statt der Zahl, das Zeichen ist Warnung bzw. Fehler (`WaitingForLogin`, `Failed`)
+- [ ] Gehalten und gescheitert: Der Balken steht beim Anteil im Ton Warnung bzw. Fehler, rechts steht `note` statt der Zahl, das Zeichen ist Warnung bzw. Fehler (`WaitingForLogin`, `Failed`, `Finished`). `pending` mit `note` zeigt die Notiz rechts, gedämpft („nicht ausgeführt“, `Finished`)
 - [ ] `issue` nur bei `done`: Zeichen Warnung, rechts der Satz, keine Spur (`Statuses`)
 - [ ] U6: Mit drei übergebenen Schritten zeigt die Komponente drei Zeilen, keinen Platzhalter für einen ausgeschalteten Schritt (`Running`, `Edge`)
 - [ ] V7: Die Zeichen unterscheiden sich in der Form (offen, gefüllt, Haken, Warnung, Fehler), und jedes hat sein Wort als zugänglichen Namen (`Statuses`, Barrierefreiheitsbaum)
-- [ ] Ansage: genau ein `role="status"` je Instanz, immer im DOM. In `Live` ändert sich sein Text nur beim Wechsel des Schritts, seines Zustands oder seiner `note`. Mutationen gezählt: so viele wie Wechsel, 0 bei Zahlschritten. Der Text enthält keine Ziffer der Menge
+- [ ] Ansage: genau ein `role="status"` je Instanz, immer im DOM. Text nur, solange ein Schritt `active` ist. In `Live` ändert er sich nur beim Wechsel des laufenden Schritts oder seiner `note`. Mutationen gezählt: so viele wie Wechsel, 0 bei Zahlschritten. Bei `held` (A9) ist er leer, am Ende ebenfalls. Der Text enthält keine Ziffer der Menge
+- [ ] Endzustand (`Finished`): A10–A12 wie in der Story beschrieben. Rechts steht das Ergebnis aus `note` bzw. `issue`, Haken bzw. Warn- oder Fehlerzeichen. Die Spur steht nur unter dem gehaltenen bzw. gescheiterten Schritt beim Anteil (37/120 → 30,8 %). Die Region ist in allen drei leer, auch beim ersten Rendern. Beim Wechsel vom letzten laufenden Stand in den Endzustand bleiben Zeilen, Reihenfolge und DOM-Knoten der Zeilen erhalten (gleiche `key`), und die Region bekommt keinen Text
 - [ ] `label` ist der zugängliche Name der Gruppe (`role="group"`) und der Anfang jeder Ansage (`Live`)
 - [ ] Bewegung: Laufend ohne Menge hat genau eine Animation `v3runmark`. Mit `prefers-reduced-motion: reduce` gibt es keine Animation, das Stück steht sichtbar in der Spur (`Starting`, Emulation wie in 0225)
 - [ ] Kein Sprung: In `Live` bleibt die Höhe der Komponente gleich, solange es einen aktuellen Schritt gibt (± 0,5 px), auch wenn die Spur eine Zeile weiterwandert
-- [ ] `compact`: Spur in der Breite von `.pz-mini`, ein Segment je Schritt in den Tönen aus Verhalten. Daneben eine Zeile „{Anwendertext} · {Zahl | note | läuft}“ in `--fs-ui-sm`. Alle Anwendertexte stehen im `title` bzw. zugänglichen Namen. Grün durch nur bei „alle erledigt ohne `issue`“ (`Densities`, `Statuses`)
+- [ ] `compact`: Spur in der Breite von `.pz-mini`, ein Segment je Schritt in den Tönen aus Verhalten. Daneben eine Zeile „{Anwendertext} · {Zahl | note | läuft}“ in `--fs-ui-sm`. Alle Anwendertexte stehen im `title` bzw. zugänglichen Namen. Grün durch nur bei „alle erledigt ohne `issue`“ (`Statuses`)
 - [ ] Schmal: keine Media-Regel für `PhaseProgress` in `v3.css`. Bei 320 px bricht der Anwendertext um, die rechte Spalte bleibt einzeilig und ganz, kein waagerechtes Scrollen (`Narrow`)
 - [ ] Kontrast gemessen: Text ≥ 4,5:1 (auch gedämpfte offene Zeilen), Zeichen, Balken und gleitendes Stück ≥ 3:1 zur Spur bzw. zum Grund (`Statuses`)
 - [ ] `phases=[]` rendert nichts, auch keine leere Region (`Edge`, DOM leer)

@@ -14,12 +14,12 @@ import {
   Disclosure,
   ExpandableRow,
   Field,
-  FilterChips,
   GroupRow,
   HeadRow,
   Input,
   LogList,
   Progress,
+  RadioGroup,
   Row,
   SearchInput,
   SelectCell,
@@ -40,12 +40,25 @@ import {
   MANY_CLIENTS,
   NOW,
   RESULT_ROWS,
-  STEP_TEXT,
   SYNC_STATE,
   type BatchRow,
   type Client,
+  type StepKey,
+  type SyncState,
 } from "./fixtures";
-import { DraftsVisible, ProblemCard, ReadinessRows, ResultSummary, Spinner, StepProgress } from "./drafts";
+import {
+  COUNT_ORDER,
+  CountLine,
+  DraftsVisible,
+  ProblemCard,
+  ReadinessRows,
+  Spinner,
+  StepProgress,
+  SupportHelp,
+  SyncResult,
+  supportFacts,
+  type StepRowState,
+} from "./drafts";
 import { Board as StateBoard, ExtensionShell, Single, type StateSpec } from "./Frame";
 
 /* ── Shared pieces ─────────────────────────────────────────────────────── */
@@ -60,10 +73,11 @@ function clientLabel(c: Client): string {
 /** Search by name **or** DATEV number: the number sits in the label. */
 function ClientPicker({ initial, clients = CLIENTS }: { initial: string | null; clients?: Client[] }) {
   const [value, setValue] = useState<string | null>(initial);
-  const options: ComboboxOption[] = [
-    { value: "all", label: `Alle Mandanten (${clients.length})`, hint: "Nacheinander in einer DATEV-Sitzung" },
-    ...clients.map((c) => ({ value: c.id, label: clientLabel(c), hint: c.skipReason ?? undefined })),
-  ];
+  const options: ComboboxOption[] = clients.map((c) => ({
+    value: c.id,
+    label: clientLabel(c),
+    hint: c.skipReason ?? undefined,
+  }));
   return (
     <Combobox
       label="Mandant"
@@ -75,10 +89,12 @@ function ClientPicker({ initial, clients = CLIENTS }: { initial: string | null; 
   );
 }
 
+/** One line instead of every step (owner 2026-11-27); the handover is off by default. */
 function StepsLine() {
+  const all = ACTIVE_STEPS.includes("handover");
   return (
     <p className="lw-ui-hint">
-      Schritte: {ACTIVE_STEPS.map((k) => STEP_TEXT[k]).join(" · ")} ·{" "}
+      {all ? "Alle Schritte" : "Alle Schritte, ohne Belegübergabe"} ·{" "}
       <TextButton href="#einstellungen">Schritte ändern</TextButton>
     </p>
   );
@@ -106,6 +122,16 @@ function ReadyCard({ children }: { children: ReactNode }) {
         <div style={stack}>{children}</div>
       </CardSection>
     </Card>
+  );
+}
+
+/** A note with an action: the sentence, and the button in its own line under it, left. */
+function NoteWithAction({ action, children }: { action: ReactNode; children: ReactNode }) {
+  return (
+    <div style={{ display: "grid", gap: "var(--space-3)", justifyItems: "start" }}>
+      <p style={{ margin: 0 }}>{children}</p>
+      {action}
+    </div>
   );
 }
 
@@ -248,25 +274,82 @@ const A3 = () => (
 
 /* ── Ready ─────────────────────────────────────────────────────────────── */
 
-const A4 = () => (
-  <ExtensionShell area="sync">
-    <ReadyCard>
-      <ClientPicker initial="c01" />
-      <StepsLine />
-      <div>
-        <Button variant="primary">Mandant abgleichen</Button>
-      </div>
-      <LastRun />
-    </ReadyCard>
-  </ExtensionShell>
-);
+/**
+ * A4–A6, A14 (owner 2026-11-27): the choice is always in sight — „Ein Mandant"
+ * with the search under it, or „Alle Mandanten" with the count and the list.
+ * The button names what the choice will do.
+ */
+function ReadyChoice({
+  initial,
+  client = "c01",
+  clients = CLIENTS,
+  openList = false,
+  extra,
+  blocked,
+  last = <LastRun />,
+}: {
+  initial: "one" | "all";
+  client?: string;
+  clients?: Client[];
+  openList?: boolean;
+  /** Under the choice of one client: the cut-off question (A4b). */
+  extra?: ReactNode;
+  /** In place of the button: what stops the start (A14). */
+  blocked?: ReactNode;
+  last?: ReactNode;
+}) {
+  const [choice, setChoice] = useState<"one" | "all">(initial);
+  const runnable = clients.filter((c) => !c.skipReason).length;
+  return (
+    <ExtensionShell area="sync" mark={blocked ? "alarm" : undefined}>
+      <ReadyCard>
+        <RadioGroup
+          name="duo-scope"
+          label="Welche Mandanten?"
+          value={choice}
+          onChange={(v) => setChoice(v === "all" ? "all" : "one")}
+          options={[
+            { value: "one", label: "Ein Mandant" },
+            {
+              value: "all",
+              label: `Alle Mandanten (${clients.length})`,
+              hint: `${runnable} werden abgeglichen · ${clients.length - runnable} übersprungen`,
+            },
+          ]}
+          underChecked={
+            choice === "one" ? (
+              <div style={stack}>
+                <ClientPicker initial={client} clients={clients} />
+                {extra}
+              </div>
+            ) : (
+              <Disclosure summary="Liste ansehen und einzelne abwählen" count={clients.length} defaultOpen={openList}>
+                <OverviewTable clients={clients} />
+              </Disclosure>
+            )
+          }
+        />
+        <StepsLine />
+        {blocked ?? (
+          <div>
+            <Button variant="primary">{choice === "one" ? "Mandant abgleichen" : "Alle Mandanten abgleichen"}</Button>
+          </div>
+        )}
+        {last}
+      </ReadyCard>
+    </ExtensionShell>
+  );
+}
+
+const A4 = () => <ReadyChoice initial="one" />;
 
 function A4bBody() {
   const [from, setFrom] = useState<string | null>("2026-07-01");
   return (
-    <ExtensionShell area="sync">
-      <ReadyCard>
-        <ClientPicker initial="c10" />
+    <ReadyChoice
+      initial="one"
+      client="c10"
+      extra={
         <Field
           label="Belege übernehmen ab"
           htmlFor="duo-cutoff"
@@ -274,13 +357,9 @@ function A4bBody() {
         >
           <DateField id="duo-cutoff" value={from} onChange={setFrom} max="2026-11-27" />
         </Field>
-        <StepsLine />
-        <div>
-          <Button variant="primary">Mandant abgleichen</Button>
-        </div>
-        <p className="lw-ui-hint">Noch kein Abgleich für Hotel Seeblick Betriebs-GmbH.</p>
-      </ReadyCard>
-    </ExtensionShell>
+      }
+      last={<p className="lw-ui-hint">Noch kein Abgleich für Hotel Seeblick Betriebs-GmbH.</p>}
+    />
   );
 }
 
@@ -357,25 +436,7 @@ function OverviewTable({ clients }: { clients: Client[] }) {
 }
 
 function ReadyAll({ open, clients = CLIENTS }: { open: boolean; clients?: Client[] }) {
-  const runnable = clients.filter((c) => !c.skipReason).length;
-  return (
-    <ExtensionShell area="sync">
-      <ReadyCard>
-        <ClientPicker initial="all" clients={clients} />
-        <p className="lw-ui-text">
-          {runnable} werden abgeglichen · {clients.length - runnable} übersprungen
-        </p>
-        <Disclosure summary="Liste ansehen und einzelne abwählen" count={clients.length} defaultOpen={open}>
-          <OverviewTable clients={clients} />
-        </Disclosure>
-        <StepsLine />
-        <div>
-          <Button variant="primary">Alle Mandanten abgleichen</Button>
-        </div>
-        <LastRun />
-      </ReadyCard>
-    </ExtensionShell>
-  );
+  return <ReadyChoice initial="all" clients={clients} openList={open} />;
 }
 
 /* ── Running ───────────────────────────────────────────────────────────── */
@@ -407,9 +468,28 @@ function RunningCard({ title, extra, children }: { title: string; extra?: ReactN
 }
 
 const STEPS_RUNNING = [
-  { key: "filing" as const, state: { kind: "done" as const, result: "7 Belege einsortiert" } },
+  { key: "filing" as const, state: { kind: "done" as const, result: "4 Belege einsortiert" } },
   { key: "fetch" as const, state: { kind: "count" as const, noun: "Beleg", done: 37, total: 120 } },
   { key: "accounts" as const, state: { kind: "open" as const } },
+];
+
+/* The same rows as during the run, in their end state (owner 2026-11-27). */
+const STEPS_OK: { key: StepKey; state: StepRowState }[] = [
+  { key: "filing", state: { kind: "done", result: "4 Belege einsortiert" } },
+  { key: "fetch", state: { kind: "done", result: "12 übertragen, 47 schon in Ludwig" } },
+  { key: "accounts", state: { kind: "done", result: "2 Konten" } },
+];
+
+const STEPS_ISSUES: { key: StepKey; state: StepRowState }[] = [
+  { key: "filing", state: { kind: "done", result: "4 Belege einsortiert" } },
+  { key: "fetch", state: { kind: "problem", result: "9 übertragen, 3 nicht übertragen" } },
+  { key: "accounts", state: { kind: "done", result: "2 Konten" } },
+];
+
+const STEPS_CANCELLED: { key: StepKey; state: StepRowState }[] = [
+  { key: "filing", state: { kind: "done", result: "4 Belege einsortiert" } },
+  { key: "fetch", state: { kind: "cancelled", at: "Beleg 37 von 120" } },
+  { key: "accounts", state: { kind: "notRun" } },
 ];
 
 const A7 = () => (
@@ -428,9 +508,10 @@ const A7b = () => (
       title="Hotel Seeblick Betriebs-GmbH wird abgeglichen"
       extra={
         <Callout>
-          <strong>Erster Belegabruf für Hotel Seeblick Betriebs-GmbH.</strong> In DATEV liegen 214 Belege seit dem
-          01.07.2026, 38 kennt Ludwig schon, 176 werden übertragen. Das dauert einige Minuten.{" "}
-          <TextButton>Belegabruf abbrechen</TextButton>
+          <NoteWithAction action={<TextButton>Belegabruf abbrechen</TextButton>}>
+            <strong>Erster Belegabruf für Hotel Seeblick Betriebs-GmbH.</strong> In DATEV liegen 214 Belege seit dem
+            01.07.2026, 38 kennt Ludwig schon, 176 werden übertragen. Das dauert einige Minuten.
+          </NoteWithAction>
         </Callout>
       }
     >
@@ -448,9 +529,10 @@ const A7b = () => (
 const A9 = () => (
   <ExtensionShell area="sync" mark="dot">
     <Callout tone="warning">
-      <strong>Bitte melden Sie sich bei DATEV an.</strong> Der Abgleich wartet, bis die Anmeldung im DATEV-Fenster
-      abgeschlossen ist, und läuft dann von selbst weiter.{" "}
-      <Button size="sm">DATEV-Fenster zeigen</Button>
+      <NoteWithAction action={<Button size="sm">DATEV-Fenster zeigen</Button>}>
+        <strong>Bitte melden Sie sich bei DATEV an.</strong> Der Abgleich wartet, bis die Anmeldung im DATEV-Fenster
+        abgeschlossen ist, und läuft dann von selbst weiter.
+      </NoteWithAction>
     </Callout>
     <RunningCard title="Musterfirma GmbH wird abgeglichen">
       <StepProgress
@@ -494,58 +576,94 @@ function RowDetail({ r }: { r: BatchRow }) {
   );
 }
 
-type BatchFilter = "all" | "issues" | "skipped";
+const PROBLEM_STATES: SyncState[] = ["succeeded_with_issues", "cancelled"];
 
-function BatchTable({ rows, openIssues }: { rows: BatchRow[]; openIssues?: boolean }) {
-  const [filter, setFilter] = useState<BatchFilter>("all");
-  const issues = rows.filter((r) => r.state === "succeeded_with_issues" || r.state === "cancelled");
-  const skipped = rows.filter((r) => r.state === "skipped");
-  const shown = filter === "issues" ? issues : filter === "skipped" ? skipped : rows;
+function BatchRowView({ r, open }: { r: BatchRow; open?: boolean }) {
+  const ended = r.state === "succeeded" || r.state === "succeeded_with_issues" || r.state === "cancelled";
+  const cells = (
+    <>
+      <span>{r.client.name}</span>
+      <span>{stateBadge(r)}</span>
+      <span>{r.state === "running" ? <Spinner label={r.summary} /> : r.summary}</span>
+    </>
+  );
+  return ended ? (
+    <ExpandableRow summary={cells} defaultOpen={open}>
+      <RowDetail r={r} />
+    </ExpandableRow>
+  ) : (
+    <Row active={r.state === "running"}>
+      <span />
+      {cells}
+    </Row>
+  );
+}
+
+/**
+ * A8/A13 (owner 2026-11-27): a count line over the list — the six states in a
+ * fixed order, each number a quick filter — then the group „Mit Problemen",
+ * then „Alle übrigen" in their fixed order. A client changes group once, when
+ * its sync ends with a problem: an event, not a jump. `ended`: the problems
+ * open, the rest folded with its count.
+ */
+function BatchTable({ rows, ended }: { rows: BatchRow[]; ended?: boolean }) {
+  const [filter, setFilter] = useState<string | null>(null);
+  const [restOpen, setRestOpen] = useState(!ended);
+  const counts = Object.fromEntries(
+    COUNT_ORDER.map((c) => [c.key, rows.filter((r) => c.states.includes(r.state)).length]),
+  );
+  const states = filter ? COUNT_ORDER.find((c) => c.key === filter)?.states : undefined;
+  const shown = states ? rows.filter((r) => states.includes(r.state)) : rows;
+  const problems = shown.filter((r) => PROBLEM_STATES.includes(r.state));
+  const rest = shown.filter((r) => !PROBLEM_STATES.includes(r.state));
   return (
     <Card>
-      <CardHead
-        title="Mandanten"
-        sub={`${shown.length} von ${rows.length}`}
-        actions={
-          <FilterChips
-            label="Zeigen"
-            active={filter}
-            onPick={(k) => setFilter(k as BatchFilter)}
-            options={[
-              { key: "all", label: "Alle", count: rows.length },
-              { key: "issues", label: "Probleme", count: issues.length },
-              { key: "skipped", label: "Übersprungen", count: skipped.length },
-            ]}
-          />
-        }
-      />
-      <Table cols={BATCH_COLS} priority={["primary", "primary", "primary", "meta"]}>
+      <CardHead title="Mandanten" sub={filter ? `${shown.length} von ${rows.length}` : `${rows.length} Mandanten`} />
+      <CardSection>
+        <CountLine counts={counts} active={filter} onPick={setFilter} />
+      </CardSection>
+      <Table
+        cols={BATCH_COLS}
+        priority={["primary", "primary", "primary", "meta"]}
+        sections={[
+          {
+            key: "issues",
+            children:
+              problems.length > 0 ? (
+                <>
+                  <GroupRow>Mit Problemen ({problems.length})</GroupRow>
+                  {problems.map((r) => (
+                    <BatchRowView key={r.client.id} r={r} open={ended} />
+                  ))}
+                </>
+              ) : null,
+          },
+          {
+            key: "rest",
+            children:
+              rest.length > 0 ? (
+                <>
+                  <GroupRow>
+                    <TextButton
+                      icon={<ActionIcon action={restOpen ? "expand" : "collapse"} />}
+                      onClick={() => setRestOpen(!restOpen)}
+                      aria-expanded={restOpen}
+                    >
+                      {problems.length > 0 ? "Alle übrigen" : "Mandanten"} ({rest.length})
+                    </TextButton>
+                  </GroupRow>
+                  {restOpen ? rest.map((r) => <BatchRowView key={r.client.id} r={r} />) : null}
+                </>
+              ) : null,
+          },
+        ]}
+      >
         <HeadRow>
           <span />
           <span>Mandant</span>
           <span>Stand</span>
           <span>Ergebnis</span>
         </HeadRow>
-        {shown.map((r) => {
-          const ended = r.state === "succeeded" || r.state === "succeeded_with_issues" || r.state === "cancelled";
-          const cells = (
-            <>
-              <span>{r.client.name}</span>
-              <span>{stateBadge(r)}</span>
-              <span>{r.summary}</span>
-            </>
-          );
-          return ended ? (
-            <ExpandableRow key={r.client.id} summary={cells} defaultOpen={openIssues && r.state !== "succeeded"}>
-              <RowDetail r={r} />
-            </ExpandableRow>
-          ) : (
-            <Row key={r.client.id} active={r.state === "running"}>
-              <span />
-              {cells}
-            </Row>
-          );
-        })}
       </Table>
     </Card>
   );
@@ -593,8 +711,10 @@ function BatchRunning({ rows, stopping }: { rows: BatchRow[]; stopping?: boolean
       {KEEP_OPEN}
       {stopping ? (
         <Callout>
-          <strong>Wird angehalten.</strong> {current?.client.name} wird noch fertig abgeglichen, die übrigen {waiting}{" "}
-          werden übersprungen. <Button size="sm">Doch weitermachen</Button>
+          <NoteWithAction action={<Button size="sm">Doch weitermachen</Button>}>
+            <strong>Wird angehalten.</strong> {current?.client.name} wird noch fertig abgeglichen, die übrigen {waiting}{" "}
+            werden übersprungen.
+          </NoteWithAction>
         </Callout>
       ) : null}
       <BatchHead done={done} total={runnable.length} skipped={rows.length - runnable.length} stopping={stopping} />
@@ -662,10 +782,10 @@ function Evidence() {
 }
 
 const RETRY = (
-  <div style={row}>
+  <>
     <Button size="sm">Erneut versuchen</Button>
     <span className="lw-ui-hint">Ein neuer Versuch überträgt nichts doppelt.</span>
-  </div>
+  </>
 );
 
 const A10 = () => (
@@ -673,15 +793,10 @@ const A10 = () => (
     <Card>
       <ResultHead name="Musterfirma GmbH" />
       <CardSection>
-        <ResultSummary
+        <SyncResult
           state="succeeded"
           sentence="12 Belege übertragen, Kontoumsätze von 2 Konten geholt."
-          figures={[
-            { label: "Belege übertragen", value: "12" },
-            { label: "schon in Ludwig", value: "47" },
-            { label: "einsortiert", value: "7" },
-            { label: "Konten", value: "2" },
-          ]}
+          steps={STEPS_OK}
           actions={
             <>
               <Button icon={<ActionIcon action="external" />} href="#ludwig">
@@ -702,15 +817,10 @@ const A11 = () => (
     <Card>
       <ResultHead name="Musterfirma GmbH" />
       <CardSection>
-        <ResultSummary
+        <SyncResult
           state="succeeded_with_issues"
           sentence="9 Belege übertragen, 3 Belege nicht übertragen."
-          figures={[
-            { label: "Belege übertragen", value: "9" },
-            { label: "nicht übertragen", value: "3" },
-            { label: "schon in Ludwig", value: "47" },
-            { label: "Konten", value: "2" },
-          ]}
+          steps={STEPS_ISSUES}
         />
       </CardSection>
     </Card>
@@ -724,43 +834,33 @@ const A11 = () => (
       technical={"beleg_kein_pdf · 3 Belege\n2026-0419  Content-Type text/html statt application/pdf\n2026-0423  Content-Type text/html statt application/pdf\n2026-0431  leere Antwort (0 Byte)"}
     />
     <Evidence />
+    <SupportHelp facts={supportFacts("beleg_kein_pdf", "belege")} />
   </ExtensionShell>
 );
 
-function Cancelled({ problem }: { problem: ReactNode }) {
+function Cancelled({ problem, code }: { problem: ReactNode; code: string }) {
   return (
     <ExtensionShell area="sync" mark="dot">
       <Card>
         <ResultHead name="Musterfirma GmbH" />
         <CardSection>
-          <div style={stack}>
-            <ResultSummary
-              state="cancelled"
-              sentence="Stehen geblieben bei „Neue Belege aus DATEV holen“, Beleg 37 von 120."
-              figures={[
-                { label: "Belege übertragen", value: "36" },
-                { label: "einsortiert", value: "7" },
-                { label: "Konten", value: "0" },
-              ]}
-            />
-            <StepProgress
-              steps={[
-                { key: "filing", state: { kind: "done", result: "7 Belege einsortiert" } },
-                { key: "fetch", state: { kind: "cancelled", at: "Beleg 37 von 120" } },
-                { key: "accounts", state: { kind: "open" } },
-              ]}
-            />
-          </div>
+          <SyncResult
+            state="cancelled"
+            sentence="Stehen geblieben bei „Neue Belege aus DATEV holen“, Beleg 37 von 120."
+            steps={STEPS_CANCELLED}
+          />
         </CardSection>
       </Card>
       {problem}
       <Evidence />
+      <SupportHelp facts={supportFacts(code, "belege")} />
     </ExtensionShell>
   );
 }
 
 const A12a = () => (
   <Cancelled
+    code="seite_geschlossen"
     problem={
       <ProblemCard
         tone="warning"
@@ -776,6 +876,7 @@ const A12a = () => (
 
 const A12b = () => (
   <Cancelled
+    code="ludwig_nicht_erreichbar"
     problem={
       <ProblemCard
         kind="retry"
@@ -791,22 +892,14 @@ const A12b = () => (
 
 const A12c = () => (
   <Cancelled
+    code="duo_element_fehlt"
     problem={
       <ProblemCard
         kind="notYou"
         what="DATEV hat anders reagiert als erwartet."
         cause="Ein Element der DATEV-Seite fehlte; vermutlich hat DATEV seine Oberfläche geändert."
-        next="Senden Sie das Protokoll an den Support, wir passen das Plugin an."
-        actions={
-          <div style={row}>
-            <Button size="sm" icon={<ActionIcon action="download" />}>
-              An Support senden
-            </Button>
-            <Button size="sm" variant="tertiary">
-              Erneut versuchen
-            </Button>
-          </div>
-        }
+        next="Schreiben Sie dem Support mit den Angaben unten, wir passen das Plugin an."
+        actions={RETRY}
         technical={"duo_element_fehlt · Schritt belege\nElement „Export starten“ nach 30 s nicht gefunden (Seite Belegübersicht)"}
       />
     }
@@ -818,43 +911,39 @@ const A13 = () => (
     <Card>
       <CardHead title="Ergebnis · Alle Mandanten" sub={<Time value={NOW} size="sm" />} />
       <CardSection>
-        <ResultSummary
+        <SyncResult
           state="succeeded_with_issues"
           sentence="10 Mandanten abgeglichen, 1 mit Problemen, 2 übersprungen."
-          figures={[
-            { label: "Mandanten fertig", value: "9" },
-            { label: "mit Problemen", value: "1" },
-            { label: "übersprungen", value: "2" },
-            { label: "Belege übertragen", value: "281" },
-          ]}
           actions={<Button variant="tertiary">Erneut abgleichen</Button>}
         />
       </CardSection>
     </Card>
-    <BatchTable rows={BATCH_DONE} openIssues />
+    <BatchTable rows={BATCH_DONE} ended />
   </ExtensionShell>
 );
 
 const A14 = () => (
-  <ExtensionShell area="sync" mark="alarm">
-    <ReadyCard>
-      <ClientPicker initial="c11" />
+  <ReadyChoice
+    initial="one"
+    client="c11"
+    last={null}
+    blocked={
       <ProblemCard
         kind="user"
         what="Mandant ohne DATEV-Mandantennummer."
         cause="In Ludwig fehlt für Ingenieurbüro Brandt die DATEV-Mandantennummer; ohne sie findet das Plugin den Mandanten in DATEV nicht."
         next="Tragen Sie die Nummer in Ludwig ein und gleichen Sie dann ab."
         actions={
-          <div style={row}>
+          <>
             <Button size="sm" icon={<ActionIcon action="external" />}>
               In Ludwig öffnen
             </Button>
             <TextButton href="#einstellungen">Alle Prüfpunkte ansehen</TextButton>
-          </div>
+          </>
         }
       />
-    </ReadyCard>
-  </ExtensionShell>
+    }
+  />
 );
 
 /* ── The states ────────────────────────────────────────────────────────── */
@@ -867,22 +956,22 @@ const SYNC_STATES: StateSpec[] = [
   { id: "A1c", title: "Einrichtung · Prüfung läuft", uses: "StepRail, Card, Button", missing: "0263, 0270 Prüfpunkt-Zeile", surface: page, render: () => <A1c /> },
   { id: "A2", title: "Einrichtung · Verbindung abgelaufen", uses: "Callout, Card, Button, Disclosure", missing: "0263", surface: page, render: () => <A2 /> },
   { id: "A3", title: "Plugin zu alt", uses: "Button", missing: "0263, 0264 ProblemCard", surface: page, render: () => <A3 /> },
-  { id: "A4", title: "Bereit · ein Mandant", uses: "Card, Combobox, Button, Badge, Time, TextButton", missing: "0263", surface: page, render: () => <A4 /> },
-  { id: "A4b", title: "Bereit · Stichtag fragen", uses: "Combobox, Field, DateField, Button", missing: "0263", surface: page, render: () => <A4bBody /> },
-  { id: "A5", title: "Bereit · alle", uses: "Combobox, Disclosure, Button, Badge", missing: "0263", surface: page, render: () => <ReadyAll open={false} /> },
-  { id: "A6", title: "Übersicht vor dem Durchgang (aufgeklappt)", uses: "Disclosure, Table, GroupRow, SelectCell, Time, DateRange", missing: "0263", surface: page, render: () => <ReadyAll open /> },
+  { id: "A4", title: "Bereit · ein Mandant", uses: "RadioGroup, Combobox, Button, Badge, Time, TextButton", missing: "0263", surface: page, render: () => <A4 /> },
+  { id: "A4b", title: "Bereit · Stichtag fragen", uses: "RadioGroup, Combobox, Field, DateField, Button", missing: "0263", surface: page, render: () => <A4bBody /> },
+  { id: "A5", title: "Bereit · alle", uses: "RadioGroup, Disclosure, Button, Badge", missing: "0263", surface: page, render: () => <ReadyAll open={false} /> },
+  { id: "A6", title: "Übersicht vor dem Durchgang (aufgeklappt)", uses: "RadioGroup, Disclosure, Table, GroupRow, SelectCell, Time, DateRange", missing: "0263", surface: page, render: () => <ReadyAll open /> },
   { id: "A7", title: "Läuft · ein Mandant", uses: "Callout, Card, Progress, Button", missing: "0263, 0265, 0268", surface: page, render: () => <A7 /> },
   { id: "A7b", title: "Läuft · erster Belegabruf", uses: "Callout, TextButton, Progress", missing: "0263, 0265", surface: page, render: () => <A7b /> },
-  { id: "A8", title: "Läuft · Durchgang", uses: "Progress, Card, Table, ExpandableRow, Badge, FilterChips", missing: "0263, 0265, 0268", surface: page, render: () => <BatchRunning rows={BATCH_RUNNING} /> },
-  { id: "A8b", title: "Läuft · Durchgang wird angehalten", uses: "Callout, Button, Progress, Table", missing: "0263, 0265", surface: page, render: () => <BatchRunning rows={BATCH_RUNNING} stopping /> },
+  { id: "A8", title: "Läuft · Durchgang", uses: "Progress, Card, Table, GroupRow, ExpandableRow, Badge, TextButton", missing: "0263, 0265, 0268, Zählzeile", surface: page, render: () => <BatchRunning rows={BATCH_RUNNING} /> },
+  { id: "A8b", title: "Läuft · Durchgang wird angehalten", uses: "Callout, Button, Progress, Table", missing: "0263, 0265, Zählzeile", surface: page, render: () => <BatchRunning rows={BATCH_RUNNING} stopping /> },
   { id: "A9", title: "Wartet auf DATEV-Anmeldung", uses: "Callout, Button", missing: "0263, 0265", surface: page, render: () => <A9 /> },
-  { id: "A10", title: "Ergebnis · alles gut", uses: "Card, KpiGrid, Button, Disclosure, Table, LogList", missing: "0263, 0269 StatusCallout figures", surface: page, render: () => <A10 /> },
-  { id: "A11", title: "Ergebnis · mit Problemen", uses: "KpiGrid, StatusCallout, Disclosure, CopyTextButton", missing: "0263, 0264, 0269", surface: page, render: () => <A11 /> },
-  { id: "A12a", title: "Ergebnis · abgebrochen (Seite geschlossen)", uses: "KpiGrid, StatusCallout, Button", missing: "0263, 0264, 0265, 0269", surface: page, render: () => <A12a /> },
-  { id: "A12b", title: "Ergebnis · abgebrochen (Ludwig nicht erreichbar)", uses: "StatusCallout, Disclosure, CopyTextButton", missing: "0263, 0264, 0265, 0269", surface: page, render: () => <A12b /> },
-  { id: "A12c", title: "Ergebnis · abgebrochen (liegt nicht an Ihnen)", uses: "StatusCallout, Button", missing: "0263, 0264, 0265, 0269", surface: page, render: () => <A12c /> },
-  { id: "A13", title: "Ergebnis · Durchgang", uses: "KpiGrid, Table, ExpandableRow, FilterChips, Badge", missing: "0263, 0264, 0269", surface: page, render: () => <A13 /> },
-  { id: "A14", title: "Stille Prüfung sperrt den Start", uses: "Combobox, Button, TextButton", missing: "0263, 0264", surface: page, render: () => <A14 /> },
+  { id: "A10", title: "Ergebnis · alles gut", uses: "Card, Button, Disclosure, Table, LogList", missing: "0263, 0265, 0269 Ergebnis", surface: page, render: () => <A10 /> },
+  { id: "A11", title: "Ergebnis · mit Problemen", uses: "Callout, StatusCallout, Disclosure, CopyTextButton, Button", missing: "0263, 0264, 0265, 0269", surface: page, render: () => <A11 /> },
+  { id: "A12a", title: "Ergebnis · abgebrochen (Seite geschlossen)", uses: "Callout, StatusCallout, Button, CopyTextButton", missing: "0263, 0264, 0265, 0269", surface: page, render: () => <A12a /> },
+  { id: "A12b", title: "Ergebnis · abgebrochen (Ludwig nicht erreichbar)", uses: "Callout, StatusCallout, Disclosure, CopyTextButton, Button", missing: "0263, 0264, 0265, 0269", surface: page, render: () => <A12b /> },
+  { id: "A12c", title: "Ergebnis · abgebrochen (liegt nicht an Ihnen)", uses: "Callout, StatusCallout, Disclosure, CopyTextButton, Button", missing: "0263, 0264, 0265, 0269", surface: page, render: () => <A12c /> },
+  { id: "A13", title: "Ergebnis · Durchgang", uses: "Callout, Table, GroupRow, ExpandableRow, Badge, TextButton", missing: "0263, 0264, 0269, Zählzeile", surface: page, render: () => <A13 /> },
+  { id: "A14", title: "Stille Prüfung sperrt den Start", uses: "RadioGroup, Combobox, Button, TextButton", missing: "0263, 0264", surface: page, render: () => <A14 /> },
 ];
 
 /* ── Stories ───────────────────────────────────────────────────────────── */

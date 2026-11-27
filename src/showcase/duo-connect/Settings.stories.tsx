@@ -23,7 +23,7 @@ import {
   type CheckItem,
 } from "@/ui/v3";
 import { READINESS, READINESS_REPORT, STEP_TEXT, USER, type StepKey } from "./fixtures";
-import { DraftsVisible } from "./drafts";
+import { DraftsVisible, SettingSwitch } from "./drafts";
 import { Board as StateBoard, ExtensionShell, Single, type StateSpec } from "./Frame";
 
 const stack = { display: "grid", gap: "var(--space-4)" } as const;
@@ -71,69 +71,47 @@ function ConnectionCard() {
   );
 }
 
-/* ── C2, C3: settings that act at once (0266: no switch, owner 2026-09-04) ── */
-
-function ImmediateSetting({
-  title,
-  text,
-  initial,
-  turnOn,
-  turnOff,
-}: {
-  title: string;
-  text: string;
-  initial: boolean;
-  turnOn: string;
-  turnOff: string;
-}) {
-  const [on, setOn] = useState(initial);
-  return (
-    <Card>
-      <CardHead
-        title={title}
-        headingLevel={3}
-        meta={
-          <span role="status" className="lw-ui-hint">
-            {on ? "eingeschaltet" : "ausgeschaltet"}
-          </span>
-        }
-        actions={
-          <ActionButton size="sm" action={async () => setOn(!on)}>
-            {on ? turnOff : turnOn}
-          </ActionButton>
-        }
-      />
-      <CardSection>
-        <p className="lw-ui-text">{text}</p>
-      </CardSection>
-    </Card>
-  );
-}
+/* ── C2, C3: switches (owner 2026-11-27: lifts 0018 for settings that act at once) ── */
 
 const HANDOVER_TEXT =
   "Lädt Beleg-Dateien, die auf anderem Weg nach Ludwig kamen, zum Beispiel per E-Mail, nach DATEV Unternehmen Online hoch. Welche das sind, bestimmt Ludwig. Buchungen werden nicht übertragen. Gilt für alle Mandanten dieses Geräts.";
 
-function Handover({ on }: { on: boolean }) {
-  return (
-    <ImmediateSetting
-      title={STEP_TEXT.handover}
-      text={HANDOVER_TEXT}
-      initial={on}
-      turnOn="Belegübergabe einschalten"
-      turnOff="Belegübergabe ausschalten"
-    />
-  );
-}
+type HandoverDemo = "off" | "on" | "saving" | "failed";
 
-function ErrorReports() {
+/**
+ * The two settings as switch rows in one card. `handover` shows the switch in
+ * each of its phases: off, on, saving (locked) and failed (sprung back).
+ */
+function StepsAndReports({ handover }: { handover: HandoverDemo }) {
+  const [on, setOn] = useState(handover === "on" || handover === "saving");
+  const [reports, setReports] = useState(true);
+  const [said, setSaid] = useState<string | undefined>();
   return (
-    <ImmediateSetting
-      title="Fehlermeldungen senden"
-      text="Technische Meldungen ohne Mandantendaten an den Anbieter. Hilft, Fehler zu finden, die nicht an Ihnen liegen."
-      initial
-      turnOn="Fehlermeldungen senden"
-      turnOff="Fehlermeldungen nicht mehr senden"
-    />
+    <Card>
+      <CardHead title="Schritte und Meldungen" />
+      <CardSection>
+        <div style={{ display: "grid", gap: "var(--space-6)" }}>
+          <SettingSwitch
+            title={STEP_TEXT.handover}
+            text={HANDOVER_TEXT}
+            on={on}
+            phase={handover === "saving" ? "saving" : handover === "failed" ? "failed" : "idle"}
+            error="Die Einstellung wurde nicht gespeichert: Ludwig ist nicht erreichbar. Versuchen Sie es in ein paar Minuten erneut."
+            onToggle={() => {
+              setSaid(on ? "Belegübergabe ausgeschaltet" : "Belegübergabe eingeschaltet");
+              setOn(!on);
+            }}
+            announce={said}
+          />
+          <SettingSwitch
+            title="Fehlermeldungen senden"
+            text="Technische Meldungen ohne Mandantendaten an den Anbieter. Hilft, Fehler zu finden, die nicht an Ihnen liegen."
+            on={reports}
+            onToggle={() => setReports(!reports)}
+          />
+        </div>
+      </CardSection>
+    </Card>
   );
 }
 
@@ -364,14 +342,14 @@ function StoredDataConfirm() {
 function SettingsPage({
   items = ONE_HINT,
   sentence = "1 Punkt braucht Sie.",
-  handoverOn = false,
+  handover = "off",
   diagnosisOpen = false,
   tokenShown = false,
   confirmStored = false,
 }: {
   items?: CheckItem[];
   sentence?: string;
-  handoverOn?: boolean;
+  handover?: HandoverDemo;
   diagnosisOpen?: boolean;
   tokenShown?: boolean;
   confirmStored?: boolean;
@@ -379,11 +357,7 @@ function SettingsPage({
   return (
     <ExtensionShell area="settings">
       <ConnectionCard />
-      <section style={{ display: "grid", gap: "var(--space-3)" }}>
-        <h2 className="lw-ui-section">Schritte und Meldungen</h2>
-        <Handover on={handoverOn} />
-        <ErrorReports />
-      </section>
+      <StepsAndReports handover={handover} />
       <ReadinessCard items={items} sentence={sentence} />
       <Diagnosis open={diagnosisOpen} tokenShown={tokenShown} />
       {confirmStored ? <StoredDataConfirm /> : null}
@@ -398,17 +372,33 @@ const SETTINGS_STATES: StateSpec[] = [
     id: "C",
     title: "Einstellungen · ein Punkt braucht Sie",
     uses: "Card, CardHead, FieldList, Button, ActionButton (Rückfrage), CheckItems, CopyTextButton, Disclosure",
-    missing: "0263",
+    missing: "0263, 0266 Switch",
     surface: page,
     render: () => <SettingsPage />,
   },
   {
     id: "C2b",
     title: "Belegübergabe eingeschaltet",
-    uses: "Card, CardHead (meta mit Zustandswort), ActionButton",
-    missing: "0263",
+    uses: "Card, CardHead",
+    missing: "0263, 0266 Switch",
     surface: page,
-    render: () => <SettingsPage handoverOn />,
+    render: () => <SettingsPage handover="on" />,
+  },
+  {
+    id: "C2c",
+    title: "Belegübergabe wird gespeichert",
+    uses: "Card, CardHead",
+    missing: "0263, 0266 Switch, 0268 Spinner",
+    surface: page,
+    render: () => <SettingsPage handover="saving" />,
+  },
+  {
+    id: "C2d",
+    title: "Belegübergabe: Fehler, zurückgesprungen",
+    uses: "Card, CardHead",
+    missing: "0263, 0266 Switch",
+    surface: page,
+    render: () => <SettingsPage handover="failed" />,
   },
   {
     id: "C4b",
@@ -484,6 +474,8 @@ export const Board: Story = {
 
 export const C00Settings = one("C");
 export const C02bHandoverOn = one("C2b");
+export const C02cHandoverSaving = one("C2c");
+export const C02dHandoverFailed = one("C2d");
 export const C04bAllReady = one("C4b");
 export const C05aTokenHidden = one("C5a");
 export const C05aTokenShown = one("C5a-shown");

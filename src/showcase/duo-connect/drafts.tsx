@@ -9,12 +9,14 @@
  * ponytail: drafts only. The real blocks come from their specs; none of this
  * moves into src/ui/v3.
  */
-import { createContext, useContext, type CSSProperties, type ReactNode } from "react";
+import { createContext, useContext, useId, useState, type CSSProperties, type ReactNode } from "react";
 import {
-  Badge,
+  Button,
+  Callout,
+  Card,
+  CardHead,
+  CardSection,
   CopyTextButton,
-  KpiGrid,
-  KpiTile,
   Progress,
   StateIcon,
   StatusCallout,
@@ -184,7 +186,7 @@ export function ProblemCard({
                     >
                       {technical}
                     </pre>
-                    <CopyTextButton text={technical} label="Technische Angaben kopieren" size="xs" />
+                    <CopyTextButton text={technical} label="Kopieren" size="xs" />
                   </div>
                 ),
               }
@@ -204,12 +206,15 @@ export type StepRowState =
   | { kind: "done"; result: string }
   | { kind: "problem"; result: string }
   | { kind: "cancelled"; at: string }
+  | { kind: "notRun" }
   | { kind: "login" };
 
 function stepSign(state: StepRowState): ReactNode {
   switch (state.kind) {
     case "open":
       return <StateIcon state="open" />;
+    case "notRun":
+      return <StateIcon state="skipped" />;
     case "busy":
     case "count":
       return <span className="v2spin" aria-hidden="true" style={{ color: "var(--color-accent-700)" }} />;
@@ -226,6 +231,8 @@ function stepWord(state: StepRowState): string {
   switch (state.kind) {
     case "open":
       return "offen";
+    case "notRun":
+      return "nicht gelaufen";
     case "busy":
       return state.note;
     case "count":
@@ -269,7 +276,7 @@ export function StepProgress({ steps }: { steps: { key: StepKey; state: StepRowS
                 style={{
                   fontSize: "var(--fs-ui)",
                   fontWeight: active ? 600 : 400,
-                  color: state.kind === "open" ? "var(--color-text-muted)" : "var(--color-text)",
+                  color: state.kind === "open" || state.kind === "notRun" ? "var(--color-text-muted)" : "var(--color-text)",
                 }}
               >
                 {STEP_TEXT[key]}
@@ -299,48 +306,48 @@ export function StepProgress({ steps }: { steps: { key: StepKey; state: StepRowS
   );
 }
 
-/* ── 0269 ResultSummary ─────────────────────────────────────────────── */
+/* ── 0269 Result: one sentence, then the steps in their end state ──── */
 
 /**
- * The answer first: the state word, one sentence in large type, the figures
- * underneath, the next step as buttons. The badge carries the state, so the
- * sentence does not repeat it.
+ * The answer first (owner 2026-11-27): a sentence that starts with the state
+ * word in bold — no badge above it, no figure tiles. With problems or after a
+ * cancel the surface carries sign and tone of the warning step, so the state
+ * is plain without a mark floating beside it. Under it the same step rows as
+ * during the run (0265), now in their end state: the picture runs from
+ * progress into result without a jump.
  */
-export function ResultSummary({
+export function SyncResult({
   state,
   sentence,
-  figures,
+  steps,
   actions,
 }: {
   state: SyncState;
   sentence: string;
-  figures: { label: string; value: string }[];
+  steps?: { key: StepKey; state: StepRowState }[];
   actions?: ReactNode;
 }) {
-  const s = SYNC_STATE[state];
+  const word = SYNC_STATE[state].label;
+  const warn = SYNC_STATE[state].tone === "warning";
+  const line = (
+    <p role="status" style={{ margin: 0, fontSize: "var(--fs-ui-lg)", lineHeight: "var(--lh-ui-lg)", color: "var(--color-text)" }}>
+      <strong>{word}.</strong> {sentence}
+    </p>
+  );
   return (
-    <Draft spec="0269" name="StatusCallout figures">
+    <Draft spec="0269" name="Ergebnis">
       <div style={{ display: "grid", gap: "var(--space-4)" }}>
-        <div style={{ display: "grid", gap: "var(--space-2)", justifyItems: "start" }}>
-          <Badge tone={s.tone}>{s.label}</Badge>
-          <p
-            role="status"
-            style={{
-              margin: 0,
-              fontSize: "var(--fs-ui-xl)",
-              lineHeight: "var(--lh-ui-xl)",
-              fontWeight: 600,
-              color: "var(--color-text)",
-            }}
-          >
-            {sentence}
-          </p>
-        </div>
-        <KpiGrid columns={figures.length}>
-          {figures.map((f) => (
-            <KpiTile key={f.label} label={f.label} value={f.value} />
-          ))}
-        </KpiGrid>
+        {warn ? (
+          <Callout tone="warning">
+            <span style={{ display: "flex", gap: "var(--space-2)", alignItems: "flex-start" }}>
+              <StateIcon state="warning" />
+              {line}
+            </span>
+          </Callout>
+        ) : (
+          line
+        )}
+        {steps ? <StepProgress steps={steps} /> : null}
         {actions ? (
           <div style={{ display: "flex", flexWrap: "wrap", gap: "var(--space-3)", alignItems: "center" }}>
             {actions}
@@ -348,6 +355,220 @@ export function ResultSummary({
         ) : null}
       </div>
     </Draft>
+  );
+}
+
+/* ── 0266 Switch: a setting that acts at once ───────────────────────── */
+
+export type SwitchPhase = "idle" | "saving" | "failed";
+
+/**
+ * One row: title and explanation on the left, the switch with its word
+ * „An"/„Aus" on the right. The whole row toggles; the switch itself is the
+ * focus stop (role="switch", aria-checked). While saving it is locked; when
+ * saving fails it springs back and the error stands under the row, announced.
+ */
+export function SettingSwitch({
+  title,
+  text,
+  on,
+  onToggle,
+  phase = "idle",
+  error,
+  announce,
+}: {
+  title: string;
+  text: string;
+  on: boolean;
+  onToggle?: () => void;
+  phase?: SwitchPhase;
+  error?: string;
+  /** What the page says once the change is stored: „Belegübergabe eingeschaltet". */
+  announce?: string;
+}) {
+  const [hover, setHover] = useState(false);
+  const id = useId();
+  const locked = phase === "saving";
+  const toggle = () => {
+    if (!locked) onToggle?.();
+  };
+  return (
+    <Draft spec="0266" name="Switch">
+      <div style={{ display: "grid", gap: "var(--space-2)" }}>
+        <div
+          onClick={toggle}
+          onMouseEnter={() => setHover(true)}
+          onMouseLeave={() => setHover(false)}
+          style={{
+            display: "grid",
+            gridTemplateColumns: "minmax(0, 1fr) auto",
+            gap: "var(--space-4)",
+            alignItems: "center",
+            padding: "var(--space-3)",
+            margin: "calc(-1 * var(--space-3))",
+            borderRadius: "var(--radius-md)",
+            cursor: locked ? "progress" : "pointer",
+            background: hover && !locked ? "var(--color-bg-soft)" : undefined,
+          }}
+        >
+          <span style={{ display: "grid", gap: "var(--space-1)" }}>
+            <span id={`${id}-t`} style={{ fontSize: "var(--fs-ui-md)", fontWeight: 600, color: "var(--color-text)" }}>
+              {title}
+            </span>
+            <span id={`${id}-d`} className="lw-ui-hint">
+              {text}
+            </span>
+          </span>
+          <span style={{ display: "inline-flex", alignItems: "center", gap: "var(--space-2)" }}>
+            {locked ? <Spinner label="wird gespeichert" /> : null}
+            <span className="lw-ui-hint" aria-hidden="true" style={{ minWidth: "var(--space-6)", textAlign: "right" }}>
+              {on ? "An" : "Aus"}
+            </span>
+            <button
+              type="button"
+              role="switch"
+              aria-checked={on}
+              aria-labelledby={`${id}-t`}
+              aria-describedby={`${id}-d`}
+              disabled={locked}
+              style={{
+                position: "relative",
+                width: "calc(var(--space-8) + var(--space-2))",
+                height: "var(--space-6)",
+                padding: 0,
+                border: "none",
+                borderRadius: "var(--radius-pill)",
+                background: on ? "var(--color-primary)" : "var(--color-border-control)",
+                opacity: locked ? 0.6 : 1,
+                cursor: "inherit",
+              }}
+            >
+              <span
+                aria-hidden="true"
+                style={{
+                  position: "absolute",
+                  top: "var(--space-1)",
+                  left: on ? "calc(var(--space-4) + var(--space-2))" : "var(--space-1)",
+                  width: "var(--space-4)",
+                  height: "var(--space-4)",
+                  borderRadius: "var(--radius-pill)",
+                  background: "var(--color-surface)",
+                  boxShadow: "var(--shadow-xs)",
+                }}
+              />
+            </button>
+          </span>
+        </div>
+        {phase === "failed" && error ? (
+          <p role="alert" className="v2field__err" style={{ margin: 0 }}>
+            {error}
+          </p>
+        ) : null}
+        {announce ? (
+          <span role="status" className="v2vh">
+            {announce}
+          </span>
+        ) : null}
+      </div>
+    </Draft>
+  );
+}
+
+/* ── Count line of a batch: the six states, each a quick filter ─────── */
+
+/** Fixed order (owner 2026-11-27): problems first, then what runs, then the rest. */
+export const COUNT_ORDER: { key: string; label: string; states: SyncState[] }[] = [
+  { key: "issues", label: "Mit Problemen", states: ["succeeded_with_issues"] },
+  { key: "cancelled", label: "Abgebrochen", states: ["cancelled"] },
+  { key: "running", label: "Läuft", states: ["running"] },
+  { key: "queued", label: "Wartet", states: ["queued"] },
+  { key: "succeeded", label: "Fertig", states: ["succeeded"] },
+  { key: "skipped", label: "Übersprungen", states: ["skipped"] },
+];
+
+/**
+ * Word and number per state; a 0 stays in its place, grey and inert, so the
+ * line never shifts. Each number filters the list; pressed again, it lets go.
+ */
+export function CountLine({
+  counts,
+  active,
+  onPick,
+}: {
+  counts: Record<string, number>;
+  active: string | null;
+  onPick: (key: string | null) => void;
+}) {
+  return (
+    <Draft spec="ohne Spec" name="Zählzeile">
+      <div role="group" aria-label="Mandanten nach Stand filtern" style={{ display: "flex", flexWrap: "wrap", gap: "var(--space-1) var(--space-4)" }}>
+        {COUNT_ORDER.map((c) => {
+          const n = counts[c.key] ?? 0;
+          const on = active === c.key;
+          return (
+            <button
+              key={c.key}
+              type="button"
+              aria-pressed={on}
+              disabled={n === 0}
+              onClick={() => onPick(on ? null : c.key)}
+              style={{
+                display: "inline-flex",
+                gap: "var(--space-1)",
+                alignItems: "baseline",
+                minHeight: "var(--space-6)",
+                padding: "0 var(--space-1)",
+                border: "none",
+                borderBottom: on ? "var(--border-1-strong)" : "none",
+                background: "none",
+                fontSize: "var(--fs-ui)",
+                fontWeight: on ? 600 : 400,
+                color: n === 0 ? "var(--color-text-subtle)" : "var(--color-text)",
+                cursor: n === 0 ? "default" : "pointer",
+              }}
+            >
+              {c.label}
+              <span className="lw-numeric" style={{ fontWeight: 600 }}>
+                {n}
+              </span>
+            </button>
+          );
+        })}
+      </div>
+    </Draft>
+  );
+}
+
+/* ── Help from the support: no draft mark, every part exists ───────── */
+
+/** Technical facts without client data: error code, step, version, browser, run id. */
+export function supportFacts(code: string, step: string): string {
+  return `Fehler-Code ${code} · Schritt ${step} · Ludwig DUO-Connect 0.11.0 · Chrome 131 · Abgleich 2026-11-27-0911-a3f2`;
+}
+
+/**
+ * End of a result and the log (owner 2026-11-27): what goes to the support, and
+ * the two ways there. „E-Mail an den Support" opens the mail program with the
+ * facts and downloads the log; nothing is sent until the person sends it.
+ */
+export function SupportHelp({ facts }: { facts: string }) {
+  return (
+    <Card>
+      <CardHead title="Hilfe vom Support" headingLevel={3} />
+      <CardSection>
+        <div style={{ display: "grid", gap: "var(--space-3)", justifyItems: "start" }}>
+          <p className="lw-ui-text">Das Protokoll enthält Mandantendaten. Geben Sie es nur an den Ludwig-Support weiter.</p>
+          <div style={{ display: "flex", flexWrap: "wrap", gap: "var(--space-3)" }}>
+            <CopyTextButton text={facts} label="Angaben kopieren" />
+            <Button size="sm">E-Mail an den Support</Button>
+          </div>
+          <p className="lw-ui-hint">
+            Ihr E-Mail-Programm öffnet sich mit allen Angaben. Das Protokoll wird dabei heruntergeladen — hängen Sie die
+            Datei an. Gesendet wird erst, wenn Sie selbst senden.
+          </p>
+        </div>
+      </CardSection>
+    </Card>
   );
 }
 

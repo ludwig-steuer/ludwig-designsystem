@@ -92,7 +92,7 @@ Abbildung von B8 (`code` → Anwendertext, nächster Schritt, `klasse`) liegt
 in der Fehler-Datei des Plugins. GLOSSARY: kein neuer Begriff.
 
 Was die Karte **nicht** kann (bewusst):
-- Sie sammelt keine Probleme und zählt sie nicht. Den Satz darüber („3 Belege nicht übertragen“) trägt `ResultSummary` (0269).
+- Sie sammelt keine Probleme und zählt sie nicht. Den Satz darüber („3 Belege nicht übertragen“) trägt `StatusCallout layout="sentence"` (0269).
 - Sie wiederholt nichts selbst. „Erneut versuchen“ ist der Knopf des Aufrufers, sein Warten zeigt `ActionButton`.
 - Sie sagt sich nicht per Live-Region an (Offene Frage 2).
 - Sie zeigt nur einen Knopf (Ausbau).
@@ -104,7 +104,7 @@ Was die Karte **nicht** kann (bewusst):
 - **Hover:** Die Karte ist nicht klickbar und hat deshalb kein Hover. Hover tragen nur der Knopf und die Zusammenfassung, wie in `Disclosure`.
 - **Fokus:** Der Fokusring von Knopf, Zusammenfassung und Kopierknopf liegt außen und wird nicht vom Rahmen beschnitten.
 - **Zustände:** gefüllt. Die anderen vier gelten nicht, siehe Stories.
-- **Ansage:** keine eigene. Im Ergebnis sagt `ResultSummary` (0269) den Satz an, die Karten sind Inhalt darunter. Zeigt ein Aufrufer eine einzelne Karte als Antwort auf eine Handlung (Verbinden scheitert), setzt er sie in seine Live-Region.
+- **Ansage:** keine eigene. Im Ergebnis sagt `StatusCallout layout="sentence"` (0269) den Satz an, die Karten sind Inhalt darunter. Zeigt ein Aufrufer eine einzelne Karte als Antwort auf eine Handlung (Verbinden scheitert), setzt er sie in seine Live-Region.
 - **Server-Component:** keine Hooks, kein `"use client"`. `CopyTextButton` ist ein Client-Kind.
 
 ## Stories
@@ -121,7 +121,7 @@ Plugins (Musterfirma GmbH, Abgleich vom 27.11.2026).
 | `Edge` | ohne `cause`: der feste Satz steht allein · ohne `action`: kein leerer Platz rechts · ohne `technical`: kein Aufklapper · `context` mit langem Mandantennamen („Bäckerei Schulze & Söhne Gebäudereinigung und Hausmeisterservice GmbH“) · `technical` mit 40 Zeilen Stack und einer 300 Zeichen langen Zeile ohne Leerzeichen. Dieselben Karten in 320 px Breite: `action` unter dem Text, keine waagerechte Scrollleiste der Seite |
 
 Nicht anwendbare Zustände und warum:
-- **leer:** Ohne Problem gibt es keine Karte. „Nichts zu tun“ oder „alles übertragen“ sagt `ResultSummary` (0269).
+- **leer:** Ohne Problem gibt es keine Karte. „Nichts zu tun“ oder „alles übertragen“ sagt `StatusCallout layout="sentence"` (0269).
 - **leer nach Filter:** Die Karte filtert nichts.
 - **lädt:** Ein Problem ist ein Ergebnis. Ein laufender neuer Versuch zeigt sich am Knopf (`ActionButton` `pending`).
 - **Fehler:** Die Karte ist der Fehler. Scheitert das Kopieren, meldet das `CopyTextButton` (seine Story).
@@ -140,7 +140,7 @@ Nicht anwendbare Zustände und warum:
    vorübergehend.“ (`retry`) und „Das liegt nicht an Ihnen.“ (`support`).
    Neue Wörter entscheidet der Owner. **Ohne Antwort:** diese beiden Sätze.
 2. **Sagt sich die Karte selbst an** (`role="alert"`)? **Ohne Antwort:**
-   nein. Im Ergebnis spricht `ResultSummary`. Drei Karten als drei Alarme
+   nein. Im Ergebnis spricht der Satz in `StatusCallout layout="sentence"` (0269). Drei Karten als drei Alarme
    hintereinander wären Lärm.
 
 ## Abnahmekriterien
@@ -169,7 +169,7 @@ Variabel (aus dieser Spec):
 - [ ] Tastatur: Tab-Reihenfolge `action` → „Technisch“ → (offen) Textblock → Kopieren; Enter und Leertaste klappen; der Fokusring ist sichtbar und nicht beschnitten (`Filled`)
 - [ ] Kontrast gemessen: Text ≥ 4,5:1, Rahmen und Zeichen ≥ 3:1 gegen `--color-surface`, je Stufe (`Levels`)
 - [ ] `ProblemCard.tsx` trägt kein `"use client"` und keinen Hook
-- [ ] Tut bewusst nicht: keine Live-Region, keine Wiederholung, keine Zählung. `@instead` nennt `ResultSummary` (0269) für den Satz darüber und `ActionButton` für den Fehler eines einzelnen Klicks
+- [ ] Tut bewusst nicht: keine Live-Region, keine Wiederholung, keine Zählung. `@instead` nennt `StatusCallout layout="sentence"` (0269) für den Satz darüber und `ActionButton` für den Fehler eines einzelnen Klicks
 - [ ] Die Nachbarn bekommen ihren Verweis: `StatusCallout` und `Messages` nennen in `@instead` „ein Problem nach einem Vorgang, mit Ursache, Schritt und technischem Text → ProblemCard“
 
 ## Abnahme

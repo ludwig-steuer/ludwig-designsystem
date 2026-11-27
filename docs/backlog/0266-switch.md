@@ -1,161 +1,242 @@
-# 0266 · Sofort wirkende Einstellung: `ActionButton` statt `Switch`
+# 0266 · Switch: Schalter für sofort wirkende Einstellungen
 
 | | |
 |---|---|
 | Status | spec |
-| Stufe | Seitenaufgabe auf `primitives/` (`Card`, `CardHead`, `CardSection`, `ActionButton`), **kein neuer Export**. Dazu eine Erweiterung von `ActionButton`: der Fehler neben dem Knopf wird angesagt |
-| Klassen-Test | ja: eine Einstellung, die sofort gilt, mit Wort und Erklärsatz, gibt es in jeder Software |
-| Quelle | Anfrage plugin-mananger 2026-11-27 (Simon): `ludwig-plugin/docs/spec-bausteine.md` (Branch `umbau`), Zeile „Schalter“ („Belegübergabe, Fehlermeldungen senden · an, aus, gesperrt; mit Erklärtext“). Fachtext: `…/docs/spec-oberflaeche-und-fehler.md` C2 und C5, `…/docs/begriffe.md` |
-| Ersetzt | nichts im Set. Im Plugin die heutigen Kästchen der Einstellungsseite |
-| Blockiert | Plugin-Paket C5 (Bereich Einstellungen), 0263 `ExtensionShell` (Story des Bereichs Einstellungen) |
-| Spec von / am | designsystem, 2026-11-27 |
+| Stufe | `primitives/` · eigene Datei `primitives/Switch.tsx`, Gruppe Formular neben der Form-Familie |
+| Klassen-Test | „Ergäbe das auch in einer Versicherungs-App Sinn?“ → ja, eine Einstellung, die sofort gilt und sich zurückschalten lässt, kennt jede Software |
+| Quelle | Owner-Entscheid 2026-11-27 (Simon über plugin-mananger, Feedback zu den Entwürfen). Er hebt 0018 für sofort wirkende, umkehrbare An/Aus-Einstellungen auf. Seitenprofil `docs/seiten/duo-connect.md`, „Nachtrag 2“, Zeile C2, C3. Fachtext `ludwig-plugin/docs/spec-oberflaeche-und-fehler.md` (Branch `umbau`) C2 und C5, Wörter aus `…/docs/begriffe.md` |
+| Ersetzt | nichts im Set (`role="switch"` 0×). Im Plugin die Kästchen der heutigen Einstellungsseite |
+| Blockiert | Plugin-Paket C5 (Bereich Einstellungen) und 0263 `ExtensionShell` (Story des Bereichs Einstellungen) |
+| Setzt voraus | 0268 `Spinner` (`size="sm"`, `label`) |
+| Spec von / am | designsystem, 2026-11-27 (ersetzt den Entwurf „`ActionButton` statt `Switch`“ vom selben Tag) |
 
 ## Ziel
 
-Die Steuerfachangestellte öffnet im Plugin den Bereich Einstellungen, um die
-Belegübergabe einzuschalten. Sie sieht, ob die Belegübergabe gerade läuft,
-liest in einem Satz, was sie tut, und schaltet mit einem Klick auf einen Knopf
-um, der die Handlung in Worten nennt („Belegübergabe einschalten“). Es gibt
-keinen Speichern-Knopf: Die Einstellung gilt sofort, das Zustandswort wechselt,
-und ein Vorleseprogramm sagt den neuen Zustand an. Dieselbe Form trägt
-„Fehlermeldungen senden“.
+Die Steuerfachangestellte öffnet im Plugin die Einstellungen und will die
+Belegübergabe einschalten. Sie liest den Namen und darunter in zwei Sätzen,
+was die Belegübergabe tut. Rechts steht der Schalter mit dem Wort „Aus“. Sie
+klickt irgendwo in die Zeile oder drückt die Leertaste. Der Schalter steht auf
+„An“, die Einstellung gilt sofort, einen Speichern-Knopf gibt es nicht. Dauert
+das Speichern, sieht sie „wird gespeichert …“. Misslingt es, springt der
+Schalter zurück, und der Grund steht darunter. Ein Vorleseprogramm sagt
+„Belegübergabe eingeschaltet“, sobald der Wert gespeichert ist. „Fehlermeldungen
+senden“ hat dieselbe Form.
 
 ## Einordnung
 
-- **Entschieden ist schon:** Einen Schalter hat der Owner am 2026-09-04
-  verworfen (0018, `design-guidelines.md` §11 Zeile „Schalter (Toggle)“).
-  0018 nennt zwei Formen. Eine Sofort-Umschaltung ist ein `Button` mit Wort
-  und Ladezustand. Eine Formularangabe, die mit dem Formular gespeichert wird,
-  ist ein `Checkbox`. Die App macht es genauso: `ClientActiveToggle` ist mit
-  Absicht ein Knopf, „ein Klick mit klarer Beschriftung statt eines
-  Schalters, den man versehentlich streift“.
-- **Wiederverwenden (§3 Regel 1):** Beide Plugin-Einstellungen gelten sofort
-  und werden im Gerät gemerkt (C2: „Der Schalter ist gemerkt und gilt für
-  alle Mandanten des Geräts“). Das ist der Fall Sofort-Umschaltung. Den
-  Ablauf trägt `ActionButton` (`@when` „Every action that runs, can take a
-  moment and can fail“): er sperrt den Knopf während der Handlung, zeigt den
-  Fehler neben dem Knopf und meldet bewusst keinen Erfolg, denn den zeigt das
-  Ergebnis. Das Ergebnis ist hier das Zustandswort. Den Rahmen tragen `Card`,
-  `CardHead` (`title`, `meta`, `actions`) und `CardSection` für den Erklärsatz.
-- **Warum kein `Checkbox` (§3 Regel 2 geprüft):** Ein `Checkbox` mit
-  Erklärtext wäre eine Prop (`hint`, wie `RadioOption.hint`). Er stünde aber
-  für „wird mit dem Formular gespeichert“, und genau das trifft hier nicht zu.
-  Ein Kästchen, das ohne Speichern sofort wirkt, liest sich in Ludwig anders
-  als jedes andere Kästchen. Ein `Checkbox` bleibt richtig für die Auswahl
-  einzelner Schritte unter „Diagnose“, weil die erst mit dem Start des
-  Probelaufs gilt.
-- **Warum kein `Switch`, auch nicht nach Weg B von 0018:** Weg B erlaubt einen
-  Schalter nur für **folgenlose** Einstellungen. Beide Plugin-Einstellungen
-  haben Folgen. Die Belegübergabe lädt Dateien nach DATEV Unternehmen Online
-  hoch, die Fehlermeldungen schicken Daten an den Anbieter. Hier gilt dieselbe
-  Begründung wie bei `ClientActiveToggle`.
-- **Erweitert (§3 Regel 2):** `ActionButton` sagt einen Fehler neben dem Knopf
-  heute nicht an. Der Zweig ohne Dialog rendert
-  `<span className="v2act__err">` ohne Rolle, der Dialogzweig dagegen
-  `role="alert"`. Ohne Ansage hört ein Vorleseprogramm nach dem Klick nichts.
-  Dafür kommt keine neue Prop dazu, nur dasselbe Attribut wie im Dialogzweig.
-  Es gilt für jeden `ActionButton`.
-- **Zuschnitt:** kein neuer Baustein. Die Komposition hat keinen eigenen
-  Zustand: Ladezustand und Fehler hält `ActionButton`, den Wert hält der
-  Aufrufer. Sie kommt auf genau einem Bildschirm vor (§3 Regel 4 greift nicht).
-  Sie wird als Story vorgeführt, damit Plugin und App sie gleich bauen.
-- **Setzt auf:** `Card`, `CardHead`, `CardSection` (`primitives/Table.tsx`),
-  `ActionButton`.
+- **Wiederverwenden (§3 Regel 1, geprüft):**
+  - `Checkbox` (`@when` „A single yes/no inside a form or a row“) steht für
+    eine Angabe, die mit dem Formular gespeichert wird. Ein Kästchen, das
+    ohne Speichern sofort wirkt, läse sich anders als jedes andere Kästchen
+    im Set.
+  - `ActionButton` trägt eine einmalige Handlung und nennt sie im Knopf.
+    Einen dauerhaften Zustand zeigt er nicht.
+  - `Segmented` schaltet Ansichten, nicht Einstellungen.
+  - Kein `@when` trägt den Fall.
+- **Neu, weil (§3 Regel 3):** kein `@when` passt, kein Fachwort nötig, zwei
+  Verwendungen heute (Belegübergabe, Fehlermeldungen senden) und dazu der
+  Owner-Entscheid. Aus vorhandenen Primitives ist es nicht in 15 Zeilen zu
+  bauen, weil der Baustein eigenen Zustand trägt: Sperre beim Speichern,
+  Rücksprung, Fehler, Ansage.
+- **Das Bedenken aus 0018, gelöst im Schalter statt mit einem Nein:** 0018
+  fürchtete einen Schalter ohne Wort, „den man versehentlich streift“. Die
+  Antwort steckt im Baustein selbst:
+  - Das Wort „An“/„Aus“ steht immer sichtbar daneben. Farbe zeigt den
+    Zustand nie allein.
+  - Der Name und ein Erklärsatz stehen in derselben Zeile.
+  - Jede Änderung wird angesagt.
+  - Der Rückweg ist derselbe Klick. Eine unumkehrbare Folge darf ein
+    Schalter nicht haben, dafür gibt es `ActionButton` mit Rückfrage.
+- **Zuschnitt (§4):** eigene Datei, nicht `Form.tsx`. `Switch` braucht
+  `"use client"` (Zustand, `useId`, Zeitgeber), `Form.tsx` ist ohne. Läge der
+  Schalter dort, würden `Field`, `Input` und `Checkbox` zu Client-Komponenten
+  (Muster `Row` ↔ `ClickRow`). Im Barrel steht `Switch` bei der Form-Familie,
+  der Story-Titel liegt in der Gruppe Formular. Mit den Props aus der Tabelle
+  und sieben Stories liegt er unter den Grenzen.
+- **Setzt auf:** `Spinner` (0268), `ActionResult` aus `ActionButton` (derselbe
+  Ergebnistyp, keine zweite Definition), `.v2vh` für die Ansage.
+- **Mitgeändert, damit Gleiches gleich ist:** `ActionButton` sagt einen
+  Fehler neben dem Knopf heute nur im Dialogzweig an (`role="alert"`), im
+  einfachen Zweig nicht (`<span className="v2act__err">`). Der Schalter sagt
+  seinen Fehler an, also bekommt auch dieser Zweig `role="alert"`. Es gibt
+  keine neue Prop. 0267 setzt darauf auf.
 
 ## Schnittstelle
 
-Keine neue Prop und kein neuer Export. Die Seite baut jede Einstellung aus
-diesen Teilen:
+| Prop | Typ | Pflicht | Bedeutung | Nachweis (Story) |
+|---|---|---|---|---|
+| `label` | `string` | ja | Name der Einstellung („Belegübergabe“). Titel der Zeile, zugänglicher Name über `aria-labelledby` und Teil der Ansage | `Filled` |
+| `hint` | `ReactNode` | nein | Erklärtext unter dem Titel, ein bis drei Sätze, über `aria-describedby` verknüpft. Dasselbe Wort wie `RadioOption.hint` und `Field.hint` | `Filled`, `LongText` |
+| `checked` | `boolean` | ja | Der gespeicherte Wert. Der Aufrufer hält ihn und setzt ihn nach dem Speichern neu | `Filled`, `Interactive` |
+| `onChange` | `(checked: boolean) => void \| Promise<ActionResult>` | ja | Wird mit dem neuen Wert gerufen. `void` heißt: gilt sofort, ohne Warten. Ein Promise heißt: Der Schalter steht schon auf dem neuen Wert und ist gesperrt, bis das Promise antwortet. Antwort `{ error }` oder ein Wurf → Rücksprung mit Fehler. Sonst → Ansage | `Interactive`, `Saving`, `Failed` |
+| `disabledReason` | `string` | nein | Gesetzt heißt gesperrt. Der Satz steht unter dem Erklärtext und ist mit `aria-describedby` verknüpft. Gesperrt ohne Grund geht nicht, das sichert der Typ | `Locked` |
 
-| Teil | Baustein · Prop | Inhalt | Nachweis (Story) |
-|---|---|---|---|
-| Name der Einstellung | `CardHead.title` | „Belegübergabe“, „Fehlermeldungen senden“ (Wörter aus `ludwig-plugin/docs/begriffe.md`) | `ActionButton/ImmediateSetting` |
-| Zustand als Wort | `CardHead.meta`, darin ein `<span role="status">` | „eingeschaltet“ oder „ausgeschaltet“, grau wie jedes `meta`, **keine Farbe** (Farbe kodiert Kritikalität, nicht den Wert) | `ImmediateSetting` |
-| Umschalten | `CardHead.actions` → `ActionButton` mit `action`, `pendingLabel`, `variant="secondary"` | Imperativ mit Objekt, nennt die Folge: „Belegübergabe einschalten“ oder „Belegübergabe ausschalten“ | `ImmediateSetting` |
-| Was die Einstellung tut | `CardSection` | ein bis zwei Sätze, z. B. „Lädt Beleg-Dateien, die auf anderem Weg nach Ludwig kamen (zum Beispiel per E-Mail), nach DATEV Unternehmen Online hoch. Welche das sind, bestimmt Ludwig. Buchungen und Buchungsanweisungen werden nicht übertragen.“ | `ImmediateSetting` |
-| Gesperrt mit Grund | `ActionButton.disabled` + ein Satz in der `CardSection` | „Erst möglich, wenn das Plugin mit Ludwig verbunden ist.“ | `ImmediateSettingLocked` |
+Typen: `ActionResult` aus `primitives/ActionButton.tsx` (`void | { error?: string }`).
+Aus `src/ludwig/` kommt nichts, der Schalter kennt keine Entität.
+GLOSSARY: Die Wörter „Belegübergabe“ und „Fehlermeldungen senden“ kommen nur
+als Daten in Stories vor (aus `ludwig-plugin/docs/begriffe.md`).
 
-Geändert wird `ActionButton` im Zweig ohne Dialog:
-`<span className="v2act__err" role="alert">`. Die Props bleiben, wie sie sind.
+Feste Wörter im Baustein. Sie sind vom Owner freigegeben (Profil, Nachtrag 2):
+„An“, „Aus“, „wird gespeichert …“, die Ansage „{label} eingeschaltet.“ bzw.
+„{label} ausgeschaltet.“ und der fette Anfang eines Fehlers „Nicht
+gespeichert.“.
 
-Was die Komposition **nicht** kann (bewusst):
-- Sie speichert nichts. `action` ruft der Aufrufer auf, im Plugin die
-  Schicht „Daten für die Oberfläche“ (C0).
-- Sie fragt nicht nach. Beide Einstellungen sind umkehrbar, und der
-  Rückweg ist derselbe Knopf. Ein Bestätigungsdialog gilt nur für
-  Unumkehrbares.
-- Sie meldet keinen Erfolg per `Toast`. Der Erfolg ist das neue Zustandswort,
-  angesagt über `role="status"`. Ein Toast daneben wäre dieselbe Nachricht
-  doppelt.
-- Es gibt keine Taste dafür. Eine Einstellung ändert man selten, und
-  Beschleuniger gibt es nur für Häufiges.
+Markup, das der Bau einhält:
+
+```
+<div class="v2switch">                                  ← Zeile, Hover-Grund
+  <label class="v2switch__row">                         ← die ganze Zeile ist das Ziel
+    <span class="v2switch__text">
+      <span id={labelId} class="v2switch__label">{label}</span>
+      <span id={hintId} class="v2switch__hint">{hint}</span>
+      <span id={reasonId} class="v2switch__reason">{disabledReason}</span>
+    </span>
+    <span class="v2switch__state" aria-hidden="true">An | Aus</span>
+    <input type="checkbox" role="switch" class="v2switch__knob"
+           aria-labelledby={labelId} aria-describedby={hintId reasonId errorId}
+           checked={shown} aria-disabled={pending || undefined} disabled={!!disabledReason} />
+  </label>
+  <div class="v2switch__msg">                           ← Spinner (ab 300 ms) oder Fehler
+    <span id={errorId} role="alert">…</span>
+  </div>
+  <span class="v2vh" role="status">{announcement}</span> ← immer im DOM, anfangs leer
+</div>
+```
+
+`aria-checked` folgt bei `input type="checkbox" role="switch"` dem nativen
+`checked`. Ein eigenes `aria-checked` wäre eine zweite Wahrheit und wird nicht
+gesetzt.
+
+Was der Schalter **nicht** kann (bewusst):
+- Er ist kein Formularfeld: kein `name`, kein Wert in `FormData`. Eine Angabe
+  mit Speichern-Knopf ist ein `Checkbox`.
+- Er fragt nicht nach. Eine Einstellung mit unumkehrbarer Folge gehört
+  nicht in einen Schalter.
+- Er meldet keinen Erfolg per `Toast`. Der Erfolg ist die Stellung plus Wort,
+  angesagt über `role="status"`.
+- Er hat keine eigene Taste. Eine Einstellung ändert man selten.
+- Er speichert nichts selbst und lädt nichts. `onChange` ruft der Aufrufer
+  auf.
 
 ## Verhalten
 
-- **Tastatur:** Tab erreicht den Knopf, Enter oder Leertaste löst ihn aus. Der
-  Fokus bleibt auf dem Knopf, auch wenn das Wort wechselt („einschalten“ →
-  „ausschalten“), weil `ActionButton` dasselbe Element behält.
-- **Hover und Fokus:** kommen von `Button`. Die Trefferfläche wird gemessen,
-  sie muss mindestens 24 × 24 px groß sein. Der Fokusring ist sichtbar.
+- **Ziel und Maus:** Die ganze Zeile ist ein `<label>`. Ein Klick auf Titel,
+  Erklärtext, Wort oder Knopf schaltet um. Die Zeile antwortet auf Hover mit
+  `--color-bg-soft` wie `.v2radioline` und zeigt `cursor: pointer`. Gesperrt
+  hat sie keinen Hover-Grund und zeigt `cursor: not-allowed`. Die Zeile ist
+  mindestens 24 px hoch (gemessen). Der Knopf allein misst 32 × 18 px, sein
+  Daumen 14 px. Die Maße stehen in `v3.css`.
+- **Tastatur:** Tab erreicht den Schalter, die Leertaste schaltet (nativ).
+  Enter schaltet nicht: Das ist ein natives Kästchen, und Enter ist laut
+  APG-Muster nur optional (offene Frage 2). Der Fokusring
+  (`outline` in `--color-focus`, mit Abstand) liegt um den Knopf und ist bei
+  `:focus-visible` sichtbar.
+- **Stellung und Wort:** An heißt Knopf gefüllt in `--color-primary-700`,
+  Daumen weiß rechts, Wort „An“. Aus heißt Rahmen `--color-border-control`
+  auf `--color-surface`, Daumen in `--color-border-control` links, Wort
+  „Aus“. Der gefüllte Grund steht für „aktiv/ausgewählt“ wie beim
+  `Checkbox` (`accent-color: --color-primary-700`), nicht für einen Wert. Das
+  Wort trägt den Zustand immer mit. Es hat eine feste Breite (die von „Aus“),
+  damit der Knopf beim Wechsel nicht rückt, und es ist `aria-hidden`, weil
+  der Zustand über `checked` schon vorgelesen wird.
+- **Bewegung:** Der Daumen gleitet mit `--duration-fast` und
+  `--ease-standard`. Bei `prefers-reduced-motion: reduce` springt er ohne
+  Übergang.
+- **Sofort wirkend mit Promise:**
+  1. Ein Klick stellt den Schalter auf den neuen Wert, ruft `onChange(neu)`
+     und sperrt ihn mit `aria-disabled="true"`. Es ist nicht `disabled`, weil
+     der Fokus sonst verloren ginge. Weitere Klicks und die Leertaste wirken
+     nicht, solange er gesperrt ist.
+  2. Dauert das Promise länger als 300 ms, steht in der Meldungszeile
+     `Spinner size="sm" label="wird gespeichert …"`. Speichern in
+     `chrome.storage` dauert Millisekunden, dann blitzt nichts auf.
+  3. Antwort `{ error }` oder ein Wurf: Der Schalter springt auf `checked`
+     zurück. In der Meldungszeile steht
+     „**Nicht gespeichert.** {error}“, bei einem Wurf ohne Text „**Nicht
+     gespeichert.** Die Einstellung ist unverändert. Bitte versuchen Sie es
+     noch einmal.“ Der Fehler wird mit `role="alert"` angesagt, ist mit
+     `aria-describedby` verknüpft und verschwindet beim nächsten Umschalten.
+  4. Erfolg: Die Sperre geht weg, und die Region sagt „{label}
+     eingeschaltet.“ bzw. „… ausgeschaltet.“ an. Angezeigt wird danach
+     `checked`. Der Aufrufer setzt den Wert also vor dem Ende seines Promise
+     (Muster: `async (v) => { await save(v); setOn(v); }`, Story
+     `Interactive`).
+- **Ohne Promise (`void`):** Der Schalter zeigt `checked`, der Aufrufer setzt
+  den Wert sofort. Es gibt keine Sperre und keine Ansage, weil der
+  Zustandswechsel des fokussierten Schalters schon vorgelesen wird.
+- **Gesperrt (`disabledReason`):** natives `disabled`, der Grund steht unter
+  dem Erklärtext in `--color-text-muted`.
 - **Zustände:**
-  - Gefüllt: Das Wort lautet „eingeschaltet“ oder „ausgeschaltet“, der Knopf
-    nennt die Gegenhandlung.
-  - Lädt: Der Knopf ist gesperrt und trägt `pendingLabel` („Wird
-    eingeschaltet …“). Im Plugin dauert das Speichern in `chrome.storage`
-    Millisekunden, der Zustand blitzt also höchstens auf.
-  - Fehler: Der Satz neben dem Knopf nennt Was · Ursache · nächster Schritt,
-    zum Beispiel „**Nicht gespeichert.** Der Browser hat die Einstellung
-    abgelehnt. Bitte laden Sie die Seite neu und versuchen Sie es noch
-    einmal.“ Das Wort bleibt beim alten Wert, weil der gespeicherte Wert die
-    Wahrheit ist. Der Satz wird angesagt (`role="alert"`, neu).
-  - Gesperrt: Der Knopf ist aus, der Grund steht als Satz in der
-    `CardSection`.
-  - Leer und leer nach Filter gibt es nicht, weil eine Einstellung immer
-    einen Wert hat.
-- **Ansage:** Der Zustandswechsel wird über `role="status"` am Wort angesagt
-  („eingeschaltet“), der Fehler über `role="alert"`.
-- **Handy unter 640 px:** Die Aktionen des `CardHead` brechen unter den Titel
-  um (0259). Es fällt nichts weg.
-- **Client:** `ActionButton` ist schon Client. Die Komposition hält keinen
-  eigenen Zustand.
+  - Gefüllt: An oder Aus.
+  - Lädt: wie Schritt 1 und 2 oben.
+  - Fehler: wie Schritt 3 oben.
+  - Leer gibt es nicht, weil ein Schalter immer einen Wert hat.
+  - Leer nach Filter gibt es nicht, weil kein Filter da ist.
+- **Schmal (320 px, Popup):** Titel und Erklärtext brechen um. Wort und Knopf
+  bleiben rechts oben auf Höhe der ersten Titelzeile. Es gibt keinen
+  waagerechten Scroll.
+- **Mehrere Schalter untereinander:** Die Linie `--color-border-subtle`
+  trennt sie (`.v2switch + .v2switch`). Es gibt keinen Zellrahmen und keine
+  Zebra.
+- **Client-Component**, weil der Baustein Zustand für Sperre, angezeigten
+  Wert, Fehler und Ansage hält, dazu einen Zeitgeber für 300 ms und `useId`.
 
 ## Stories
 
-Seitenaufgabe, deshalb zwei Stories, beide in `ActionButton.stories.tsx`
-unter `v3/Primitives/Aktion/ActionButton`. Wo die Komposition im Set gezeigt
-wird, entscheidet die Klasse des tragenden Bausteins: Das Verhalten (sperren,
-Fehler, Ansage) gehört `ActionButton`.
+Titel `v3/Primitives/Formular/Switch`. Ableitung nach §6:
+- anwendbare Zustände: gefüllt, lädt, Fehler, dazu gesperrt (Prop
+  `disabledReason`) → `Filled`, `Saving`, `Failed`, `Locked`
+- Callback `onChange` → `Interactive`
+- im Einsatz → `InUse`
+- Rand, weil Texte umbrechen → `LongText`
+
+Das sind sieben Stories, die Untergrenze für ein Primitive ist 3, die
+Obergrenze 10.
 
 | Story | Beweist |
 |---|---|
-| `ImmediateSetting` | Zwei Karten untereinander. „Belegübergabe“ (ausgeschaltet, Knopf „Belegübergabe einschalten“) und „Fehlermeldungen senden“ (eingeschaltet, Knopf „Fehlermeldungen nicht mehr senden“), je mit Erklärsatz. Rundlauf mit `useState` und einer Promise mit 600 ms. Das Wort wechselt, der Knopf nennt die Gegenhandlung. Der zweite Klick auf „Fehlermeldungen …“ scheitert einmal mit dem Fehlersatz oben, das Wort bleibt stehen, der nächste Klick gelingt |
-| `ImmediateSettingLocked` | „Belegübergabe“ gesperrt, solange keine Verbindung besteht: Knopf aus, Satz „Erst möglich, wenn das Plugin mit Ludwig verbunden ist.“ |
-
-Die vorhandene Story `ActionButton/Failed` beweist nach dem Bau zusätzlich
-`role="alert"` am Fehler.
+| `Filled` | Zwei Zeilen untereinander. „Belegübergabe“ steht auf Aus, mit Erklärtext „Lädt Beleg-Dateien, die auf anderem Weg nach Ludwig kamen (zum Beispiel per E-Mail), nach DATEV Unternehmen Online hoch. Welche das sind, bestimmt Ludwig. Buchungen und Buchungsanweisungen werden nicht übertragen.“ „Fehlermeldungen senden“ steht auf An, mit „Bricht ein Abgleich mit einem Fehler ab, schickt das Plugin eine technische Meldung an den Anbieter: Version, Schritt, Fehlertext. Ohne Belegdaten, Namen oder Dateinamen.“ Dazwischen die Trennlinie. `onChange` ist synchron |
+| `Saving` | `onChange` liefert ein Promise, das nicht antwortet. `play` klickt, nach 300 ms steht Spinner sm mit „wird gespeichert …“, der Schalter steht auf An und ist `aria-disabled` |
+| `Failed` | `onChange` antwortet nach 600 ms mit `{ error: "Der Browser hat die Einstellung abgelehnt. Bitte laden Sie die Seite neu." }`. `play` klickt, der Schalter springt auf Aus zurück, darunter „**Nicht gespeichert.** Der Browser …“ in `role="alert"` |
+| `Locked` | „Belegübergabe“ mit `disabledReason` „Erst möglich, wenn das Plugin mit Ludwig verbunden ist.“ Kein Hover, nicht fokussierbar, der Grund ist sichtbar |
+| `Interactive` | Rundlauf mit `useState`. Promise mit 600 ms, Ansage „Belegübergabe eingeschaltet.“, eine Ausgabezeile unter der Story zeigt den gespeicherten Wert. Jeder dritte Klick scheitert einmal und springt zurück, der nächste gelingt |
+| `InUse` | Eine `Card` mit Kopf „Einstellungen“ wie im Plugin (C5): beide Schalter, darüber eine `FieldList` „Verbindung“ und darunter eine eingeklappte `Disclosure` „Diagnose“. Bei 1280 px und bei 720 px Breite |
+| `LongText` | Ein Rahmen von 288 px (Popup 320 px minus 16 px Rand je Seite), ein langer Name „Belege aus Ludwig an DATEV übergeben“ und drei Sätze Erklärtext. Titel bricht um, Wort und Knopf bleiben rechts oben |
 
 Nicht anwendbare Zustände: leer und leer nach Filter, wie unter Verhalten
-begründet. „Lädt“ steckt im Rundlauf von `ImmediateSetting`, weil die Promise
-600 ms hält. Eine eigene Story wäre nur ein Standbild davon. `ActionButton/Pending`
-gibt es schon.
+begründet. Für den Wurf ohne Text gibt es keine eigene Story. Er ist ein
+Zweig von `Failed`, die Abnahme prüft ihn im Code.
 
 ## Ausbau
 
 | Was fehlt | Welche Prop es trägt | Woran man merkt, dass es Zeit ist |
 |---|---|---|
-| Eigenes Pattern „Einstellung“ (Name, Wort, Satz, Knopf in einem) | ein neuer Export mit `label`, `on`, `description`, `onToggle` | Die Komposition taucht auf einem zweiten Bildschirm auf, zum Beispiel wenn die App `ClientActiveToggle` darauf hebt (siehe Befund unten) |
-| Ein Kästchen mit Erklärsatz für Formularangaben | `Checkbox.hint` (Wortlaut wie `RadioOption.hint`) | Ein Formular mit Speichern-Knopf braucht eine Ja/Nein-Angabe mit Satz darunter |
+| Eine Gruppe von Schaltern mit Überschrift (`fieldset`/`legend`) | neuer Export `SwitchGroup` mit `label` | Eine Seite hat mehr als drei Schalter, die zusammengehören |
+| Eine eigene Ansage, wo „{label} eingeschaltet.“ schief klingt | `announce?: (checked: boolean) => string` | Ein Label liest sich in der Ansage falsch, und der Owner will den Wortlaut ändern |
+| Enter schaltet zusätzlich | keine Prop, eine Tastenregel im Baustein | Offene Frage 2 wird mit Ja beantwortet |
+
+## Text für `design-guidelines.md` §11
+
+Wörtlich als Ersatz der Zeile „Formular | Schalter (Toggle)“. Die Guideline
+ändert der Bau, nicht diese Spec:
+
+> | Formular | `Switch` (0266): dauerhafte An/Aus-Einstellung, die sofort wirkt und umkehrbar ist; Zustandswort „An“/„Aus“ immer sichtbar, ganze Zeile klickbar, Speichern mit Sperre, Rücksprung und Ansage | Kit `Toggle`; `ClientActiveToggle` bleibt ein Knopf (Zustand des Mandanten, keine Einstellung) | v2 (0266) · **benannte Ausnahme zu 0018, Owner 2026-11-27:** 0018 verwarf den Schalter am 2026-09-04; der Owner hebt das für sofort wirkende, umkehrbare Einstellungen auf. Formularangaben mit Speichern bleiben `Checkbox`, einmalige Handlungen `Button`/`ActionButton`, Wahl zwischen Ansichten `Segmented` |
+
+Dazu erhält 0018 einen datierten Nachtrag mit Verweis auf 0266. Der Status
+von 0018 bleibt „verworfen“, denn der verworfene Fall ist der Schalter ohne
+Wort.
 
 ## Offene Fragen
 
-1. Soll der Owner 0018 für das Plugin aufheben und einen echten Schalter
-   (`role="switch"`) zulassen? **Ohne Antwort:** nein. 0018 gilt, und selbst
-   ihr Weg B setzt folgenlose Einstellungen voraus, was beide Plugin-
-   Einstellungen nicht sind.
-2. Wortlaut der Knöpfe für „Fehlermeldungen senden“. Die Story nutzt
-   „Fehlermeldungen senden“ und „Fehlermeldungen nicht mehr senden“.
-   **Ohne Antwort:** so. Den endgültigen Text liefert das Plugin, denn die
-   Wörter gehören seiner Oberfläche (`begriffe.md`).
+1. Ansage für Einstellungen, deren Name kein Hauptwort ist: „Fehlermeldungen
+   senden eingeschaltet.“ **Ohne Antwort:** Es bleibt bei der Vorlage
+   „{label} eingeschaltet.“, und ein eigener Wortlaut kommt erst mit dem
+   Ausbau `announce`.
+2. Soll Enter den Schalter umschalten? Laut APG ist das optional, das native
+   Kästchen tut es nicht. **Ohne Antwort:** nein, nur die Leertaste. Es ist
+   ein natives Element ohne eigenen Tastencode, und Enter schickt in keinem
+   Formular etwas ab, weil der Schalter in keinem Formular steht.
 
 ## Abnahmekriterien
 
@@ -171,22 +252,30 @@ Fest (gilt immer):
 
 Variabel (aus dieser Spec):
 
-- [ ] Es gibt keinen neuen Export und kein `role="switch"` im Set (`grep -rn 'role="switch"' src` leer)
-- [ ] `ActionButton` ohne Dialog: Der Fehler steht in `<span className="v2act__err" role="alert">`. Nachweis in `Failed` und `ImmediateSetting` am DOM
-- [ ] `ImmediateSetting`: Ein Klick wechselt das Wort von „ausgeschaltet“ auf „eingeschaltet“ und den Knopf auf die Gegenhandlung. Der Fokus steht danach noch auf dem Knopf (`document.activeElement`)
-- [ ] `ImmediateSetting`: Das Wort steht in einem Element mit `role="status"`, das schon vor dem Klick im DOM ist, und es ist grau (`--color-text-subtle` aus `.v2card__meta`), nicht farbig
-- [ ] `ImmediateSetting`: Während der 600 ms ist der Knopf gesperrt und trägt `pendingLabel`
-- [ ] `ImmediateSetting`: Ein gescheiterter Klick lässt das Wort stehen. Der Fehlersatz hat die Form Was (fett) · Ursache · nächster Schritt, und der nächste Klick löscht ihn
-- [ ] `ImmediateSettingLocked`: Der Knopf ist `disabled`, der Grund steht als Satz in der Karte
-- [ ] Trefferfläche des Knopfs mindestens 24 × 24 px, gemessen im Browser. Fokusring sichtbar, Hover antwortet
-- [ ] Bei 1280 px stehen Wort und Knopf in einer Zeile mit dem Titel, unter 640 px bricht der Knopf unter den Titel um (0259), es fällt nichts weg
-- [ ] 0018 wird nicht wieder geöffnet. `design-guidelines.md` §11, Zeile „Schalter (Toggle)“, verweist zusätzlich auf 0266 als Antwort für Sofort-Einstellungen
+- [ ] Die Props stehen im Typ Zeichen für Zeichen wie in der Tabelle. `onChange` nutzt `ActionResult` aus `ActionButton`, es gibt keine zweite Definition
+- [ ] `@when`: „A lasting on/off setting that takes effect at once and can be switched back.“ `@instead`: „A yes/no saved with a form → Checkbox. A one-off action → Button / ActionButton. Choosing between views → Segmented. One of several values → RadioGroup.“ `Checkbox` und `ActionButton` verweisen in ihrem `@instead` auf `Switch`. `pnpm check:when` ist grün
+- [ ] Datei `primitives/Switch.tsx` mit `"use client"`, und `Form.tsx` bleibt ohne `"use client"`
+- [ ] DOM (`Filled`): `input type="checkbox" role="switch"` ohne eigenes `aria-checked`, `aria-labelledby` zeigt auf den Titel, `aria-describedby` auf den Erklärtext. Der zugängliche Name ist „Belegübergabe“, die Beschreibung der Erklärtext (Barrierefreiheitsbaum gelesen)
+- [ ] Ein Klick auf Titel, Erklärtext und Wort schaltet je einmal um (`Filled`). Die Leertaste schaltet, Enter nicht (offene Frage 2)
+- [ ] Gemessen bei 1280 px: Zeile mindestens 24 px hoch, Knopf 32 × 18 px, Daumen 14 px. Fokusring sichtbar bei `:focus-visible`, Hover-Grund `--color-bg-soft` auf der ganzen Zeile
+- [ ] Kontrast gemessen: Rahmen und Daumen bei Aus gegen `--color-surface` mindestens 3:1, Knopf bei An gegen `--color-surface` mindestens 3:1, Daumen bei An gegen den Knopf mindestens 3:1, das Wort mindestens 4,5:1
+- [ ] Wort „An“/„Aus“ sichtbar in jeder Stellung, `aria-hidden`. Der Knopf rückt beim Wechsel nicht (x-Lage vorher = nachher)
+- [ ] `prefers-reduced-motion: reduce` (Playwright `emulateMedia`): Der Daumen springt ohne `transition`
+- [ ] `Saving`: Nach dem Klick sofort `aria-disabled="true"` und neue Stellung, der Fokus bleibt auf dem Schalter. Nach 300 ms steht Spinner sm mit „wird gespeichert …“, davor nicht. Leertaste und Klick wirken nicht
+- [ ] `Failed`: Rücksprung auf den alten Wert. „**Nicht gespeichert.** …“ in `role="alert"`, mit `aria-describedby` verknüpft. Der nächste Klick löscht ihn
+- [ ] `Interactive`: Die Region `role="status"` ist vor dem ersten Klick im DOM und leer. Nach Erfolg enthält sie „Belegübergabe eingeschaltet.“ bzw. „… ausgeschaltet.“. Bei Fehler bekommt sie keinen neuen Text
+- [ ] `Locked`: natives `disabled`, nicht per Tab erreichbar, kein Hover-Grund. Der Grund ist sichtbar und mit `aria-describedby` verknüpft
+- [ ] `LongText` bei 288 px: kein waagerechter Scroll, Wort und Knopf rechts oben auf Höhe der ersten Titelzeile
+- [ ] Mehrere Schalter (`Filled`, `InUse`): genau eine Linie `--color-border-subtle` zwischen zwei Zeilen, keine über der ersten
+- [ ] `ActionButton` im einfachen Zweig: `<span className="v2act__err" role="alert">`, nachgewiesen in `ActionButton/Failed`
+- [ ] `grep -rn 'role="switch"' src` trifft nur `Switch.tsx`
 
 ## Befund an die App
 
-| # | Befund | Quelle |
-|---|---|---|
-| (neu) | `ClientActiveToggle` (`modules/admin/ui/ClientActiveToggle.tsx`) baut Ladezustand und Fehler von Hand nach, was `ActionButton` seit 0004 trägt. Sein Fehler steht ohne Ansage neben dem Knopf, und das TSX schreibt px (`gap: 8`, `fontSize: 12`). Lösung: `ActionButton` mit `pendingLabel` und die Form aus 0266 (Zustandswort in `meta` mit `role="status"`) | 0266 |
+Die Zeile L-386 gilt weiter, mit geändertem Lösungsteil. `ClientActiveToggle`
+wird kein Schalter: Stilllegen ändert den Zustand eines Mandanten, es ist
+keine Vorliebe. Dazu kommt ein Zusammenstoß in der Datenbank, wenn ein
+zweiter Mandant mit derselben DATEV-Identität aktiv ist.
 
 ## Abnahme
 
