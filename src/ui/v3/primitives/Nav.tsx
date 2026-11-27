@@ -61,6 +61,26 @@ export type TabItem = TabItemBase &
   );
 
 /**
+ * A tab the keyboard lands on while the strip has scrolled it out of sight
+ * (narrow widths scroll the strip sideways): bring it in — the strip alone,
+ * never the page, and instantly, so there is no motion to opt out of. The
+ * browser's own focus scrolling left the last tab cut off by 19 px at 320 px
+ * (0263, H12; 0272 Nachtrag). The focus ring counts, measured, not assumed.
+ */
+function revealInStrip(tab: HTMLElement) {
+  const strip = tab.parentElement;
+  if (!strip || strip.scrollWidth <= strip.clientWidth) return;
+  const ring = getComputedStyle(tab);
+  const extra = Math.max(0, parseFloat(ring.outlineWidth) + parseFloat(ring.outlineOffset)) || 0;
+  const t = tab.getBoundingClientRect();
+  const s = strip.getBoundingClientRect();
+  const overRight = t.right + extra - (s.left + strip.clientWidth);
+  const overLeft = t.left - extra - s.left;
+  if (overRight > 0) strip.scrollLeft += Math.ceil(overRight);
+  else if (overLeft < 0) strip.scrollLeft += Math.floor(overLeft);
+}
+
+/**
  * @when    Views with their own content, one active; counter and alarm on the tab.
  * @instead Same data, different order or density → Segmented. Narrowing down → FilterChips.
  */
@@ -96,6 +116,7 @@ export function Tabs({
             className={cls}
             role="tab"
             aria-selected={it.key === active}
+            onFocus={(e) => revealInStrip(e.currentTarget)}
           >
             {body}
           </Link>
@@ -107,6 +128,7 @@ export function Tabs({
             role="tab"
             aria-selected={it.key === active}
             onClick={() => onPick?.(it.key)}
+            onFocus={(e) => revealInStrip(e.currentTarget)}
           >
             {body}
           </button>
@@ -179,6 +201,13 @@ export interface ChipOption {
   href?: string;
   /** A sign before the word — the same sign the column shows (0205 categories). Never without the word. */
   icon?: ReactNode;
+  /**
+   * There, but not to be picked — it would leave nothing (a state counted 0).
+   * Stays in its place, grey, no hover, out of the tab order, so the line never
+   * shifts (0272). An active option is never locked: the way out of a filter
+   * that ran empty stays open.
+   */
+  disabled?: boolean;
 }
 
 /**
@@ -189,7 +218,8 @@ export interface ChipOption {
  * pressed on its own — for a dimension whose values are not exclusive
  * (document categories). A string keeps the one-of-many behaviour.
  *
- * @when    Narrowing down by dimension, above the card.
+ * @when    Narrowing down by dimension, above the card; with `disabled` a
+ *          state line whose zeros stay in place (0272).
  * @instead In the card header. Full text → SearchInput. Everything else that
  *          is set → ActiveFilters.
  */
@@ -209,7 +239,8 @@ export function FilterChips({
     <div className="v2chips" role={typeof active === "string" ? undefined : "group"} aria-label={label}>
       <span className="v2chips__label">{label}</span>
       {options.map((o) => {
-        const cls = `v2chip${isOn(o.key) ? " is-active" : ""}`;
+        const locked = !!o.disabled && !isOn(o.key);
+        const cls = `v2chip${isOn(o.key) ? " is-active" : ""}${locked ? " is-disabled" : ""}`;
         const body = (
           <>
             {o.icon ? <span className="v2chip__icon">{o.icon}</span> : null}
@@ -217,6 +248,14 @@ export function FilterChips({
             {o.count === undefined ? null : <span className="n">{o.count}</span>}
           </>
         );
+        // A locked link is a `span`: nothing may look clickable that does not click.
+        if (locked && o.href) {
+          return (
+            <span key={o.key} className={cls}>
+              {body}
+            </span>
+          );
+        }
         return o.href ? (
           <Link key={o.key} href={o.href} className={cls} aria-current={isOn(o.key)}>
             {body}
@@ -227,6 +266,7 @@ export function FilterChips({
             type="button"
             className={cls}
             aria-pressed={isOn(o.key)}
+            disabled={locked}
             onClick={() => onPick?.(o.key)}
           >
             {body}

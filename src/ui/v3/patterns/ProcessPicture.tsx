@@ -12,6 +12,8 @@ import {
   ProcessMini,
   processComplete,
   ProcessStepper,
+  STEP_STATE,
+  STEP_ACTIVE_WORD,
   type BatonMeta,
   type ProcessPhase,
   type ProcessPhaseStatus,
@@ -98,14 +100,6 @@ export interface ProcessDialogDetail {
 }
 
 const LEVEL_STATE: Partial<Record<ProcessLevel, StateKind>> = { warning: "warning", error: "error" };
-
-const STEP_STATE: Record<ProcessPhaseStatus, StateKind> = {
-  done: "done",
-  active: "open",
-  held: "warning",
-  failed: "error",
-  pending: "open",
-};
 
 /**
  * The sign of the level — only for warning and error; the word always stands.
@@ -276,7 +270,7 @@ function Steps({ steps, phases }: { steps: readonly ProcessStep[]; phases: reado
             <li key={`${phase.key}-${i}`} className={`is-${s.status}`}>
               <span className="pz-steps__sign">
                 {/* The active step is drawn filled; its name says so, not „offen". */}
-                <StateIcon state={STEP_STATE[s.status]} title={s.status === "active" ? "aktuell" : undefined} />
+                <StateIcon state={STEP_STATE[s.status]} title={s.status === "active" ? STEP_ACTIVE_WORD.record : undefined} />
               </span>
               <span className="pz-steps__label">
                 {s.label}

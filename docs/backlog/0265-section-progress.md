@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Status | spec |
+| Status | fertig — fremd abgenommen 2026-11-27 (Nachprüfung ✓; H1–H3, H6 erledigt) |
 | Stufe | `patterns/`, Gruppe Prozess. Die Schritte stehen als Zeilen mit denselben Zeichen wie die Schrittliste im `ProcessDialog` (`.pz-steps`), die Kurzform nutzt die Spur von `ProcessMini` |
 | Klassen-Test | ja, sobald es dort einen Ablauf in festen Schritten gibt: Ein Datenimport einer Versicherung mit „Policen lesen · Abgleichen · Übertragen“ braucht dasselbe Bild |
 | Quelle | Seitenprofil `docs/seiten/duo-connect.md` (Commit b4a9660, Owner angenommen 2026-11-27): **U5** (Schritte als Zeilen statt waagerechtem Abschnittsbalken), **U6** (ausgeschaltete Schritte erscheinen nicht), **A7** (läuft · ein Mandant), **A8** (läuft · Durchgang), **A9** (wartet auf DATEV-Anmeldung). Abschnitt „Nachtrag 2 2026-11-27 — Simons Feedback zu den Entwürfen“, **A10–A12**: Die Ergebnisliste sind dieselben Schrittzeilen im Endzustand. Anfrage plugin-mananger 2026-11-27: `ludwig-plugin/docs/spec-bausteine.md` (Branch `umbau`), Zeile „Fortschrittsbalken in Abschnitten“. `docs/spec-oberflaeche-und-fehler.md` C2: Menge sobald bekannt, sonst laufende Anzeige; „nie rückwärts“; Ansage nur beim Wechsel. Begriffe und Anwendertexte aus `docs/begriffe.md` |
@@ -113,10 +113,9 @@ Anwendertexte passen nicht hinein, und unter 640 px bricht er.
   - Ihr Vokabular ist das des Prozessbilds.
   - Der Zustand des **Abgleichs** dagegen (Wartet, Läuft, Fertig, Fertig mit
     Problemen, Abgebrochen, Übersprungen) steht im Verlauf und in der
-    Durchgangsliste (A8) als Badge. Dafür hat die App die Achse `duo_sync`
-    (Owner 2026-11-27, `apps/web/src/ui/status/status-registry.ts`). Im
-    Spiegel `src/ludwig/` des Sets fehlt sie noch, `pnpm sync:ludwig` holt
-    sie. Bis dahin steht dort `Badge`, als benannter Übergang.
+    Durchgangsliste (A8) als `StatusBadge axis="duo_sync"`. Die Achse hat
+    die App (Owner 2026-11-27, `apps/web/src/ui/status/status-registry.ts`),
+    im Spiegel `src/ludwig/` des Sets steht sie seit `93e2791`.
 
 ## Schnittstelle
 
@@ -183,9 +182,9 @@ Was die Komponente **nicht** kann (bewusst):
 - Block „Jetzt“: Name des laufenden Mandanten und `PhaseProgress
   density="compact"`;
 - darunter die Liste aller Mandanten in fester Reihenfolge, je Zeile der
-  Zustand und das Kurzergebnis. Der Zustand steht bis zur Achse `duo_sync` als
-  `Badge`: Wartet · Läuft · Fertig · Fertig mit Problemen · Abgebrochen ·
-  Übersprungen mit Grund.
+  Zustand und das Kurzergebnis. Der Zustand steht als `StatusBadge
+  axis="duo_sync"`: Wartet · Läuft · Fertig · Fertig mit Problemen ·
+  Abgebrochen · Übersprungen mit Grund.
 - fertige Zeilen klappen über `ExpandableRow` auf.
 
 Die Liste zeigt den laufenden Mandanten **nicht** ein zweites Mal als
@@ -201,8 +200,9 @@ Die Liste zeigt den laufenden Mandanten **nicht** ein zweites Mal als
   Optik von `.pz-steps`.
   - Die Zeile hat drei Spalten: links das Zeichen, in der Mitte der
     Anwendertext (er bricht um, `min-width: 0`), rechts Zähler oder Notiz.
-    Die rechte Spalte steht rechtsbündig (Zahlen rechts), mit `tnum`, und
-    bricht nicht um.
+    Die rechte Spalte steht rechtsbündig (Zahlen rechts) mit `tnum`. Eine
+    Zahl bricht nie um; eine Notiz darf umbrechen und nimmt höchstens die
+    halbe Zeile ein (Nachtrag 2026-11-27).
   - Unter der **aktuellen** Zeile, über die Breite von Text und rechter
     Spalte, steht eine Spur in der Höhe von `Progress size="sm"`:
     - mit Menge: `Progress` mit `label={null}`, denn die Zahl steht
@@ -288,7 +288,7 @@ Ablageorte, Anwendertexte aus `begriffe.md`.
 | `Finished` | Endzustand als Ergebnisliste (Nachtrag 2), in `regular` untereinander. **A10:** alle `done` mit „4 Belege einsortiert“ · „12 übertragen, 47 schon in Ludwig“ · „2 Konten“. **A11:** Belegabruf `done` mit `issue` „9 übertragen, 3 nicht übertragen“. **A12:** Belegabruf `held` bei 37 von 120 mit „Seite geschlossen“ bzw. `failed` mit „Ludwig nicht erreichbar“, danach `pending` mit „nicht ausgeführt“. Die Region ist in allen leer. Ein Schalter in der Story wechselt vom letzten laufenden Stand in den Endzustand: dieselben Zeilen in derselben Reihenfolge, nur die Spur fällt weg, und es entsteht keine Mutation der Region mit Text |
 | `Live` | Rundlauf: Ein Takt in der Story führt einen Abgleich durch alle Schritte, die Menge zählt mit. Unter der Komponente steht ein Protokoll jeder Änderung des Region-Texts: Er ändert sich nur beim Wechsel des laufenden Schritts oder seiner `note`, nie bei einer Zahl. Ein Halt bei der Anmeldung leert ihn, das Weiterlaufen sagt den Schritt wieder an, am Ende ist er leer |
 | `Narrow` | Umbruch langer Texte bei 320 px: „Belege aus Ludwig an DATEV übergeben“ mit „Beleg 1.234 von 12.480“. Der Text bricht um, die rechte Spalte bleibt ganz, nichts scrollt waagerecht; `compact` ebenso |
-| `InUse` | A7 und A8 nebeneinander. A7: `Card` „Musterfirma GmbH wird abgeglichen“, darüber `Callout` „Lassen Sie diese Seite und das DATEV-Fenster geöffnet, bis der Abgleich fertig ist.“, darin `regular`. A8: `Progress` „Mandant 3 von 12“, Block „Jetzt“ mit `compact`, darunter vier Mandantenzeilen mit `Badge` (Übergang bis `duo_sync`): Fertig · Fertig mit Problemen · Läuft · Wartet. Die laufende Zeile zeigt kein zweites `PhaseProgress` |
+| `InUse` | A7 und A8 nebeneinander. A7: `Card` „Musterfirma GmbH wird abgeglichen“, darüber `Callout` „Lassen Sie diese Seite und das DATEV-Fenster geöffnet, bis der Abgleich fertig ist.“, darin `regular`. A8: `Progress` „Mandant 3 von 12“, Block „Jetzt“ mit `compact`, darunter vier Mandantenzeilen mit `StatusBadge axis="duo_sync"`: Fertig · Fertig mit Problemen · Läuft · Wartet. Die laufende Zeile zeigt kein zweites `PhaseProgress` |
 | `Edge` | Rand: große Mengen („Beleg 1.234 von 12.480“), `total` 0 (keine Menge, gleitendes Stück), `done` > `total` (Balken voll, Zahl begrenzt), lange `note` in der rechten Spalte, drei Schritte neben vier |
 
 Nicht anwendbare Zustände: leer und leer nach Filter, siehe Verhalten.
@@ -351,3 +351,128 @@ Variabel (aus dieser Spec):
 - [ ] `@when`/`@instead` an `PhaseProgress` grenzen gegen `ProcessStepper`, `Checklist`, `Progress` und `StepRail` ab. `ProcessStepper`, `ProcessMini` und `Checklist` verweisen in ihrem `@instead` auf `PhaseProgress` („steps of a run in progress, with counts, live“)
 - [ ] `InUse` setzt A8 mit `Progress` (`done`/`total`/`label`) und genau einem `PhaseProgress` (Block „Jetzt“) zusammen, ohne neue Komponente. Der Zustand der Mandantenzeilen kommt bis zur Achse `duo_sync` als `Badge`, im Story-Text als Übergang benannt
 - [ ] Export in `index.ts` in der Gruppe Prozess
+
+
+## Nachtrag 2026-11-27 — aus Bau und Abnahme (H1, H2/H3, H6)
+
+- **`count` hat einen eigenen Typnamen:** `PhaseCount` (`{ done, total,
+  unit }`), exportiert neben `PhaseProgressItem`. Die Form ist die der
+  Schnittstellen-Tabelle.
+- **Textgröße der Zeilen:** `regular` nimmt `--fs-ui` (wie der vom Owner
+  freigegebene Entwurf, Seitenprofil A7), nicht `--fs-ui-sm` von `.pz-steps`
+  im Dialog; die rechte Spalte steht in `--fs-ui-sm`.
+- **Rechte Spalte:** Spur `fit-content(50%)`. Eine Zahl bricht nie um
+  (`white-space: nowrap`, `tnum`); eine Notiz bricht um und nimmt höchstens
+  die halbe Zeile ein — sonst schöbe eine lange Notiz bei 320 px die Seite
+  waagerecht. Das ersetzt „bricht nicht um“ im Verhalten (dort berichtigt).
+- **Das Wort des gefüllten Kreises** steht an einer Stelle:
+  `STEP_ACTIVE_WORD` neben `STEP_STATE` in `Process.tsx`, kein Literal in
+  `PhaseProgress`. Es sind zwei Bedeutungen und deshalb zwei Wörter: `run`
+  „läuft“ für einen Schritt, an dem ein Lauf gerade arbeitet (`PhaseProgress`),
+  `record` „aktuell“ für den Schritt, in dem ein Datensatz steht und
+  womöglich wochenlang wartet (`ProcessDialog`).
+- **Zustand der Mandantenzeilen:** `StatusBadge axis="duo_sync"` statt des
+  Übergangs-`Badge` — die Achse ist seit `93e2791` im Spiegel. Das Kriterium
+  zu `InUse` („… als `Badge`, im Story-Text als Übergang benannt“) gilt damit
+  als: „… als `StatusBadge axis="duo_sync"`“.
+
+## Abnahme
+
+Gemessene Abnahme 2026-11-27, fremder Prüfer (hat nicht gebaut). Grundlage:
+Spec, Code im Arbeitsbaum, Seitenprofil `docs/seiten/duo-connect.md` (U5,
+U6, Nachtrag 2). Browser: Playwright gegen Storybook 6107, eigene Seite je
+Durchlauf; Bildvergleich: Scratch-Klon `git clone --shared` auf HEAD
+`1b9a847` gegen einen zweiten Klon mit dem Arbeitsbaum ohne die fremde
+Baustelle `src/showcase/duo-connect/fixtures.ts`/`support.tsx`, beide mit
+`storybook build -o` in den Scratchpad, `scripts/png-diff.mjs`.
+
+| Kriterium | Nachweis (Story-ID · Befehl · Screenshot) | Ergebnis |
+|---|---|---|
+| `pnpm typecheck` und `pnpm build` grün | Snapshot-Klon (eigene Änderungen, ohne fremde `fixtures.ts`): `tsc --noEmit` Exit 0; `storybook build -o …/sb-new` Exit 0, HEAD-Build ebenso. Im Arbeitsbaum ist `typecheck` rot, aber nur durch die fremde, laufende Änderung an `src/showcase/duo-connect/fixtures.ts` (`SYNC_STATE`/`SyncState` fehlen; drafts, History, Popup, Sync) — nicht Gegenstand | ✓ |
+| Datei nach der Familie, Story daneben, Titel in der Gruppe | `patterns/PhaseProgress.tsx` + `PhaseProgress.stories.tsx`, Titel `v3/Patterns/Prozess/PhaseProgress` | ✓ |
+| Code englisch; `@when`/`@instead` an jedem Export | `pnpm check:language` Exit 0 („0 German comment lines“), `--test` Exit 0; `pnpm check:when` Exit 0, `--test` Exit 0; `STEP_STATE` trägt eigenes `@when`/`@instead` | ✓ |
+| Kein Hex, kein px, keine lokale Label-Map; Status über Registry | `grep` auf Hex/px in `PhaseProgress*.tsx`: 0 Treffer (einzige Inline-Breite ist der Anteil in %); Zeichen über `STEP_STATE` → `StateIcon`/`stateLabel`; die Schrittzustände sind nach Spec keine Registry-Achse; `pnpm check:type` Exit 0, `--test` Exit 0. Das Wort „läuft“ steht als Literal im Code (H3) | ✓ |
+| Alle Stories vorhanden; ausgeschlossene Zustände begründet | Storybook-Index: `running`, `starting`, `waiting-for-login`, `failed`, `statuses`, `finished`, `live`, `narrow`, `in-use`, `edge` = 10 von 10; leer (`[]` rendert nichts) und leer nach Filter in der Spec begründet | ✓ |
+| Prüfliste §9 | Zeilenpolster `--space-3` = `.v2tbl__row` (12 px, `--fs-ui`); Text links, Zahlen rechts mit `tnum`; Rot nur bei `failed`; jedes Zeichen mit Wort (V7); Kontrast und Bewegung siehe unten; Lucide 1,5 über `StateIcon`; Schrift 13,5 px (`--fs-ui`) Zeile, 12,5 px (`--fs-ui-sm`) rechte Spalte und Kurzform, gemessen; `.v3phase` hat `min-width: 0` und `position: relative` (Region `.v2vh` bleibt drin); nichts klickbar | ✓ |
+| Im Browser angesehen | alle 10 Stories geladen, Inhalt sichtbar, 0 Konsolenfehler/-warnungen; Screenshots `finished`, `in-use`, `narrow` (360 px) angesehen | ✓ |
+| Props und `PhaseProgressItem` wie in den Tabellen; `ProcessPhaseStatus` importiert | `PhaseProgress({ phases: readonly PhaseProgressItem[], label: string, density?: "regular" \| "compact" = "regular" })`; Item `key`, `label`, `status: ProcessPhaseStatus`, `count?: PhaseCount \| null` (`PhaseCount` = `{ done; total; unit }`, strukturgleich mit der Tabelle, benannter Typ als Abweichung des Bauers), `note?`, `issue?`. Eine Definition `export type ProcessPhaseStatus` (`Process.tsx:35`); `git grep "type ProcessPhaseStatus"` liefert wörtlich 5 Treffer (Definition, Importe/Re-Exporte, diese Spec) — das Kriterium meint die Definition (H7) | ✓ |
+| `STEP_STATE` einmal, `ProcessDialog` unverändert | `git grep STEP_STATE`: eine Definition (`Process.tsx:45`), `ProcessPicture.tsx` importiert sie, Barrel exportiert sie; Bildvergleich `processpicture--dialog-full` und `--dialog-history` HEAD gegen neu 0,000 % | ✓ |
+| `regular` = `<ol>`, einspaltig, Zeichen · Text · rechte Spalte rechtsbündig mit `tnum` (`Running`) | 1 `ol`, 3 `li`; bei 320/700/1100/1400/1920 px Fensterbreite: Zeichen x = 16, Text ab x = 48, rechte Spalte endet bündig mit der Zeile (304/684/736 px); `font-variant-numeric: lining-nums tabular-nums`; bei 320 px bricht der Text um (41,8 px), die Zahl bleibt einzeilig (19,4 px) | ✓ |
+| Jede Zeile der Zuordnungstabelle (`Statuses`) | gemessen je Zeile: offen → Kreis „offen“, gedämpft, rechts leer, keine Spur · läuft ohne Menge → gefüllter Kreis „läuft“, halbfett, Notiz, gleitendes Stück · läuft mit Menge → „Beleg 37 von 120“, `Progress` 30,83 % Akzent · wartet → Warnung, Notiz statt Zahl, Balken 30,83 % Warnton · fertig → erledigt, Notiz · Problem → Warnung, `issue`, keine Spur · abgebrochen Fehler → Fehler, Notiz, Balken Fehlerton · abgebrochen Warnung → Warnung, „Seite geschlossen“, Balken Warnton · nicht ausgeführt → offen, „nicht ausgeführt“ gedämpft | ✓ |
+| Spur: genau eine, `Progress` ± 1 px, Zahl rechts; `total` 0; `done` > `total` | `Running`: 1 Spur unter dem laufenden Schritt, x 48–736 (Text + rechte Spalte), Füllung 212,13 von 688 px = 30,83 %, `aria-hidden`, kein eigenes Label, rechts „Beleg 37 von 120“. `Edge`: `total` 0 → gleitendes Stück, rechts „läuft“; 130/120 → 100 %, „Beleg 120 von 120“; „Beleg 1.234 von 12.480“ → 9,89 % | ✓ |
+| Gehalten und gescheitert; `pending` mit `note` | `WaitingForLogin`: Warnung, „wartet auf Anmeldung“, Füllung 30,83 % `#8C601E`; `Failed`: Fehler, „DATEV-Sitzung abgelaufen“, 30,83 % `#A8403C`; `Finished` A12: dasselbe für „Seite geschlossen“/„Ludwig nicht erreichbar“; „nicht ausgeführt“ in `--color-text-muted` | ✓ |
+| `issue` nur bei `done`: Warnung, Satz, keine Spur | `Statuses` „Problem“ und `Finished` A11: Zeichen `triangle-alert` „Warnung“, rechts „9 übertragen, 3 nicht übertragen“, 0 Spuren | ✓ |
+| U6: drei Schritte → drei Zeilen | `Running` 3 `li`, kein Platzhalter; `Edge` „vier Schritte“ 4 `li` | ✓ |
+| V7: Form und Name je Zeichen | `circle` (offen), `circle` gefüllt (läuft), `circle-check` (erledigt), `triangle-alert` (Warnung), `circle-x` (Fehler); jedes `role="img"` mit `aria-label` | ✓ |
+| Ansage (`Live`) | 1 `role="status"` je Instanz, immer im DOM (auch leer), über den ganzen Lauf **derselbe Knoten**. 18 Takte, 7 Mutationen = 7 Wechsel (Notiz fällt weg · Schrittwechsel · Notiz · Halt → leer · Weiterlaufen · Schrittwechsel · Ende → leer), 0 Mutationen bei den 9 reinen Zahlschritten; kein Text enthält eine Ziffer der Menge; bei `held` leer, am Ende leer | ✓ |
+| Endzustand (`Finished`) | A10/A11/A12 wie beschrieben, Region in allen vier Endzustands-Instanzen schon beim ersten Rendern leer; Spur nur unter `held`/`failed` bei 30,83 %. Umschalter „Abgleich beenden“: Gruppe, Region und alle drei `li` bleiben dieselben DOM-Knoten, Reihenfolge gleich, rechts danach das Ergebnis; Region: 1 Mutation (`childList`) auf leer, kein Text; Höhe 148,77 → 136,77 px (nur die Spur fällt weg) | ✓ |
+| `label` = Name der Gruppe und Anfang jeder Ansage | `role="group"` `aria-label="Fortschritt des Abgleichs Musterfirma GmbH"`; jede Ansage in `Live` beginnt damit | ✓ |
+| Bewegung (`Starting`) | ohne Einstellung genau eine Animation `v3runmark` (1800 ms, `alternate`) auf `::after`, das Stück bewegt sich; mit `reducedMotion: 'reduce'`: 0 Animationen, Stück steht bei `translateX(206,4 px)` von 688 px = Mitte, sichtbar (`#2B6F9C` auf `#E3F0F8`) | ✓ |
+| Kein Sprung (`Live`) | Höhe in allen 17 Takten mit aktuellem Schritt 148,77 px (Abweichung 0), auch beim Weiterwandern der Spur und bei Notiz statt Zahl; erst im Endzustand 136,77 px | ✓ |
+| `compact` (`Statuses`) | Spur 64 px = `.pz-mini`, ein Segment je Schritt: erledigt `#1A3A5C`, laufend Füllung 30,83 % Akzent bzw. gleitendes Stück, gehalten/Problem `#8C601E`, gescheitert `#A8403C`, offen `#DDE2E8`; grün durch (`is-complete`, `#3F7A5A`) nur bei „fertig“ und „alle erledigt“, nicht bei „einer mit Problem“; Zeile „{Text} · {Zahl \| note \| läuft}“ in 12,5 px, bei gehalten/gescheitert mit Zeichen; ohne aktuellen Schritt kein Text; alle Anwendertexte im `title` (` → `, wie `ProcessMini`) und im Namen (`role="img"`) | ✓ |
+| Schmal (`Narrow`) | keine `@media`-Regel mit `v3phase` in `src/styles/*.css` (Klammerscan); im 320-px-Kasten nichts über den Rand, Text bricht um, „Beleg 1.234 von 12.480“ einzeilig ganz; `compact` bricht um, Spur links. `Running` bei 320 px Fenster: `scrollWidth` 320 = `clientWidth`. Die Story selbst setzt 320 px plus 16 px Rand und scrollt bei 320 px Fenster um 16 px — Fixture, nicht Komponente (H5) | ✓ |
+| Kontrast (`Statuses`) | Text `#2D2D2D` 13,77/12,96:1, gedämpft `#5C5C5C` 6,69/6,29:1 (weiß/Seite `#F7F8FA`); Zeichen: offen `#717171` 4,88/4,59, erledigt 5,07/4,77, Warnung 5,52/5,19, Fehler 6,06/5,71; Balken zur Spur `#ECEFF3`: Akzent 3,08, Warnung 4,78, Fehler 5,26; gleitendes Stück 4,69:1 auf `#E3F0F8`. Kurzform: Teilfüllung Akzent auf Segmentgrund `#DDE2E8` nur 2,73:1, zum Grund 3,34–3,55:1 (H4) | ✓ |
+| `phases=[]` rendert nichts | `Edge` `[data-testid=empty]` `innerHTML` = `""` — keine Region | ✓ |
+| Nicht klickbar | `Running`: Tab von einem Knopf davor springt direkt zum Knopf danach; 0 fokussierbare Elemente in allen Instanzen; Hover ändert weder Grund noch Cursor (`auto`) | ✓ |
+| `@when`/`@instead` | `PhaseProgress` grenzt gegen `ProcessStepper`, `Checklist`, `Progress`, `StepRail` ab; `ProcessStepper`, `ProcessMini` (`Process.tsx`) und `Checklist` (`Review.tsx`) verweisen „Steps of a run in progress, with counts, live → PhaseProgress“ | ✓ |
+| `InUse` | A7: `Callout` über `Card` „Musterfirma GmbH wird abgeglichen“ mit `regular`; A8: `Progress` „Mandant 3 von 12“, Block „Jetzt“ mit genau einem `compact`, vier Mandantenzeilen; seitenweit 2 Regionen (eine je Instanz). Der Zustand kommt als `StatusBadge axis="duo_sync"` (Fertig · Fertig mit Problemen · Läuft · Wartet) statt als Übergangs-`Badge` — die Achse ist seit `93e2791` im Spiegel, das ist die Zielform; der Spec-Satz zum Übergang ist überholt (H6) | ✓ |
+| Export in `index.ts`, Gruppe Prozess | `index.ts` unter `/* Prozess */`: `PhaseProgress`, `PhaseProgressItem`, `PhaseProgressProps`, `PhaseProgressDensity`, `PhaseCount`; `STEP_STATE` im Block von `Process` | ✓ |
+| Verträglichkeit (zusätzlich geprüft) | Bildvergleich HEAD gegen neu, 1400 px, `reducedMotion`: alle 7 `Process`- und 8 `ProcessPicture`-Stories 0,000 %; Set ändert nur Exporte und hebt `STEP_STATE` (nicht kopiert); App: nur neue Exporte, kein bestehender Aufrufer betroffen | ✓ |
+
+Hinweise (keiner hält die Freigabe auf):
+
+- **H1** Abweichungen des Bauers ohne Nachtrag in der Spec: Typname
+  `PhaseCount`; Zeilen in `--fs-ui` statt der 12,5 px von `.pz-steps`
+  (Rolle Zeilentitel, §2a — vertretbar); eine lange Notiz bricht rechts um,
+  höchstens bis zur halben Zeile (`fit-content(50%)`), obwohl „Verhalten“
+  sagt „die rechte Spalte … bricht nicht um“ (`Edge` „lange Notiz“: 360 px
+  breit, zwei Zeilen). Alle drei gehören als datierter Nachtrag in die Spec.
+- **H2** Ein Zeichen, zwei Wörter: der gefüllte Kreis (`STEP_STATE.active`)
+  heißt im `ProcessDialog` „aktuell“ (`ProcessPicture.tsx:272`), in
+  `PhaseProgress` „läuft“ (`PhaseProgress.tsx`, `signWord`). Ein Wort wählen
+  und an `STEP_STATE` hängen.
+- **H3** „läuft“ steht dreimal als Literal in `PhaseProgress.tsx` (Name des
+  Zeichens, rechte Spalte, Ansage) — mit H2 an einer Stelle führen.
+- **H4** Kurzform: die Teilfüllung (`--color-accent` auf `--color-border`)
+  hat 2,73:1 zur Spur; der Balken der Zeile hat 3,08:1. Das Kriterium hält
+  über „bzw. zum Grund“ (3,34:1), die Füllkante liest sich aber schwach.
+- **H5** Die Story `Narrow` misst die Fixture: 320 px Kasten plus 16 px
+  Story-Rand. Die Komponente selbst ist bei 320 px Fenster (288 px breit)
+  ohne Querlauf gemessen.
+- **H6** `InUse` nutzt die Achse `duo_sync` statt des Übergangs-`Badge`
+  (besser); der Satz in Spec und Story-Ableitung ist überholt. „Mandant 3 von
+  12“ folgt der Spec, das Seitenprofil (Nachtrag 1) zählt „Mandant 3 von 10 ·
+  2 übersprungen“ — Sache der Seite, nicht der Komponente.
+- **H7** Das Kriterium „`git grep "type ProcessPhaseStatus"` = 1 Treffer“
+  ist wörtlich nicht erfüllbar (Importe und Spec treffen mit); gemeint und
+  erfüllt ist eine Definition.
+- **H8** `compact` bricht als Ganzes unter die Spur, sobald die Zeile nicht
+  passt (`Statuses` „abgebrochen, Stufe Fehler, kurz“ bei 419 px: 19,38 →
+  29,38 px). Im Block „Jetzt“ kann die Höhe damit von Schritt zu Schritt
+  wechseln; nach Spec erlaubt.
+
+Abgenommen von / am: fremder Prüfer (Agent), 2026-11-27 · Offene Punkte:
+keine M; Hinweise H1–H8 an den Bauer.
+
+### Nachprüfung 2026-11-27
+
+Derselbe fremde Prüfer, nach der Meldung des Bauers (Nachtrag „aus Bau und
+Abnahme (H1, H2/H3, H6)“). Gemessen im Storybook 6107 und an frischen Builds
+(Scratch-Klon HEAD `1b9a847` gegen einen Klon mit dem ganzen jetzigen
+Arbeitsbaum, beide mit `storybook build -o`, Bilder im selben
+Browser-Kontext abwechselnd je Story).
+
+| Punkt | Nachweis | Ergebnis |
+|---|---|---|
+| H1 Abweichungen in der Spec | Nachtrag nennt `PhaseCount`, `--fs-ui` und `fit-content(50%)`; „Verhalten“ ist berichtigt („Eine Zahl bricht nie um; eine Notiz darf umbrechen und nimmt höchstens die halbe Zeile ein“) | ✓ |
+| H2/H3 Wort des gefüllten Kreises | `STEP_ACTIVE_WORD = { run: "läuft", record: "aktuell" }` in `Process.tsx` mit `@when`/`@instead`, im Barrel neben `STEP_STATE`; `PhaseProgress.tsx` ohne Literal „läuft“ (grep 0); `ProcessDialog` nimmt `.record` (`ProcessPicture.tsx:273`). Gemessen unverändert: Zeichen „erledigt · läuft · offen“, Region „… Neue Belege aus DATEV holen läuft“, `Edge` ohne Menge rechts „läuft“. Die Entscheidung „zwei Bedeutungen, zwei Wörter“ ist ein Systementscheid. Der Nachtrag hält ihn fest; die Bedeutung des Zeichens („hier steht der Vorgang gerade“) bleibt eine | ✓ |
+| H6 `InUse` mit `duo_sync` | Nachtrag ersetzt das Kriterium durch „… als `StatusBadge axis="duo_sync"`“ — entspricht der Story | ✓ |
+| Bildvergleich gegen frische HEAD-Bilder | alle 7 `Process`- und 8 `ProcessPicture`-Stories 0,000 % (auch `dialog-full`/`dialog-history`, also „aktuell“ unverändert) | ✓ |
+| `typecheck`, `build`, Wächter | ganzer Arbeitsbaum im Snapshot: `tsc --noEmit` Exit 0, `storybook build -o` Exit 0; `check:type`, `check:language`, `check:when`, `check:icons` Exit 0 (je `--test` Exit 0); `check:classes` nur mit den 4 Klassen, die schon auf HEAD gemeldet werden | ✓ |
+
+Unverändert offen als Hinweise: H4 (Teilfüllung der Kurzform 2,73:1 zur
+Spur), H5 (Fixture `Narrow`), H7 (Wortlaut des grep-Kriteriums), H8
+(`compact` wechselt die Höhe beim Umbruch).
+
+Abgenommen von / am: fremder Prüfer (Agent), 2026-11-27 (Nachprüfung) —
+**abgenommen** · Offene Punkte: keine M; Hinweise H4, H5, H7, H8.

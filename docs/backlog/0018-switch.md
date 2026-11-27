@@ -54,6 +54,19 @@ Entfällt — siehe oben.
 
 Entfällt — siehe oben.
 
+## Nachtrag 2026-11-27 — Owner hebt den Entscheid für Einstellungen auf (0266)
+
+Simon (Owner, über plugin-mananger, Feedback zu den Entwürfen der
+Browser-Erweiterung Ludwig DUO-Connect) will für sofort wirkende, umkehrbare
+An/Aus-Einstellungen einen Schalter. Gebaut wird er in **0266** (`Switch`).
+Der Status dieser Spec bleibt „verworfen“: Verworfen ist der Schalter **ohne
+Wort**, den man versehentlich streift. 0266 löst genau das im Baustein —
+Zustandswort „An“/„Aus“ immer sichtbar, Name und Erklärtext in der Zeile,
+Ansage jeder gespeicherten Änderung, Rückweg mit demselben Klick, keine
+unumkehrbare Folge. Die benannte Ausnahme steht in `design-guidelines.md`
+§11, Zeile Formular. `ClientActiveToggle` bleibt ein Knopf (Zustand eines
+Mandanten, keine Einstellung; L-386).
+
 ## Abnahmekriterien
 
 Fest (gilt immer): entfällt, solange nichts gebaut wird.

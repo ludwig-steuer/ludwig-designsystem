@@ -95,7 +95,7 @@ interface AskProps<Input> extends CommonProps {
  *          reverse, export, delete.
  * @instead A jump → Button with `href`. A purely visual button whose caller
  *          holds the state → Button with `loading`. An action inside running
- *          text → TextButton.
+ *          text → TextButton. A lasting on/off setting → Switch.
  */
 export function ActionButton<Input = void>(props: PlainProps | AskProps<Input>) {
   const {
@@ -216,7 +216,13 @@ export function ActionButton<Input = void>(props: PlainProps | AskProps<Input>) 
       >
         {children}
       </Button>
-      {error && !asking ? <span className="v2act__err">{error}</span> : null}
+      {/* Announced like the error in the dialog and at the switch (0266) — next to
+          the button it was only seen, never heard. */}
+      {error && !asking ? (
+        <span className="v2act__err" role="alert">
+          {error}
+        </span>
+      ) : null}
       {dialog ? (
         <Dialog
           open={asking}

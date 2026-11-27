@@ -1,6 +1,6 @@
 import { ActionIcon, EntityIcon } from "../Icons";
 import { Link } from "../primitives/Link";
-import { StateIcon, stateLabel } from "./Review";
+import { StateIcon, stateLabel, type StateKind } from "./Review";
 import type { ReactNode } from "react";
 
 /**
@@ -33,6 +33,34 @@ import type { ReactNode } from "react";
  * act, but nothing has failed. Step „warning", never red.
  */
 export type ProcessPhaseStatus = "done" | "active" | "held" | "pending" | "failed";
+
+/**
+ * The sign of a phase or step — **the one mapping** (0265): `ProcessDialog`
+ * draws its step list with it, `PhaseProgress` its rows. An active step is the
+ * open circle, drawn filled by its row (`.pz-steps li.is-active`).
+ *
+ * @when    Drawing the state of a phase or step as a `StateIcon`.
+ * @instead A record's state from a registry axis → StatusBadge.
+ */
+export const STEP_STATE: Record<ProcessPhaseStatus, StateKind> = {
+  done: "done",
+  active: "open",
+  held: "warning",
+  failed: "error",
+  pending: "open",
+};
+
+/**
+ * The word of the filled circle, at one place (0265, H2/H3) — two meanings,
+ * two words: `run` for a step that is working right now in a run
+ * (`PhaseProgress`: „läuft"), `record` for the step a record currently stands
+ * in (`ProcessDialog`: „aktuell") — that one may wait for weeks without
+ * anything working.
+ *
+ * @when    Naming the active step's sign or saying that a step runs.
+ * @instead The words of every other sign → stateLabel.
+ */
+export const STEP_ACTIVE_WORD = { run: "läuft", record: "aktuell" } as const;
 
 export interface ProcessPhase {
   key: string;
@@ -157,7 +185,8 @@ export function processComplete(phases: readonly ProcessPhase[]): boolean {
  *
  * @when    Process state in the list row.
  * @instead The whole run with its phases → Process. One phase as a
- *          state → StatusBadge on the axis `lauf`.
+ *          state → StatusBadge on the axis `lauf`. Steps of a run in
+ *          progress, with counts, live → PhaseProgress.
  */
 export function ProcessMini({ phases }: { phases: readonly ProcessPhase[] }) {
   return (
@@ -224,6 +253,7 @@ export interface ProcessLoops {
  *          state badge and its (i) carry them.
  * @instead Steps of a review → StepRail. Which ways exist between the
  *          states — the map instead of the position → StateMachine (Z7).
+ *          Steps of a run in progress, with counts, live → PhaseProgress.
  */
 export function ProcessStepper({
   phases,

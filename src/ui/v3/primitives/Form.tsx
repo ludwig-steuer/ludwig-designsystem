@@ -63,6 +63,9 @@ function inputClass({ invalid, className }: WithInvalid) {
  *          has its own label.
  * @instead Label, hint and error around it → Field. Several lines →
  *          Textarea. An amount → AmountInput. An account → AccountField.
+ *          A secret (token, password) → `type="password"` with
+ *          `autoComplete="off"`, `spellCheck={false}`, no `name`; once stored
+ *          it is never shown again (0267).
  */
 export function Input({ invalid, className, ...rest }: InputHTMLAttributes<HTMLInputElement> & WithInvalid) {
   return <input {...rest} aria-invalid={invalid || undefined} className={inputClass({ invalid, className })} />;
@@ -141,7 +144,8 @@ export function InputGroup({
  *
  * @when    A single yes/no inside a form or a row.
  * @instead One of several values → RadioGroup. Selecting rows of a table →
- *          SelectCell.
+ *          SelectCell. A lasting setting that takes effect at once, without a
+ *          form to save → Switch.
  */
 export function Checkbox({
   label,

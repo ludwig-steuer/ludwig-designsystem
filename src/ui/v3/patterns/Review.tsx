@@ -15,6 +15,7 @@ import { HeadRow, Table, rowCells } from "../primitives/Table";
 import { TableLoading } from "../primitives/Cells";
 import { Disclosure } from "../primitives/Disclosure";
 import { Progress } from "../primitives/Progress";
+import { CheckFoldFocus } from "./CheckFoldFocus";
 
 /**
  * v2 review building blocks (F123 T123.1): state icon, checklist, check
@@ -131,7 +132,8 @@ function folds(row: ChecklistRow): boolean {
  * inside a `MasterDetail`.
  *
  * @when    Checklist of a gate: check, status, progress, jump.
- * @instead Items to work through → TodoList.
+ * @instead Items to work through → TodoList. Steps of a run in progress,
+ *          with counts, live → PhaseProgress.
  */
 export function Checklist({
   rows,
@@ -351,11 +353,27 @@ export interface CheckItem {
   code: string;
   /** What is checked, as a question — „Stimmt der Steuersatz zum Beleg?" */
   question: string;
-  /** Why the result is what it is. Always filled, otherwise the level is an oracle. */
+  /** Why the result is what it is. Always filled, otherwise the level is an oracle. While `running`: what happens right now („Ludwig wird angefragt."). */
   reason: string;
-  state: "green" | "yellow" | "red" | "open";
+  /**
+   * `running` (0270): the item is being checked right now — the `Spinner`
+   * with its word as the accessible name; the reason stays quiet, nothing is
+   * to read yet; `result` and `gate` stay away. „Not checkable" is `open`, not
+   * a state of its own (0148). The readiness check of the browser extension
+   * (plugin spec C6) maps: in order → `green`, a hint with something to do →
+   * `yellow` with `action`, a hint without → `green` (the reason says it), an
+   * error → `red`, not checkable → `open`, being checked → `running`.
+   */
+  state: "green" | "yellow" | "red" | "open" | "running";
   /** Jump to the place where the item can be resolved. */
   jump?: ReactNode;
+  /**
+   * The one button that resolves the item here or checks it again (0270) —
+   * `Button`, `ActionButton`. It stands after `jump`; an item with an action
+   * never folds into a group, not even an `open` one: a button in a closed
+   * fold-out is none.
+   */
+  action?: ReactNode;
   /** The gate: a red or yellow item has to be checked off. */
   gate?: ReactNode;
   /**
@@ -378,8 +396,8 @@ export interface CheckItem {
 export type CheckKind = "rule" | "fact";
 
 const SUMMARY_WORD: Record<CheckKind, Record<CheckItem["state"], string>> = {
-  rule: { red: "verletzt", yellow: "offen", open: "nicht prüfbar", green: "bestanden" },
-  fact: { red: "widersprüchlich", yellow: "zu klären", open: "nicht erhoben", green: "geklärt" },
+  rule: { red: "verletzt", yellow: "offen", running: "in Prüfung", open: "nicht prüfbar", green: "bestanden" },
+  fact: { red: "widersprüchlich", yellow: "zu klären", running: "in Prüfung", open: "nicht erhoben", green: "geklärt" },
 };
 
 /**
@@ -392,7 +410,7 @@ const SUMMARY_WORD: Record<CheckKind, Record<CheckItem["state"], string>> = {
  *          a list row → CheckResult.
  */
 export function checkSummary(items: readonly CheckItem[], kind: CheckKind = "rule"): string {
-  const order: CheckItem["state"][] = ["red", "yellow", "open", "green"];
+  const order: CheckItem["state"][] = ["red", "yellow", "running", "open", "green"];
   const parts = order
     .map((state) => [items.filter((i) => i.state === state).length, SUMMARY_WORD[kind][state]] as const)
     .filter(([n]) => n > 0)
@@ -400,7 +418,8 @@ export function checkSummary(items: readonly CheckItem[], kind: CheckKind = "rul
   return parts.length ? parts.join(" · ") : kind === "fact" ? "keine Fakten" : "keine Prüfungen";
 }
 
-const PP_ICON: Record<CheckItem["state"], StateKind> = {
+/** The sign of a settled item; a `running` one draws the `Spinner` instead (0270, rule 1). */
+const PP_ICON: Record<Exclude<CheckItem["state"], "running">, StateKind> = {
   green: "done",
   yellow: "warning",
   red: "error",
@@ -423,8 +442,8 @@ function technical(item: CheckItem, kind: CheckKind): string {
 
 function CheckRow({ item, kind = "rule" }: { item: CheckItem; kind?: CheckKind }) {
   return (
-    <div className={`v2pp__row v2pp__row--${item.state}`}>
-      <StateIcon state={PP_ICON[item.state]} />
+    <div className={`v2pp__row v2pp__row--${item.state}`} data-code={item.code}>
+      {item.state === "running" ? <RunningSign /> : <StateIcon state={PP_ICON[item.state]} />}
       <span style={{ flex: "1 1 auto", minWidth: 0 }}>
         <span className="v2pp__q">
           {item.question}
@@ -447,7 +466,23 @@ function CheckRow({ item, kind = "rule" }: { item: CheckItem; kind?: CheckKind }
       {item.result ? <span className="v2pp__result">{item.result}</span> : null}
       {item.gate}
       {item.jump}
+      {item.action}
     </div>
+  );
+}
+
+/**
+ * „wird geprüft": the circle of `Spinner` sm — coloured like it by the shared
+ * rule in `v3.css` (`.v3spinner > .v2spin, .v2pp__running > .v2spin`) — with
+ * the word as the name of the surrounding image, like `StateIcon` (0270,
+ * rule 1). The word is not drawn: the row's question and reason stand next
+ * to it.
+ */
+function RunningSign() {
+  return (
+    <span className="v2pp__running" role="img" aria-label="wird geprüft" title="wird geprüft">
+      <span className="v2spin" aria-hidden="true" />
+    </span>
   );
 }
 
@@ -518,23 +553,70 @@ function CheckGroup({
  * `open`: „not checkable" (0148) is a statement about the data, „to clarify" is
  * work.
  *
+ * **While checks run (0270)** five rules hold:
+ * 1. A `running` item shows the spinner with the word „wird geprüft"; its
+ *    reason stays quiet.
+ * 2. Nothing folds while at least one item runs: every item stands alone in
+ *    the order of `items` and changes its sign in place — nothing jumps, and
+ *    focus stays where it was.
+ * 3. Once none runs, the order is: findings (red, yellow), then **every item
+ *    with an `action`** (also open and green — a button in a closed fold-out
+ *    is none), then the passed group and the not-checkable group without
+ *    them. „x von y bestanden" keeps counting every item that is not open.
+ * 4. `checkSummary` counts `running` as „in Prüfung"; `CheckResult` shows the
+ *    spinner and „x von y geprüft".
+ * 5. With `live` a hidden region says „Prüfung läuft." while items run and
+ *    the summary when they are done — two announcements, not ten. Without
+ *    `live` there is no region.
+ *
  * @when    Individual checks with reasons — rules (pass/fail) or facts (a word
- *          each); passed/settled and unrunnable ones each in a single line.
+ *          each); passed/settled and unrunnable ones each in a single line;
+ *          also while the checks run, with one button per item.
  * @instead Error that blocks saving → Messages. The count alone → checkSummary;
  *          as a line with sign and tone in a list row → CheckResult.
  */
-export function CheckItems({ items, kind = "rule" }: { items: CheckItem[]; kind?: CheckKind }) {
+export function CheckItems({ items, kind = "rule", live = false }: { items: CheckItem[]; kind?: CheckKind; live?: boolean }) {
   const words = SUMMARY_WORD[kind];
   // „Prüfungen", not „Prüfpunkte" — the word of the steps (llcto for the owner, 2026-10-27, 0232).
   const noun = kind === "fact" ? "Fakten" : "Prüfungen";
-  const passed = items.filter((i) => i.state === "green");
-  const notRun = items.filter((i) => i.state === "open");
+  const running = items.some((i) => i.state === "running");
+  const region = live ? (
+    <span className="v2vh" role="status">
+      {running ? "Prüfung läuft." : checkSummary(items, kind)}
+    </span>
+  ) : null;
+  // Only a live list folds in front of the reader; it keeps the focus of a
+  // row that folds away (0270, H4). A static list has no client code.
+  const keeper = live ? <CheckFoldFocus folded={!running} /> : null;
+  // Rule 2: while anything runs, every item stands in its own place. The rows
+  // stand in the same slot as the single rows after the fold (one array,
+  // keyed by code), so a row that stays single keeps its DOM node — and the
+  // focus on its button (0270, M2).
+  if (running) {
+    return (
+      <div className="v2pp">
+        {region}
+        {keeper}
+        {items.map((i) => (
+          <CheckRow item={i} key={i.code} kind={kind} />
+        ))}
+      </div>
+    );
+  }
+  const passedAll = items.filter((i) => i.state === "green");
+  const passed = passedAll.filter((i) => !i.action);
+  const notRunAll = items.filter((i) => i.state === "open");
+  const notRun = notRunAll.filter((i) => !i.action);
   // Red and yellow keep their own row. A finding that can hide is not a
   // finding — not even twenty of them.
   const findings = items.filter((i) => i.state === "red" || i.state === "yellow");
+  // Rule 3: an item with a button never folds.
+  const withAction = items.filter((i) => (i.state === "open" || i.state === "green") && i.action);
   return (
     <div className="v2pp">
-      {findings.map((i) => (
+      {region}
+      {keeper}
+      {[...findings, ...withAction].map((i) => (
         <CheckRow item={i} key={i.code} kind={kind} />
       ))}
       {passed.length > 0 ? (
@@ -543,7 +625,7 @@ export function CheckItems({ items, kind = "rule" }: { items: CheckItem[]; kind?
           kind={kind}
           // y counts only what could run (F355): „18 von 18", not „18 von 24"
           // under a green sign — the not checkable stand in their own group.
-          summary={`${passed.length} von ${items.length - notRun.length} ${noun} ${words.green}`}
+          summary={`${passedAll.length} von ${items.length - notRunAll.length} ${noun} ${words.green}`}
           items={passed}
         />
       ) : null}
@@ -572,7 +654,7 @@ export function CheckItems({ items, kind = "rule" }: { items: CheckItem[]; kind?
  * The worst state of a set — what the result line says first. „Not checkable"
  * is no finding (0148), so it decides only when nothing else is there.
  */
-function worst(items: readonly CheckItem[]): CheckItem["state"] | null {
+function worst(items: readonly CheckItem[]): Exclude<CheckItem["state"], "running"> | null {
   for (const state of ["red", "yellow", "green", "open"] as const) if (items.some((i) => i.state === state)) return state;
   return null;
 }
@@ -592,6 +674,16 @@ function worst(items: readonly CheckItem[]): CheckItem["state"] | null {
  */
 export function CheckResult({ items, kind = "rule" }: { items: readonly CheckItem[]; kind?: CheckKind }) {
   const words = SUMMARY_WORD[kind];
+  // While checks run (0270, rule 4): the spinner and how many are through.
+  const runningCount = items.filter((i) => i.state === "running").length;
+  if (runningCount > 0) {
+    return (
+      <span className="v2pp__result-line v2pp__result-line--running" title={checkSummary(items, kind)}>
+        <RunningSign />
+        <span>{`${items.length - runningCount} von ${items.length} geprüft`}</span>
+      </span>
+    );
+  }
   const state = worst(items);
   const passed = items.filter((i) => i.state === "green").length;
   // y counts only what could run (F355) — the same sum as the group in CheckItems.
@@ -628,7 +720,8 @@ export interface Message {
  * meaning.
  *
  * @when    Error, warning or hint about a journal entry or form.
- * @instead Note not tied to a journal entry → Callout.
+ * @instead Note not tied to a journal entry → Callout. A problem after a
+ *          process, with cause, next step and technical text → ProblemCard.
  */
 export function Messages({ items }: { items: Message[] }) {
   if (items.length === 0) return null;

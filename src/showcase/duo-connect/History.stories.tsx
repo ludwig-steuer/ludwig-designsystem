@@ -1,5 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
-import { useState, type ReactNode } from "react";
+import { useState } from "react";
+import type { DuoSyncState } from "@/ludwig/modules/intake";
 import {
   ActionButton,
   ActionIcon,
@@ -15,12 +16,14 @@ import {
   LogList,
   Row,
   SearchInput,
+  StatusBadge,
+  StatusInfoButton,
   Table,
   TextButton,
   Time,
 } from "@/ui/v3";
-import { CLIENTS, LOG, LOG_TEXT, SYNC_STATE, type Client, type SyncState } from "./fixtures";
-import { DraftsVisible, SupportHelp, supportFacts } from "./drafts";
+import { CLIENTS, LOG, LOG_TEXT, type Client } from "./fixtures";
+import { SupportHelp, supportFacts } from "./support";
 import { Board as StateBoard, ExtensionShell, Single, type StateSpec } from "./Frame";
 
 const stack = { display: "grid", gap: "var(--space-4)" } as const;
@@ -30,7 +33,7 @@ const row = { display: "flex", flexWrap: "wrap", gap: "var(--space-3)", alignIte
 
 interface Past {
   at: string;
-  state: SyncState;
+  state: DuoSyncState;
   summary: string;
 }
 
@@ -46,8 +49,9 @@ function pastRuns(c: Client, i: number): Past[] {
 
 const HISTORY = CLIENTS.filter((c) => c.lastSync).map((c, i) => ({ client: c, runs: pastRuns(c, i) }));
 
-function StateBadge({ state }: { state: SyncState }) {
-  return <Badge tone={SYNC_STATE[state].tone}>{SYNC_STATE[state].label}</Badge>;
+/** In lists the (i) would repeat on every line; the card head carries it once. */
+function StateBadge({ state }: { state: DuoSyncState }) {
+  return <StatusBadge axis="duo_sync" status={state} info={false} />;
 }
 
 function SearchHead({ query, onQuery }: { query: string; onQuery: (q: string) => void }) {
@@ -101,7 +105,7 @@ function B2Body({ query = "" }: { query?: string }) {
   return (
     <ExtensionShell area="history">
       <Card>
-        <CardHead title="Verlauf" sub="Je Mandant der letzte erfolgreiche Abgleich" />
+        <CardHead title="Verlauf" sub="Je Mandant der letzte erfolgreiche Abgleich" actions={<StatusInfoButton axis="duo_sync" />} />
         <CardSection>
           <SearchHead query={q} onQuery={setQ} />
         </CardSection>
@@ -273,48 +277,36 @@ const B4 = () => (
 const page = "page" as const;
 
 const HISTORY_STATES: StateSpec[] = [
-  { id: "B1", title: "Verlauf · leer", uses: "Card, EmptyState, Button", missing: "", surface: page, render: () => <B1 /> },
-  { id: "B2", title: "Verlauf · je Mandant", uses: "Card, SearchInput, Table, ExpandableRow, Badge, Time, TextButton", missing: "", surface: page, render: () => <B2Body /> },
-  { id: "B3", title: "Suche nach Beleg-Nummer", uses: "SearchInput, Table, Badge, Time", missing: "", surface: page, render: () => <Findings query="7c1e4b20-5d3a-4f6e-9a21-0b8e3f4d1c77" findings={BY_NUMBER} /> },
-  { id: "B3b", title: "Suche nach Eingangsdatum", uses: "SearchInput, Table, Badge, Time", missing: "", surface: page, render: () => <Findings query="24.11.2026" findings={BY_DATE} /> },
-  { id: "B3c", title: "Suche ohne Treffer", uses: "SearchInput, EmptyState (leer nach Filter), TextButton", missing: "", surface: page, render: () => <Findings query="3f9a0d11-77c2-4b8e-a1f0-5c2d9e6b4a10" findings={[]} /> },
-  { id: "B4", title: "Protokoll", uses: "Card, Button, CopyTextButton, LogList, ActionButton (Rückfrage); Hilfe vom Support aus Card, CopyTextButton, Button", missing: "", surface: page, render: () => <B4 /> },
+  { id: "B1", title: "Verlauf · leer", uses: "ExtensionShell, Card, EmptyState, Button", missing: "", surface: page, render: () => <B1 /> },
+  { id: "B2", title: "Verlauf · je Mandant", uses: "ExtensionShell, Card, SearchInput, Table, ExpandableRow, StatusBadge, Time, TextButton", missing: "", surface: page, render: () => <B2Body /> },
+  { id: "B3", title: "Suche nach Beleg-Nummer", uses: "ExtensionShell, SearchInput, Table, Badge, Time", missing: "", surface: page, render: () => <Findings query="7c1e4b20-5d3a-4f6e-9a21-0b8e3f4d1c77" findings={BY_NUMBER} /> },
+  { id: "B3b", title: "Suche nach Eingangsdatum", uses: "ExtensionShell, SearchInput, Table, Badge, Time", missing: "", surface: page, render: () => <Findings query="24.11.2026" findings={BY_DATE} /> },
+  { id: "B3c", title: "Suche ohne Treffer", uses: "ExtensionShell, SearchInput, EmptyState (leer nach Filter), TextButton", missing: "", surface: page, render: () => <Findings query="3f9a0d11-77c2-4b8e-a1f0-5c2d9e6b4a10" findings={[]} /> },
+  { id: "B4", title: "Protokoll", uses: "ExtensionShell, Card, Button, CopyTextButton, LogList, ActionButton (Rückfrage); Hilfe vom Support aus Card, CopyTextButton, Button", missing: "", surface: page, render: () => <B4 /> },
 ];
 
-interface Args {
-  showDrafts: boolean;
-}
-
-const meta: Meta<Args> = {
+const meta: Meta = {
   title: "Seiten/DUO-Connect/Verlauf",
   parameters: { layout: "fullscreen" },
-  args: { showDrafts: true },
-  argTypes: { showDrafts: { name: "Entwürfe kennzeichnen", control: "boolean" } },
 };
 export default meta;
-type Story = StoryObj<Args>;
-
-function wrap(args: Args, children: ReactNode) {
-  return <DraftsVisible value={args.showDrafts}>{children}</DraftsVisible>;
-}
+type Story = StoryObj;
 
 function one(id: string): Story {
   const spec = HISTORY_STATES.find((s) => s.id === id);
   if (!spec) throw new Error(`unknown state ${id}`);
-  return { name: `${spec.id} · ${spec.title}`, render: (args) => wrap(args, <Single spec={spec} />) };
+  return { name: `${spec.id} · ${spec.title}`, render: () => <Single spec={spec} /> };
 }
 
 /** Every state of the tab „Verlauf", side by side. */
 export const Board: Story = {
-  render: (args) =>
-    wrap(
-      args,
-      <StateBoard
-        title="Verlauf — alle Zustände"
-        lead="Ein Abgleich im Verlauf öffnet dieselbe Ergebnisansicht wie im Reiter Abgleich (U9)."
-        states={HISTORY_STATES}
-      />,
-    ),
+  render: () => (
+    <StateBoard
+      title="Verlauf — alle Zustände"
+      lead="Ein Abgleich im Verlauf öffnet dieselbe Ergebnisansicht wie im Reiter Abgleich (U9)."
+      states={HISTORY_STATES}
+    />
+  ),
 };
 
 export const B01Empty = one("B1");

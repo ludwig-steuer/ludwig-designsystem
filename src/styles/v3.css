@@ -668,6 +668,45 @@ a.v3stepbar__step.is-current:hover { background: var(--color-accent-50); }
 .pz-steps__sub { margin-top: var(--space-1); }
 .pz-steps__sub > li { display: flex; gap: var(--space-2); align-items: center; font-weight: 400; color: var(--color-text-muted); }
 
+/* --- PhaseProgress (0265): the steps of a run as rows -------------------
+   The rows of `.pz-steps` in the size of the page (A7): sign, the user's
+   words, count or note on the right. Only the current row carries a track,
+   one line under text and count. No rule for narrow widths: the list is one
+   column at every width (U5). */
+.v3phase { position: relative; min-width: 0; }
+.v3phase__steps > li {
+  grid-template-columns: var(--space-5) minmax(0, 1fr) fit-content(50%);
+  column-gap: var(--space-3); row-gap: var(--space-2);
+  align-items: start; padding: var(--space-3) 0;
+  font-size: var(--fs-ui); line-height: var(--lh-ui);
+}
+.v3phase__steps > li:last-child { border-bottom: none; }
+.v3phase__steps .pz-steps__sign { padding-top: 1px; }
+/* The right column: numbers right with tnum and never wrapped; a note may
+   wrap, but never takes more than half the row — so a long one at 320 px
+   breaks instead of pushing the page sideways. */
+.v3phase__aside {
+  justify-self: end; text-align: right;
+  font-size: var(--fs-ui-sm); color: var(--color-text-muted);
+  font-variant-numeric: tabular-nums lining-nums;
+}
+.v3phase__num { font-variant-numeric: tabular-nums lining-nums; white-space: nowrap; }
+.v3phase__steps li.is-held > .v3phase__aside,
+.v3phase__steps li.is-failed > .v3phase__aside { color: var(--color-text); }
+.v3phase__track { grid-column: 2 / -1; display: block; }
+.v3phase__track > span { display: block; }
+/* Work without a quantity: the gliding piece of `RunMark` across the whole
+   track, in the height of `Progress size="sm"`. */
+.v3phase__track .v3runmark { display: block; width: 100%; }
+/* Short form (A8, block „Jetzt"): the strip of `.pz-mini`, the current step
+   beside it. */
+.v3phase--compact { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-1) var(--space-3); }
+.v3phase__now { display: inline-flex; align-items: center; gap: var(--space-1); min-width: 0; font-size: var(--fs-ui-sm); color: var(--color-text-muted); }
+.v3phase__now > svg { flex: none; }
+.pz-mini span.v3phase__seg { overflow: hidden; }
+.pz-mini .v3phase__fill { display: block; flex: none; height: 100%; border-radius: 0; background: var(--color-accent); }
+.pz-mini span.v3runmark { background: var(--color-accent-100); }
+
 /* --- Baton bar: where did the time go ---------------------------------- */
 .pz-staffel { display: flex; height: 20px; border-radius: var(--radius-sm); overflow: hidden; }
 .pz-staffel > span { display: block; border-right: 1px solid var(--color-surface); min-width: 2px; }
@@ -957,6 +996,12 @@ a.v3stepbar__step.is-current:hover { background: var(--color-accent-50); }
 .v2chip:focus-visible { outline: 2px solid var(--color-focus); outline-offset: 2px; }
 .v2chip .n { font-variant-numeric: tabular-nums lining-nums; opacity: 0.75; }
 .v2chip__icon { display: inline-flex; line-height: 0; margin-right: var(--space-1); }
+/* A locked option (0272): in its place, grey, no hover, the count at full
+   strength — `--color-text-subtle` 4.88:1 on the white chip; at 0.75 opacity it
+   would fall below 4.5:1. The lighter border says „not a control right now“. */
+.v2chip.is-disabled { color: var(--color-text-subtle); border-color: var(--color-border); cursor: default; }
+.v2chip.is-disabled:hover { background: var(--color-surface); }
+.v2chip.is-disabled .n { opacity: 1; }
 
 /* --- Kennzahl-Kachel ---------------------------------------------------- */
 .v2kpigrid { display: grid; grid-template-columns: repeat(var(--v2-kpi-cols, 6), minmax(0, 1fr)); gap: var(--space-4); }
@@ -1162,6 +1207,84 @@ a.v2kpi--link:focus-visible { outline: 2px solid var(--color-focus); outline-off
 .v2callout--folds > .v2disc > .v2disc__sum { padding: var(--space-3) 24px; border-radius: 0 0 var(--radius-lg) var(--radius-lg); }
 .v2callout--folds > .v2disc[open] > .v2disc__sum { border-radius: 0; }
 .v2callout--folds > .v2disc > .v2disc__body { padding: 0 24px 20px; }
+/* `layout="sentence"` (0269): the state as one sentence its word opens. The
+   tone stays on frame and sign; every line of text keeps the text colours,
+   whatever the tone. Actions get a row of their own under the text, left. */
+/* Only on a frame without a fold: with `details` the frame is a column whose
+   fold must stretch to the edges (`.v2callout--folds`); there the head row
+   carries the alignment instead. */
+.v2callout--sentence:not(.v2callout--folds),
+.v2callout--sentence .v2callout__head { align-items: flex-start; justify-content: flex-start; }
+.v2callout__body { flex: 1 1 auto; min-width: 0; display: grid; gap: var(--space-1); }
+.v2callout__sentence {
+  margin: 0; overflow-wrap: anywhere;
+  font-size: var(--fs-ui-lg); line-height: var(--lh-ui-lg); font-weight: 400;
+  color: var(--color-text);
+}
+.v2callout__lead { font-weight: 600; }
+.v2callout.v2callout--sentence .v2callout__sub { color: var(--color-text-muted); }
+.v2callout--sentence .v2callout__actions {
+  flex-wrap: wrap; align-items: center; flex-shrink: 1;
+  margin-top: calc(var(--space-3) - var(--space-1));
+}
+@media (max-width: 639.98px) {
+  /* On a phone the buttons stand one under the other, full width; a note in
+     the row falls under its button. */
+  .v2callout--sentence .v2callout__actions { flex-direction: column; align-items: stretch; }
+}
+
+/* --- Problem card (0264) ------------------------------------------------
+   One problem after a process. Frame and head in the level's colour, the text
+   in the text colour — three sentences in red read badly — and no tinted
+   ground (background is reserved for active, selected, alarmed). No shadow:
+   it mostly stands inside a Card. The fold reaches the card's edges like the
+   StatusCallout's, so its chevron lines up with the text. */
+.v3prob {
+  display: grid; gap: var(--space-1);
+  min-width: 0;
+  padding: var(--space-4);
+  background: var(--color-surface);
+  border: 1px solid var(--color-danger);
+  border-radius: var(--radius-md);
+}
+.v3prob--warning { border-color: var(--color-warning); }
+.v3prob__kicker {
+  display: flex; align-items: flex-start; gap: var(--space-1);
+  min-width: 0; overflow-wrap: anywhere;
+  font-size: var(--fs-ui-xs); line-height: var(--lh-ui-xs); font-weight: 600;
+  color: var(--color-danger);
+}
+.v3prob--warning .v3prob__kicker { color: var(--color-warning); }
+/* The sign sits on the first line of a kicker that wraps (long client name). */
+.v3prob__ico { flex: 0 0 auto; margin-top: calc((var(--lh-ui-xs) * var(--fs-ui-xs) - 12px) / 2); }
+.v3prob__title,
+.v3prob__text {
+  margin: 0; min-width: 0; overflow-wrap: anywhere;
+  font-size: var(--fs-ui); line-height: var(--lh-ui); color: var(--color-text);
+}
+.v3prob__title { font-weight: 600; }
+/* The next step's button in its own row under the sentence, left — on every
+   width (Seitenprofil duo-connect, Nachtrag 1). */
+.v3prob__action {
+  display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-2) var(--space-3);
+  margin-top: var(--space-2);
+}
+.v3prob > .v2disc { margin: var(--space-3) calc(-1 * var(--space-4)) calc(-1 * var(--space-4)); }
+.v3prob > .v2disc > .v2disc__sum { padding: var(--space-2) var(--space-4); border-radius: 0 0 var(--radius-md) var(--radius-md); }
+.v3prob > .v2disc[open] > .v2disc__sum { border-radius: 0; }
+.v3prob > .v2disc > .v2disc__body { padding: 0 var(--space-4) var(--space-4); }
+.v3prob__tech { display: grid; gap: var(--space-2); justify-items: start; min-width: 0; }
+/* Line breaks kept, long lines wrap — the page never scrolls sideways; above
+   sixteen lines the block scrolls by itself (and is then a tab stop). */
+.v3prob__pre {
+  box-sizing: border-box; width: 100%; margin: 0;
+  max-height: calc(16 * var(--lh-ui-sm) * var(--fs-ui-sm));
+  overflow: auto;
+  font-family: var(--font-mono); font-size: var(--fs-ui-sm); line-height: var(--lh-ui-sm);
+  white-space: pre-wrap; overflow-wrap: anywhere;
+  color: var(--color-text);
+}
+.v3prob__pre:focus-visible { outline: 2px solid var(--color-focus); outline-offset: 2px; }
 
 /* --- Hinweisbox --------------------------------------------------------- */
 .v2note {
@@ -1319,6 +1442,81 @@ select.v2in { padding-right: 26px; }
   cursor: pointer;
 }
 .v2checkline { display: inline-flex; align-items: center; gap: 8px; font-size: var(--fs-ui); color: var(--color-text); cursor: pointer; }
+
+/* --- Switch (0266): a lasting on/off setting that acts at once -----------
+   The whole row is the target (a `<label>`), and it answers to hover like
+   `.v2radioline`. The negative inline margin keeps title and explanation on
+   the content edge while the hover ground reaches past it. The word „An"/
+   „Aus" sits in a two-word cell as wide as „Aus", so the knob never moves.
+   Knob 32 x 18, thumb 14; filled ground = active/selected, like the checkbox
+   (`accent-color: --color-primary-700`), never a value. Contrast, measured:
+   border and thumb off: `--color-border-control` 3.45:1 on surface
+   knob on: `--color-primary-700` 11.64:1 on surface (white thumb on it the same)
+   word: `--color-text-muted` 6.69:1 on surface */
+.v2switch { position: relative; display: grid; gap: var(--space-1); padding-block: var(--space-1); }
+.v2switch + .v2switch { border-top: var(--border-1-subtle); }
+.v2switch__row {
+  display: grid; grid-template-columns: minmax(0, 1fr) auto auto; align-items: start;
+  column-gap: var(--space-2);
+  padding: var(--space-2); margin-inline: calc(-1 * var(--space-2));
+  border-radius: var(--radius-sm); cursor: pointer;
+}
+.v2switch__row:hover { background: var(--color-bg-soft); }
+.v2switch.is-pending .v2switch__row { cursor: progress; }
+.v2switch.is-disabled .v2switch__row { cursor: not-allowed; }
+.v2switch.is-disabled .v2switch__row:hover { background: none; }
+.v2switch__text { display: grid; gap: var(--space-1); min-width: 0; padding-right: var(--space-2); }
+.v2switch__label {
+  font-size: var(--fs-ui); line-height: var(--lh-ui); font-weight: 600;
+  color: var(--color-text); overflow-wrap: anywhere;
+}
+/* Explanation and saving line in one grid cell (0266 addendum): the cell keeps
+   the explanation's height; the spinner takes the explanation's size so a
+   one-line explanation does not grow either. */
+.v2switch__sub { display: grid; }
+.v2switch__sub > * { grid-area: 1 / 1; }
+.v2switch__sub > .is-hidden { visibility: hidden; }
+/* The block carries the small step too, or it keeps the inherited 13.5 px line
+   box and a one-line explanation grows by ~2 px while saving (0266 recheck 2). */
+.v2switch__saving { font-size: var(--fs-ui-sm); line-height: var(--lh-ui-sm); }
+.v2switch__saving .v3spinner { font-size: var(--fs-ui-sm); line-height: var(--lh-ui-sm); }
+.v2switch__saving .v3spinner > .v2spin { margin-top: calc((var(--fs-ui-sm) * var(--lh-ui-sm) - 14px) / 2); }
+.v2switch__hint, .v2switch__reason {
+  font-size: var(--fs-ui-sm); line-height: var(--lh-ui-sm); color: var(--color-text-muted);
+}
+/* Word and knob on the first title line, whatever wraps below. */
+.v2switch__state {
+  display: inline-grid; justify-items: end;
+  font-size: var(--fs-ui-sm); line-height: calc(var(--fs-ui) * var(--lh-ui));
+  color: var(--color-text-muted);
+}
+.v2switch__state > * { grid-area: 1 / 1; }
+.v2switch__state > .is-hidden { visibility: hidden; }
+.v2switch__knob {
+  appearance: none; -webkit-appearance: none;
+  position: relative; flex: none; box-sizing: border-box;
+  width: 32px; height: 18px; margin: calc((var(--fs-ui) * var(--lh-ui) - 18px) / 2) 0 0;
+  border: 1px solid var(--color-border-control); border-radius: var(--radius-pill);
+  background: var(--color-surface); cursor: inherit;
+}
+.v2switch__knob::before {
+  content: ""; position: absolute; top: 1px; left: 1px;
+  width: 14px; height: 14px; border-radius: var(--radius-pill);
+  background: var(--color-border-control);
+  transition: transform var(--duration-fast) var(--ease-standard), background-color var(--duration-fast) var(--ease-standard);
+}
+.v2switch__knob:checked { background: var(--color-primary-700); border-color: var(--color-primary-700); }
+.v2switch__knob:checked::before { transform: translateX(14px); background: var(--color-surface); }
+.v2switch__knob:focus-visible { outline: 2px solid var(--color-focus); outline-offset: 2px; }
+.v2switch__knob:disabled { opacity: 0.5; }
+@media (prefers-reduced-motion: reduce) {
+  .v2switch__knob::before { transition: none; }
+}
+/* The message line adds no gap while empty: its parts are the row's items. */
+.v2switch__msg { display: contents; }
+.v2switch__err { font-size: var(--fs-ui-sm); line-height: var(--lh-ui-sm); color: var(--color-danger); }
+.v2switch__err:empty { display: none; }
+.v2switch__err strong { font-weight: 600; }
 .v2search { min-width: 220px; font-size: var(--fs-ui-sm); }
 
 /* --- Field with addon (0036) --------------------------------------------
@@ -1701,6 +1899,9 @@ summary.v2lp__grp:focus-visible { outline: 2px solid var(--color-focus); outline
   font-size: var(--fs-ui);
 }
 .v2pp__row:last-child { border-bottom: none; }
+/* „wird geprüft" (0270): the spinner's circle in the box of a 15 px state
+   icon, so the sign column does not move when the result arrives. */
+.v2pp__running { display: inline-flex; flex: none; align-items: center; justify-content: center; width: 15px; height: 15px; }
 .v2pp__q { font-weight: 500; color: var(--color-text); }
 /* **A row of its own.** The block was a `span` without `display`, so inline —
    the reason stuck to the check code ("P-KONTOSonst 5401, hier —"), and
@@ -2332,11 +2533,15 @@ a.ki__src:hover { text-decoration: underline; color: var(--color-accent-700); }
   line-height: var(--lh-ui);
   color: var(--color-text-muted);
 }
-.v3spinner > .v2spin {
+/* The spinner's circle: accent 700 at full strength — the same picture
+   wherever the sign stands alone, also as „wird geprüft" in a check row
+   (0270, M1). Only the circle inside a button stays at 70 % of its text. */
+.v3spinner > .v2spin,
+.v2pp__running > .v2spin {
   color: var(--color-accent-700);
   opacity: 1;
-  margin-top: calc((var(--fs-ui) * var(--lh-ui) - 14px) / 2);
 }
+.v3spinner > .v2spin { margin-top: calc((var(--fs-ui) * var(--lh-ui) - 14px) / 2); }
 .v3spinner__label { min-width: 0; overflow-wrap: anywhere; }
 .v3spinner--lg { font-size: var(--fs-ui-md); line-height: var(--lh-ui-md); }
 .v3spinner--lg > .v2spin {
@@ -4603,6 +4808,7 @@ button.v2oil__side:focus-visible { outline: 2px solid var(--color-focus); outlin
 .v2pp__result-line--yellow { color: var(--color-warning); }
 .v2pp__result-line--open,
 .v2pp__result-line--none { color: var(--color-text-muted); }
+.v2pp__result-line--running { color: var(--color-text-muted); }
 
 /* --- PeriodGrid (0162): periods as columns, one state per cell, a gap is a
    cell with a statement. The subject column stays while the grid scrolls in

@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Status | spec (überarbeitet 2026-11-27 nach Simons Feedback zu den Entwürfen; die erste Fassung mit `figures` ist verworfen) |
+| Status | fertig — fremd abgenommen 2026-11-27 (Mangel sentence+details behoben, Achsen-Mischung in der Story vom Auftraggeber behoben) |
 | Stufe | `primitives/` (`StatusCallout`): eine neue Prop `layout`. Alles Übrige ist eine Seitenaufgabe aus vorhandenen bzw. spezifizierten Bausteinen |
 | Klassen-Test | ja: Das Ergebnis eines Vorgangs als ein Satz, der mit seinem Zustand beginnt, mit dem nächsten Schritt darunter, gibt es in jeder Fach-App |
 | Quelle | Seitenprofil `docs/seiten/duo-connect.md`, Abschnitt „Nachtrag 2 2026-11-27 — Simons Feedback zu den Entwürfen (17e044a)“, Zeilen **A10–A12 Ergebnis**, **A11, A12, B4 Support** und **A9** (Regel für jede Hinweisfläche mit Aktion: Knopf in eigener Zeile unter dem Text, linksbündig). Davor: `ludwig-plugin/docs/spec-bausteine.md` (Branch `umbau`), „Ergebnis-Zusammenfassung“; `docs/spec-oberflaeche-und-fehler.md` C3 |
@@ -260,3 +260,107 @@ Variabel (aus dieser Spec):
 - [ ] `@when` des `StatusCallout` nennt `layout="sentence"` im Halbsatz. Das `@instead` von `Callout` verweist für „Zustand als Satz mit nächstem Schritt“ auf `StatusCallout layout="sentence"`
 - [ ] Seitenaufgabe, **offen bis 0264 und 0265 gebaut sind:** Die Entwürfe A10–A12 in `src/showcase/duo-connect/Sync.stories.tsx` zeigen `StatusCallout layout="sentence"`, darunter `PhaseProgress` im Endzustand, `ProblemCard`, die zwei Aufklapper und „Hilfe vom Support“ mit den Texten aus Nachtrag 2. Sie haben kein `figures` und kein `KpiGrid`
 - [ ] Wort und Stufe aus `duo_sync`, sobald der Spiegel sie hat: **offen (Spiegel)**, `pnpm sync:ludwig`
+
+## Nachtrag 2026-11-27 — aus dem Bau
+
+- Der Typ heißt `StatusCalloutLayout` und steht im Barrel.
+- `sentence` rendert `kicker` als `<strong>` im selben `<p>` wie `title`;
+  `sub` und die Aktionszeile folgen im Textblock (`.v2callout__body`). Mit
+  `details` gilt dieselbe Form im Kopf, der Aufklapper bleibt darunter.
+- Die Regeln für `sentence` treffen nur neue Klassen; die sieben bestehenden
+  Stories ohne `layout` sind pixelgleich (gemessen 0,000 %).
+- **Nachbesserung aus der Abnahme:** Die Ausrichtung `flex-start` gilt nur
+  für einen Rahmen ohne Aufklapper (`.v2callout--sentence:not(.v2callout--folds)`);
+  mit `details` bleibt der Rahmen gestreckt, der Aufklapper reicht von Kante zu
+  Kante (neue Story `SentenceWithDetails`, gemessen bei 720 px: 686 von 688 px).
+  Damit hat die Datei zehn Stories.
+- `RunResult`: Der 320-px-Rahmen zeigt Umbruch, nicht die Schmal-Regel — die
+  hängt am Fenster (L1); der Story-Text sagt das jetzt. Das Zustandswort kommt
+  in `Layouts` und `RunResult` aus der Registry (`resolveStatus(axis, key).label`
+  + „.“) — das Muster fürs Plugin.
+- **Offen, nicht Teil dieses Baus:** die Seitenaufgabe in
+  `src/showcase/duo-connect/Sync.stories.tsx` (A10–A12 mit `PhaseProgress`,
+  `ProblemCard`, „Hilfe vom Support“) — sie wartet auf `PhaseProgress` (0265)
+  und gehört zum Umstellen der Entwürfe.
+- Die Achse `duo_sync` ist seit 93e2791 im Spiegel; das Kriterium „Wort und
+  Stufe aus `duo_sync`“ prüft der Aufrufer (Plugin bzw. Entwürfe), der
+  `StatusCallout` nimmt `kicker` und `tone` als Werte.
+
+## Abnahme
+
+Gemessene Abnahme (nicht schlank), Storybook-Dev-Server :6107 (Arbeitsbaum),
+Chromium 158; Story-IDs `v3-primitives-fläche-statuscallout--…`. Vorher-Stand:
+eigener `git clone --shared` von HEAD 1b9a847 im Scratchpad, Storybook-Dev auf
+:6199 (ein `storybook build` aus dem Klon scheitert an „File name too long“ —
+rolldown schreibt den Base64-Pfad des Duo-Logos in einen Dateinamen; der
+Dev-Server schreibt nichts und rendert dieselben Module).
+
+| Kriterium | Nachweis (Story-ID · Befehl · Screenshot) | Ergebnis |
+|---|---|---|
+| `pnpm typecheck` und `pnpm build` grün | `pnpm typecheck` Exit 0; `pnpm build -o <scratchpad>/abn0264/sb-work` Exit 0 | ✓ |
+| Datei nach der Familie benannt, Story daneben, Titel in der richtigen Gruppe | `primitives/StatusCallout.tsx`, Stories in `StatusCallout.stories.tsx` (`v3/Primitives/Fläche/StatusCallout`); `StatusCalloutLayout` im Barrel unter `/* Fläche */` | ✓ |
+| Code englisch; `@when`/`@instead` an jedem Export | `pnpm check:when` „in Ordnung“ (`--test` Exit 0); `pnpm check:language` ok; deutsche Story-Beschreibungen wie im Bestand der Datei | ✓ |
+| Kein Hex, kein px, keine lokale Label-Map; Status nur über Registry | `grep` Hex/`px` in `StatusCallout.tsx`: leer; Wort und Ton kommen als `kicker`/`tone` vom Aufrufer | ✓ (Hinweis H2) |
+| Alle Stories oben vorhanden; ausgeschlossene Zustände begründet | Index: 7 bestehende + `layouts`, `run-result` = 9; lädt/leer nach Filter unter „Verhalten“ begründet. Deckungslücke: keine Story zeigt `layout="sentence"` mit `details` — gehört zu M1 | ✓ (→ M1) |
+| Prüfliste `design-guidelines.md` §9 durchgegangen | Text links; Ton nur Rahmen + Zeichen, Wort im Satz (V7); Rot nur `danger`; Schrift aus der Skala (`pnpm check:type` ok); Trefferflächen Knopf 151,3 × 34,8, Link 198,5 × 24,8; Fläche ohne Hover, Cursor `auto`; keine Bewegung (`transition-duration` 0s); Rand + Schatten ist die benannte Ausnahme von `.v2callout` | ✓ |
+| Im Browser angesehen (Storybook), nicht nur gebaut | `layouts`, `run-result`, `open`, `with-details` bei 1440 px: gerendert, keine Konsolen-Fehler/-Warnungen | ✓ |
+| `layout` im Typ wie in der Tabelle, optional, Default `"head"`; keine Prop `figures` | `layout?: StatusCalloutLayout` (= `"head" \| "sentence"`), `layout = "head"`; `git grep figures -- src/ui/v3/primitives/StatusCallout.tsx` leer | ✓ |
+| Ohne `layout` sind die sieben bestehenden Stories bei 1440 px pixelgleich (`png-diff.mjs` ≤ 0,5 %) | `node scripts/png-diff.mjs diff-1440-before diff-1440-after 0.5`: `open`, `waiting-for-client`, `failed`, `done`, `without-action`, `next-action`, `with-details` je **0,000 %**, Exit 0; dasselbe bei 1280 px 0,000 % | ✓ |
+| `sentence`, gemessen: nichts über dem Satz; `kicker`+`title` ein Absatz; `kicker` 600, `title` 400, beide `--fs-ui-lg`, `--color-text`; `sub` `--color-text-muted` in allen drei Tönen | `layouts` und `run-result` (je Ton): kein sichtbares Element mit Unterkante ≤ Satz-Oberkante (Zeichen links ausgenommen), kein `.v2callout__kicker`; `<p>` = `STRONG` + Text; `strong` 16 px/600, Satz 16 px/400, beide `rgb(45,45,45)`; `sub` 13,5 px `rgb(92,92,92)` in neutral, warning, danger | ✓ |
+| Vorleser: Satz als einer, ein Textknoten-Elternteil | `ariaSnapshot` von `run-result`: `paragraph: [strong "Fertig.", text "12 Belege übertragen, Kontoumsätze von 2 Konten geholt."]` — Wort und Titel im selben Absatz, `textContent` mit einem Leerzeichen dazwischen | ✓ |
+| Aktionen bei `sentence`: eigene Zeile unter Satz und `sub`, linksbündig ± 1 px; unter 640 px untereinander in voller Breite, kein waagerechtes Scrollen bei 320 px; bei 1280 px ändert die Regel keine bestehende Story | 1280 px: Aktionszeile 12 px unter `sub` bzw. Satz, linke Kante − Satzkante = 0 px; Fenster 320 px: `flex-direction: column`, jeder Knopf/Link so breit wie die Zeile (238 bzw. 202 px), Hinweis unter dem Knopf; `scrollWidth` 320 = `clientWidth`; 1280 px Pixelvergleich 0,000 % | ✓ (Hinweis H1) |
+| Ton bei `sentence`: `warning`/`danger` färben Rahmen und Zeichen, keinen Text; `neutral` ohne getönten Rahmen | warning Rahmen + Zeichen `rgb(140,96,30)`, danger `rgb(168,64,60)`, aller Text `rgb(45,45,45)`/`rgb(92,92,92)`; neutral Rahmen `rgb(221,226,232)` = `--color-border`, ohne Zeichen | ✓ |
+| Kontrast gemessen: Satz ≥ 4,5:1, `sub` ≥ 4,5:1, Zeichen und Rahmen im Ton ≥ 3:1 | `layouts`: Satz 13,77:1, `sub` 6,69:1, warning Zeichen/Rahmen 5,52:1, danger 6,06:1 (gegen `rgb(255,255,255)`) | ✓ |
+| Keine Live-Region im `StatusCallout` | DOM aller `sentence`-Flächen in `layouts`/`run-result`: kein `role`, kein `aria-live` | ✓ |
+| Texte wörtlich aus Nachtrag 2 (`RunResult`); kein Ausrufezeichen, „Sie“, `TT.MM.JJJJ` | „Fertig.“ · „Fertig mit Problemen.“ · „Abgebrochen.“ · „Stehen geblieben bei „Neue Belege aus DATEV holen“, Beleg 37 von 120.“ · „Ein neuer Versuch überträgt nichts doppelt.“ zeichengleich; „Von Ihnen abgebrochen …“; Daten 26.11.2026, 13.11.2026 bis 27.11.2026 | ✓ |
+| `@when` nennt `layout="sentence"`; `@instead` von `Callout` verweist auf `StatusCallout layout="sentence"` | `StatusCallout.tsx`: „… or a state as one sentence opened by its word, actions below (`layout="sentence"`)“; `Callout.tsx`: „A state as a sentence with the next step → StatusCallout `layout="sentence"`“ | ✓ |
+| Seitenaufgabe A10–A12 in `Sync.stories.tsx` | laut Spec „offen bis 0264 und 0265 gebaut sind“ und laut Nachtrag nicht Teil dieses Baus: `Sync.stories.tsx` (unverändert seit HEAD) nimmt `ProblemCard` noch aus `./drafts`, kein `PhaseProgress`; `KpiGrid`/`figures` kommen dort schon nicht mehr vor (0 Treffer) | offen (vereinbart) |
+| Wort und Stufe aus `duo_sync` | Achse im Spiegel (`src/ludwig/ui/status/status-registry.ts`, `DUO_SYNC`: Fertig · Fertig mit Problemen · Abgebrochen …); prüft laut Nachtrag der Aufrufer | offen (beim Aufrufer) |
+| `details` bei `layout="sentence"` „wie heute im selben Rahmen, unter den Aktionen“ (Schnittstelle, Nachtrag) | echtes Markup (`renderToStaticMarkup(<StatusCallout layout="sentence" tone="warning" details={…} …/>)`) in die Seite mit `v3.css` gesetzt, Rahmen 720 px: `align-items` des Rahmens = `flex-start`, `details` **211,6 px** statt 718 px breit, Kopf 535 px; die Trennlinie des Aufklappers endet nach einem Drittel (`sc-sentence-details-real.png`). Ursache: `.v2callout--sentence { align-items: flex-start }` steht in `v3.css` nach `.v2callout--folds { align-items: stretch }` bei gleicher Spezifität | ✗ (M1) |
+
+Abgenommen von / am: Claude (Abnahme-Agent designsystem, hat nicht gebaut) ·
+2026-11-27 · **nicht abgenommen — ein Mangel** ·
+Offene Punkte:
+- **M1 `sentence` + `details` bricht den Aufklapper.** Regel in `v3.css`
+  auf den Rahmen ohne Aufklapper begrenzen, etwa
+  `.v2callout--sentence:not(.v2callout--folds), .v2callout--sentence .v2callout__head { … }`,
+  und eine Story mit `layout="sentence"` und `details` ergänzen
+  (z. B. „Ergebnis im Einzelnen“ in `RunResult`); danach erneut messen.
+- **H1 `RunResult`, 320-px-Rahmen:** Die Regel für schmale Breiten hängt am
+  Fenster (`@media`), der Rahmen in einem breiten Fenster zeigt sie nicht —
+  Knöpfe umbrechen dort, stehen aber nicht in voller Breite, obwohl die
+  Beschreibung „Knöpfe untereinander“ sagt. Beschreibung angleichen („bei
+  einem Fenster unter 640 px“) oder die Story mit Viewport-Parameter zeigen.
+- **H2 Wörter in den Stories:** `RunResult`, `Layouts` und `ProblemCard InUse`
+  schreiben „Fertig.“ usw. als Literal, obwohl `DUO_SYNC` im Spiegel steht.
+  Als Vorbild für den Aufrufer besser `label` + „.“ aus der Registry.
+- `pnpm check:classes` ist rot, aber nur durch fremde Klassen (`v3clt`,
+  `v3clt__step`, `v3phase__run`, `v2tbl__foot`, `cy-page`); keine aus 0264/0269.
+
+### Nachprüfung 2026-11-27
+
+Derselbe Prüfer, Storybook :6107 (Arbeitsbaum) gegen HEAD 1b9a847 (eigener
+`git clone --shared`, Storybook-Dev :6199), Chromium 158.
+
+| Punkt | Nachweis | Ergebnis |
+|---|---|---|
+| M1 `sentence` + `details` | `v3.css`: `.v2callout--sentence:not(.v2callout--folds), .v2callout--sentence .v2callout__head { align-items: flex-start; … }`. Neue Story `sentence-with-details`: Rahmen `align-items: stretch`, bei 1280 px Rahmen 720 px, `details` und `summary` **718 px** (1 px Rand je Seite), offen auch der Inhalt 718 px; bei 320 px Rahmen 288, `details` 286. Kopf weiter in Satzform: nichts über dem Satz, Aktionen 12 px unter `sub`, linke Kante = Satzkante, Zeichen auf der ersten Zeile; bei 320 px Spalte in voller Breite (202 = 202), kein waagerechtes Scrollen (320 = 320); Enter auf „3 Belege nicht übertragen“ öffnet | ✓ |
+| Sieben alte Stories pixelgleich | erneut `png-diff.mjs` vor (HEAD :6199) / nach (:6107), je 7 Stories: 1440 px und 1280 px alle **0,000 %**, Exit 0 | ✓ |
+| H1 `RunResult`-Text | Beschreibung sagt jetzt: im 320-px-Rahmen brechen Satz und Aktionszeile um; „untereinander in voller Breite … erst, wenn das Fenster schmaler als 640 px ist — die Regel hängt am Fenster (L1)“. Stimmt mit der Messung überein (Rahmen: Umbruch, Fenster 320 px: Spalte) | ✓ |
+| H2 Wörter aus der Registry | `RunResult` und `sentence-with-details`: „Fertig.“, „Fertig mit Problemen.“, „Abgebrochen.“ aus `resolveStatus("duo_sync", …)` — Achse und Gegenstand (Abgleich) passen, Texte unverändert wörtlich | ✓ |
+| H2 → `Layouts`, Ton `danger` | `kicker` = `resolveStatus("job", "failed").label` → „Fehlgeschlagen.“, `title` „Der Abgleich konnte nicht beginnen, Ludwig war nicht erreichbar.“ **Achsen-Mischmasch:** `job` ist die Achse „Auftrag“ (`ops_jobs.status`, „Auftrag endgültig aufgegeben — alle Wiederholungen sind aufgebraucht“), der Satz spricht aber von einem Abgleich — dessen Achse `duo_sync` kennt kein Rot und nennt genau diesen Fall „Abgebrochen“ (Profil A12b: Ludwig nicht erreichbar → „Abgebrochen.“ + Problemkarte Fehler). Die Story, die sich als „das Muster fürs Plugin“ ausgibt, zeigt damit ein zweites Wort für denselben Ausgang eines Abgleichs | ✗ (M2) |
+| Wächter, Bau | `pnpm typecheck` Exit 0; `check:type`, `check:when`, `check:icons`, `check:language`, `check:domain-paths` Exit 0; `check:classes` rot nur durch fremde Klassen; `pnpm build -o <scratchpad>/abn0264/sb-work2` Exit 0; `layouts`, `run-result`, `sentence-with-details` ohne Konsolen-Fehler/-Warnungen. Zehn Stories im Index | ✓ |
+
+Ergebnis der Nachprüfung: **M1 behoben, ein neuer Mangel — noch nicht
+abgenommen.**
+- **M2 `StatusCallout.stories.tsx`, `Layouts` (Ton `danger`):** Wort aus
+  `job`, Gegenstand Abgleich. Sauber wird es, wenn Wort und Satz aus
+  derselben Achse kommen — etwa `job`/`failed` mit einem Auftrag als
+  Gegenstand („Fehlgeschlagen. Der Auftrag „Belege einlesen“ wurde nach drei
+  Versuchen aufgegeben.“) oder eine andere Achse mit Rot und passendem Satz.
+  Eine Zeile; danach ist 0269 aus Sicht dieses Prüfers abnahmefähig.
+- Weiter offen wie vereinbart: Seitenaufgabe A10–A12 und „Wort und Stufe aus
+  `duo_sync`“ beim Aufrufer. `Sync.stories.tsx` nimmt im Arbeitsbaum
+  inzwischen `ProblemCard`, `PhaseProgress` und `layout="sentence"` aus
+  `@/ui/v3` (`drafts.tsx` gelöscht); das ist nicht Gegenstand dieser
+  Nachprüfung und wird gesondert abgenommen.

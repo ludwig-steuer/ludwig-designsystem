@@ -66,7 +66,8 @@ function scoreFor(i: number, kind: string, taxKey: string | null, checks: CheckI
     confidence: confidenceFor(i),
     taxKeys: taxKey ? [taxKey] : [],
     reverseCharge: false,
-    checks: checks.map(({ code, state }) => ({ code, state })),
+    // A check that still runs (0270) has no result yet — the score counts only settled ones.
+    checks: checks.flatMap(({ code, state }) => (state === "running" ? [] : [{ code, state }])),
     priorSameBookings: i % 9 === 4 ? 0 : PRIOR[i % 6]!,
   });
   return { score: s.score, reasons: s.reasons, hard: s.hard };

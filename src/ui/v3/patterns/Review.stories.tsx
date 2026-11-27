@@ -1,6 +1,8 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Button } from "../primitives/Button";
+import { CopyTextButton } from "../primitives/CopyTextButton";
+import { Card, CardHead } from "../primitives/Table";
 import { DetailPane, MasterDetail } from "./MasterDetail";
 import { Checklist, ChecklistItems, Messages, CheckItems, CheckResult, StateIcon, checkSummary, type CheckItem, type ChecklistRow } from "./Review";
 import { StatusBadge } from "./StatusBadge";
@@ -407,6 +409,7 @@ export const CheckSummaryLine: Story = {
           { code: "VST-02", question: "", reason: "", state: "green" },
         ])}
       </span>
+      <span>{checkSummary([...rule("red", 1), ...rule("running", 3), ...rule("green", 6)])}</span>
     </div>
   ),
 };
@@ -435,9 +438,131 @@ export const CheckResultTones: Story = {
       <CheckResult items={rule("green", 4)} kind="fact" />
       <CheckResult items={rule("open", 3)} kind="fact" />
       <CheckResult items={[]} kind="fact" />
+      <CheckResult items={[...rule("red", 1), ...rule("running", 3), ...rule("green", 6)]} />
     </div>
   ),
 };
+
+/* ── 0270: while the checks run, a button per item ─────────────────────
+ * The readiness check of the extension „Ludwig DUO-Connect" (plugin spec C6),
+ * ten items with citable short codes BP-01 … BP-10 (open question 3). */
+
+type Readiness = Omit<CheckItem, "state" | "reason"> & { done: Pick<CheckItem, "state" | "reason" | "action" | "jump"> };
+
+const reconnect = <Button size="xs" variant="secondary">Neu verbinden</Button>;
+const openDatev = <Button size="xs" variant="secondary">DATEV öffnen</Button>;
+const guide = <Button size="xs" variant="tertiary">Anleitung</Button>;
+const confirmDone = <Button size="xs" variant="secondary">Erledigt</Button>;
+
+const READINESS: Readiness[] = [
+  { code: "BP-01", question: "Ist die Erweiterung aktuell?", done: { state: "green", reason: "Version 0.11.0 ist die aktuelle." } },
+  { code: "BP-02", question: "Ist Ludwig erreichbar?", done: { state: "green", reason: "Ludwig hat in 180 ms geantwortet." } },
+  { code: "BP-03", question: "Ist die Erweiterung mit Ludwig verbunden?", done: { state: "red", reason: "Die Verbindung ist am 26.11.2026 abgelaufen.", action: reconnect } },
+  { code: "BP-04", question: "Haben die Mandanten eine DATEV-Mandantennummer?", done: { state: "green", reason: "Alle 12 Mandanten sind vollständig." } },
+  { code: "BP-05", question: "Ist DATEV erreichbar?", done: { state: "open", reason: "Lässt sich ohne geöffnetes DATEV-Fenster nicht prüfen.", action: openDatev } },
+  { code: "BP-06", question: "Sind Sie bei DATEV angemeldet?", done: { state: "open", reason: "Lässt sich ohne geöffnetes DATEV-Fenster nicht prüfen.", action: openDatev } },
+  { code: "BP-07", question: "Ist der Mandant in DATEV zugänglich?", done: { state: "open", reason: "Nur bei „Gründlich prüfen“: öffnet einen DATEV-Tab." } },
+  { code: "BP-08", question: "Ist das Pop-up für DATEV erlaubt?", done: { state: "open", reason: "Edge fragt die Freigabe nicht ab; bitte einmal bestätigen.", jump: guide, action: confirmDone } },
+  { code: "BP-09", question: "Sind die Einstellungen von Ludwig geladen?", done: { state: "green", reason: "Vom Server geladen um 09:12.", jump: <Button size="xs" variant="tertiary">Einstellungen ansehen</Button> } },
+  { code: "BP-10", question: "Läuft kein anderer Abgleich?", done: { state: "green", reason: "Keine zweite Seite offen." } },
+];
+
+const RUNNING_REASON: Record<string, string> = {
+  "BP-05": "DATEV wird angefragt.",
+  "BP-06": "DATEV wird angefragt.",
+  "BP-07": "DATEV wird angefragt.",
+  "BP-08": "Die Freigabe des Browsers wird gelesen.",
+};
+
+/** The items after the check, or with `running` for the codes given. */
+function readiness(running: ReadonlySet<string> = new Set()): CheckItem[] {
+  return READINESS.map(({ done, ...rest }) =>
+    running.has(rest.code) ? { ...rest, state: "running", reason: RUNNING_REASON[rest.code] ?? "Wird geprüft." } : { ...rest, ...done },
+  );
+}
+
+/**
+ * 0270 rule 1 and 2 — mid-check: four items run, nothing is folded, every
+ * item stands in the order given; BP-03 has its result already, with its
+ * button.
+ */
+export const CheckItemsRunning: Story = {
+  render: () => (
+    <div className="v2card" style={{ maxWidth: "var(--container-narrow)" }}>
+      <CheckItems items={readiness(new Set(["BP-05", "BP-06", "BP-07", "BP-08"]))} />
+    </div>
+  ),
+};
+
+/**
+ * 0270 rule 3 — after the check: the finding first, then every item with a
+ * button (also the not checkable ones: a button in a closed fold-out is
+ * none), then „5 von 6 Prüfungen bestanden" and „1 Prüfung nicht prüfbar".
+ * BP-08 carries both: the jump „Anleitung" and the button „Erledigt".
+ */
+export const CheckItemsWithAction: Story = {
+  render: () => (
+    <div className="v2card" style={{ maxWidth: "var(--container-narrow)" }}>
+      <CheckItems items={readiness()} />
+    </div>
+  ),
+};
+
+function ReadinessDemo() {
+  const [running, setRunning] = useState<ReadonlySet<string>>(new Set());
+  const [said, setSaid] = useState<string[]>([]);
+  const host = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    if (running.size === 0) return;
+    const next = [...running][0]!;
+    const t = window.setTimeout(() => setRunning((r) => new Set([...r].filter((c) => c !== next))), 600);
+    return () => window.clearTimeout(t);
+  }, [running]);
+  useEffect(() => {
+    const region = host.current?.querySelector('[role="status"]');
+    if (!region) return;
+    const mo = new MutationObserver(() => setSaid((l) => [...l, region.textContent ?? ""]));
+    mo.observe(region, { childList: true, characterData: true, subtree: true });
+    return () => mo.disconnect();
+  }, []);
+  const items = readiness(running);
+  return (
+    <div style={{ display: "grid", gap: "var(--space-3)", maxWidth: "var(--container-narrow)" }}>
+      <Card>
+        <CardHead
+          title="Alles bereit?"
+          sub={running.size > 0 ? "Prüfung läuft" : checkSummary(items)}
+          actions={
+            <>
+              <Button size="sm" variant="secondary" onClick={() => setRunning(new Set(READINESS.map((r) => r.code)))}>
+                Erneut prüfen
+              </Button>
+              <CopyTextButton
+                size="sm"
+                label="Bericht kopieren"
+                text={items.map((i) => `${i.code} ${i.question} — ${i.state}`).join("\n")}
+              />
+            </>
+          }
+        />
+        <div ref={host}>
+          <CheckItems items={items} live />
+        </div>
+      </Card>
+      <div className="lw-ui-hint" data-testid="region-log">
+        Live-Region jetzt: „{running.size > 0 ? "Prüfung läuft." : checkSummary(items)}“ · Änderungen seit Laden: {said.length}
+        {said.length ? ` (${said.join(" → ")})` : ""}
+      </div>
+    </div>
+  );
+}
+
+/**
+ * 0270 rule 2 and 5 in use: „Erneut prüfen" sets every item to `running`, the
+ * results arrive one by one in place, and only when the last is done the list
+ * folds once. The live region speaks twice — „Prüfung läuft." and the summary.
+ */
+export const ReadinessCheckInUse: Story = { render: () => <ReadinessDemo /> };
 
 /** Fehler blockieren, Warnungen brauchen eine Quittung, Hinweise stehen nur da. */
 export const MessagesThreeLevels: Story = {

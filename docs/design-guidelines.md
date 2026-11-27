@@ -552,7 +552,7 @@ Aufgabe in `docs/backlog/NNNN-*.md` (Stand der Auswertung: 2026-09-03).
 | Fläche | `Disclosure` (Aufklapper mit Kopf und Zustand) | natives `<details>/<summary>`, 34 Stellen / 20 Dateien | v2 (0005) |
 | Formular | `Field` · `Input` · `Textarea` · `Select` · `Checkbox` (Label sichtbar, Fehler als Text, Pflicht, I8) | — | v2 |
 | Formular | `RadioGroup` (Antwortoptionen I6) | 3 rohe Radio-Felder in 2 Dateien | v2 (0017) |
-| Formular | Schalter (Toggle) | `ClientActiveToggle` ist bewusst ein Knopf; `role=switch` 0× | — verworfen (0018, 2026-09-04) |
+| Formular | `Switch` (0266): dauerhafte An/Aus-Einstellung, die sofort wirkt und umkehrbar ist; Zustandswort „An“/„Aus“ immer sichtbar, ganze Zeile klickbar, Speichern mit Sperre, Rücksprung und Ansage | Kit `Toggle`; `ClientActiveToggle` bleibt ein Knopf (Zustand des Mandanten, keine Einstellung) | v2 (0266) · **benannte Ausnahme zu 0018, Owner 2026-11-27:** 0018 verwarf den Schalter am 2026-09-04; der Owner hebt das für sofort wirkende, umkehrbare Einstellungen auf. Formularangaben mit Speichern bleiben `Checkbox`, einmalige Handlungen `Button`/`ActionButton`, Wahl zwischen Ansichten `Segmented` |
 | Formular | `DateField`/`DateRangeField` | natives Datumsfeld, 14 Dateien | v2 (0024) |
 | Formular | `AmountInput` (`tnum`, Komma, Vorzeichen) | inline im Editor, 16 Dezimal-Felder | v2 (0019) |
 | Formular | `Combobox` generisch (Suche, Kandidaten nach Herkunft, Tastatur) | `KontoCombobox`, `CreditorCombobox`; v3 `AccountField` entitätsgebunden | v2 (0009, Basis für `AccountField`/`PartnerField`) |

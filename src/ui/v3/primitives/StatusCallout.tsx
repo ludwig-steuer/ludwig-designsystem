@@ -2,6 +2,9 @@ import type { ReactNode } from "react";
 
 import { Disclosure } from "./Disclosure";
 
+/** How the callout reads: a header with kicker above, or one sentence (0269). */
+export type StatusCalloutLayout = "head" | "sentence";
+
 /**
  * Header card that carries its state in the frame: kicker, title, sub line,
  * actions on the right. The tone colours frame, kicker and sub line; the
@@ -14,10 +17,18 @@ import { Disclosure } from "./Disclosure";
  * actions sit in the head, never in the `<summary>`, so a click on them
  * cannot toggle the fold.
  *
+ * `layout="sentence"` (0269) reads the state as one sentence its word opens:
+ * the kicker bold at the start („Fertig.“), the title continuing it in normal
+ * weight, the sub line muted below, the actions in a row of their own under
+ * the text, left. The tone sits on frame and sign only — all text stays in
+ * the text colours. Nothing stands above the sentence (no floating mark).
+ *
  * @when    The header of an item whose state defines the page (batch, period),
- *          optionally with its evidence folded underneath.
+ *          optionally with its evidence folded underneath — or a state as one
+ *          sentence opened by its word, actions below (`layout="sentence"`).
  * @instead Note in the flow → Callout. Page-wide message → Banner. A fold-out
- *          that belongs to nothing above it → Disclosure.
+ *          that belongs to nothing above it → Disclosure. A problem after a
+ *          process, with cause, next step and technical text → ProblemCard.
  */
 export function StatusCallout({
   tone = "neutral",
@@ -27,6 +38,7 @@ export function StatusCallout({
   sub,
   actions,
   details,
+  layout = "head",
 }: {
   tone?: "neutral" | "success" | "warning" | "danger";
   /**
@@ -44,9 +56,28 @@ export function StatusCallout({
    * default, because the head already carries the answer.
    */
   details?: { summary: ReactNode; children: ReactNode; defaultOpen?: boolean };
+  /**
+   * `head`: kicker above the title, title semibold, sub line in the tone,
+   * actions on the right. `sentence`: the kicker opens the sentence in bold,
+   * the title continues it, sub line muted, actions in their own row below.
+   */
+  layout?: StatusCalloutLayout;
 }) {
-  const frame = `v2callout${tone === "neutral" ? "" : ` v2callout--${tone}`}`;
-  const head = (
+  const sentence = layout === "sentence";
+  const frame = `v2callout${tone === "neutral" ? "" : ` v2callout--${tone}`}${sentence ? " v2callout--sentence" : ""}`;
+  const head = sentence ? (
+    <>
+      {icon ? <span className="v2callout__ico">{icon}</span> : null}
+      <div className="v2callout__body">
+        {/* One paragraph, so a screen reader reads word and title as one sentence. */}
+        <p className="v2callout__sentence">
+          <strong className="v2callout__lead">{kicker}</strong> {title}
+        </p>
+        {sub ? <div className="v2callout__sub">{sub}</div> : null}
+        {actions ? <div className="v2callout__actions">{actions}</div> : null}
+      </div>
+    </>
+  ) : (
     <>
       {icon ? <span className="v2callout__ico">{icon}</span> : null}
       <div>

@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
-import { useState, type ReactNode } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 import {
   ActionButton,
   Button,
@@ -18,12 +18,12 @@ import {
   Input,
   RawValue,
   Select,
+  Switch,
   TextButton,
   Time,
   type CheckItem,
 } from "@/ui/v3";
 import { READINESS, READINESS_REPORT, STEP_TEXT, USER, type StepKey } from "./fixtures";
-import { DraftsVisible, SettingSwitch } from "./drafts";
 import { Board as StateBoard, ExtensionShell, Single, type StateSpec } from "./Frame";
 
 const stack = { display: "grid", gap: "var(--space-4)" } as const;
@@ -78,38 +78,62 @@ const HANDOVER_TEXT =
 
 type HandoverDemo = "off" | "on" | "saving" | "failed";
 
+const STORE_FAILED = "Ludwig ist nicht erreichbar. Versuchen Sie es in ein paar Minuten erneut.";
+
+/** The plugin stores a setting in a moment; the switch shows nothing for a quick save (0266). */
+const store = (set: (v: boolean) => void) => async (v: boolean) => {
+  await new Promise((done) => setTimeout(done, 150));
+  set(v);
+};
+
 /**
- * The two settings as switch rows in one card. `handover` shows the switch in
- * each of its phases: off, on, saving (locked) and failed (sprung back).
+ * Shows a switch in the phase it only reaches after a click — saving, or
+ * sprung back — by clicking it once on mount. Showcase only: the page stands
+ * still in that phase for the picture.
+ */
+function ClickedOnce({ children }: { children: ReactNode }) {
+  const box = useRef<HTMLDivElement>(null);
+  const clicked = useRef(false);
+  useEffect(() => {
+    if (clicked.current) return;
+    clicked.current = true;
+    box.current?.querySelector<HTMLInputElement>("input[role=switch]")?.click();
+  }, []);
+  return <div ref={box}>{children}</div>;
+}
+
+/**
+ * The two settings as `Switch` rows in one card. `handover` shows the first
+ * switch in each of its phases: off, on, saving (locked) and failed (sprung back).
  */
 function StepsAndReports({ handover }: { handover: HandoverDemo }) {
-  const [on, setOn] = useState(handover === "on" || handover === "saving");
+  const [on, setOn] = useState(handover === "on");
   const [reports, setReports] = useState(true);
-  const [said, setSaid] = useState<string | undefined>();
+  const handoverSwitch = (
+    <Switch
+      label={STEP_TEXT.handover}
+      hint={HANDOVER_TEXT}
+      checked={on}
+      onChange={
+        handover === "saving"
+          ? () => new Promise(() => undefined)
+          : handover === "failed"
+            ? async () => ({ error: STORE_FAILED })
+            : store(setOn)
+      }
+    />
+  );
   return (
     <Card>
       <CardHead title="Schritte und Meldungen" />
       <CardSection>
-        <div style={{ display: "grid", gap: "var(--space-6)" }}>
-          <SettingSwitch
-            title={STEP_TEXT.handover}
-            text={HANDOVER_TEXT}
-            on={on}
-            phase={handover === "saving" ? "saving" : handover === "failed" ? "failed" : "idle"}
-            error="Die Einstellung wurde nicht gespeichert: Ludwig ist nicht erreichbar. Versuchen Sie es in ein paar Minuten erneut."
-            onToggle={() => {
-              setSaid(on ? "Belegübergabe ausgeschaltet" : "Belegübergabe eingeschaltet");
-              setOn(!on);
-            }}
-            announce={said}
-          />
-          <SettingSwitch
-            title="Fehlermeldungen senden"
-            text="Technische Meldungen ohne Mandantendaten an den Anbieter. Hilft, Fehler zu finden, die nicht an Ihnen liegen."
-            on={reports}
-            onToggle={() => setReports(!reports)}
-          />
-        </div>
+        {handover === "saving" || handover === "failed" ? <ClickedOnce>{handoverSwitch}</ClickedOnce> : handoverSwitch}
+        <Switch
+          label="Fehlermeldungen senden"
+          hint="Technische Meldungen ohne Mandantendaten an den Anbieter. Hilft, Fehler zu finden, die nicht an Ihnen liegen."
+          checked={reports}
+          onChange={store(setReports)}
+        />
       </CardSection>
     </Card>
   );
@@ -117,7 +141,7 @@ function StepsAndReports({ handover }: { handover: HandoverDemo }) {
 
 /* ── C4 readiness check ──────────────────────────────────────────────── */
 
-type Point = { state: CheckItem["state"]; reason: string; jump?: ReactNode };
+type Point = { state: CheckItem["state"]; reason: string; action?: ReactNode };
 
 function readiness(points: Record<string, Point>): CheckItem[] {
   return READINESS.map((p) => {
@@ -128,28 +152,28 @@ function readiness(points: Record<string, Point>): CheckItem[] {
 }
 
 const ONE_HINT = readiness({
-  "1": { state: "green", reason: "Version 0.11.0 ist aktuell." },
-  "2": { state: "green", reason: "Ludwig antwortet." },
-  "3": { state: "green", reason: "Verbunden als Anna Berger, gültig bis 26.11.2027." },
-  "4": {
+  "BP-01": { state: "green", reason: "Version 0.11.0 ist aktuell." },
+  "BP-02": { state: "green", reason: "Ludwig antwortet." },
+  "BP-03": { state: "green", reason: "Verbunden als Anna Berger, gültig bis 26.11.2027." },
+  "BP-04": {
     state: "yellow",
     reason: "Bei Ingenieurbüro Brandt fehlt die DATEV-Mandantennummer; er wird übersprungen.",
-    jump: <Button size="xs">In Ludwig öffnen</Button>,
+    action: <Button size="xs">In Ludwig öffnen</Button>,
   },
-  "5": { state: "open", reason: "Lässt sich ohne geöffnetes DATEV nicht prüfen.", jump: <Button size="xs">DATEV öffnen</Button> },
-  "6": { state: "open", reason: "Zeigt sich beim ersten Abgleich; der Abgleich wartet auf die Anmeldung.", jump: <Button size="xs">DATEV öffnen</Button> },
-  "7": { state: "open", reason: "Nur bei „Gründlich prüfen“: öffnet DATEV und wählt den Mandanten." },
-  "8": { state: "green", reason: "In Chrome ist keine Freigabe nötig." },
-  "9": { state: "green", reason: "Vom Server geladen." },
-  "10": { state: "green", reason: "Diese Seite ist die einzige." },
+  "BP-05": { state: "open", reason: "Lässt sich ohne geöffnetes DATEV nicht prüfen.", action: <Button size="xs">DATEV öffnen</Button> },
+  "BP-06": { state: "open", reason: "Zeigt sich beim ersten Abgleich; der Abgleich wartet auf die Anmeldung.", action: <Button size="xs">DATEV öffnen</Button> },
+  "BP-07": { state: "open", reason: "Nur bei „Gründlich prüfen“: öffnet DATEV und wählt den Mandanten." },
+  "BP-08": { state: "green", reason: "In Chrome ist keine Freigabe nötig." },
+  "BP-09": { state: "green", reason: "Vom Server geladen." },
+  "BP-10": { state: "green", reason: "Diese Seite ist die einzige." },
 });
 
 const ALL_READY = readiness({
-  ...Object.fromEntries(ONE_HINT.map((i) => [i.code, { state: i.state, reason: i.reason, jump: i.jump }])),
-  "4": { state: "green", reason: "12 Mandanten, alle mit DATEV-Mandantennummer." },
-  "5": { state: "green", reason: "DATEV antwortet." },
-  "6": { state: "green", reason: "Angemeldet." },
-  "7": { state: "green", reason: "Musterfirma GmbH in DATEV geöffnet und wieder geschlossen." },
+  ...Object.fromEntries(ONE_HINT.map((i) => [i.code, { state: i.state, reason: i.reason, action: i.action }])),
+  "BP-04": { state: "green", reason: "12 Mandanten, alle mit DATEV-Mandantennummer." },
+  "BP-05": { state: "green", reason: "DATEV antwortet." },
+  "BP-06": { state: "green", reason: "Angemeldet." },
+  "BP-07": { state: "green", reason: "Musterfirma GmbH in DATEV geöffnet und wieder geschlossen." },
 });
 
 function ReadinessCard({ items, sentence }: { items: CheckItem[]; sentence: string }) {
@@ -172,7 +196,7 @@ function ReadinessCard({ items, sentence }: { items: CheckItem[]; sentence: stri
           </>
         }
       />
-      <CheckItems items={items} />
+      <CheckItems items={items} live />
     </Card>
   );
 }
@@ -371,39 +395,39 @@ const SETTINGS_STATES: StateSpec[] = [
   {
     id: "C",
     title: "Einstellungen · ein Punkt braucht Sie",
-    uses: "Card, CardHead, FieldList, Button, ActionButton (Rückfrage), CheckItems, CopyTextButton, Disclosure",
-    missing: "0266 Switch",
+    uses: "ExtensionShell, Card, CardHead, FieldList, Button, ActionButton (Rückfrage), Switch, CheckItems (Aktion je Punkt), CopyTextButton, Disclosure",
+    missing: "",
     surface: page,
     render: () => <SettingsPage />,
   },
   {
     id: "C2b",
     title: "Belegübergabe eingeschaltet",
-    uses: "Card, CardHead",
-    missing: "0266 Switch",
+    uses: "ExtensionShell, Card, CardHead, Switch",
+    missing: "",
     surface: page,
     render: () => <SettingsPage handover="on" />,
   },
   {
     id: "C2c",
     title: "Belegübergabe wird gespeichert",
-    uses: "Card, CardHead",
-    missing: "0266 Switch",
+    uses: "ExtensionShell, Card, CardHead, Switch",
+    missing: "",
     surface: page,
     render: () => <SettingsPage handover="saving" />,
   },
   {
     id: "C2d",
     title: "Belegübergabe: Fehler, zurückgesprungen",
-    uses: "Card, CardHead",
-    missing: "0266 Switch",
+    uses: "ExtensionShell, Card, CardHead, Switch",
+    missing: "",
     surface: page,
     render: () => <SettingsPage handover="failed" />,
   },
   {
     id: "C4b",
     title: "Alles bereit, gründlich geprüft",
-    uses: "CheckItems",
+    uses: "ExtensionShell, CheckItems",
     missing: "",
     surface: page,
     render: () => <SettingsPage items={ALL_READY} sentence="Alles bereit." />,
@@ -411,7 +435,7 @@ const SETTINGS_STATES: StateSpec[] = [
   {
     id: "C5a",
     title: "Diagnose · Verbindung, technisch · Token verdeckt",
-    uses: "Disclosure, FieldList, TextButton, Field + Input (Passwort), ActionButton, Select, DateRangeField, Checkbox, Button",
+    uses: "ExtensionShell, Disclosure, FieldList, TextButton, Field + Input (Passwort), ActionButton, Select, DateRangeField, Checkbox, Button",
     missing: "",
     surface: page,
     render: () => <SettingsPage diagnosisOpen />,
@@ -419,7 +443,7 @@ const SETTINGS_STATES: StateSpec[] = [
   {
     id: "C5a-shown",
     title: "Diagnose · Token aufgedeckt",
-    uses: "FieldList, RawValue, CopyTextButton, TextButton",
+    uses: "ExtensionShell, FieldList, RawValue, CopyTextButton, TextButton",
     missing: "",
     surface: page,
     render: () => <SettingsPage diagnosisOpen tokenShown />,
@@ -430,46 +454,34 @@ const SETTINGS_STATES: StateSpec[] = [
 const STORED_CONFIRM: StateSpec = {
   id: "C5b",
   title: "Gespeicherte Daten löschen · Rückfrage offen",
-  uses: "ActionButton (Rückfrage), Dialog, Button",
+  uses: "ExtensionShell, ActionButton (Rückfrage), Dialog, Button",
   missing: "",
   surface: page,
   render: () => <SettingsPage diagnosisOpen confirmStored />,
 };
 
-interface Args {
-  showDrafts: boolean;
-}
-
-const meta: Meta<Args> = {
+const meta: Meta = {
   title: "Seiten/DUO-Connect/Einstellungen",
   parameters: { layout: "fullscreen" },
-  args: { showDrafts: true },
-  argTypes: { showDrafts: { name: "Entwürfe kennzeichnen", control: "boolean" } },
 };
 export default meta;
-type Story = StoryObj<Args>;
-
-function wrap(args: Args, children: ReactNode) {
-  return <DraftsVisible value={args.showDrafts}>{children}</DraftsVisible>;
-}
+type Story = StoryObj;
 
 function one(id: string): Story {
   const spec = [...SETTINGS_STATES, STORED_CONFIRM].find((s) => s.id === id);
   if (!spec) throw new Error(`unknown state ${id}`);
-  return { name: `${spec.id} · ${spec.title}`, render: (args) => wrap(args, <Single spec={spec} />) };
+  return { name: `${spec.id} · ${spec.title}`, render: () => <Single spec={spec} /> };
 }
 
 /** Every state of the tab „Einstellungen", side by side. */
 export const Board: Story = {
-  render: (args) =>
-    wrap(
-      args,
-      <StateBoard
-        title="Einstellungen — alle Zustände"
-        lead="Keine eigene Versionskarte (U8): die Version steht in der Fußzeile und im Prüfpunkt 1. Rückfragen nur bei „Verbindung trennen“, „Gespeicherte Daten löschen“ (eigene Story C5b) und „Alle Protokolle löschen“; alles andere wirkt sofort. Keinen Knopf „Verbindung zurücksetzen“ (U16)."
-        states={SETTINGS_STATES}
-      />,
-    ),
+  render: () => (
+    <StateBoard
+      title="Einstellungen — alle Zustände"
+      lead="Keine eigene Versionskarte (U8): die Version steht in der Fußzeile und im Prüfpunkt 1. Rückfragen nur bei „Verbindung trennen“, „Gespeicherte Daten löschen“ (eigene Story C5b) und „Alle Protokolle löschen“; alles andere wirkt sofort. Keinen Knopf „Verbindung zurücksetzen“ (U16)."
+      states={SETTINGS_STATES}
+    />
+  ),
 };
 
 export const C00Settings = one("C");

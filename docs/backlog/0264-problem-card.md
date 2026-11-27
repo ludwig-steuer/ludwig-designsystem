@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Status | spec |
+| Status | fertig — fremd abgenommen 2026-11-27 (Nachprüfung ✓; Schätzwert 24 Zeichen) |
 | Stufe | `primitives/`, neue Datei `ProblemCard.tsx`, ein Export |
 | Klassen-Test | ja: Jede Anwendung, die nach einem Vorgang sagt, was schiefging, warum, was jetzt zu tun ist und was die Technik dazu meldet, braucht diese Form |
 | Quelle | Anfrage plugin-mananger 2026-11-27 (Auftrag Simon): `ludwig-plugin/docs/spec-bausteine.md` (Branch `umbau`), Zeile „Problemkarte“; Anforderungen aus `ludwig-plugin/docs/spec-oberflaeche-und-fehler.md`, B8 (Fehlertyp mit `klasse`, `technisch`) und C3 (Ergebnis und Fehleranzeige) |
@@ -172,10 +172,106 @@ Variabel (aus dieser Spec):
 - [ ] Tut bewusst nicht: keine Live-Region, keine Wiederholung, keine Zählung. `@instead` nennt `StatusCallout layout="sentence"` (0269) für den Satz darüber und `ActionButton` für den Fehler eines einzelnen Klicks
 - [ ] Die Nachbarn bekommen ihren Verweis: `StatusCallout` und `Messages` nennen in `@instead` „ein Problem nach einem Vorgang, mit Ursache, Schritt und technischem Text → ProblemCard“
 
+## Nachtrag 2026-11-27 — aus dem Bau
+
+- **Knopf unter dem Satz, auf jeder Breite.** Das vom Owner freigegebene
+  Seitenprofil (`docs/seiten/duo-connect.md`, Nachtrag 1: „der Knopf unter
+  dem Satz, nicht rechts im Kopf — drückte den Text auf ein Drittel“) geht
+  der Zeichnung oben vor. `action` steht in einer eigenen Zeile unter `step`,
+  linksbündig an der Textkante, 12 px darüber (Lücke `--space-1` des Rasters
+  plus `--space-2`); die Regel „unter 640 px“ entfällt, weil es keinen zweiten Zustand gibt. Die Kriterien
+  „`action` steht rechts im Kopfbereich, oben bündig … unter 640 px in eigener
+  Zeile“ werden so geprüft: **auf allen Breiten** in eigener Zeile unter
+  `step`, linke Kante = Textkante (± 1 px), Trefferfläche ≥ 24 × 24 px.
+- **Tab-Halt des technischen Blocks ohne Hook:** Ob der Block überläuft,
+  schätzt die Karte auf dem Server (je Zeile ⌈Länge / 30⌉, Summe > 16; 30
+  Zeichen passen bei 320 px knapp in eine Zeile, Nachbesserung aus der
+  Abnahme). Nur dann
+  trägt er `tabIndex=0`, `role="region"` und `aria-label="Technischer Text"`.
+  Grenze: ein breiter Block mit mehr als 16 geschätzten Zeilen kann ein Tab-Halt
+  sein, der nicht scrollt (ein Halt zu viel, kein Halt zu wenig).
+  Nachweis: eine JSON-Zeile mit 900 Zeichen ist bei 320 px Tab-Halt und
+  scrollt (`Edge`).
+- **Fokusring an „Technisch“** liegt innen (Vorgabe von `Disclosure`,
+  `outline-offset: -2px`) und wird deshalb vom Rahmen nicht beschnitten.
+- **Wörter:** Aufklapper „Technisch“ (T4 b) und Knopf „Technischen Text
+  kopieren“ wie oben. Der Entwurf im Showcase und Nachtrag 2 des Profils
+  sagen „Technische Angaben für den Support“ und „Kopieren“ — die Spec gilt,
+  der Showcase zieht beim Umstellen auf den echten Export nach. Weicht der
+  Owner davon ab, ist es ein Wort an einer Stelle (`ProblemCard.tsx`).
+- `InUse` zeigt den Satz darüber schon mit `StatusCallout layout="sentence"`
+  (0269), nicht mit einem Platzhalter; das Zustandswort kommt aus der Registry
+  (`resolveStatus("duo_sync", key).label` + „.“).
+
 ## Abnahme
+
+Gemessene Abnahme (nicht schlank), Storybook-Dev-Server :6107 (Arbeitsbaum),
+Chromium 158, je Story eine eigene Seite; Messung über
+`getBoundingClientRect`/`getComputedStyle`, Kontrast nach WCAG aus den
+berechneten Farben gegen den berechneten Kartengrund. Story-IDs
+`v3-primitives-fläche-problemcard--…`.
 
 | Kriterium | Nachweis (Story-ID · Befehl · Screenshot) | Ergebnis |
 |---|---|---|
-| … | … | ✓ / ✗ |
+| `pnpm typecheck` und `pnpm build` grün | `pnpm typecheck` Exit 0; `pnpm build -o <scratchpad>/abn0264/sb-work` Exit 0 („Storybook build completed successfully“) | ✓ |
+| Datei nach der Familie benannt, Story daneben, Titel in der richtigen Gruppe | `primitives/ProblemCard.tsx` + `ProblemCard.stories.tsx`, Titel `v3/Primitives/Fläche/ProblemCard`; Barrel unter `/* Fläche */` (`ProblemCard`, `ProblemLevel`, `ProblemResolution`) | ✓ |
+| Code englisch; `@when`/`@instead` an jedem Export | `pnpm check:when` „in Ordnung“, `--test` Exit 0; `pnpm check:language` „0 German comment lines“; ein Export mit `@when`/`@instead` | ✓ |
+| Kein Hex, kein px, keine lokale Label-Map; Status nur über Registry | `grep` auf Hex/`px` in `ProblemCard.tsx` und Stories: leer; Stufenwort und Zeichen aus `LEVEL_ICON`; `RESOLUTION_SENTENCE` ist die von der Spec verlangte eine Quelle der festen Sätze, keine Statusliste. `12px` in `.v3prob__ico` (v3.css): px ist in der Stildatei zulässig (§9 „kein px außerhalb `v2.css`“, hier `v3.css`; CLAUDE „kein px in TSX“); kein Token-Fall — die Icon-Leiter A8 (12/14/16) hat keine Token, das Maß steht als `size={12}` am Icon, und die Rechnung zentriert genau dieses Zeichen auf der ersten Kopfzeile (gemessen: 2,35 px Versatz bei 16,7 px Zeile). Gleiches Muster wie `.v2switch__knob` (18px), `.v2pp__running` (15px) | ✓ |
+| Alle Stories oben vorhanden; ausgeschlossene Zustände begründet | Index: `filled`, `resolutions`, `levels`, `in-use`, `edge` (5 von 5); leer/leer nach Filter/lädt/Fehler im Abschnitt „Nicht anwendbare Zustände“ begründet | ✓ |
+| Prüfliste `design-guidelines.md` §9 durchgegangen | Text links, keine Zahlenspalte; Farbe nur Kritikalität (Fehler `--color-danger`, Warnung `--color-warning`), jede Stufe mit Wort + Zeichen; Rand ohne Schatten; `min-width: 0` an Karte, Kopf, Text, Block; Icons Lucide 12 px, Strich 1,5; Schrift aus der Skala (`pnpm check:type` ok, `--test` Exit 0); Trefferflächen ≥ 24 px; kein Hover auf der Karte; Texte Sie-Form, Imperativ, keine Ausrufezeichen; `pnpm check:icons` ok | ✓ |
+| Im Browser angesehen (Storybook), nicht nur gebaut | alle fünf Stories bei 1440 px gerendert, keine Konsolen-Fehler oder -Warnungen, kein `pageerror` | ✓ |
+| Die Props stehen Zeichen für Zeichen wie in der Schnittstellen-Tabelle; `step` und `resolution` sind Pflicht | Code: `title: string`, `cause?: ReactNode`, `step: ReactNode`, `action?: ReactNode`, `resolution: ProblemResolution` (= `"user" \| "retry" \| "support"`), `level?: ProblemLevel` (= `"error" \| "warning"`, Vorgabe `"error"`), `context?: string`, `technical?: string` | ✓ |
+| Reihenfolge nach T5: Kopf, `title` fett, `cause` mit festem Satz, `step`; außerhalb des Aufklappers nichts Technisches | `filled`: Kinder in DOM- und Bildreihenfolge `kicker` „Fehler · Belegabruf“ → `title` (600) → „Drei Versuche … gescheitert. Das ist meist vorübergehend.“ → `step` → Knopf → `details`. Code-Zeichenkette, Pfad und HTTP-Status stehen nur im `<pre>` | ✓ |
+| `resolution` setzt genau die Sätze der Tabelle, `user` setzt keinen; ohne `cause` steht der Satz allein | `resolutions`: user „Die Anmeldung bei DATEV Unternehmen Online ist abgelaufen.“ (ohne Zusatz) · retry „… abgebrochen. Das ist meist vorübergehend.“ · support „… fehlte. Das liegt nicht an Ihnen.“; `edge` ohne `cause`: Absatz = „Das liegt nicht an Ihnen.“ | ✓ |
+| `level` färbt Rahmen, Zeichen und Kopf; Wort immer da; Fläche bleibt `--color-surface` | `levels`: error Rahmen/Kopf/Zeichen `rgb(168,64,60)`, warning `rgb(140,96,30)`; Kopf „Fehler · …“ bzw. „Warnung · …“; Grund beider Karten `rgb(255,255,255)`, auch unter Hover | ✓ |
+| `context` im Kopf nach dem Stufenwort, ` · ` getrennt; langer Name bricht um, schiebt den Knopf nicht aus der Karte | `edge`: „Warnung · Bäckerei Schulze & Söhne Gebäudereinigung und Hausmeisterservice GmbH“; im 320-px-Rahmen drei Kopfzeilen (50 px), Zeichen auf der ersten; Knopf 204,5 px breit, innerhalb der Karte (rechts 981,5 < 1063 Textkante) | ✓ |
+| `action` rechts im Kopf … — **geprüft nach Nachtrag 2026-11-27** (Profil-Nachtrag 1, Owner): auf allen Breiten eigene Zeile unter `step`, linke Kante = Textkante ± 1 px, Trefferfläche ≥ 24 × 24 px | `in-use` bei 700/1100/1280/1400/1920 px und `edge` (720- und 320-px-Rahmen, Fenster 1280 und 320): linke Kante − Textkante = 0 px, 12 px unter `step`, Knopf 148,1 × 34,8 px (`Protokoll herunterladen` 186,6 × 34,8, `Mandant in Ludwig öffnen` 204,5 × 34,8) | ✓ |
+| `technical`: Aufklapper „Technisch“ zu; offen mit erhaltenen Umbrüchen; Kopierknopf legt genau `technical` ab und zeigt „Kopiert“ | `filled`: `details.open` = false; nach Enter offen, `<pre>` mit 3 Zeilen, `white-space: pre-wrap`, `--font-mono` 12,5 px; Kopieren per Tastatur → Beschriftung „Kopiert“; `navigator.clipboard.readText()` und Einfügen mit Cmd+V in ein Textfeld = Fixture `GATEWAY` zeichengenau | ✓ |
+| Langer technischer Text: scrollt in sich, per Tab erreichbar, mit Pfeiltasten scrollbar; Seite bei 320 px ohne waagerechtes Scrollen | `edge`, 40-Zeilen-Stack: `<pre tabindex="0" role="region" aria-label="Technischer Text">`, `max-height` 300 px (16 Zeilen), `scrollHeight` 806 (1280) bzw. 2381 (320); Tab landet darauf, 3 × Pfeil ab → `scrollTop` 0 → 120, Bild ab → 400; Block `scrollWidth` = `clientWidth`; Fenster 320 px mit allen Aufklappern offen: `scrollWidth` 320 = `clientWidth` | ✓ (Hinweis H1) |
+| Ohne `technical` kein Aufklapper, ohne `action` kein leerer Platz | `edge`: Karte ohne `technical` hat kein `details`; Karte ohne `action` hat kein `.v3prob__action`, Abstand letzter Absatz → Kartenunterkante 17 px (16 Polster + 1 Rand) wie bei den anderen | ✓ |
+| Tastatur: Tab-Reihenfolge `action` → „Technisch“ → (offen) Textblock → Kopieren; Enter und Leertaste klappen; Fokusring sichtbar, nicht beschnitten | `filled`: Tab → `Erneut versuchen` → `summary` „Technisch“; Enter öffnet, Leertaste schließt, Leertaste öffnet; Tab → `Technischen Text kopieren` (der Block mit 3 Zeilen läuft nicht über und ist zu Recht kein Halt); `edge` mit Überlauf: Knopf → Zusammenfassung → Block → Kopieren. Ring 2 px `--color-focus`, Knopf und Block außen (+2 px), Zusammenfassung innen (−2 px, Vorgabe von `Disclosure`) — alle drei vollständig sichtbar (Bildschirmfotos `pc-focus-*.png`), die Karte selbst ist kein Ziel | ✓ |
+| Kontrast gemessen: Text ≥ 4,5:1, Rahmen und Zeichen ≥ 3:1 gegen `--color-surface`, je Stufe | `levels`: Text (Titel, Ursache, Schritt) 13,77:1; Kopf (Text, 11,5 px/600) und Zeichen und Rahmen error 6,06:1, warning 5,52:1; „Technisch“ 6,69:1 | ✓ |
+| `ProblemCard.tsx` trägt kein `"use client"` und keinen Hook | `grep` nach `use client`, `useState`, `useEffect`, `useRef`, `useMemo`, `useCallback`, `useId`, `useContext`: leer; `CopyTextButton` ist das Client-Kind | ✓ |
+| Tut bewusst nicht: keine Live-Region, keine Wiederholung, keine Zählung; `@instead` nennt `StatusCallout layout="sentence"` und `ActionButton` | DOM von `filled`: kein `role`/`aria-live` in der Karte; keine Zählung, Knopf kommt vom Aufrufer; JSDoc: „The result sentence above the problems → StatusCallout `layout="sentence"`. The failure of a single click → ActionButton.“ | ✓ |
+| Die Nachbarn bekommen ihren Verweis: `StatusCallout` und `Messages` nennen in `@instead` … → ProblemCard | `StatusCallout.tsx` und `patterns/Review.tsx` (`Messages`): „A problem after a process, with cause, next step and technical text → ProblemCard.“ | ✓ |
 
-Abgenommen von / am: … · Offene Punkte: …
+Abgenommen von / am: Claude (Abnahme-Agent designsystem, hat nicht gebaut) ·
+2026-11-27 · **abgenommen**, mit Hinweisen ·
+Offene Punkte (keiner sperrt):
+- **H1 Tab-Halt-Schätzung unter 640 px zu knapp.** `TECH_LINE_CHARS = 60`
+  gilt laut Kommentar „when the block is as narrow as a phone“, gemessen
+  passen bei 320 px Fenster aber **31** Zeichen in eine Zeile (bei
+  720/1280 px 80). Ein Text, den die Karte auf 15–16 Zeilen schätzt (eine
+  JSON-Zeile mit 900 Zeichen; 8 Zeilen à 119 Zeichen), läuft bei 320 px über
+  (525 bzw. 600 px Inhalt in 300 px) und hat weder `tabIndex` noch
+  `role="region"`/`aria-label`. Chromium 158 macht den Scroller selbst
+  fokussierbar (gemessen: Tab erreicht ihn, Pfeil scrollt), aber ohne Namen;
+  Safari und Firefox tun das nicht. Die Aussage im Nachtrag „ein Halt zu viel,
+  kein Halt zu wenig“ stimmt damit nur ab etwa 640 px. Vorschlag: 30 Zeichen
+  (gemessene Handy-Breite) — eine Konstante.
+- **H2 Satz im Nachtrag:** „Abstand `--space-2` darüber“ — der sichtbare
+  Abstand `step` → Knopf ist 12 px (`--space-1` Rasterlücke + `--space-2`
+  Rand). Satz auf „12 px (`--space-3`)“ angleichen oder Rand auf
+  `calc(var(--space-3) - var(--space-1))` wie in `.v2callout--sentence`.
+- Verhalten sagt „Fokusring … liegt außen“; bei „Technisch“ liegt er innen
+  (Vorgabe `Disclosure`, unbeschnitten) — kein Mangel, nur der Satz.
+
+### Nachprüfung 2026-11-27
+
+Derselbe Prüfer, Storybook :6107 (Arbeitsbaum), Chromium 158.
+
+| Punkt | Nachweis | Ergebnis |
+|---|---|---|
+| H1 `TECH_LINE_CHARS` 30 | `ProblemCard.tsx`: `TECH_LINE_CHARS = 30`. `edge`, neue Karte „technical: eine JSON-Zeile mit 900 Zeichen“ (Schätzung 30 > 16): bei 320 px Fenster `tabindex="0"`, `role="region"`, `aria-label="Technischer Text"`, Block 254 px, `scrollHeight` 788 > 300 → scrollt; Tab: „Technisch“ → Block → „Technischen Text kopieren“, 2 × Pfeil ab `scrollTop` 0 → 80. Bei 1280 px im 720-px-Rahmen ist derselbe Block Tab-Halt ohne Überlauf (263 = 263) — der zugelassene „Halt zu viel“ | ✓ |
+| H1 Rest: „kein Halt zu wenig“ auch verschachtelt? | `in-use` bei 320 px Fenster (Karte in `Card` › `CardSection`): Block 221 px, **29** Zeichen je Zeile. 16 Zeilen à 30 Zeichen (Schätzung 16, also kein Halt) belegen dort 600 px in 300 px → scrollt ohne `tabindex`/Namen (Chromium macht ihn selbst fokussierbar, Safari/Firefox nicht). Der Code-Kommentar „at 320 px … about 33“ gilt nur für die Karte direkt im Fenster | H (Rest) |
+| H2 Bau-Notiz | Nachtrag sagt jetzt „12 px darüber (Lücke `--space-1` des Rasters plus `--space-2`)“ — gemessen 12 px; Fokusring an „Technisch“ innen als Satz ergänzt | ✓ |
+| Nebenwirkung: Wort im Satz darüber | `in-use`: `kicker` = `resolveStatus("duo_sync", "succeeded_with_issues").label` + „.“ → „Fertig mit Problemen.“; Achse passt zum Gegenstand (Abgleich) | ✓ |
+| Wächter, Bau | `pnpm typecheck` Exit 0; `check:type`, `check:when`, `check:icons`, `check:language`, `check:domain-paths` Exit 0; `check:classes` rot nur durch fremde Klassen (`v3clt`, `v3clt__step`, `v2tbl__foot`, `cy-page`); `pnpm build -o <scratchpad>/abn0264/sb-work2` Exit 0 | ✓ |
+| Browser | `filled`, `edge` (320 und 1280 px) ohne Konsolen-Fehler/-Warnungen; 320 px mit allen Aufklappern offen: `scrollWidth` 320 = `clientWidth` | ✓ |
+
+Ergebnis der Nachprüfung: **abgenommen.** Offen als Hinweis:
+- **H (Rest zu H1):** Die Schätzung trägt bis zu einer Blockbreite von etwa
+  230 px (30 Zeichen); eine Karte in einer Karte bei 320 px hat 221 px (29
+  Zeichen). Wer „kein Halt zu wenig“ ohne Bedingung will: 24 Zeichen (reicht
+  bis etwa 180 px Block) oder den Satz im Nachtrag auf „ab etwa 230 px
+  Blockbreite“ einschränken.

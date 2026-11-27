@@ -1,6 +1,8 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { AlertTriangle, CircleCheck, Clock } from "lucide-react";
 import { Badge } from "./Badge";
+import { resolveStatus } from "@/ludwig/ui/status/status-registry";
+import { LEVEL_ICON } from "../Icons";
 import { Button } from "./Button";
 import { Link } from "./Link";
 import { HeadRow, Row, Table } from "./Table";
@@ -185,6 +187,161 @@ export const WithDetails: Story = {
         title="Ludwig ist an 2 Stellen nicht fertig"
         actions={<Button variant="primary">Abnahme beginnen</Button>}
         details={{ summary: "5 von 7 Aufgaben erledigt", children: <TaskTable tasks={TASKS} />, defaultOpen: true }}
+      />
+    </div>
+  ),
+};
+
+/* ── layout="sentence" (0269) ────────────────────────────────────────── */
+
+/** The sign of a level, from the registry — part of the tone, not of the text. */
+function Sign({ level }: { level: "error" | "warning" }) {
+  const { icon: Icon } = LEVEL_ICON[level];
+  return <Icon size={16} strokeWidth={1.5} aria-hidden="true" />;
+}
+
+/**
+ * The state word opens the sentence — taken from the registry, never typed in
+ * (the pattern for the extension: label of the axis plus a full stop).
+ */
+const word = (axis: "duo_sync" | "job", key: string) => `${resolveStatus(axis, key).label}.`;
+
+const SENTENCE_TONES = [
+  { tone: "neutral", kicker: word("duo_sync", "succeeded"), title: "12 Belege übertragen, Kontoumsätze von 2 Konten geholt." },
+  { tone: "warning", kicker: word("duo_sync", "succeeded_with_issues"), title: "9 Belege übertragen, 3 Belege nicht übertragen." },
+  { tone: "danger", kicker: word("job", "failed"), title: "Der Auftrag „Belege einlesen“ wurde nach drei Versuchen aufgegeben." },
+] as const;
+
+/**
+ * `head` und `sentence` mit denselben Daten nebeneinander: Beim Satz steht nichts darüber, die Aktionen
+ * stehen darunter, der Text bleibt in Textfarbe — der Ton liegt nur auf Rahmen und Zeichen.
+ */
+export const Layouts: Story = {
+  render: () => (
+    <div style={{ display: "grid", gap: "var(--space-4)", gridTemplateColumns: "repeat(auto-fit, minmax(min(100%, 26rem), 1fr))", alignItems: "start" }}>
+      {SENTENCE_TONES.flatMap((t) =>
+        (["head", "sentence"] as const).map((layout) => (
+          <div key={`${t.tone}-${layout}`} style={{ display: "grid", gap: "var(--space-1)" }}>
+            <span className="lw-ui-hint">
+              {layout} · {t.tone}
+            </span>
+            <StatusCallout
+              layout={layout}
+              tone={t.tone}
+              icon={t.tone === "neutral" ? undefined : <Sign level={t.tone === "danger" ? "error" : "warning"} />}
+              kicker={t.kicker}
+              title={t.title}
+              sub="Musterfirma GmbH · 27.11.2026, 09:14"
+              actions={<Button>Erneut abgleichen</Button>}
+            />
+          </div>
+        )),
+      )}
+    </div>
+  ),
+};
+
+/** The note beside „Erneut versuchen“: muted, in the action row (0269, offene Frage 2). */
+function NoDouble() {
+  return <span className="lw-ui-hint">Ein neuer Versuch überträgt nichts doppelt.</span>;
+}
+
+function RunResults() {
+  return (
+    <div style={{ display: "grid", gap: "var(--space-3)" }}>
+      <StatusCallout
+        layout="sentence"
+        kicker={word("duo_sync", "succeeded")}
+        title="12 Belege übertragen, Kontoumsätze von 2 Konten geholt."
+        sub="Abrufzeitraum 13.11.2026 bis 27.11.2026"
+        actions={
+          <>
+            <Button>Erneut abgleichen</Button>
+            <Link href="#ludwig-eingang">Belege in Ludwig ansehen</Link>
+          </>
+        }
+      />
+      <StatusCallout
+        layout="sentence"
+        kicker={word("duo_sync", "succeeded")}
+        title="Keine neuen Belege seit dem 26.11.2026, Kontoumsätze von 2 Konten geholt."
+        sub="Abrufzeitraum 12.11.2026 bis 27.11.2026"
+        actions={<Button>Erneut abgleichen</Button>}
+      />
+      <StatusCallout
+        layout="sentence"
+        tone="warning"
+        icon={<Sign level="warning" />}
+        kicker={word("duo_sync", "succeeded_with_issues")}
+        title="9 Belege übertragen, 3 Belege nicht übertragen."
+        sub="Abrufzeitraum 13.11.2026 bis 27.11.2026"
+        actions={
+          <>
+            <Button>Erneut versuchen</Button>
+            <NoDouble />
+          </>
+        }
+      />
+      <StatusCallout
+        layout="sentence"
+        tone="warning"
+        icon={<Sign level="warning" />}
+        kicker={word("duo_sync", "cancelled")}
+        title="Stehen geblieben bei „Neue Belege aus DATEV holen“, Beleg 37 von 120."
+        actions={<Button>Erneut abgleichen</Button>}
+      />
+      <StatusCallout
+        layout="sentence"
+        tone="warning"
+        icon={<Sign level="warning" />}
+        kicker={word("duo_sync", "cancelled")}
+        title="Von Ihnen abgebrochen bei „Neue Belege aus DATEV holen“, Beleg 37 von 120."
+        actions={<Button>Erneut abgleichen</Button>}
+      />
+    </div>
+  );
+}
+
+/**
+ * Die Ausgänge eines Abgleichs mit den Texten aus dem Seitenprofil (Nachtrag 2); das Zustandswort kommt aus der
+ * Registry (`duo_sync`). Daneben dieselben in einem 320-px-Rahmen: der Satz und die Aktionszeile brechen um, nichts
+ * ragt heraus. Untereinander in voller Breite stehen die Knöpfe erst, wenn das **Fenster** schmaler als 640 px ist
+ * — die Regel hängt am Fenster (L1), nicht am Rahmen; im Storybook-Viewport „Mobile“ zu sehen.
+ */
+export const RunResult: Story = {
+  render: () => (
+    <div style={{ display: "flex", gap: "var(--space-6)", alignItems: "start", flexWrap: "wrap" }}>
+      <div style={{ width: "var(--container-narrow)", maxWidth: "100%" }}>
+        <RunResults />
+      </div>
+      <div style={{ width: "20rem", maxWidth: "100%" }} data-frame="320">
+        <RunResults />
+      </div>
+    </div>
+  ),
+};
+
+/**
+ * Satz mit Beleg darunter (`layout="sentence"` + `details`): Der Aufklapper reicht wie bei `head` von Kante zu
+ * Kante, die Trennlinie läuft über die ganze Breite.
+ */
+export const SentenceWithDetails: Story = {
+  render: () => (
+    <div style={{ maxWidth: "var(--container-narrow)" }}>
+      <StatusCallout
+        layout="sentence"
+        tone="warning"
+        icon={<Sign level="warning" />}
+        kicker={word("duo_sync", "succeeded_with_issues")}
+        title="9 Belege übertragen, 3 Belege nicht übertragen."
+        sub="Abrufzeitraum 13.11.2026 bis 27.11.2026"
+        actions={
+          <>
+            <Button>Erneut versuchen</Button>
+            <NoDouble />
+          </>
+        }
+        details={{ summary: "3 Belege nicht übertragen", children: <p style={{ margin: 0 }}>Rechnung 2026-0412 · Gutschrift 77 · Quittung Tankstelle</p> }}
       />
     </div>
   ),

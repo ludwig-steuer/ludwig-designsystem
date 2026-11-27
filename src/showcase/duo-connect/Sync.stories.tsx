@@ -1,5 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { useMemo, useState, type ReactNode } from "react";
+import type { DuoSyncState } from "@/ludwig/modules/intake";
+import { resolveStatus } from "@/ludwig/ui/status/status-registry";
 import {
   ActionIcon,
   Badge,
@@ -8,27 +10,39 @@ import {
   Card,
   CardHead,
   CardSection,
+  CheckItems,
   Combobox,
   DateField,
   DateRange,
   Disclosure,
   ExpandableRow,
   Field,
+  FilterChips,
   GroupRow,
   HeadRow,
   Input,
+  Link,
   LogList,
+  PhaseProgress,
+  ProblemCard,
   Progress,
   RadioGroup,
   Row,
   SearchInput,
   SelectCell,
   Spinner,
+  StateIcon,
+  StatusBadge,
+  StatusCallout,
+  StatusInfoButton,
   StepRail,
   Table,
   TextButton,
   Time,
+  type ChipOption,
+  type CheckItem,
   type ComboboxOption,
+  type PhaseProgressItem,
   type RailItem,
 } from "@/ui/v3";
 import {
@@ -40,25 +54,14 @@ import {
   MANY_BATCH,
   MANY_CLIENTS,
   NOW,
+  READINESS,
   RESULT_ROWS,
-  SYNC_STATE,
+  STEP_TEXT,
   type BatchRow,
   type Client,
   type StepKey,
-  type SyncState,
 } from "./fixtures";
-import {
-  COUNT_ORDER,
-  CountLine,
-  DraftsVisible,
-  ProblemCard,
-  ReadinessRows,
-  StepProgress,
-  SupportHelp,
-  SyncResult,
-  supportFacts,
-  type StepRowState,
-} from "./drafts";
+import { SupportHelp, supportFacts } from "./support";
 import { Board as StateBoard, ExtensionShell, Single, type StateSpec } from "./Frame";
 
 /* ── Shared pieces ─────────────────────────────────────────────────────── */
@@ -68,6 +71,11 @@ const row = { display: "flex", flexWrap: "wrap", gap: "var(--space-3)", alignIte
 
 function clientLabel(c: Client): string {
   return c.datevNumber ? `${c.name} · ${c.datevNumber}` : c.name;
+}
+
+/** The word of a state of the axis `duo_sync`, from the registry. */
+function word(state: DuoSyncState): string {
+  return resolveStatus("duo_sync", state).label;
 }
 
 /** Search by name **or** DATEV number: the number sits in the label. */
@@ -105,7 +113,7 @@ function LastRun() {
     <p className="lw-ui-hint" style={row}>
       <span>Zuletzt:</span>
       <Time value={NOW} size="sm" />
-      <Badge tone={SYNC_STATE.succeeded.tone}>{SYNC_STATE.succeeded.label}</Badge>
+      <StatusBadge axis="duo_sync" status="succeeded" />
       <span>12 Belege übertragen</span>
     </p>
   );
@@ -125,19 +133,50 @@ function ReadyCard({ children }: { children: ReactNode }) {
   );
 }
 
-/** A note with an action: the sentence, and the button in its own line under it, left. */
-function NoteWithAction({ action, children }: { action: ReactNode; children: ReactNode }) {
-  return (
-    <div style={{ display: "grid", gap: "var(--space-3)", justifyItems: "start" }}>
-      <p style={{ margin: 0 }}>{children}</p>
-      {action}
-    </div>
-  );
-}
-
 const KEEP_OPEN = (
   <Callout>Lassen Sie diese Seite und das DATEV-Fenster geöffnet, bis der Abgleich fertig ist.</Callout>
 );
+
+/** The warning sign of a sentence callout — the tone's sign, never without the word. */
+const WARNING_SIGN = <StateIcon state="warning" />;
+
+/* ── Steps of a sync (0265): one helper for every state ──────────────── */
+
+type PhaseExtra = Pick<PhaseProgressItem, "count" | "note" | "issue">;
+
+function phase(key: StepKey, status: PhaseProgressItem["status"], extra: PhaseExtra = {}): PhaseProgressItem {
+  return { key, label: STEP_TEXT[key], status, ...extra };
+}
+
+const AT_37 = { done: 37, total: 120, unit: "Beleg" };
+
+const PHASES_RUNNING: PhaseProgressItem[] = [
+  phase("filing", "done", { note: "4 Belege einsortiert" }),
+  phase("fetch", "active", { count: AT_37 }),
+  phase("accounts", "pending"),
+];
+
+/* The same rows as during the run, in their end state (owner 2026-11-27). */
+const PHASES_OK: PhaseProgressItem[] = [
+  phase("filing", "done", { note: "4 Belege einsortiert" }),
+  phase("fetch", "done", { note: "12 übertragen, 47 schon in Ludwig" }),
+  phase("accounts", "done", { note: "2 Konten" }),
+];
+
+const PHASES_ISSUES: PhaseProgressItem[] = [
+  phase("filing", "done", { note: "4 Belege einsortiert" }),
+  phase("fetch", "done", { issue: "9 übertragen, 3 nicht übertragen" }),
+  phase("accounts", "done", { note: "2 Konten" }),
+];
+
+/** A cancel stands where it happened: `held` for a warning cause, `failed` for an error (0265). */
+function phasesCancelled(at: "held" | "failed"): PhaseProgressItem[] {
+  return [
+    phase("filing", "done", { note: "4 Belege einsortiert" }),
+    phase("fetch", at, { count: AT_37 }),
+    phase("accounts", "pending", { note: "nicht ausgeführt" }),
+  ];
+}
 
 /* ── Setup ─────────────────────────────────────────────────────────────── */
 
@@ -220,24 +259,28 @@ const A1b = () => (
   </ExtensionShell>
 );
 
+/** C6 while it runs: every point in its place, the running ones with the spinner (0270). */
+const CHECKING: CheckItem[] = READINESS.filter((p) => p.code !== "BP-07").map((p): CheckItem => {
+  const done: Record<string, string> = {
+    "BP-01": "Version 0.11.0 ist aktuell.",
+    "BP-02": "Ludwig antwortet.",
+    "BP-03": "Verbunden als Anna Berger.",
+    "BP-04": "12 Mandanten, 10 mit DATEV-Mandantennummer.",
+    "BP-09": "Vom Server geladen.",
+    "BP-10": "Diese Seite ist die einzige.",
+  };
+  const reason = done[p.code];
+  return reason
+    ? { code: p.code, question: p.question, reason, state: "green" }
+    : { code: p.code, question: p.question, reason: "", state: "running" };
+});
+
 const A1c = () => (
   <ExtensionShell area="sync">
     <StepRail ariaLabel="Einrichtung" layout="bar" items={setupSteps("check")} />
     <Card>
       <CardHead title="Alles bereit?" sub="Wird geprüft · 6 von 9 Punkten fertig" />
-      <ReadinessRows
-        rows={[
-          { code: "1", question: "Plugin ist aktuell", reason: "Version 0.11.0 ist aktuell.", state: "ok" },
-          { code: "2", question: "Ludwig ist erreichbar", reason: "Ludwig antwortet.", state: "ok" },
-          { code: "3", question: "Mit Ludwig verbunden", reason: "Verbunden als Anna Berger.", state: "ok" },
-          { code: "4", question: "Mandanten vorhanden und vollständig", reason: "12 Mandanten, 10 mit DATEV-Mandantennummer.", state: "ok" },
-          { code: "5", question: "DATEV ist erreichbar", reason: "", state: "running" },
-          { code: "6", question: "Bei DATEV angemeldet", reason: "", state: "running" },
-          { code: "8", question: "Browser-Freigaben", reason: "", state: "running" },
-          { code: "9", question: "Einstellungen von Ludwig geladen", reason: "Vom Server geladen.", state: "ok" },
-          { code: "10", question: "Kein anderer Abgleich läuft", reason: "Diese Seite ist die einzige.", state: "ok" },
-        ]}
-      />
+      <CheckItems items={CHECKING} live />
       <CardSection>
         <div style={row}>
           <Button variant="primary" disabled>
@@ -263,11 +306,11 @@ const A2 = () => (
 const A3 = () => (
   <ExtensionShell area="sync" mark="alarm">
     <ProblemCard
-      kind="user"
-      what="Ludwig DUO-Connect ist zu alt."
+      resolution="user"
+      title="Ludwig DUO-Connect ist zu alt."
       cause="Installiert ist Version 0.10.1, Ludwig verlangt mindestens 0.11.0. Bis dahin ist der Abgleich gesperrt."
-      next="Die Erweiterung aktualisiert sich meist von selbst; sonst öffnen Sie die Erweiterungen des Browsers und wählen „Aktualisieren“."
-      actions={<Button variant="primary" size="sm">Anleitung öffnen</Button>}
+      step="Die Erweiterung aktualisiert sich meist von selbst; sonst öffnen Sie die Erweiterungen des Browsers und wählen „Aktualisieren“."
+      action={<Button variant="primary" size="sm">Anleitung öffnen</Button>}
     />
   </ExtensionShell>
 );
@@ -394,7 +437,7 @@ function OverviewTable({ clients }: { clients: Client[] }) {
             key: "skipped",
             children: (
               <>
-                <GroupRow>Werden übersprungen ({skipped.length})</GroupRow>
+                <GroupRow>Werden übersprungen · {skipped.length}</GroupRow>
                 {skipped.filter(match).map((c) => (
                   <Row key={c.id}>
                     <span />
@@ -467,36 +510,11 @@ function RunningCard({ title, extra, children }: { title: string; extra?: ReactN
   );
 }
 
-const STEPS_RUNNING = [
-  { key: "filing" as const, state: { kind: "done" as const, result: "4 Belege einsortiert" } },
-  { key: "fetch" as const, state: { kind: "count" as const, noun: "Beleg", done: 37, total: 120 } },
-  { key: "accounts" as const, state: { kind: "open" as const } },
-];
-
-/* The same rows as during the run, in their end state (owner 2026-11-27). */
-const STEPS_OK: { key: StepKey; state: StepRowState }[] = [
-  { key: "filing", state: { kind: "done", result: "4 Belege einsortiert" } },
-  { key: "fetch", state: { kind: "done", result: "12 übertragen, 47 schon in Ludwig" } },
-  { key: "accounts", state: { kind: "done", result: "2 Konten" } },
-];
-
-const STEPS_ISSUES: { key: StepKey; state: StepRowState }[] = [
-  { key: "filing", state: { kind: "done", result: "4 Belege einsortiert" } },
-  { key: "fetch", state: { kind: "problem", result: "9 übertragen, 3 nicht übertragen" } },
-  { key: "accounts", state: { kind: "done", result: "2 Konten" } },
-];
-
-const STEPS_CANCELLED: { key: StepKey; state: StepRowState }[] = [
-  { key: "filing", state: { kind: "done", result: "4 Belege einsortiert" } },
-  { key: "fetch", state: { kind: "cancelled", at: "Beleg 37 von 120" } },
-  { key: "accounts", state: { kind: "notRun" } },
-];
-
 const A7 = () => (
   <ExtensionShell area="sync" mark="dot">
     {KEEP_OPEN}
     <RunningCard title="Musterfirma GmbH wird abgeglichen">
-      <StepProgress steps={STEPS_RUNNING} />
+      <PhaseProgress phases={PHASES_RUNNING} label="Abgleich Musterfirma GmbH" />
     </RunningCard>
   </ExtensionShell>
 );
@@ -507,19 +525,20 @@ const A7b = () => (
     <RunningCard
       title="Hotel Seeblick Betriebs-GmbH wird abgeglichen"
       extra={
-        <Callout>
-          <NoteWithAction action={<TextButton>Belegabruf abbrechen</TextButton>}>
-            <strong>Erster Belegabruf für Hotel Seeblick Betriebs-GmbH.</strong> In DATEV liegen 214 Belege seit dem
-            01.07.2026, 38 kennt Ludwig schon, 176 werden übertragen. Das dauert einige Minuten.
-          </NoteWithAction>
-        </Callout>
+        <StatusCallout
+          layout="sentence"
+          kicker="Erster Belegabruf für Hotel Seeblick Betriebs-GmbH."
+          title="In DATEV liegen 214 Belege seit dem 01.07.2026, 38 kennt Ludwig schon, 176 werden übertragen. Das dauert einige Minuten."
+          actions={<TextButton>Belegabruf abbrechen</TextButton>}
+        />
       }
     >
-      <StepProgress
-        steps={[
-          { key: "filing", state: { kind: "done", result: "nichts einzusortieren" } },
-          { key: "fetch", state: { kind: "count", noun: "Beleg", done: 12, total: 176 } },
-          { key: "accounts", state: { kind: "open" } },
+      <PhaseProgress
+        label="Abgleich Hotel Seeblick Betriebs-GmbH"
+        phases={[
+          phase("filing", "done", { note: "nichts einzusortieren" }),
+          phase("fetch", "active", { count: { done: 12, total: 176, unit: "Beleg" } }),
+          phase("accounts", "pending"),
         ]}
       />
     </RunningCard>
@@ -528,18 +547,21 @@ const A7b = () => (
 
 const A9 = () => (
   <ExtensionShell area="sync" mark="dot">
-    <Callout tone="warning">
-      <NoteWithAction action={<Button size="sm">DATEV-Fenster zeigen</Button>}>
-        <strong>Bitte melden Sie sich bei DATEV an.</strong> Der Abgleich wartet, bis die Anmeldung im DATEV-Fenster
-        abgeschlossen ist, und läuft dann von selbst weiter.
-      </NoteWithAction>
-    </Callout>
+    <StatusCallout
+      layout="sentence"
+      tone="warning"
+      icon={WARNING_SIGN}
+      kicker="Bitte melden Sie sich bei DATEV an."
+      title="Der Abgleich wartet, bis die Anmeldung im DATEV-Fenster abgeschlossen ist, und läuft dann von selbst weiter."
+      actions={<Button size="sm">DATEV-Fenster zeigen</Button>}
+    />
     <RunningCard title="Musterfirma GmbH wird abgeglichen">
-      <StepProgress
-        steps={[
-          { key: "filing", state: { kind: "login" } },
-          { key: "fetch", state: { kind: "open" } },
-          { key: "accounts", state: { kind: "open" } },
+      <PhaseProgress
+        label="Abgleich Musterfirma GmbH"
+        phases={[
+          phase("filing", "held", { note: "wartet auf Anmeldung" }),
+          phase("fetch", "pending"),
+          phase("accounts", "pending"),
         ]}
       />
     </RunningCard>
@@ -550,21 +572,16 @@ const A9 = () => (
 
 const BATCH_COLS = "var(--space-6) minmax(0, 1.5fr) minmax(0, 0.9fr) minmax(0, 1.4fr)";
 
-function stateBadge(r: BatchRow) {
-  const s = SYNC_STATE[r.state];
-  return <Badge tone={s.tone}>{s.label}</Badge>;
-}
-
 function RowDetail({ r }: { r: BatchRow }) {
   if (r.state === "succeeded_with_issues") {
     return (
       <ProblemCard
-        tone="warning"
-        kind="notYou"
-        what="3 Belege nicht übertragen."
+        level="warning"
+        resolution="support"
+        title="3 Belege nicht übertragen."
         cause="DATEV hat zu diesen Belegen keine PDF-Datei geliefert."
-        next="Der nächste Abgleich versucht es erneut."
-        actions={<Button size="sm">Ergebnis ansehen</Button>}
+        step="Der nächste Abgleich versucht es erneut."
+        action={<Button size="sm">Ergebnis ansehen</Button>}
       />
     );
   }
@@ -576,14 +593,19 @@ function RowDetail({ r }: { r: BatchRow }) {
   );
 }
 
-const PROBLEM_STATES: SyncState[] = ["succeeded_with_issues", "cancelled"];
+const PROBLEM_STATES: DuoSyncState[] = ["succeeded_with_issues", "cancelled"];
+
+/** The count line (0272): fixed order, problems first; a 0 stays in its place, grey and not choosable. */
+const COUNT_ORDER: DuoSyncState[] = ["succeeded_with_issues", "cancelled", "running", "queued", "succeeded", "skipped"];
 
 function BatchRowView({ r, open }: { r: BatchRow; open?: boolean }) {
   const ended = r.state === "succeeded" || r.state === "succeeded_with_issues" || r.state === "cancelled";
   const cells = (
     <>
       <span>{r.client.name}</span>
-      <span>{stateBadge(r)}</span>
+      <span>
+        <StatusBadge axis="duo_sync" status={r.state} info={false} />
+      </span>
       <span>{r.summary}</span>
     </>
   );
@@ -600,28 +622,31 @@ function BatchRowView({ r, open }: { r: BatchRow; open?: boolean }) {
 }
 
 /**
- * A8/A13 (owner 2026-11-27): a count line over the list — the six states in a
- * fixed order, each number a quick filter — then the group „Mit Problemen",
- * then „Alle übrigen" in their fixed order. A client changes group once, when
- * its sync ends with a problem: an event, not a jump. `ended`: the problems
- * open, the rest folded with its count.
+ * A8/A13 (owner 2026-11-27): the count line over the list — every state with
+ * its number, each a filter — then the group „Mit Problemen", then „Alle
+ * übrigen" in their fixed order. A client changes group once, when its sync
+ * ends with a problem: an event, not a jump. `ended`: the problems open, the
+ * rest folded with its count.
  */
 function BatchTable({ rows, ended }: { rows: BatchRow[]; ended?: boolean }) {
-  const [filter, setFilter] = useState<string | null>(null);
+  const [filter, setFilter] = useState<string>("all");
   const [restOpen, setRestOpen] = useState(!ended);
-  const counts = Object.fromEntries(
-    COUNT_ORDER.map((c) => [c.key, rows.filter((r) => c.states.includes(r.state)).length]),
-  );
-  const states = filter ? COUNT_ORDER.find((c) => c.key === filter)?.states : undefined;
-  const shown = states ? rows.filter((r) => states.includes(r.state)) : rows;
+  const options: ChipOption[] = [
+    { key: "all", label: "Alle", count: rows.length },
+    ...COUNT_ORDER.map((s): ChipOption => {
+      const count = rows.filter((r) => r.state === s).length;
+      return { key: s, label: word(s), count, disabled: count === 0 && filter !== s };
+    }),
+  ];
+  const shown = filter === "all" ? rows : rows.filter((r) => r.state === filter);
   const problems = shown.filter((r) => PROBLEM_STATES.includes(r.state));
   const rest = shown.filter((r) => !PROBLEM_STATES.includes(r.state));
   return (
+    <>
+    {/* Above the card, never in it (FilterChips @when) — 0272 acceptance H7. */}
+    <FilterChips label="Stand" options={options} active={filter} onPick={setFilter} />
     <Card>
-      <CardHead title="Mandanten" sub={filter ? `${shown.length} von ${rows.length}` : `${rows.length} Mandanten`} />
-      <CardSection>
-        <CountLine counts={counts} active={filter} onPick={setFilter} />
-      </CardSection>
+      <CardHead title="Mandanten" sub={`${shown.length} von ${rows.length}`} />
       <Table
         cols={BATCH_COLS}
         priority={["primary", "primary", "primary", "meta"]}
@@ -631,7 +656,7 @@ function BatchTable({ rows, ended }: { rows: BatchRow[]; ended?: boolean }) {
             children:
               problems.length > 0 ? (
                 <>
-                  <GroupRow>Mit Problemen ({problems.length})</GroupRow>
+                  <GroupRow>Mit Problemen · {problems.length}</GroupRow>
                   {problems.map((r) => (
                     <BatchRowView key={r.client.id} r={r} open={ended} />
                   ))}
@@ -649,7 +674,7 @@ function BatchTable({ rows, ended }: { rows: BatchRow[]; ended?: boolean }) {
                       onClick={() => setRestOpen(!restOpen)}
                       aria-expanded={restOpen}
                     >
-                      {problems.length > 0 ? "Alle übrigen" : "Mandanten"} ({rest.length})
+                      {problems.length > 0 ? "Alle übrigen" : "Mandanten"} · {rest.length}
                     </TextButton>
                   </GroupRow>
                   {restOpen ? rest.map((r) => <BatchRowView key={r.client.id} r={r} />) : null}
@@ -661,11 +686,14 @@ function BatchTable({ rows, ended }: { rows: BatchRow[]; ended?: boolean }) {
         <HeadRow>
           <span />
           <span>Mandant</span>
-          <span>Stand</span>
+          <span>
+            Stand <StatusInfoButton axis="duo_sync" />
+          </span>
           <span>Ergebnis</span>
         </HeadRow>
       </Table>
     </Card>
+    </>
   );
 }
 
@@ -695,7 +723,7 @@ function NowBlock({ name }: { name: string }) {
     <Card>
       <CardHead title={`Jetzt: ${name}`} headingLevel={3} />
       <CardSection>
-        <StepProgress steps={STEPS_RUNNING} />
+        <PhaseProgress phases={PHASES_RUNNING} label={`Abgleich ${name}`} />
       </CardSection>
     </Card>
   );
@@ -710,12 +738,12 @@ function BatchRunning({ rows, stopping }: { rows: BatchRow[]; stopping?: boolean
     <ExtensionShell area="sync" mark="dot">
       {KEEP_OPEN}
       {stopping ? (
-        <Callout>
-          <NoteWithAction action={<Button size="sm">Doch weitermachen</Button>}>
-            <strong>Wird angehalten.</strong> {current?.client.name} wird noch fertig abgeglichen, die übrigen {waiting}{" "}
-            werden übersprungen.
-          </NoteWithAction>
-        </Callout>
+        <StatusCallout
+          layout="sentence"
+          kicker="Wird angehalten."
+          title={`${current?.client.name ?? "Der laufende Mandant"} wird noch fertig abgeglichen, die übrigen ${waiting} werden übersprungen.`}
+          actions={<Button size="sm">Doch weitermachen</Button>}
+        />
       ) : null}
       <BatchHead done={done} total={runnable.length} skipped={rows.length - runnable.length} stopping={stopping} />
       {current ? <NowBlock name={current.client.name} /> : null}
@@ -788,49 +816,79 @@ const RETRY = (
   </>
 );
 
-const A10 = () => (
-  <ExtensionShell area="sync">
+/**
+ * The answer first (0269): a sentence opened by the state word, then the same
+ * step rows as during the run in their end state (0265). Problems and a cancel
+ * carry the warning's tone and sign on the frame; „Fertig" stays neutral.
+ */
+function ResultCard({
+  name,
+  state,
+  sentence,
+  phases,
+  actions,
+}: {
+  name: string;
+  state: DuoSyncState;
+  sentence: string;
+  phases?: PhaseProgressItem[];
+  actions?: ReactNode;
+}) {
+  const warn = state === "succeeded_with_issues" || state === "cancelled";
+  return (
     <Card>
-      <ResultHead name="Musterfirma GmbH" />
+      <ResultHead name={name} />
       <CardSection>
-        <SyncResult
-          state="succeeded"
-          sentence="12 Belege übertragen, Kontoumsätze von 2 Konten geholt."
-          steps={STEPS_OK}
-          actions={
-            <>
-              <Button icon={<ActionIcon action="external" />} href="#ludwig">
-                Belege in Ludwig ansehen
-              </Button>
-              <Button variant="tertiary">Erneut abgleichen</Button>
-            </>
-          }
-        />
+        <div style={stack}>
+          <StatusCallout
+            layout="sentence"
+            tone={warn ? "warning" : "neutral"}
+            icon={warn ? WARNING_SIGN : undefined}
+            kicker={`${word(state)}.`}
+            title={sentence}
+            actions={actions}
+          />
+          {phases ? <PhaseProgress phases={phases} label={`Abgleich ${name}`} /> : null}
+        </div>
       </CardSection>
     </Card>
+  );
+}
+
+const A10 = () => (
+  <ExtensionShell area="sync">
+    <ResultCard
+      name="Musterfirma GmbH"
+      state="succeeded"
+      sentence="12 Belege übertragen, Kontoumsätze von 2 Konten geholt."
+      phases={PHASES_OK}
+      actions={
+        <>
+          <Button>Erneut abgleichen</Button>
+          <Link href="#ludwig">Belege in Ludwig ansehen</Link>
+        </>
+      }
+    />
     <Evidence />
   </ExtensionShell>
 );
 
 const A11 = () => (
   <ExtensionShell area="sync" mark="dot">
-    <Card>
-      <ResultHead name="Musterfirma GmbH" />
-      <CardSection>
-        <SyncResult
-          state="succeeded_with_issues"
-          sentence="9 Belege übertragen, 3 Belege nicht übertragen."
-          steps={STEPS_ISSUES}
-        />
-      </CardSection>
-    </Card>
-    <ProblemCard
-      tone="warning"
-      kind="notYou"
-      what="3 Belege nicht übertragen."
-      cause="DATEV hat zu diesen Belegen keine PDF-Datei geliefert."
-      next="Die Belege bleiben in DATEV; ein neuer Versuch holt sie, sobald DATEV die Datei liefert."
+    <ResultCard
+      name="Musterfirma GmbH"
+      state="succeeded_with_issues"
+      sentence="9 Belege übertragen, 3 Belege nicht übertragen."
+      phases={PHASES_ISSUES}
       actions={RETRY}
+    />
+    <ProblemCard
+      level="warning"
+      resolution="support"
+      context={STEP_TEXT.fetch}
+      title="3 Belege nicht übertragen."
+      cause="DATEV hat zu diesen Belegen keine PDF-Datei geliefert."
+      step="Die Belege bleiben in DATEV; ein neuer Versuch holt sie, sobald DATEV die Datei liefert."
       technical={"beleg_kein_pdf · 3 Belege\n2026-0419  Content-Type text/html statt application/pdf\n2026-0423  Content-Type text/html statt application/pdf\n2026-0431  leere Antwort (0 Byte)"}
     />
     <Evidence />
@@ -838,19 +896,18 @@ const A11 = () => (
   </ExtensionShell>
 );
 
-function Cancelled({ problem, code }: { problem: ReactNode; code: string }) {
+/** A12: the step stands where it broke; the problem card carries the way out with its own level (0264). */
+function Cancelled({ at, problem, code }: { at: "held" | "failed"; problem: ReactNode; code: string }) {
   return (
+    // The tab keeps the grey dot after a cancel; red is for A3 and A14 only (profile, Nachtrag 1).
     <ExtensionShell area="sync" mark="dot">
-      <Card>
-        <ResultHead name="Musterfirma GmbH" />
-        <CardSection>
-          <SyncResult
-            state="cancelled"
-            sentence="Stehen geblieben bei „Neue Belege aus DATEV holen“, Beleg 37 von 120."
-            steps={STEPS_CANCELLED}
-          />
-        </CardSection>
-      </Card>
+      <ResultCard
+        name="Musterfirma GmbH"
+        state="cancelled"
+        sentence="Stehen geblieben bei „Neue Belege aus DATEV holen“, Beleg 37 von 120."
+        phases={phasesCancelled(at)}
+        actions={<Button>Erneut abgleichen</Button>}
+      />
       {problem}
       <Evidence />
       <SupportHelp facts={supportFacts(code, "belege")} />
@@ -860,15 +917,16 @@ function Cancelled({ problem, code }: { problem: ReactNode; code: string }) {
 
 const A12a = () => (
   <Cancelled
+    at="held"
     code="seite_geschlossen"
     problem={
       <ProblemCard
-        tone="warning"
-        kind="user"
-        what="Die Seite wurde während des Abgleichs geschlossen."
+        level="warning"
+        resolution="user"
+        context={STEP_TEXT.fetch}
+        title="Die Seite wurde während des Abgleichs geschlossen."
         cause="Bisher Übertragenes bleibt in Ludwig."
-        next="Gleichen Sie erneut ab; der neue Abgleich holt den Rest und überträgt nichts doppelt."
-        actions={<Button size="sm" variant="primary">Erneut abgleichen</Button>}
+        step="Gleichen Sie erneut ab; der neue Abgleich holt den Rest und überträgt nichts doppelt."
       />
     }
   />
@@ -876,14 +934,15 @@ const A12a = () => (
 
 const A12b = () => (
   <Cancelled
+    at="failed"
     code="ludwig_nicht_erreichbar"
     problem={
       <ProblemCard
-        kind="retry"
-        what="Ludwig ist nicht erreichbar."
-        cause="Die Verbindung zum Server kam nicht zustande, meist eine kurze Störung oder das Internet."
-        next="Versuchen Sie es in ein paar Minuten erneut."
-        actions={RETRY}
+        resolution="retry"
+        context={STEP_TEXT.fetch}
+        title="Ludwig ist nicht erreichbar."
+        cause="Die Verbindung zum Server kam nicht zustande."
+        step="Gleichen Sie in ein paar Minuten erneut ab; das überträgt nichts doppelt."
         technical={"ludwig_nicht_erreichbar · Schritt belege\nPOST /api/intake/v2/documents/check → net::ERR_CONNECTION_TIMED_OUT nach 3 Versuchen"}
       />
     }
@@ -892,14 +951,15 @@ const A12b = () => (
 
 const A12c = () => (
   <Cancelled
+    at="failed"
     code="duo_element_fehlt"
     problem={
       <ProblemCard
-        kind="notYou"
-        what="DATEV hat anders reagiert als erwartet."
+        resolution="support"
+        context={STEP_TEXT.fetch}
+        title="DATEV hat anders reagiert als erwartet."
         cause="Ein Element der DATEV-Seite fehlte; vermutlich hat DATEV seine Oberfläche geändert."
-        next="Schreiben Sie dem Support mit den Angaben unten, wir passen das Plugin an."
-        actions={RETRY}
+        step="Schreiben Sie dem Support mit den Angaben unten, wir passen das Plugin an."
         technical={"duo_element_fehlt · Schritt belege\nElement „Export starten“ nach 30 s nicht gefunden (Seite Belegübersicht)"}
       />
     }
@@ -911,10 +971,13 @@ const A13 = () => (
     <Card>
       <CardHead title="Ergebnis · Alle Mandanten" sub={<Time value={NOW} size="sm" />} />
       <CardSection>
-        <SyncResult
-          state="succeeded_with_issues"
-          sentence="10 Mandanten abgeglichen, 1 mit Problemen, 2 übersprungen."
-          actions={<Button variant="tertiary">Erneut abgleichen</Button>}
+        <StatusCallout
+          layout="sentence"
+          tone="warning"
+          icon={WARNING_SIGN}
+          kicker={`${word("succeeded_with_issues")}.`}
+          title="10 Mandanten abgeglichen, 1 mit Problemen, 2 übersprungen."
+          actions={<Button>Erneut abgleichen</Button>}
         />
       </CardSection>
     </Card>
@@ -929,11 +992,12 @@ const A14 = () => (
     last={null}
     blocked={
       <ProblemCard
-        kind="user"
-        what="Mandant ohne DATEV-Mandantennummer."
+        resolution="user"
+        context="Ingenieurbüro Brandt"
+        title="Mandant ohne DATEV-Mandantennummer."
         cause="In Ludwig fehlt für Ingenieurbüro Brandt die DATEV-Mandantennummer; ohne sie findet das Plugin den Mandanten in DATEV nicht."
-        next="Tragen Sie die Nummer in Ludwig ein und gleichen Sie dann ab."
-        actions={
+        step="Tragen Sie die Nummer in Ludwig ein und gleichen Sie dann ab."
+        action={
           <>
             <Button size="sm" icon={<ActionIcon action="external" />}>
               In Ludwig öffnen
@@ -951,67 +1015,52 @@ const A14 = () => (
 const page = "page" as const;
 
 const SYNC_STATES: StateSpec[] = [
-  { id: "A1", title: "Einrichtung · nicht verbunden", uses: "StepRail (bar), Card, Button, Disclosure, Field, Input (Passwort)", missing: "", surface: page, render: () => <A1 /> },
-  { id: "A1b", title: "Einrichtung · wartet auf Bestätigung", uses: "StepRail, Card, Button", missing: "", surface: page, render: () => <A1b /> },
-  { id: "A1c", title: "Einrichtung · Prüfung läuft", uses: "StepRail, Card, Button", missing: "0270 Prüfpunkt-Zeile", surface: page, render: () => <A1c /> },
-  { id: "A2", title: "Einrichtung · Verbindung abgelaufen", uses: "Callout, Card, Button, Disclosure", missing: "", surface: page, render: () => <A2 /> },
-  { id: "A3", title: "Plugin zu alt", uses: "Button", missing: "0264 ProblemCard", surface: page, render: () => <A3 /> },
-  { id: "A4", title: "Bereit · ein Mandant", uses: "RadioGroup, Combobox, Button, Badge, Time, TextButton", missing: "", surface: page, render: () => <A4 /> },
-  { id: "A4b", title: "Bereit · Stichtag fragen", uses: "RadioGroup, Combobox, Field, DateField, Button", missing: "", surface: page, render: () => <A4bBody /> },
-  { id: "A5", title: "Bereit · alle", uses: "RadioGroup, Disclosure, Button, Badge", missing: "", surface: page, render: () => <ReadyAll open={false} /> },
-  { id: "A6", title: "Übersicht vor dem Durchgang (aufgeklappt)", uses: "RadioGroup, Disclosure, Table, GroupRow, SelectCell, Time, DateRange", missing: "", surface: page, render: () => <ReadyAll open /> },
-  { id: "A7", title: "Läuft · ein Mandant", uses: "Callout, Card, Progress, Button", missing: "0265, 0268", surface: page, render: () => <A7 /> },
-  { id: "A7b", title: "Läuft · erster Belegabruf", uses: "Callout, TextButton, Progress", missing: "0265", surface: page, render: () => <A7b /> },
-  { id: "A8", title: "Läuft · Durchgang", uses: "Progress, Card, Table, GroupRow, ExpandableRow, Badge, TextButton", missing: "0265, 0268, Zählzeile", surface: page, render: () => <BatchRunning rows={BATCH_RUNNING} /> },
-  { id: "A8b", title: "Läuft · Durchgang wird angehalten", uses: "Callout, Button, Progress, Table", missing: "0265, Zählzeile", surface: page, render: () => <BatchRunning rows={BATCH_RUNNING} stopping /> },
-  { id: "A9", title: "Wartet auf DATEV-Anmeldung", uses: "Callout, Button", missing: "0265", surface: page, render: () => <A9 /> },
-  { id: "A10", title: "Ergebnis · alles gut", uses: "Card, Button, Disclosure, Table, LogList", missing: "0265, 0269 Ergebnis", surface: page, render: () => <A10 /> },
-  { id: "A11", title: "Ergebnis · mit Problemen", uses: "Callout, StatusCallout, Disclosure, CopyTextButton, Button", missing: "0264, 0265, 0269", surface: page, render: () => <A11 /> },
-  { id: "A12a", title: "Ergebnis · abgebrochen (Seite geschlossen)", uses: "Callout, StatusCallout, Button, CopyTextButton", missing: "0264, 0265, 0269", surface: page, render: () => <A12a /> },
-  { id: "A12b", title: "Ergebnis · abgebrochen (Ludwig nicht erreichbar)", uses: "Callout, StatusCallout, Disclosure, CopyTextButton, Button", missing: "0264, 0265, 0269", surface: page, render: () => <A12b /> },
-  { id: "A12c", title: "Ergebnis · abgebrochen (liegt nicht an Ihnen)", uses: "Callout, StatusCallout, Disclosure, CopyTextButton, Button", missing: "0264, 0265, 0269", surface: page, render: () => <A12c /> },
-  { id: "A13", title: "Ergebnis · Durchgang", uses: "Callout, Table, GroupRow, ExpandableRow, Badge, TextButton", missing: "0264, 0269, Zählzeile", surface: page, render: () => <A13 /> },
-  { id: "A14", title: "Stille Prüfung sperrt den Start", uses: "RadioGroup, Combobox, Button, TextButton", missing: "0264", surface: page, render: () => <A14 /> },
+  { id: "A1", title: "Einrichtung · nicht verbunden", uses: "ExtensionShell, StepRail (bar), Card, Button, Disclosure, Field, Input (Passwort)", missing: "", surface: page, render: () => <A1 /> },
+  { id: "A1b", title: "Einrichtung · wartet auf Bestätigung", uses: "ExtensionShell, StepRail, Card, Spinner, Button", missing: "", surface: page, render: () => <A1b /> },
+  { id: "A1c", title: "Einrichtung · Prüfung läuft", uses: "ExtensionShell, StepRail, Card, CheckItems (live, wird geprüft), Button", missing: "", surface: page, render: () => <A1c /> },
+  { id: "A2", title: "Einrichtung · Verbindung abgelaufen", uses: "ExtensionShell, Callout, Card, Button, Disclosure", missing: "", surface: page, render: () => <A2 /> },
+  { id: "A3", title: "Plugin zu alt", uses: "ExtensionShell, ProblemCard, Button", missing: "", surface: page, render: () => <A3 /> },
+  { id: "A4", title: "Bereit · ein Mandant", uses: "ExtensionShell, RadioGroup, Combobox, Button, StatusBadge, Time, TextButton", missing: "", surface: page, render: () => <A4 /> },
+  { id: "A4b", title: "Bereit · Stichtag fragen", uses: "ExtensionShell, RadioGroup, Combobox, Field, DateField, Button", missing: "", surface: page, render: () => <A4bBody /> },
+  { id: "A5", title: "Bereit · alle", uses: "ExtensionShell, RadioGroup, Disclosure, Button, StatusBadge", missing: "", surface: page, render: () => <ReadyAll open={false} /> },
+  { id: "A6", title: "Übersicht vor dem Durchgang (aufgeklappt)", uses: "ExtensionShell, RadioGroup, Disclosure, Table, GroupRow, SelectCell, Time, DateRange", missing: "", surface: page, render: () => <ReadyAll open /> },
+  { id: "A7", title: "Läuft · ein Mandant", uses: "ExtensionShell, Callout, Card, PhaseProgress, Button", missing: "", surface: page, render: () => <A7 /> },
+  { id: "A7b", title: "Läuft · erster Belegabruf", uses: "ExtensionShell, StatusCallout (Satz), TextButton, PhaseProgress", missing: "", surface: page, render: () => <A7b /> },
+  { id: "A8", title: "Läuft · Durchgang", uses: "ExtensionShell, Progress, PhaseProgress, FilterChips (Zählzeile), Table, GroupRow, ExpandableRow, StatusBadge", missing: "", surface: page, render: () => <BatchRunning rows={BATCH_RUNNING} /> },
+  { id: "A8b", title: "Läuft · Durchgang wird angehalten", uses: "ExtensionShell, StatusCallout (Satz), Button, Progress, PhaseProgress, FilterChips, Table", missing: "", surface: page, render: () => <BatchRunning rows={BATCH_RUNNING} stopping /> },
+  { id: "A9", title: "Wartet auf DATEV-Anmeldung", uses: "ExtensionShell, StatusCallout (Satz), Button, PhaseProgress (gehalten)", missing: "", surface: page, render: () => <A9 /> },
+  { id: "A10", title: "Ergebnis · alles gut", uses: "ExtensionShell, StatusCallout (Satz), PhaseProgress (Endzustand), Button, Link, Disclosure, Table, LogList", missing: "", surface: page, render: () => <A10 /> },
+  { id: "A11", title: "Ergebnis · mit Problemen", uses: "ExtensionShell, StatusCallout (Satz), PhaseProgress, ProblemCard, Disclosure, CopyTextButton, Button", missing: "", surface: page, render: () => <A11 /> },
+  { id: "A12a", title: "Ergebnis · abgebrochen (Seite geschlossen)", uses: "ExtensionShell, StatusCallout (Satz), PhaseProgress (gehalten), ProblemCard, CopyTextButton", missing: "", surface: page, render: () => <A12a /> },
+  { id: "A12b", title: "Ergebnis · abgebrochen (Ludwig nicht erreichbar)", uses: "ExtensionShell, StatusCallout (Satz), PhaseProgress (gescheitert), ProblemCard, CopyTextButton", missing: "", surface: page, render: () => <A12b /> },
+  { id: "A12c", title: "Ergebnis · abgebrochen (liegt nicht an Ihnen)", uses: "ExtensionShell, StatusCallout (Satz), PhaseProgress (gescheitert), ProblemCard, CopyTextButton", missing: "", surface: page, render: () => <A12c /> },
+  { id: "A13", title: "Ergebnis · Durchgang", uses: "ExtensionShell, StatusCallout (Satz), FilterChips (Zählzeile), Table, GroupRow, ExpandableRow, StatusBadge, ProblemCard", missing: "", surface: page, render: () => <A13 /> },
+  { id: "A14", title: "Stille Prüfung sperrt den Start", uses: "ExtensionShell, RadioGroup, Combobox, ProblemCard, Button, TextButton", missing: "", surface: page, render: () => <A14 /> },
 ];
 
 /* ── Stories ───────────────────────────────────────────────────────────── */
 
-interface Args {
-  showDrafts: boolean;
-}
-
-const meta: Meta<Args> = {
+const meta: Meta = {
   title: "Seiten/DUO-Connect/Abgleich",
   parameters: { layout: "fullscreen" },
-  args: { showDrafts: true },
-  argTypes: { showDrafts: { name: "Entwürfe kennzeichnen", control: "boolean" } },
 };
 export default meta;
-type Story = StoryObj<Args>;
+type Story = StoryObj;
 
 function one(id: string): Story {
   const spec = SYNC_STATES.find((s) => s.id === id);
   if (!spec) throw new Error(`unknown state ${id}`);
-  return {
-    name: `${spec.id} · ${spec.title}`,
-    render: (args) => (
-      <DraftsVisible value={args.showDrafts}>
-        <Single spec={spec} />
-      </DraftsVisible>
-    ),
-  };
+  return { name: `${spec.id} · ${spec.title}`, render: () => <Single spec={spec} /> };
 }
 
 /** Every state of the tab „Abgleich", side by side. */
 export const Board: Story = {
-  render: (args) => (
-    <DraftsVisible value={args.showDrafts}>
-      <StateBoard
-        title="Abgleich — alle Zustände"
-        lead="Entwurf nach docs/seiten/duo-connect.md. Gestrichelt umrandet ist, was es im Set noch nicht gibt; das Kennzeichen nennt die Spec."
-        states={SYNC_STATES}
-      />
-    </DraftsVisible>
+  render: () => (
+    <StateBoard
+      title="Abgleich — alle Zustände"
+      lead="Nach docs/seiten/duo-connect.md, gebaut aus den Bausteinen des Sets."
+      states={SYNC_STATES}
+    />
   ),
 };
 
@@ -1039,13 +1088,11 @@ export const A14PrecheckBlocks = one("A14");
 
 /** A8 and A11 at phone width: set the viewport to 375 px; tables turn into row cards (L1). */
 export const Narrow: Story = {
-  render: (args) => (
-    <DraftsVisible value={args.showDrafts}>
-      <div style={{ display: "grid", gap: "var(--space-8)", padding: "var(--space-2)" }}>
-        <BatchRunning rows={BATCH_RUNNING} />
-        <A11 />
-      </div>
-    </DraftsVisible>
+  render: () => (
+    <div style={{ display: "grid", gap: "var(--space-8)", padding: "var(--space-2)" }}>
+      <BatchRunning rows={BATCH_RUNNING} />
+      <A11 />
+    </div>
   ),
 };
 
@@ -1065,11 +1112,7 @@ function ManyBody() {
   );
 }
 
-/** A6 and A8 with 140 clients: search above the overview, quick filters, the running client on top. */
+/** A6 and A8 with 140 clients: search above the overview, the count line, the running client on top. */
 export const ManyClients: Story = {
-  render: (args) => (
-    <DraftsVisible value={args.showDrafts}>
-      <ManyBody />
-    </DraftsVisible>
-  ),
+  render: () => <ManyBody />,
 };

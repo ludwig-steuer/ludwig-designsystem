@@ -2,20 +2,9 @@
  * Invented data for the DUO-Connect drafts (docs/seiten/duo-connect.md).
  * No real clients, people or numbers.
  */
+import type { DuoSyncState } from "@/ludwig/modules/intake";
 import type { BadgeTone } from "@/ui/v3";
 import type { LogEntry } from "@/ui/v3";
-
-/** The six words of the `duo_sync` axis (owner 2026-11-27), until the app registry carries it. */
-export type SyncState = "queued" | "running" | "succeeded" | "succeeded_with_issues" | "cancelled" | "skipped";
-
-export const SYNC_STATE: Record<SyncState, { label: string; tone: BadgeTone }> = {
-  queued: { label: "Wartet", tone: "neutral" },
-  running: { label: "Läuft", tone: "info" },
-  succeeded: { label: "Fertig", tone: "success" },
-  succeeded_with_issues: { label: "Fertig mit Problemen", tone: "warning" },
-  cancelled: { label: "Abgebrochen", tone: "warning" },
-  skipped: { label: "Übersprungen", tone: "neutral" },
-};
 
 export interface Client {
   id: string;
@@ -94,7 +83,7 @@ export const ACTIVE_STEPS: StepKey[] = ["filing", "fetch", "accounts"];
 
 export interface BatchRow {
   client: Client;
-  state: SyncState;
+  state: DuoSyncState;
   /** Short result or what is happening, one phrase. */
   summary: string;
 }
@@ -170,16 +159,16 @@ export interface ReadinessPoint {
 }
 
 export const READINESS: ReadinessPoint[] = [
-  { code: "1", question: "Plugin ist aktuell" },
-  { code: "2", question: "Ludwig ist erreichbar" },
-  { code: "3", question: "Mit Ludwig verbunden" },
-  { code: "4", question: "Mandanten vorhanden und vollständig" },
-  { code: "5", question: "DATEV ist erreichbar" },
-  { code: "6", question: "Bei DATEV angemeldet" },
-  { code: "7", question: "Mandant in DATEV zugänglich" },
-  { code: "8", question: "Browser-Freigaben" },
-  { code: "9", question: "Einstellungen von Ludwig geladen" },
-  { code: "10", question: "Kein anderer Abgleich läuft" },
+  { code: "BP-01", question: "Plugin ist aktuell" },
+  { code: "BP-02", question: "Ludwig ist erreichbar" },
+  { code: "BP-03", question: "Mit Ludwig verbunden" },
+  { code: "BP-04", question: "Mandanten vorhanden und vollständig" },
+  { code: "BP-05", question: "DATEV ist erreichbar" },
+  { code: "BP-06", question: "Bei DATEV angemeldet" },
+  { code: "BP-07", question: "Mandant in DATEV zugänglich" },
+  { code: "BP-08", question: "Browser-Freigaben" },
+  { code: "BP-09", question: "Einstellungen von Ludwig geladen" },
+  { code: "BP-10", question: "Kein anderer Abgleich läuft" },
 ];
 
 /** Support report of the readiness check — no client names, numbers or token (C6). */

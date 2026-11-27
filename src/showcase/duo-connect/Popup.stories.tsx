@@ -1,19 +1,18 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
-import type { ReactNode } from "react";
-import { Badge, Progress, Spinner, Time } from "@/ui/v3";
-import { NOW, STEP_TEXT, SYNC_STATE, USER } from "./fixtures";
-import { DraftsVisible } from "./drafts";
+import type { DuoSyncState } from "@/ludwig/modules/intake";
+import { Progress, Spinner, StatusBadge, Time } from "@/ui/v3";
+import { NOW, STEP_TEXT, USER } from "./fixtures";
 import { Board as StateBoard, ExtensionPopup, Single, type StateSpec } from "./Frame";
 
 const line = { display: "flex", flexWrap: "wrap", gap: "var(--space-2)", alignItems: "center" } as const;
 
-function LastLine({ state, text }: { state: "succeeded" | "succeeded_with_issues"; text: string }) {
+function LastLine({ state, text }: { state: DuoSyncState; text: string }) {
   return (
     <div style={{ display: "grid", gap: "var(--space-1)" }}>
       <p className="lw-ui-hint">Zuletzt abgeglichen: Musterfirma GmbH</p>
       <p className="lw-ui-hint" style={line}>
         <Time value={NOW} size="sm" />
-        <Badge tone={SYNC_STATE[state].tone}>{SYNC_STATE[state].label}</Badge>
+        <StatusBadge axis="duo_sync" status={state} />
         {text ? <span>{text}</span> : null}
       </p>
     </div>
@@ -59,46 +58,34 @@ const D4 = () => (
 const popup = "popup" as const;
 
 const POPUP_STATES: StateSpec[] = [
-  { id: "D1", title: "Popup · verbunden", uses: "ExtensionPopup, Badge, Time", missing: "", surface: popup, render: () => <D1 /> },
+  { id: "D1", title: "Popup · verbunden", uses: "ExtensionPopup, StatusBadge, Time", missing: "", surface: popup, render: () => <D1 /> },
   { id: "D2", title: "Popup · nicht verbunden", uses: "ExtensionPopup", missing: "", surface: popup, render: () => <D2 /> },
   { id: "D3", title: "Popup · Abgleich läuft", uses: "ExtensionPopup, Spinner, Progress", missing: "", surface: popup, render: () => <D3 /> },
-  { id: "D4", title: "Popup · letzter Abgleich mit Problemen (Vorschlag U11)", uses: "ExtensionPopup, Badge, Time", missing: "", surface: popup, render: () => <D4 /> },
+  { id: "D4", title: "Popup · letzter Abgleich mit Problemen (Vorschlag U11)", uses: "ExtensionPopup, StatusBadge, Time", missing: "", surface: popup, render: () => <D4 /> },
 ];
 
-interface Args {
-  showDrafts: boolean;
-}
-
-const meta: Meta<Args> = {
+const meta: Meta = {
   title: "Seiten/DUO-Connect/Popup",
   parameters: { layout: "fullscreen" },
-  args: { showDrafts: true },
-  argTypes: { showDrafts: { name: "Entwürfe kennzeichnen", control: "boolean" } },
 };
 export default meta;
-type Story = StoryObj<Args>;
-
-function wrap(args: Args, children: ReactNode) {
-  return <DraftsVisible value={args.showDrafts}>{children}</DraftsVisible>;
-}
+type Story = StoryObj;
 
 function one(id: string): Story {
   const spec = POPUP_STATES.find((s) => s.id === id);
   if (!spec) throw new Error(`unknown state ${id}`);
-  return { name: `${spec.id} · ${spec.title}`, render: (args) => wrap(args, <Single spec={spec} />) };
+  return { name: `${spec.id} · ${spec.title}`, render: () => <Single spec={spec} /> };
 }
 
 /** The popup in its four states, side by side. */
 export const Board: Story = {
-  render: (args) =>
-    wrap(
-      args,
-      <StateBoard
-        title="Popup — alle Zustände"
-        lead="320 px, eine Spalte, ein Knopf. Der Knopf wechselt zu einer offenen Hauptseite, statt eine zweite zu öffnen."
-        states={POPUP_STATES}
-      />,
-    ),
+  render: () => (
+    <StateBoard
+      title="Popup — alle Zustände"
+      lead="320 px, eine Spalte, ein Knopf. Der Knopf wechselt zu einer offenen Hauptseite, statt eine zweite zu öffnen."
+      states={POPUP_STATES}
+    />
+  ),
 };
 
 export const D01Connected = one("D1");

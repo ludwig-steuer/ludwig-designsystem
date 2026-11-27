@@ -83,6 +83,7 @@ export { PeriodJump, periodPage, type PeriodCount } from "./primitives/PeriodJum
 
 /* Formular */
 export { Field, Input, InputGroup, Textarea, Select, Checkbox } from "./primitives/Form";
+export { Switch, type SwitchProps } from "./primitives/Switch";
 export { RadioGroup, type RadioOption } from "./primitives/RadioGroup";
 export { AmountInput, parseAmount, type ParsedAmount } from "./primitives/AmountInput";
 export { InlineEdit, type InlineEditInputProps } from "./primitives/InlineEdit";
@@ -108,7 +109,8 @@ export { ReasonDialog } from "./primitives/ReasonDialog";
 export { KpiTile, KpiGrid } from "./primitives/KpiTile";
 export { FieldList, FieldListHead, FieldProse } from "./primitives/FieldList";
 export { ProseCard } from "./primitives/ProseCard";
-export { StatusCallout } from "./primitives/StatusCallout";
+export { StatusCallout, type StatusCalloutLayout } from "./primitives/StatusCallout";
+export { ProblemCard, type ProblemLevel, type ProblemResolution } from "./primitives/ProblemCard";
 export { Badge, type BadgeTone, type BadgeProps } from "./primitives/Badge";
 export { EmptyState, type EmptyStateProps } from "./primitives/EmptyState";
 export { Callout } from "./primitives/Callout";
@@ -327,6 +329,8 @@ export { LogBrowser, type LogFilterState } from "./patterns/LogBrowser";
 export {
   ProcessMini,
   ProcessStepper,
+  STEP_STATE,
+  STEP_ACTIVE_WORD,
   HOLDER_MEANING,
   Baton,
   BatonBar,
@@ -347,6 +351,13 @@ export {
   type ProcessStep,
   type ProcessDialogDetail,
 } from "./patterns/ProcessPicture";
+export {
+  PhaseProgress,
+  type PhaseProgressItem,
+  type PhaseProgressProps,
+  type PhaseProgressDensity,
+  type PhaseCount,
+} from "./patterns/PhaseProgress";
 
 /* ── Entitäten ── Konto */
 export {
