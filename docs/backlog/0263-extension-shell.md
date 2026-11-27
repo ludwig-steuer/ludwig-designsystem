@@ -264,6 +264,33 @@ Variabel (aus dieser Spec):
 - [ ] Kein `"use client"` in `ExtensionShell.tsx`; keine Animation
 - [ ] `AppShell`, `PageHeader` und `Tabs` sind unverändert bis auf die `@instead`-Verweise (`git diff`)
 
+## Nachtrag 2026-11-27 — Tabellen nach Spaltenbreite (aus den Entwürfen)
+
+Befund aus den Entwürfen (`docs/seiten/duo-connect.md`, Nachtrag 1): Die
+Tabelle antwortet heute auf ihre eigene Breite (`container: v2tbl`,
+Zeilenkarte unter 640 px Tabellenbreite), aber nur innerhalb von
+`@media (max-width: 1279.98px)`. In der Spalte des Rahmens ist eine Tabelle
+in einer Karte knapp unter 640 px breit. Folge: Bei 960 px Fenster (neben
+DATEV) kippt sie zu Zeilenkarten, bei 1440 px bleibt sie Tabelle — dieselbe
+Spalte, zwei Formen.
+
+- `--container-narrow` (720 px) ist die **Innenbreite** von `main`; das
+  Seiten-Padding liegt außerhalb. Eine Tabelle in einer Karte ist damit bei
+  voller Spalte ≥ 640 px breit.
+- Der Rahmen setzt für Tabellen in seinem `main` den Container **auf allen
+  Fensterbreiten** (eine Regel, die nur unter `.ext…` greift; Klassenname
+  nach `check:classes` vergeben). Die Form richtet sich dann allein nach der
+  Spalte: Tabelle, solange sie ≥ 640 px breit ist, darunter Zeilenkarten.
+- In der App ändert sich nichts: Die Regel greift nur im Rahmen.
+
+Zusätzliche Kriterien:
+
+- [ ] `Interactive` mit einer `DataTable` in einer `Card`: bei Fenster
+  1440 px und 960 px dieselbe Tabelle (gemessen: Tabellenbreite ≥ 640 px,
+  keine Zeilenkarte); bei 600 px Zeilenkarten
+- [ ] In `AppShell` (App) ist bei 960 px nichts anders als vorher
+  (Bildvergleich einer vorhandenen Tabellen-Story ≤ 0,5 %)
+
 ## Abnahme
 
 | Kriterium | Nachweis (Story-ID · Befehl · Screenshot) | Ergebnis |
