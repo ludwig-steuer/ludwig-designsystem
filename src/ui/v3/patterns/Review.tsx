@@ -82,6 +82,7 @@ export function StateIcon({ state, title }: { state: StateKind; title?: string }
       color={TONE_VAR[tone]}
       aria-label={title ?? label}
       role="img"
+      className="v3stateicon"
     />
   );
 }

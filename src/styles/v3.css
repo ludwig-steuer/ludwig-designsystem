@@ -1899,6 +1899,9 @@ summary.v2lp__grp:focus-visible { outline: 2px solid var(--color-focus); outline
   font-size: var(--fs-ui);
 }
 .v2pp__row:last-child { border-bottom: none; }
+/* A state icon never shrinks: in a narrow flex row (a check next to a long
+   reason at 390 px) it went down to 5 px (plugin-dev on a600180). */
+.v3stateicon { flex: none; }
 /* „wird geprüft" (0270): the spinner's circle in the box of a 15 px state
    icon, so the sign column does not move when the result arrives. */
 .v2pp__running { display: inline-flex; flex: none; align-items: center; justify-content: center; width: 15px; height: 15px; }
