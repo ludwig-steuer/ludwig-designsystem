@@ -166,6 +166,50 @@ Entwürfen“).
 | A8, A13 Durchgang | Über der Liste eine **Zählzeile** (0272: `FilterChips` mit gesperrter Option) in fester Reihenfolge: Alle · Fertig mit Problemen · Abgebrochen · Läuft · Wartet · Fertig · Übersprungen, je Wort aus der Registry und Zahl; Zahl 0 grau und nicht wählbar. Jede Zahl ist zugleich Filter. Darunter zuerst die Gruppe **Mit Problemen** (Fertig mit Problemen und Abgebrochen), dann **Alle übrigen** in fester Reihenfolge. Ein Mandant wechselt nur einmal die Gruppe, wenn sein Abgleich mit Problem endet — das ist ein Ereignis, kein Springen. A13: die Gruppe Mit Problemen aufgeklappt, die übrigen eingeklappt mit Zahl |
 | C2, C3 Einstellungen | **Schalter** (Owner 2026-11-27, hebt 0018 für sofort wirkende, umkehrbare Einstellungen auf; 0266 wird zur Spec des `Switch`): Zeile mit Titel, Erklärtext darunter, rechts der Schalter mit sichtbarem Zustandswort „An“/„Aus“. Wirkt sofort. Während des Speicherns gesperrt mit „wird gespeichert“; misslingt es, springt er zurück und der Fehler steht darunter (angesagt); gelingt es, sagt die Seite „Belegübergabe eingeschaltet“ an |
 
+## Nachtrag 3 2026-11-28 — Bereitschaftsprüfung: Sätze und Knöpfe (aus dem Einbau, plugin-dev auf a600180)
+
+Ersetzt die Sätze zu C4 „Alles bereit?“. Quelle der heutigen Sätze:
+`ludwig-plugin/src/sync/readiness-check.ts` und `src/ui/readiness-view.ts`
+(Branch `umbau`). Gelesen gegen T1–T9 (Sie, Imperativ mit Objekt, Fehler =
+Was · Ursache · nächster Schritt, Wörter der Kanzlei). **Geändert** = so
+übernimmt es das Plugin; sonst gilt der Satz wie gebaut. Zustandswörter:
+in Ordnung · Hinweis · Fehler · nicht prüfbar · wird geprüft (0270).
+
+| Punkt | Fall | Satz | Knopf |
+|---|---|---|---|
+| BP-01 | zu alt (Fehler) | **Geändert:** „Installiert ist Version 0.10.1, Ludwig verlangt mindestens 0.11.0. Aktualisieren Sie das Plugin.“ | **Geändert:** Plugin aktualisieren |
+| BP-01 | Update verfügbar (Hinweis) | „Version 0.11.2 ist verfügbar, installiert ist 0.11.0.“ | **Geändert:** Plugin aktualisieren |
+| BP-01 | aktuell | „Version 0.11.0 ist aktuell.“ | — |
+| BP-02 | Ludwig antwortet nicht | „Ludwig antwortet nicht. Prüfen Sie die Internetverbindung und versuchen Sie es später erneut.“ | — |
+| BP-03 | nicht verbunden | „Nicht verbunden. Richten Sie das Plugin einmal ein.“ | Mit Ludwig verbinden |
+| BP-03 | abgelaufen | **Geändert:** „Die Verbindung ist abgelaufen oder wurde in Ludwig getrennt. Verbinden Sie das Plugin neu.“ | Neu verbinden |
+| BP-03 | Umgebung ohne Verbindung (nur Diagnose) | **Geändert:** „Für diese Umgebung ist keine Verbindung eingerichtet.“ | Mit Ludwig verbinden |
+| BP-03 | verbunden | „Verbunden als ‹Name der Verbindung›.“ bzw. „Verbunden.“ — Nutzer und „gültig bis“ erst mit F918 | — |
+| BP-04 | kein Mandant (Fehler) | **Geändert:** „Ihr Ludwig-Zugang sieht keinen Mandanten. Lassen Sie sich in Ludwig Mandanten freigeben.“ | In Ludwig öffnen |
+| BP-04 | ein Mandant ohne Nummer (Hinweis) | **Geändert:** „Bei Musterfirma GmbH fehlt in Ludwig die DATEV-Mandantennummer; der Mandant wird übersprungen. Tragen Sie die Nummer in Ludwig ein.“ | In Ludwig öffnen |
+| BP-04 | mehrere ohne Nummer (Hinweis) | **Geändert:** „Bei 3 Mandanten fehlt in Ludwig die DATEV-Mandantennummer; sie werden übersprungen. Tragen Sie die Nummern in Ludwig ein.“ | In Ludwig öffnen |
+| BP-04 | stille Prüfung, gewählter Mandant (Fehler) | **Geändert:** „In Ludwig fehlt für Musterfirma GmbH die DATEV-Mandantennummer. Tragen Sie sie in Ludwig ein.“ | In Ludwig öffnen |
+| BP-04 | alles da | „1 Mandant, mit DATEV-Mandantennummer.“ / „12 Mandanten, alle mit DATEV-Mandantennummer.“ | — |
+| BP-05 | nicht prüfbar | „Lässt sich ohne geöffnetes DATEV nicht prüfen.“ | DATEV öffnen |
+| BP-06 | nicht prüfbar | „Zeigt sich beim ersten Abgleich; der Abgleich wartet auf die Anmeldung.“ | DATEV öffnen |
+| BP-08 | Chrome | „In Chrome ist keine Freigabe nötig.“ | — |
+| BP-08 | Edge, offen (Hinweis) | **Geändert:** „Edge braucht eine Popup-Freigabe für DATEV. Tragen Sie unter edge://settings/content/popups bei „Zulassen“ [*.]datev.de ein und bestätigen Sie es hier.“ | **Geändert:** Freigabe bestätigen |
+| BP-08 | Edge, bestätigt | **Geändert:** „Sie haben die Popup-Freigabe für DATEV bestätigt.“ | **Geändert:** Bestätigung zurücknehmen |
+| BP-09 | vom Server | **Geändert:** „Von Ludwig geladen.“ | — |
+| BP-09 | einzelne ungültig (Hinweis) | **Geändert:** „Von Ludwig geladen; 2 Einstellungen waren ungültig, für sie gelten die Standardwerte.“ | — |
+| BP-09 | Zwischenspeicher (Hinweis) | **Geändert:** „Es gelten die zuletzt gespeicherten Einstellungen; Ludwig hat keine neuen geliefert.“ Die Versionsnummer gehört unter „Technisch“ bzw. in den Bericht | — |
+| BP-09 | Standard (Hinweis / in Ordnung) | **Geändert:** „Es gelten die Standardwerte; Ludwig hat keine Einstellungen geliefert.“ bzw. „Es gelten die Standardwerte; Ludwig hat für das Plugin keine eigenen.“ | — |
+| BP-10 | anderer Tab hält die Sperre (Fehler) | „In einem anderen Tab läuft gerade ein Abgleich. Warten Sie, bis er fertig ist, oder schließen Sie den anderen Tab.“ | — |
+| BP-10 | Seite mehrfach offen (Hinweis) | „Die Seite ist in 3 Tabs offen. Schließen Sie die übrigen, damit kein Abgleich doppelt startet.“ | — |
+| BP-10 | in Ordnung | **Geändert:** „Die Seite ist nur einmal offen.“ | — |
+| alle | Zeitüberschreitung / keine Antwort | „Keine Antwort; lässt sich gerade nicht prüfen.“ · „Lässt sich ohne Antwort von Ludwig nicht prüfen.“ · „Lässt sich erst nach dem Verbinden prüfen.“ | — |
+| Kopf | Satz | „Alles bereit.“ · „1 Punkt braucht Sie.“ · „3 Punkte brauchen Sie.“ · „Ein Abgleich läuft gerade. Geprüft wird, wenn er fertig ist.“ | Erneut prüfen · Bericht kopieren |
+| Bericht | Zustände | in Ordnung · Hinweis · Fehler · nicht prüfbar; Punkt 4 als „Mandant ohne DATEV-Mandantennummer: ja/nein/**nicht prüfbar**“ (**geändert**: nie „nicht geprüft“ — ein Wort für eine Sache) | — |
+
+Übergang, nicht aufgenommen (verschwindet mit C2/C5): ohne „Gründlich
+prüfen“, BP-07 „Wird beim Abgleich geprüft …“, Einstellungen vorerst nur
+ein Satz über „Alles bereit?“.
+
 ## Schmale Fläche
 
 - Die Hauptseite liegt oft neben dem DATEV-Fenster: halbe Bildschirmbreite
